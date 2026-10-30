@@ -1,8 +1,13 @@
 // src/components/QuarterlyAssessmentWidget.tsx
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  ATHLETE_PROFILE,
-  calculateAthleteAge,
+  ATHLETE_PROFILE_EVENT,
+  bodyweightTimeline,
+  currentBodyweight,
+  loadProfile,
+  profileAge,
+} from '../domain/athleteProfile';
+import {
   QuarterlyAssessmentRecord,
   AssessmentScores,
   loadQuarterlyAssessments,
@@ -43,7 +48,17 @@ export interface QuarterlyAssessmentWidgetProps {
 }
 
 export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps> = () => {
-  const currentAge = useMemo(() => calculateAthleteAge(ATHLETE_PROFILE.dob), []);
+  const [profile, setProfile] = useState(() => loadProfile());
+  useEffect(() => {
+    const refresh = () => setTimeout(() => setProfile(loadProfile()), 0);
+    window.addEventListener(ATHLETE_PROFILE_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(ATHLETE_PROFILE_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+  const currentAge = useMemo(() => profileAge(profile), [profile]);
 
   // Records state
   const [assessments, setAssessments] = useState<QuarterlyAssessmentRecord[]>(() => {
@@ -63,6 +78,14 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
   const activeRecord = useMemo(() => {
     return assessments.find((a) => a.id === selectedAssessmentId) || assessments[0] || DEFAULT_BASELINE_ASSESSMENT;
   }, [assessments, selectedAssessmentId]);
+
+  const currentBw = useMemo(() => currentBodyweight(bodyweightTimeline(profile, assessments)), [profile, assessments]);
+  const heightFt = Math.floor(profile.heightInches / 12);
+  const heightIn = Math.round(profile.heightInches - heightFt * 12);
+  const heightLabel = `${heightFt}'${heightIn}"`;
+  const bmi = (703 * currentBw) / (profile.heightInches * profile.heightInches);
+  const [dobY, dobM, dobD] = profile.dob.split('-');
+  const dobLabel = `${dobM}/${dobD}/${dobY}`;
 
   // Edit / Add modal state
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -107,13 +130,13 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
       date: now.toISOString().split('T')[0],
       quarterLabel: `Q${qNum} ${year}`,
       age: currentAge,
-      bodyweightLbs: ATHLETE_PROFILE.defaultWeightLbs,
+      bodyweightLbs: currentBw,
       scores: { ...activeRecord.scores },
       notes: '',
     };
     setEditFormData(newRecord);
     setIsEditing(true);
-  }, [activeRecord, currentAge]);
+  }, [activeRecord, currentAge, currentBw]);
 
   // Handle save
   const handleSaveAssessment = useCallback(() => {
@@ -152,7 +175,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
   const squatEval = useMemo(() => evaluateSquat(activeRecord.scores.squat1rmLbs || 0, activeRecord.bodyweightLbs), [activeRecord]);
   const benchEval = useMemo(() => evaluateBenchPress(activeRecord.scores.bench1rmLbs || 0, activeRecord.bodyweightLbs), [activeRecord]);
   const ohpEval = useMemo(() => evaluateOverheadPress(activeRecord.scores.ohp1rmLbs || 0, activeRecord.bodyweightLbs), [activeRecord]);
-  const pullupsEval = useMemo(() => evaluatePullups(activeRecord.scores.strictPullupsReps || 0), [activeRecord]);
+  const pullupsEval = useMemo(() => evaluatePullups(activeRecord.scores.strictPullupsReps || 0, activeRecord.bodyweightLbs), [activeRecord]);
   const pushupsEval = useMemo(() => evaluatePushups(activeRecord.scores.pushupsReps || 0), [activeRecord]);
   const deadHangEval = useMemo(() => evaluateDeadHang(activeRecord.scores.deadHangSec || 0), [activeRecord]);
 
@@ -174,11 +197,11 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                 Quarterly Fitness Testing Battery
               </h2>
               <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold">
-                DOB: 10/10/1991 • Age {currentAge}
+                DOB: {dobLabel} • Age {currentAge}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-300">
-              Objective biometric standards calibrated for a 35-year-old male at 5'6", 168 lbs.
+              Objective biometric standards calibrated for a {currentAge}-year-old male at {heightLabel}, {currentBw} lbs.
             </p>
           </div>
 
@@ -222,8 +245,10 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-4 pt-3.5 border-t border-slate-800/80 text-xs">
           <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
             <div className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Height & Weight</div>
-            <div className="font-bold text-white mt-0.5">5'6" (66 in) • 168 lbs</div>
-            <div className="text-[10px] text-slate-400">BMI 27.1 (High Lean Mass)</div>
+            <div className="font-bold text-white mt-0.5">
+              {heightLabel} ({profile.heightInches} in) • {currentBw} lbs
+            </div>
+            <div className="text-[10px] text-slate-400">BMI {bmi.toFixed(1)}</div>
           </div>
 
           <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
@@ -326,7 +351,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
           )}
         </div>
 
-        {/* DOMAIN 2: Compound Strength Standards (At 168 lbs) */}
+        {/* DOMAIN 2: Compound Strength — percentile among lifters at this assessment's bodyweight */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3.5 sm:p-4 shadow-lg space-y-3">
           <button
             type="button"
@@ -338,8 +363,8 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                 <Dumbbell className="w-4 h-4" />
               </span>
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-white">2. Relative Strength (168 lbs BW)</h3>
-                <p className="text-[11px] text-slate-400">1RM estimates & bodyweight multipliers</p>
+                <h3 className="font-bold text-sm sm:text-base text-white">2. Relative Strength ({activeRecord.bodyweightLbs} lbs BW)</h3>
+                <p className="text-[11px] text-slate-400">1RM ÷ bodyweight, percentile among lifters (same scale as the heatmap)</p>
               </div>
             </div>
             {expandedCategories.strength ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -359,7 +384,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                   </div>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${dlEval.badgeClass}`}>
-                  {dlEval.tier}
+                  {dlEval.tier} · {dlEval.percentileRank}
                 </span>
               </div>
 
@@ -375,7 +400,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                   </div>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${squatEval.badgeClass}`}>
-                  {squatEval.tier}
+                  {squatEval.tier} · {squatEval.percentileRank}
                 </span>
               </div>
 
@@ -391,7 +416,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                   </div>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${benchEval.badgeClass}`}>
-                  {benchEval.tier}
+                  {benchEval.tier} · {benchEval.percentileRank}
                 </span>
               </div>
 
@@ -407,7 +432,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                   </div>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ohpEval.badgeClass}`}>
-                  {ohpEval.tier}
+                  {ohpEval.tier} · {ohpEval.percentileRank}
                 </span>
               </div>
             </div>
@@ -444,7 +469,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                   <div className="text-[11px] text-slate-400 mt-0.5">{pullupsEval.description}</div>
                 </div>
                 <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${pullupsEval.badgeClass}`}>
-                  {pullupsEval.tier}
+                  {pullupsEval.tier} · {pullupsEval.percentileRank}
                 </span>
               </div>
 

@@ -46,12 +46,17 @@ export const StrengthHeatmapWidget = lazyView(() =>
   import('./components/StrengthHeatmapWidget').then((m) => m.StrengthHeatmapWidget)
 );
 
+export const AthleteProfileCard = lazyView(() =>
+  import('./components/AthleteProfileCard').then((m) => m.AthleteProfileCard)
+);
+
 const LAZY_VIEWS = [
   MobilityTrackerWidget,
   StretchingRoutineWidget,
   ProgressChartWidget,
   QuarterlyAssessmentWidget,
   StrengthHeatmapWidget,
+  AthleteProfileCard,
 ];
 
 export const preloadLazyViews = () =>

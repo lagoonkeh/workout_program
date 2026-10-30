@@ -14,6 +14,7 @@ import {
   cooperBenchPercentile,
   epley1RM,
   liftPercentile,
+  strengthLevelRow,
   tierFromScore,
   NO_DATA_COLOR,
   type LiftId,
@@ -224,5 +225,35 @@ describe('domain/strengthStandards', () => {
       expect(colorForScore(60, 'football')).toBe('#f43f5e');
       expect(colorForScore(85, 'football')).toBe('#06b6d4');
     });
+  });
+});
+
+describe('domain/strengthStandards bodyweight tables', () => {
+  it('matches the published rows and interpolates between them', () => {
+    expect(strengthLevelRow('squat', 170)).toEqual([157, 213, 282, 359, 442]);
+    expect(strengthLevelRow('squat', 165)).toEqual([151, 206, 273.5, 349.5, 431.5]);
+    expect(strengthLevelRow('bench', 100)).toEqual(strengthLevelRow('bench', 110)); // clamped
+  });
+
+  it('scores each lift against the bodyweight on the day it was done', () => {
+    const heavyLater = computeLiftResults(DEFAULT_BASELINE_ASSESSMENT, [], new Date('2026-10-30'), {
+      bodyweightAt: () => 190,
+      currentBodyweightLbs: 190,
+    });
+    expect(heavyLater.bodyweightLbs).toBe(190);
+    expect(heavyLater.lifts.squat?.value).toBeCloseTo(255 / 190, 6);
+    expect(heavyLater.lifts.squat?.bodyweightLbs).toBe(190);
+    const atAssessment = computeLiftResults(DEFAULT_BASELINE_ASSESSMENT, [], new Date('2026-10-30'));
+    expect(atAssessment.lifts.squat?.value).toBeCloseTo(255 / 168, 6);
+    const pHeavy = buildStrengthProfile(heavyLater, 'general').lifts.squat.score!;
+    const pLight = buildStrengthProfile(atAssessment, 'general').lifts.squat.score!;
+    expect(pHeavy).toBeLessThan(pLight);
+  });
+
+  it('handles bodyweights outside the tables by comparing absolute loads', () => {
+    const p = liftPercentile('squat', 442 / 340, 340); // 442 lb vs the 310 lb row (N 387 · I 477)
+    expect(p).toBeGreaterThan(20);
+    expect(p).toBeLessThan(50);
+    expect(liftPercentile('squat', 680 / 340, 340)).toBe(95);
   });
 });

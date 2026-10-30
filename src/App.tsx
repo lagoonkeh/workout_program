@@ -5,6 +5,7 @@ import {
   ProgressChartWidget,
   QuarterlyAssessmentWidget,
   StrengthHeatmapWidget,
+  AthleteProfileCard,
   preloadLazyViews,
 } from './lazyView';
 import {
@@ -3054,6 +3055,7 @@ export function WorkoutAppMain() {
         {currentView === 'assessment' && (
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
             <Suspense fallback={<ViewLoadingFallback />}>
+              <AthleteProfileCard />
               <StrengthHeatmapWidget history={Object.values(storageManager.getCompletedWorkouts())} />
               <QuarterlyAssessmentWidget />
             </Suspense>

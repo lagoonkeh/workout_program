@@ -13,6 +13,7 @@ import {
   evaluateBenchPress,
   evaluateOverheadPress,
   evaluatePullups,
+  evaluateLiftPercentile,
   evaluatePushups,
   calculateMcGillRatios,
   evaluateDeadHang,
@@ -75,47 +76,43 @@ describe('Fitness Assessment Domain Logic (DOB 10/10/1991, 5\'6", 168 lbs)', () 
     });
   });
 
-  describe('3. Compound Strength Standards (At 168 lbs Bodyweight)', () => {
-    it('evaluates deadlift relative strength ratios', () => {
-      expect(evaluateDeadlift(425, 168).tier).toBe('Elite'); // 2.53x
-      expect(evaluateDeadlift(350, 168).tier).toBe('Advanced'); // 2.08x
-      expect(evaluateDeadlift(315, 168).tier).toBe('Intermediate'); // 1.88x
-      expect(evaluateDeadlift(225, 168).tier).toBe('Novice'); // 1.34x
-      expect(evaluateDeadlift(185, 168).tier).toBe('Developing');
+  describe('3. Strength on the lifter-percentile scale (Strength Level tables)', () => {
+    // at 170 lb bodyweight the tables give, e.g., squat 157/213/282/359/442 lb for B/N/I/A/E
+    it('rates lifts at the Strength Level anchors for their bodyweight', () => {
+      expect(evaluateSquat(442, 170).tier).toBe('Elite');
+      expect(evaluateSquat(359, 170).tier).toBe('Advanced');
+      expect(evaluateSquat(282, 170).tier).toBe('Intermediate');
+      expect(evaluateSquat(213, 170).tier).toBe('Novice');
+      expect(evaluateSquat(150, 170).tier).toBe('Beginner');
+      expect(evaluateDeadlift(513, 170).tier).toBe('Elite');
+      expect(evaluateDeadlift(330, 170).tier).toBe('Intermediate');
+      expect(evaluateBenchPress(264, 170).tier).toBe('Advanced');
+      expect(evaluateBenchPress(158, 170).tier).toBe('Novice');
+      expect(evaluateOverheadPress(133, 170).tier).toBe('Intermediate');
+      expect(evaluateOverheadPress(60, 170).tier).toBe('Beginner');
     });
 
-    it('evaluates squat relative strength ratios', () => {
-      expect(evaluateSquat(340, 168).tier).toBe('Elite'); // 2.02x
-      expect(evaluateSquat(280, 168).tier).toBe('Advanced'); // 1.67x
-      expect(evaluateSquat(255, 168).tier).toBe('Intermediate'); // 1.52x
-      expect(evaluateSquat(185, 168).tier).toBe('Novice'); // 1.10x
-      expect(evaluateSquat(135, 168).tier).toBe('Developing');
+    it('reports the percentile and ratio in the description', () => {
+      const r = evaluateSquat(255, 168);
+      expect(r.tier).toBe('Novice');
+      expect(r.description).toMatch(/1\.52x BW · ~\d+(st|nd|rd|th) percentile among lifters/);
+      expect(r.percentileRank).toMatch(/^\d+(st|nd|rd|th) percentile$/);
     });
 
-    it('evaluates bench press relative strength ratios', () => {
-      expect(evaluateBenchPress(255, 168).tier).toBe('Elite'); // 1.52x
-      expect(evaluateBenchPress(225, 168).tier).toBe('Advanced'); // 1.34x
-      expect(evaluateBenchPress(195, 168).tier).toBe('Intermediate'); // 1.16x
-      expect(evaluateBenchPress(145, 168).tier).toBe('Novice'); // 0.86x
-      expect(evaluateBenchPress(115, 168).tier).toBe('Developing');
-    });
-
-    it('evaluates strict overhead press ratios', () => {
-      expect(evaluateOverheadPress(170, 168).tier).toBe('Elite'); // 1.01x
-      expect(evaluateOverheadPress(145, 168).tier).toBe('Advanced'); // 0.86x
-      expect(evaluateOverheadPress(125, 168).tier).toBe('Intermediate'); // 0.74x
-      expect(evaluateOverheadPress(95, 168).tier).toBe('Novice'); // 0.57x
-      expect(evaluateOverheadPress(75, 168).tier).toBe('Developing');
+    it('accounts for bodyweight: the same lift ranks lower at a heavier bodyweight', () => {
+      const light = evaluateLiftPercentile('bench', 225, 150).percentile;
+      const heavy = evaluateLiftPercentile('bench', 225, 220).percentile;
+      expect(light).toBeGreaterThan(heavy);
     });
   });
 
   describe('4. Calisthenics & Relative Muscular Endurance', () => {
-    it('evaluates strict dead-hang pull-ups', () => {
-      expect(evaluatePullups(21).tier).toBe('Elite');
-      expect(evaluatePullups(16).tier).toBe('Advanced');
-      expect(evaluatePullups(12).tier).toBe('Intermediate');
-      expect(evaluatePullups(7).tier).toBe('Novice');
-      expect(evaluatePullups(3).tier).toBe('Developing');
+    it('evaluates strict dead-hang pull-ups on the same percentile scale', () => {
+      expect(evaluatePullups(29, 170).tier).toBe('Elite');
+      expect(evaluatePullups(21, 170).tier).toBe('Advanced');
+      expect(evaluatePullups(13, 170).tier).toBe('Intermediate');
+      expect(evaluatePullups(7, 170).tier).toBe('Novice');
+      expect(evaluatePullups(3, 170).tier).toBe('Beginner');
     });
 
     it('evaluates push-ups to failure using ACSM 30–39 norms', () => {

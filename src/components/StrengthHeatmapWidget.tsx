@@ -27,6 +27,14 @@ import {
   type QuarterlyAssessmentRecord,
 } from '../domain/fitnessAssessment';
 import type { CompletedWorkoutSession } from '../storage/storageManager';
+import {
+  ATHLETE_PROFILE_EVENT,
+  bodyweightOn,
+  bodyweightTimeline,
+  currentBodyweight,
+  loadProfile,
+  profileAge,
+} from '../domain/athleteProfile';
 
 export interface StrengthHeatmapWidgetProps {
   history?: CompletedWorkoutSession[];
@@ -104,6 +112,26 @@ export const StrengthHeatmapWidget: React.FC<StrengthHeatmapWidgetProps> = ({
   const [mode, setMode] = useState<CompareMode>('general');
   const [selected, setSelected] = useState<MuscleId>('chest');
   const [stored, setStored] = useState<QuarterlyAssessmentRecord>(() => latestAssessment());
+  const [athlete, setAthlete] = useState(() => loadProfile());
+  const [allAssessments, setAllAssessments] = useState(() => loadQuarterlyAssessments());
+
+  useEffect(() => {
+    const refresh = () =>
+      setTimeout(() => {
+        setAthlete(loadProfile());
+        setAllAssessments(loadQuarterlyAssessments());
+      }, 0);
+    // catch anything saved by sibling widgets while this one was mounting
+    refresh();
+    window.addEventListener(ATHLETE_PROFILE_EVENT, refresh);
+    window.addEventListener(QUARTERLY_ASSESSMENTS_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(ATHLETE_PROFILE_EVENT, refresh);
+      window.removeEventListener(QUARTERLY_ASSESSMENTS_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
 
   useEffect(() => {
     if (assessmentProp !== undefined) return;
@@ -119,7 +147,17 @@ export const StrengthHeatmapWidget: React.FC<StrengthHeatmapWidgetProps> = ({
 
   const assessment = assessmentProp !== undefined ? assessmentProp : stored;
 
-  const inputs = useMemo(() => computeLiftResults(assessment, history, now), [assessment, history, now]);
+  const inputs = useMemo(() => {
+    const records = assessment
+      ? [assessment, ...allAssessments.filter((a) => a.id !== assessment.id)]
+      : allAssessments;
+    const timeline = bodyweightTimeline(athlete, records);
+    return computeLiftResults(assessment, history, now, {
+      bodyweightAt: timeline.length ? (d) => bodyweightOn(timeline, d) : undefined,
+      currentBodyweightLbs: timeline.length ? currentBodyweight(timeline) : undefined,
+      age: profileAge(athlete, now),
+    });
+  }, [assessment, allAssessments, athlete, history, now]);
   const profile = useMemo(() => buildStrengthProfile(inputs, mode), [inputs, mode]);
   const muscle = profile.muscles[selected];
   const isGeneral = mode === 'general';

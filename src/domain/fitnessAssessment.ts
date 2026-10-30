@@ -16,6 +16,8 @@
  *   - Ben Patrick (ATG) & Lucas Hardie (Range of Strength) Loaded Mobility
  */
 
+import { liftPercentile, ordinal, tierFromScore, type LiftId } from './strengthStandards';
+
 export const ATHLETE_PROFILE = {
   dob: '1991-10-10',
   heightInches: 66,
@@ -25,7 +27,7 @@ export const ATHLETE_PROFILE = {
   waistCircumferenceTargetInches: 33, // Waist-to-Height Ratio < 0.50
 } as const;
 
-export type AssessmentTier = 'Elite' | 'Advanced' | 'Intermediate' | 'Novice' | 'Developing';
+export type AssessmentTier = 'Elite' | 'Advanced' | 'Intermediate' | 'Novice' | 'Beginner' | 'Developing';
 
 export interface ScoreTierInfo {
   tier: AssessmentTier;
@@ -173,93 +175,53 @@ export function evaluateCooperRun(distanceMiles: number): ScoreTierInfo {
 }
 
 /**
- * 3. Compound Strength Standards at 168 lbs Bodyweight
+ * 3. Strength: percentile among lifters (Strength Level male bodyweight tables), the same scale
+ * as the Strength Development Heatmap. Beginner 5th · Novice 20th · Intermediate 50th ·
+ * Advanced 80th · Elite 95th percentile.
  */
+const STRENGTH_BADGES: Record<'Elite' | 'Advanced' | 'Intermediate' | 'Novice' | 'Beginner', { badgeClass: string; dotClass: string }> = {
+  Elite: { badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400' },
+  Advanced: { badgeClass: 'bg-blue-950/70 border-blue-500 text-blue-300', dotClass: 'bg-blue-400' },
+  Intermediate: { badgeClass: 'bg-cyan-950/70 border-cyan-500 text-cyan-300', dotClass: 'bg-cyan-400' },
+  Novice: { badgeClass: 'bg-amber-950/70 border-amber-500 text-amber-300', dotClass: 'bg-amber-400' },
+  Beginner: { badgeClass: 'bg-rose-950/70 border-rose-500 text-rose-300', dotClass: 'bg-rose-400' },
+};
+
+export function evaluateLiftPercentile(lift: LiftId, value: number, bodyweightLbs: number = 168): ScoreTierInfo & { percentile: number } {
+  const ratio = lift === 'pullups' ? value : value / (bodyweightLbs || 168);
+  const percentile = liftPercentile(lift, ratio, bodyweightLbs);
+  const tier = tierFromScore(percentile);
+  const amount = lift === 'pullups' ? `${value} strict reps` : `${ratio.toFixed(2)}x BW`;
+  return {
+    tier,
+    ...STRENGTH_BADGES[tier],
+    description: `${amount} · ~${ordinal(percentile)} percentile among lifters`,
+    percentileRank: `${ordinal(percentile)} percentile`,
+    percentile,
+  };
+}
+
 export function evaluateDeadlift(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  const ratio = weightLbs / bodyweightLbs;
-  if (ratio >= 2.50) { // 420 lbs
-    return { tier: 'Elite', badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400', description: `${ratio.toFixed(2)}x BW (Competitive Powerlifter)`, percentileRank: 'Top 5%' };
-  }
-  if (ratio >= 2.05) { // 345 lbs
-    return { tier: 'Advanced', badgeClass: 'bg-blue-950/70 border-blue-500 text-blue-300', dotClass: 'bg-blue-400', description: `${ratio.toFixed(2)}x BW (Double Bodyweight Milestone)`, percentileRank: 'Top 15%' };
-  }
-  if (ratio >= 1.70) { // 285 lbs
-    return { tier: 'Intermediate', badgeClass: 'bg-cyan-950/70 border-cyan-500 text-cyan-300', dotClass: 'bg-cyan-400', description: `${ratio.toFixed(2)}x BW (Solid Strength Baseline)`, percentileRank: 'Top 40%' };
-  }
-  if (ratio >= 1.30) { // 220 lbs
-    return { tier: 'Novice', badgeClass: 'bg-amber-950/70 border-amber-500 text-amber-300', dotClass: 'bg-amber-400', description: `${ratio.toFixed(2)}x BW (Building Foundational Hinge)`, percentileRank: '50th Percentile' };
-  }
-  return { tier: 'Developing', badgeClass: 'bg-rose-950/70 border-rose-500 text-rose-300', dotClass: 'bg-rose-400', description: `${ratio.toFixed(2)}x BW`, percentileRank: '< 50th Percentile' };
+  return evaluateLiftPercentile('deadlift', weightLbs, bodyweightLbs);
 }
 
 export function evaluateSquat(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  const ratio = weightLbs / bodyweightLbs;
-  if (ratio >= 2.00) { // 336 lbs
-    return { tier: 'Elite', badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400', description: `${ratio.toFixed(2)}x BW (Double Bodyweight Squat)`, percentileRank: 'Top 5%' };
-  }
-  if (ratio >= 1.65) { // 277 lbs
-    return { tier: 'Advanced', badgeClass: 'bg-blue-950/70 border-blue-500 text-blue-300', dotClass: 'bg-blue-400', description: `${ratio.toFixed(2)}x BW (Advanced Powerbuilding)`, percentileRank: 'Top 20%' };
-  }
-  if (ratio >= 1.40) { // 235 lbs
-    return { tier: 'Intermediate', badgeClass: 'bg-cyan-950/70 border-cyan-500 text-cyan-300', dotClass: 'bg-cyan-400', description: `${ratio.toFixed(2)}x BW (Standard GZCL T1 Goal)`, percentileRank: 'Top 45%' };
-  }
-  if (ratio >= 1.00) { // 168 lbs
-    return { tier: 'Novice', badgeClass: 'bg-amber-950/70 border-amber-500 text-amber-300', dotClass: 'bg-amber-400', description: `${ratio.toFixed(2)}x BW (Bodyweight Squat)`, percentileRank: '50th Percentile' };
-  }
-  return { tier: 'Developing', badgeClass: 'bg-rose-950/70 border-rose-500 text-rose-300', dotClass: 'bg-rose-400', description: `${ratio.toFixed(2)}x BW`, percentileRank: '< 50th Percentile' };
+  return evaluateLiftPercentile('squat', weightLbs, bodyweightLbs);
 }
 
 export function evaluateBenchPress(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  const ratio = weightLbs / bodyweightLbs;
-  if (ratio >= 1.50) { // 252 lbs
-    return { tier: 'Elite', badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400', description: `${ratio.toFixed(2)}x BW (1.5x Bodyweight)`, percentileRank: 'Top 5%' };
-  }
-  if (ratio >= 1.25) { // 210 lbs
-    return { tier: 'Advanced', badgeClass: 'bg-blue-950/70 border-blue-500 text-blue-300', dotClass: 'bg-blue-400', description: `${ratio.toFixed(2)}x BW (2+ Plates Milestone)`, percentileRank: 'Top 20%' };
-  }
-  if (ratio >= 1.05) { // 176 lbs
-    return { tier: 'Intermediate', badgeClass: 'bg-cyan-950/70 border-cyan-500 text-cyan-300', dotClass: 'bg-cyan-400', description: `${ratio.toFixed(2)}x BW (Bodyweight+ Bench)`, percentileRank: 'Top 45%' };
-  }
-  if (ratio >= 0.80) { // 135 lbs
-    return { tier: 'Novice', badgeClass: 'bg-amber-950/70 border-amber-500 text-amber-300', dotClass: 'bg-amber-400', description: `${ratio.toFixed(2)}x BW (1-Plate 135 lb Baseline)`, percentileRank: '50th Percentile' };
-  }
-  return { tier: 'Developing', badgeClass: 'bg-rose-950/70 border-rose-500 text-rose-300', dotClass: 'bg-rose-400', description: `${ratio.toFixed(2)}x BW`, percentileRank: '< 50th Percentile' };
+  return evaluateLiftPercentile('bench', weightLbs, bodyweightLbs);
 }
 
 export function evaluateOverheadPress(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  const ratio = weightLbs / bodyweightLbs;
-  if (ratio >= 1.00) { // 168 lbs
-    return { tier: 'Elite', badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400', description: `${ratio.toFixed(2)}x BW (Bodyweight Strict Press)`, percentileRank: 'Top 5%' };
-  }
-  if (ratio >= 0.82) { // 138 lbs
-    return { tier: 'Advanced', badgeClass: 'bg-blue-950/70 border-blue-500 text-blue-300', dotClass: 'bg-blue-400', description: `${ratio.toFixed(2)}x BW (1-Plate OHP Milestone)`, percentileRank: 'Top 20%' };
-  }
-  if (ratio >= 0.68) { // 115 lbs
-    return { tier: 'Intermediate', badgeClass: 'bg-cyan-950/70 border-cyan-500 text-cyan-300', dotClass: 'bg-cyan-400', description: `${ratio.toFixed(2)}x BW (Solid Shoulder Foundation)`, percentileRank: 'Top 45%' };
-  }
-  if (ratio >= 0.54) { // 90 lbs
-    return { tier: 'Novice', badgeClass: 'bg-amber-950/70 border-amber-500 text-amber-300', dotClass: 'bg-amber-400', description: `${ratio.toFixed(2)}x BW (Developing Strict Overhead)`, percentileRank: '50th Percentile' };
-  }
-  return { tier: 'Developing', badgeClass: 'bg-rose-950/70 border-rose-500 text-rose-300', dotClass: 'bg-rose-400', description: `${ratio.toFixed(2)}x BW`, percentileRank: '< 50th Percentile' };
+  return evaluateLiftPercentile('ohp', weightLbs, bodyweightLbs);
 }
 
 /**
  * 4. Calisthenics & Muscular Endurance
  */
-export function evaluatePullups(reps: number): ScoreTierInfo {
-  if (reps >= 20) {
-    return { tier: 'Elite', badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400', description: `${reps} Strict Dead-Hang Reps (Elite Calisthenics)`, percentileRank: 'Top 2%' };
-  }
-  if (reps >= 15) {
-    return { tier: 'Advanced', badgeClass: 'bg-blue-950/70 border-blue-500 text-blue-300', dotClass: 'bg-blue-400', description: `${reps} Strict Dead-Hang Reps (Gymnast Level)`, percentileRank: 'Top 10%' };
-  }
-  if (reps >= 10) {
-    return { tier: 'Intermediate', badgeClass: 'bg-cyan-950/70 border-cyan-500 text-cyan-300', dotClass: 'bg-cyan-400', description: `${reps} Strict Reps (Athletic Double-Digit Standard)`, percentileRank: 'Top 25%' };
-  }
-  if (reps >= 6) {
-    return { tier: 'Novice', badgeClass: 'bg-amber-950/70 border-amber-500 text-amber-300', dotClass: 'bg-amber-400', description: `${reps} Strict Reps (Active Adult Baseline)`, percentileRank: '50th Percentile' };
-  }
-  return { tier: 'Developing', badgeClass: 'bg-rose-950/70 border-rose-500 text-rose-300', dotClass: 'bg-rose-400', description: `${reps} Reps (Yellow Dude Negative Gate Advised)`, percentileRank: '< 50th Percentile' };
+export function evaluatePullups(reps: number, bodyweightLbs: number = 168): ScoreTierInfo {
+  return evaluateLiftPercentile('pullups', reps, bodyweightLbs);
 }
 
 export function evaluatePushups(reps: number): ScoreTierInfo {
