@@ -1,0 +1,53 @@
+{
+  "name": "4-Day Workout & Mobility System",
+  "short_name": "Workout",
+  "description": "Personalized 4-Day Upper/Lower Workout & Mobility Routine with Timers, Tempo Metronome, and Tracking",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "categories": ["fitness", "health", "sports"],
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Workout Routine",
+      "short_name": "Routine",
+      "url": "/?view=workout"
+    },
+    {
+      "name": "Daily Body Check-In",
+      "short_name": "Check-In",
+      "url": "/?view=readiness"
+    },
+    {
+      "name": "Barbell Plate Calculator",
+      "short_name": "Plates",
+      "url": "/?view=plates"
+    },
+    {
+      "name": "Adaptive Recovery Stretch",
+      "short_name": "Stretch",
+      "url": "/?view=stretching"
+    }
+  ]
+}

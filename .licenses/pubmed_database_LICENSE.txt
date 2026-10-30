@@ -1,0 +1,3 @@
+PubMed Database Terms Notice:
+User notified to review the NCBI/NLM terms and conditions at https://pubmed.ncbi.nlm.nih.gov/disclaimer/ and https://www.ncbi.nlm.nih.gov/home/about/policies/ and to check the individual licenses of retrieved papers for restrictions.
+Timestamp: 2026-10-26T21:06:00Z

@@ -1,0 +1,12 @@
+.vercel
+.env*
+
+node_modules/
+dist/
+coverage/
+!.env.example
+_archive/
+*.log
+tsconfig.tsbuildinfo
+.pytest_cache/
+__pycache__/

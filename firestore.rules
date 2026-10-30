@@ -1,0 +1,323 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// This security rules file assumes the following data structures
+// for the 4-Day Upper/Lower workout tracking application:
+//
+// 1. Collection: /users/{userId}
+//    Document ID: {userId} (matches request.auth.uid)
+//    Fields:
+//      - uid: string (required/optional, matches userId) - User identifier
+//      - email: string (optional, max 100 chars) - User email
+//      - displayName: string (optional, max 100 chars) - Athlete display name
+//      - photoURL: string (optional, max 500 chars) - Avatar URL
+//      - settings: map (optional, max 10 keys) - User preferences (sound, units, presets)
+//      - createdAt: number | timestamp (optional, immutable)
+//      - updatedAt: number | timestamp (optional)
+//
+// 2. Collection: /users/{userId}/state
+//    Document ID: current_workout
+//    Fields:
+//      - activeSessionId: string (required, 1-50 chars) - Current session key (e.g. 'upper-a')
+//      - workoutLogs: map (required, max 60 keys) - Exercise ID to SetLogRecord array mapping
+//      - completedWarmupDrills: map (required, max 30 keys) - McGill Big 3 and warmup completion flags
+//      - splitSidesExercises: map (required, max 60 keys) - Unilateral left/right split mode flags
+//      - updatedAt: number | timestamp (required) - Sync timestamp (epoch ms or Firestore timestamp)
+//      - device: string (optional, max 100 chars) - Client device/browser user agent tag
+//
+// 3. Collection: /users/{userId}/mobility
+//    Document ID: 'history' (batch sync payload) OR individual entry ID (e.g. 'mob_1729239847_abc12')
+//    History Payload Fields:
+//      - entries: list (required, max 1000 items) - Array of mobility assessment entry objects
+//      - updatedAt: number | timestamp (required) - Sync timestamp
+//    Individual Mobility Entry Document Fields:
+//      - testId: string (required, 1-50 chars, must be valid protocol ID)
+//      - value: number (required, 0-10000 range) - Numeric measurement or level
+//      - date: string | timestamp (optional, ISO 8601 string or Firestore timestamp)
+//      - unit: string (optional, max 30 chars) - Units (e.g. 'inches', 'level', 'seconds')
+//      - painScore: number (optional, 0-10 range) - Athlete discomfort rating
+//      - notes: string (optional, max 1000 chars) - Qualitative biomechanical observation
+//      - side: string (optional, 'left' | 'right' | 'bilateral') - Unilateral testing side
+//      - id: string (optional, max 100 chars, immutable) - Unique entry ID
+//      - createdAt: number | timestamp (optional, immutable)
+//      - updatedAt: number | timestamp (optional)
+//
+// 4. Collection: /users/{userId}/adaptations
+//    Document ID: Evaluation ID, week key, 'current', or 'program_adaptations'
+//    Fields:
+//      - weekNumber: number (optional, 1-104 range) - Microcycle week number
+//      - overallStatus: string (optional, enum: 'progressing', 'adapting_for_recovery', 'deload_recommended', 'maintaining')
+//      - evaluatedAt: string | timestamp (optional, ISO 8601 string or timestamp)
+//      - coachVerdict: string (optional, max 2000 chars) - Automated coaching summary
+//      - nextWeekFocus: string (optional, max 2000 chars) - Focal recommendations
+//      - exerciseId: string (optional, max 100 chars) - Specific exercise being adapted
+//      - exerciseName: string (optional, max 100 chars) - Exercise display name
+//      - action: string (optional, max 50 chars) - Adaptation action type
+//      - parameter: string (optional, max 50 chars) - Parameter modified (weightLbs, tempo, etc.)
+//      - currentValue: string | number | bool (optional, max 200 chars if string)
+//      - proposedValue: string | number | bool (optional, max 200 chars if string)
+//      - proposedLabel: string (optional, max 200 chars)
+//      - rationale: string (optional, max 2000 chars)
+//      - creatorInfluence: string (optional, max 100 chars)
+//      - applied: bool (optional) - Whether adaptation is currently applied
+//      - stats: map (optional, max 20 keys) - Performance statistics map
+//      - commentInsights: list (optional, max 100 items) - Categorized note analyses
+//      - adaptations: list | map (optional, max 100 items) - Proposed workout adjustments
+//      - evaluations: list (optional, max 100 items) - Historical weekly evaluations
+//      - programAdaptations: map (optional, max 100 keys) - Overridden exercise parameters
+//      - id: string (optional, max 100 chars, immutable)
+//      - createdAt: number | timestamp (optional, immutable)
+//      - updatedAt: number | timestamp (optional)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Global Helper Functions
+    // ===============================================================
+
+    // Check if the user is authenticated with Firebase Auth
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if authenticated user is the strict owner of this userId path
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Validate that document contains only allowed fields (Strict Schema Enforcement)
+    function hasOnlyAllowedFields(data, allowedKeys) {
+      return data.keys().hasOnly(allowedKeys);
+    }
+
+    // Validate that document contains all required fields
+    function hasRequiredFields(data, requiredKeys) {
+      return data.keys().hasAll(requiredKeys);
+    }
+
+    // Validate that immutable fields have not been modified during an update
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Check whether a value is a valid numeric epoch timestamp or Firestore timestamp
+    function isValidTimestampValue(val) {
+      return (val is number && val > 0) || val is timestamp;
+    }
+
+    // ===============================================================
+    // Domain Validator: User Profile
+    // ===============================================================
+    function isValidUserProfile(data, userId) {
+      return hasOnlyAllowedFields(data, ['uid', 'email', 'displayName', 'photoURL', 'settings', 'createdAt', 'updatedAt']) &&
+             (!('uid' in data) || data.uid == userId) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 100)) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+             (!('settings' in data) || (data.settings is map && data.settings.size() <= 10)) &&
+             (!('createdAt' in data) || isValidTimestampValue(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimestampValue(data.updatedAt));
+    }
+
+    // ===============================================================
+    // Domain Validator: Workout State (current_workout)
+    // ===============================================================
+    function isValidWorkoutState(data) {
+      return hasOnlyAllowedFields(data, ['activeSessionId', 'workoutLogs', 'completedWarmupDrills', 'splitSidesExercises', 'updatedAt', 'device']) &&
+             hasRequiredFields(data, ['activeSessionId', 'workoutLogs', 'completedWarmupDrills', 'splitSidesExercises', 'updatedAt']) &&
+             data.activeSessionId is string &&
+             data.activeSessionId.size() > 0 &&
+             data.activeSessionId.size() <= 50 &&
+             data.workoutLogs is map &&
+             data.workoutLogs.size() <= 60 &&
+             data.completedWarmupDrills is map &&
+             data.completedWarmupDrills.size() <= 30 &&
+             data.splitSidesExercises is map &&
+             data.splitSidesExercises.size() <= 60 &&
+             isValidTimestampValue(data.updatedAt) &&
+             (!('device' in data) || (data.device is string && data.device.size() <= 100));
+    }
+
+    // ===============================================================
+    // Domain Validator: Mobility History Document (batch sync)
+    // ===============================================================
+    function isValidMobilityHistory(data) {
+      return hasOnlyAllowedFields(data, ['entries', 'updatedAt']) &&
+             hasRequiredFields(data, ['entries', 'updatedAt']) &&
+             data.entries is list &&
+             data.entries.size() <= 1000 &&
+             isValidTimestampValue(data.updatedAt);
+    }
+
+    // ===============================================================
+    // Domain Validator: Single Mobility Assessment Entry
+    // ===============================================================
+    function isValidMobilityEntry(data) {
+      return hasOnlyAllowedFields(data, ['testId', 'value', 'date', 'unit', 'painScore', 'notes', 'side', 'id', 'createdAt', 'updatedAt']) &&
+             hasRequiredFields(data, ['testId', 'value']) &&
+             data.testId is string &&
+             data.testId.size() > 0 &&
+             data.testId.size() <= 50 &&
+             data.testId in ['elephant-walk', 'knee-to-wall', 'split-squat-elevation', 'biering-sorensen', 'dead-hang'] &&
+             data.value is number &&
+             data.value >= 0 &&
+             data.value <= 10000 &&
+             (!('date' in data) || (data.date is string && data.date.size() >= 10 && data.date.size() <= 50) || data.date is timestamp) &&
+             (!('unit' in data) || (data.unit is string && data.unit.size() <= 30)) &&
+             (!('painScore' in data) || (data.painScore is number && data.painScore >= 0 && data.painScore <= 10)) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+             (!('side' in data) || (data.side is string && data.side in ['left', 'right', 'bilateral'])) &&
+             (!('id' in data) || (data.id is string && data.id.size() <= 100)) &&
+             (!('createdAt' in data) || isValidTimestampValue(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimestampValue(data.updatedAt));
+    }
+
+    // Dispatcher for mobility documents (history payload vs individual entries)
+    function isValidMobilityDoc(data, docId) {
+      return (docId == 'history' && isValidMobilityHistory(data)) ||
+             (docId != 'history' && isValidMobilityEntry(data));
+    }
+
+    // ===============================================================
+    // Domain Validator: Program Adaptations and Weekly Evaluations
+    // ===============================================================
+    function isValidAdaptationDoc(data) {
+      return hasOnlyAllowedFields(data, [
+               'id', 'exerciseId', 'exerciseName', 'action', 'parameter',
+               'currentValue', 'proposedValue', 'proposedLabel', 'rationale',
+               'creatorInfluence', 'applied', 'weekNumber', 'overallStatus',
+               'evaluatedAt', 'stats', 'commentInsights', 'adaptations',
+               'evaluations', 'programAdaptations', 'coachVerdict', 'nextWeekFocus',
+               'updatedAt', 'createdAt'
+             ]) &&
+             data.keys().size() > 0 &&
+             data.keys().size() <= 23 &&
+             (!('id' in data) || (data.id is string && data.id.size() <= 100)) &&
+             (!('exerciseId' in data) || (data.exerciseId is string && data.exerciseId.size() <= 100)) &&
+             (!('exerciseName' in data) || (data.exerciseName is string && data.exerciseName.size() <= 100)) &&
+             (!('action' in data) || (data.action is string && data.action.size() <= 50)) &&
+             (!('parameter' in data) || (data.parameter is string && data.parameter.size() <= 50)) &&
+             (!('proposedLabel' in data) || (data.proposedLabel is string && data.proposedLabel.size() <= 200)) &&
+             (!('rationale' in data) || (data.rationale is string && data.rationale.size() <= 2000)) &&
+             (!('creatorInfluence' in data) || (data.creatorInfluence is string && data.creatorInfluence.size() <= 100)) &&
+             (!('applied' in data) || (data.applied is bool)) &&
+             (!('currentValue' in data) || (data.currentValue is string && data.currentValue.size() <= 200) || data.currentValue is number || data.currentValue is bool) &&
+             (!('proposedValue' in data) || (data.proposedValue is string && data.proposedValue.size() <= 200) || data.proposedValue is number || data.proposedValue is bool) &&
+             (!('weekNumber' in data) || (data.weekNumber is number && data.weekNumber >= 1 && data.weekNumber <= 104)) &&
+             (!('overallStatus' in data) || (data.overallStatus is string && data.overallStatus in ['progressing', 'adapting_for_recovery', 'deload_recommended', 'maintaining'])) &&
+             (!('evaluatedAt' in data) || (data.evaluatedAt is string && data.evaluatedAt.size() <= 50) || data.evaluatedAt is timestamp) &&
+             (!('stats' in data) || (data.stats is map && data.stats.size() <= 20)) &&
+             (!('commentInsights' in data) || (data.commentInsights is list && data.commentInsights.size() <= 100)) &&
+             (!('adaptations' in data) || ((data.adaptations is list || data.adaptations is map) && data.adaptations.size() <= 100)) &&
+             (!('evaluations' in data) || (data.evaluations is list && data.evaluations.size() <= 100)) &&
+             (!('programAdaptations' in data) || (data.programAdaptations is map && data.programAdaptations.size() <= 100)) &&
+             (!('coachVerdict' in data) || (data.coachVerdict is string && data.coachVerdict.size() <= 2000)) &&
+             (!('nextWeekFocus' in data) || (data.nextWeekFocus is string && data.nextWeekFocus.size() <= 2000)) &&
+             (!('createdAt' in data) || isValidTimestampValue(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimestampValue(data.updatedAt));
+    }
+
+    // ===============================================================
+    // Root Match: Strict Default Deny
+    // ===============================================================
+    // Deny all reads, writes, and listings by default across the entire database.
+    // Disallows cross-user queries, root collection queries, and collectionGroup scans.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ===============================================================
+    // User Scope Rules: /users/{userId}
+    // ===============================================================
+    match /users/{userId} {
+      // Disallow collection listings of /users (prevents user enumeration & PII leaks)
+      allow list: if false;
+
+      // Allow authenticated user to read, create, or update their own profile document
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data, userId);
+      allow update: if isOwner(userId) && isValidUserProfile(request.resource.data, userId) && areImmutableFieldsUnchanged(['uid', 'createdAt']);
+      allow delete: if isOwner(userId);
+
+      // -------------------------------------------------------------
+      // Subcollection: /users/{userId}/state
+      // -------------------------------------------------------------
+      match /state/{stateDoc} {
+        // Disallow listing the /state subcollection
+        allow list: if isOwner(userId);
+
+        // Strict lockdown for active workout state document
+        allow get: if isOwner(userId) && stateDoc == 'current_workout';
+        allow create: if isOwner(userId) &&
+                         stateDoc == 'current_workout' &&
+                         isValidWorkoutState(request.resource.data);
+        allow update: if isOwner(userId) &&
+                         stateDoc == 'current_workout' &&
+                         isValidWorkoutState(request.resource.data);
+        allow delete: if isOwner(userId) && stateDoc == 'current_workout';
+      }
+
+      // -------------------------------------------------------------
+      // Subcollection: /users/{userId}/mobility
+      // -------------------------------------------------------------
+      match /mobility/{mobilityDoc} {
+        // Owner can query or read their own mobility entries
+        allow read: if isOwner(userId);
+
+        // Validate on create: distinguishes batch history vs single entry
+        allow create: if isOwner(userId) &&
+                         isValidMobilityDoc(request.resource.data, mobilityDoc);
+
+        // Validate on update: enforces domain validation + immutable field lockdown
+        allow update: if isOwner(userId) &&
+                         isValidMobilityDoc(request.resource.data, mobilityDoc) &&
+                         areImmutableFieldsUnchanged(['id', 'createdAt']);
+
+        // Owner can delete individual assessments or reset history
+        allow delete: if isOwner(userId);
+
+        // Explicitly protect any nested subcollections under mobility
+        match /{subDoc=**} {
+          allow read: if isOwner(userId);
+          allow create: if isOwner(userId) && isValidMobilityEntry(request.resource.data);
+          allow update: if isOwner(userId) && isValidMobilityEntry(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+          allow delete: if isOwner(userId);
+        }
+      }
+
+      // -------------------------------------------------------------
+      // Subcollection: /users/{userId}/adaptations
+      // -------------------------------------------------------------
+      match /adaptations/{adaptationDoc} {
+        // Owner can query or read their weekly adaptations and evaluations
+        allow read: if isOwner(userId);
+
+        // Validate on create: strictly schema-enforced
+        allow create: if isOwner(userId) &&
+                         isValidAdaptationDoc(request.resource.data);
+
+        // Validate on update: enforces domain validation + immutable field lockdown
+        allow update: if isOwner(userId) &&
+                         isValidAdaptationDoc(request.resource.data) &&
+                         areImmutableFieldsUnchanged(['id', 'createdAt']);
+
+        // Owner can remove past adaptations or evaluations
+        allow delete: if isOwner(userId);
+
+        // Explicitly protect any nested subcollections under adaptations
+        match /{subDoc=**} {
+          allow read: if isOwner(userId);
+          allow create: if isOwner(userId) && isValidAdaptationDoc(request.resource.data);
+          allow update: if isOwner(userId) && isValidAdaptationDoc(request.resource.data) && areImmutableFieldsUnchanged(['id', 'createdAt']);
+          allow delete: if isOwner(userId);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Emerald Gradient for the Hexagonal Shield Rim -->
+    <linearGradient id="logo-shield-stroke" x1="4" y1="2" x2="40" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6ee7b7" />
+      <stop offset="45%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+
+    <!-- Deep Dark Emerald Radial / Linear Background -->
+    <linearGradient id="logo-shield-bg" x1="22" y1="2" x2="22" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#064e3b" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#022c22" stop-opacity="1" />
+    </linearGradient>
+
+    <!-- Kinetic Chevrons Gradient -->
+    <linearGradient id="logo-chevron-left" x1="8" y1="14" x2="20" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <linearGradient id="logo-chevron-right" x1="36" y1="14" x2="24" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6ee7b7" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+
+    <!-- Central Apex Core Gradient -->
+    <linearGradient id="logo-core-grad" x1="22" y1="6" x2="22" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a7f3d0" />
+      <stop offset="50%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+
+  <!-- 1. Structural Faceted Hexagon Shield (Stability & Bulletproofing) -->
+  <polygon
+    points="22,3 39,12 39,32 22,41 5,32 5,12"
+    fill="url(#logo-shield-bg)"
+    stroke="url(#logo-shield-stroke)"
+    stroke-width="2.2"
+    stroke-linejoin="round"
+  />
+
+  <!-- 2. Inner Geometric Accent Ring -->
+  <polygon
+    points="22,7 35,14 35,30 22,37 9,30 9,14"
+    fill="none"
+    stroke="#10b981"
+    stroke-width="0.8"
+    stroke-opacity="0.3"
+    stroke-dasharray="2 2"
+  />
+
+  <!-- 3. Ascending Left Kinetic Wing / Chevron -->
+  <path
+    d="M11,26 L19,15 L19,22.5 L13.5,29.5 Z"
+    fill="url(#logo-chevron-left)"
+  />
+
+  <!-- 4. Ascending Right Kinetic Wing / Chevron -->
+  <path
+    d="M33,26 L25,15 L25,22.5 L30.5,29.5 Z"
+    fill="url(#logo-chevron-right)"
+  />
+
+  <!-- 5. Central Vertical Barbell Axis & Kinetic Arrowhead Apex -->
+  <path
+    d="M22,8 L26.5,15.5 L23.5,15.5 L23.5,33 L20.5,33 L20.5,15.5 L17.5,15.5 Z"
+    fill="url(#logo-core-grad)"
+  />
+
+  <!-- 6. Heavy Barbell Plate Base Collar Accent -->
+  <rect
+    x="16.5"
+    y="29"
+    width="11"
+    height="2.2"
+    rx="1.1"
+    fill="#a7f3d0"
+  />
+  <rect
+    x="18"
+    y="32"
+    width="8"
+    height="1.5"
+    rx="0.75"
+    fill="#6ee7b7"
+    opacity="0.8"
+  />
+</svg>
