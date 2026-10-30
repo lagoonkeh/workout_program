@@ -7,6 +7,8 @@ import { vi, afterEach, beforeAll } from 'vitest';
 beforeAll(async () => {
   const { preloadLazyViews } = await import('../src/lazyView');
   await preloadLazyViews();
+  const { loadCueCards } = await import('../src/domain/cueCardStore');
+  await loadCueCards();
 });
 
 // 1. Mock LocalStorage

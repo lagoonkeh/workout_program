@@ -52,6 +52,149 @@ function sanitizeCell(value) {
   return /^[=+\-@]/.test(str) ? `'${str}` : str;
 }
 
+// ---------------------------------------------------------------------------
+// App backup: profile, weigh-ins and quarterly assessments (device-only data)
+// ---------------------------------------------------------------------------
+
+const BACKUP_SHEET = 'App Backup';
+const BODY_SHEET = 'Body Metrics';
+const ASSESSMENT_SHEET = 'Quarterly Assessments';
+const MAX_BACKUP_CHARS = 45000; // a Sheets cell holds 50,000 characters
+
+async function getAccessToken() {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  if (!clientId || !clientSecret || !refreshToken) return null;
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    }),
+  });
+  if (!tokenRes.ok) throw new Error(`Failed to refresh Google OAuth token: ${await tokenRes.text()}`);
+  return (await tokenRes.json()).access_token;
+}
+
+function sheetsUrl(spreadsheetId, path) {
+  return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}${path}`;
+}
+
+async function sheetsFetch(accessToken, url, init = {}) {
+  const res = await fetch(url, {
+    ...init,
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json', ...(init.headers || {}) },
+  });
+  if (!res.ok) throw new Error(`Google Sheets ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  return res.json();
+}
+
+async function ensureSheets(accessToken, spreadsheetId, titles) {
+  const meta = await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '?fields=sheets.properties.title'));
+  const have = new Set((meta.sheets || []).map((s) => s.properties.title));
+  const missing = titles.filter((t) => !have.has(t));
+  if (missing.length) {
+    await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, ':batchUpdate'), {
+      method: 'POST',
+      body: JSON.stringify({ requests: missing.map((title) => ({ addSheet: { properties: { title } } })) }),
+    });
+  }
+}
+
+/** Basic shape check; the client re-sanitizes on restore. */
+export function validateAppBackup(b) {
+  if (!b || typeof b !== 'object') return 'Backup must be an object.';
+  if (typeof b.savedAt !== 'string' || Number.isNaN(Date.parse(b.savedAt))) return 'Backup needs a savedAt timestamp.';
+  if (!b.profile || typeof b.profile !== 'object') return 'Backup needs a profile.';
+  if (!Array.isArray(b.assessments)) return 'Backup needs an assessments list.';
+  if (JSON.stringify(b).length > MAX_BACKUP_CHARS) return 'Backup is too large for one cell.';
+  return null;
+}
+
+export function backupTables(b) {
+  const weighIns = Array.isArray(b.profile.weighIns) ? b.profile.weighIns : [];
+  const byDate = new Map();
+  b.assessments.forEach((a) => {
+    if (a && a.date && a.bodyweightLbs) byDate.set(String(a.date).slice(0, 10), [String(a.date).slice(0, 10), a.bodyweightLbs, 'Quarterly test']);
+  });
+  weighIns.forEach((w) => byDate.set(w.date, [w.date, w.lbs, 'Weigh-in']));
+  const body = [['Date', 'Bodyweight (lb)', 'Source'], ...[...byDate.values()].sort((x, y) => String(x[0]).localeCompare(String(y[0])))];
+
+  const cols = [
+    ['Quarter', (a) => a.quarterLabel],
+    ['Date', (a) => a.date],
+    ['Age', (a) => a.age],
+    ['Bodyweight (lb)', (a) => a.bodyweightLbs],
+    ['Squat 1RM', (a) => a.scores?.squat1rmLbs],
+    ['Deadlift 1RM', (a) => a.scores?.deadlift1rmLbs],
+    ['Bench 1RM', (a) => a.scores?.bench1rmLbs],
+    ['OHP 1RM', (a) => a.scores?.ohp1rmLbs],
+    ['Pull-ups', (a) => a.scores?.strictPullupsReps],
+    ['Push-ups', (a) => a.scores?.pushupsReps],
+    ['2k row (s)', (a) => a.scores?.row2kSeconds],
+    ['Cooper (mi)', (a) => a.scores?.cooperRunMiles],
+    ['Dead hang (s)', (a) => a.scores?.deadHangSec],
+    ['Notes', (a) => a.notes],
+  ];
+  const assessments = [
+    cols.map((c) => c[0]),
+    ...[...b.assessments]
+      .sort((x, y) => String(x.date).localeCompare(String(y.date)))
+      // written RAW, so nothing is evaluated as a formula
+      .map((a) => cols.map((c) => c[1](a) ?? '')),
+  ];
+  return { body, assessments };
+}
+
+async function writeAppBackup(accessToken, spreadsheetId, backup) {
+  await ensureSheets(accessToken, spreadsheetId, [BACKUP_SHEET, BODY_SHEET, ASSESSMENT_SHEET]);
+  const { body, assessments } = backupTables(backup);
+  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
+    method: 'POST',
+    body: JSON.stringify({ ranges: [`'${BODY_SHEET}'!A1:C2000`, `'${ASSESSMENT_SHEET}'!A1:N500`] }),
+  });
+  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
+    method: 'POST',
+    body: JSON.stringify({
+      valueInputOption: 'RAW',
+      data: [
+        {
+          range: `'${BACKUP_SHEET}'!A1:B4`,
+          values: [
+            ['Last saved', backup.savedAt],
+            ['Format', `workout-app-backup v${backup.version || 1}`],
+            ['Data (used by the app to restore — do not edit)', JSON.stringify(backup)],
+            ['Readable copies', `See the '${BODY_SHEET}' and '${ASSESSMENT_SHEET}' tabs`],
+          ],
+        },
+        { range: `'${BODY_SHEET}'!A1`, values: body },
+        { range: `'${ASSESSMENT_SHEET}'!A1`, values: assessments },
+      ],
+    }),
+  });
+}
+
+async function readAppBackup(accessToken, spreadsheetId) {
+  const res = await fetch(
+    sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(`'${BACKUP_SHEET}'!B3`)}`),
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!res.ok) return null; // tab not created yet
+  const data = await res.json();
+  const raw = data.values && data.values[0] && data.values[0][0];
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return validateAppBackup(parsed) ? null : parsed;
+  } catch {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
@@ -70,6 +213,19 @@ export default async function handler(req, res) {
     const action =
       req.query?.action ||
       (req.url ? new URL(req.url, 'http://localhost').searchParams.get('action') : null);
+
+    if (action === 'backup') {
+      try {
+        const spreadsheetId =
+          process.env.GOOGLE_SPREADSHEET_ID || '18IDVdkxJnCLdC2hDYJQOcKc2OFrZCWK3bkc-N-p-3NA';
+        const accessToken = await getAccessToken();
+        if (!accessToken) return res.status(200).json({ status: 'ok', backup: null, message: 'Missing OAuth credentials.' });
+        const backup = await readAppBackup(accessToken, spreadsheetId);
+        return res.status(200).json({ status: 'ok', backup });
+      } catch (err) {
+        return res.status(502).json({ error: `Error reading backup: ${err.message}` });
+      }
+    }
 
     if (action === 'last-workout' || action === 'scan') {
       try {
@@ -258,6 +414,15 @@ export default async function handler(req, res) {
 
     let syncedWorkouts = 0;
     let syncedMobility = 0;
+    let backedUpProfile = false;
+
+    // 1b. Back up profile, weigh-ins and quarterly assessments (new tabs are created on first use)
+    if (body.appBackup) {
+      const problem = validateAppBackup(body.appBackup);
+      if (problem) return res.status(400).json({ error: `Backup rejected: ${problem}` });
+      await writeAppBackup(accessToken, spreadsheetId, body.appBackup);
+      backedUpProfile = true;
+    }
 
     // 2. Synchronize Workout Logs (Deduplicated by Date + Exercise + Set #)
     if (workoutLogs.length > 0) {
@@ -555,6 +720,7 @@ export default async function handler(req, res) {
       success: true,
       syncedWorkouts,
       syncedMobility,
+      backedUpProfile,
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

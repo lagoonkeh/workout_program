@@ -30,6 +30,8 @@ export type MuscleId =
   | 'glutes'
   | 'calves';
 
+export type Sex = 'male' | 'female';
+
 export type StrengthTier = 'Beginner' | 'Novice' | 'Intermediate' | 'Advanced' | 'Elite';
 
 export interface LiftInfo {
@@ -87,7 +89,7 @@ export const MUSCLE_LIFT_WEIGHTS: Record<MuscleId, Partial<Record<LiftId, number
  * (bench 48.7 M, squat 25.0 M, deadlift 23.0 M, press 0.9 M, pull-ups 4.9 M logged lifts).
  * Strength Level sets each level at a fixed percentile of its male lifters:
  * Beginner 5th · Novice 20th · Intermediate 50th · Advanced 80th · Elite 95th.
- * Male bodyweight tables, 110–310 lb; values between rows are interpolated by bodyweight.
+ * Bodyweight tables (men 110–310 lb, women 90–260 lb); values between rows are interpolated by bodyweight.
  */
 export const PERCENTILE_ANCHORS = [5, 20, 50, 80, 95] as const;
 
@@ -157,10 +159,78 @@ export const STRENGTH_LEVEL_TABLES: Record<LiftId, { unit: 'lb' | 'reps'; rows: 
   },
 };
 
-/** Strength Level row for any bodyweight (linear between table rows, clamped to 110–310 lb). */
-export function strengthLevelRow(lift: LiftId, bodyweightLbs: number): number[] {
-  const rows = STRENGTH_LEVEL_TABLES[lift].rows;
-  const bw = Math.min(rows[rows.length - 1][0], Math.max(rows[0][0], bodyweightLbs || 170));
+/** Strength Level female bodyweight tables, 90–260 lb (same percentile anchors, among female lifters). */
+export const STRENGTH_LEVEL_TABLES_FEMALE: Record<LiftId, { unit: 'lb' | 'reps'; rows: Row[] }> = {
+  squat: {
+    unit: 'lb',
+    rows: [
+      [90, 44, 76, 118, 170, 228], [100, 50, 84, 129, 183, 243], [110, 57, 92, 139, 194, 256],
+      [120, 63, 100, 148, 206, 269], [130, 69, 107, 157, 216, 281], [140, 74, 114, 165, 226, 292],
+      [150, 80, 121, 174, 235, 303], [160, 85, 128, 181, 244, 313], [170, 90, 134, 189, 253, 323],
+      [180, 95, 140, 196, 261, 332], [190, 100, 146, 203, 269, 341], [200, 105, 151, 209, 277, 350],
+      [210, 109, 157, 216, 284, 358], [220, 114, 162, 222, 291, 366], [230, 118, 167, 228, 298, 374],
+      [240, 122, 172, 234, 305, 381], [250, 126, 177, 239, 311, 389], [260, 130, 182, 245, 318, 396],
+    ],
+  },
+  deadlift: {
+    unit: 'lb',
+    rows: [
+      [90, 59, 97, 146, 205, 270], [100, 67, 106, 157, 218, 286], [110, 74, 115, 168, 231, 300],
+      [120, 80, 123, 178, 242, 313], [130, 87, 131, 187, 253, 326], [140, 93, 139, 196, 264, 338],
+      [150, 99, 146, 205, 274, 349], [160, 105, 153, 213, 283, 359], [170, 110, 159, 221, 292, 370],
+      [180, 115, 166, 228, 301, 379], [190, 121, 172, 236, 309, 389], [200, 126, 178, 242, 317, 397],
+      [210, 130, 184, 249, 325, 406], [220, 135, 189, 256, 332, 414], [230, 140, 195, 262, 339, 422],
+      [240, 144, 200, 268, 346, 430], [250, 148, 205, 274, 353, 437], [260, 153, 210, 280, 359, 445],
+    ],
+  },
+  bench: {
+    unit: 'lb',
+    rows: [
+      [90, 23, 44, 73, 110, 152], [100, 27, 50, 81, 119, 163], [110, 32, 56, 88, 128, 173],
+      [120, 36, 61, 95, 137, 183], [130, 40, 67, 102, 145, 192], [140, 44, 72, 108, 152, 201],
+      [150, 48, 77, 114, 159, 209], [160, 52, 82, 120, 166, 217], [170, 55, 86, 126, 173, 224],
+      [180, 59, 91, 131, 179, 232], [190, 63, 95, 136, 185, 238], [200, 66, 99, 141, 191, 245],
+      [210, 69, 103, 146, 197, 251], [220, 73, 107, 151, 202, 258], [230, 76, 111, 156, 207, 264],
+      [240, 79, 115, 160, 212, 269], [250, 82, 119, 164, 217, 275], [260, 85, 122, 168, 222, 280],
+    ],
+  },
+  ohp: {
+    unit: 'lb',
+    rows: [
+      [90, 20, 34, 51, 72, 95], [100, 23, 37, 56, 77, 102], [110, 26, 41, 60, 83, 108],
+      [120, 29, 45, 64, 88, 113], [130, 32, 48, 68, 92, 118], [140, 34, 51, 72, 96, 123],
+      [150, 37, 54, 76, 101, 128], [160, 39, 57, 79, 105, 132], [170, 42, 60, 82, 108, 137],
+      [180, 44, 62, 86, 112, 141], [190, 46, 65, 89, 116, 145], [200, 48, 68, 92, 119, 149],
+      [210, 50, 70, 94, 122, 152], [220, 52, 73, 97, 125, 156], [230, 54, 75, 100, 128, 159],
+      [240, 56, 77, 102, 131, 162], [250, 58, 79, 105, 134, 166], [260, 60, 81, 107, 137, 169],
+    ],
+  },
+  pullups: {
+    unit: 'reps',
+    rows: [
+      [90, 0.5, 0.5, 6, 14, 23], [100, 0.5, 0.5, 6, 13, 22], [110, 0.5, 0.5, 6, 13, 22],
+      [120, 0.5, 0.5, 6, 13, 21], [130, 0.5, 0.5, 6, 12, 20], [140, 0.5, 0.5, 6, 12, 19],
+      [150, 0.5, 0.5, 6, 11, 18], [160, 0.5, 0.5, 5, 11, 17], [170, 0.5, 0.5, 5, 10, 16],
+      [180, 0.5, 0.5, 5, 10, 16], [190, 0.5, 0.5, 4, 9, 15], [200, 0.5, 0.5, 4, 9, 14],
+      [210, 0.5, 0.5, 3, 8, 13], [220, 0.5, 0.5, 3, 8, 13], [230, 0.5, 0.5, 3, 8, 12],
+      [240, 0.5, 0.5, 2, 7, 11], [250, 0.5, 0.5, 2, 7, 11], [260, 0.5, 0.5, 1, 6, 10],
+    ],
+  },
+};
+
+/** The table for a sex. */
+export const strengthTables = (sex: Sex = 'male') => (sex === 'female' ? STRENGTH_LEVEL_TABLES_FEMALE : STRENGTH_LEVEL_TABLES);
+
+/** Bodyweight clamped to the range the table covers (110–310 lb men, 90–260 lb women). */
+export function clampTableBodyweight(lift: LiftId, bodyweightLbs: number, sex: Sex = 'male'): number {
+  const rows = strengthTables(sex)[lift].rows;
+  return Math.min(rows[rows.length - 1][0], Math.max(rows[0][0], bodyweightLbs || (sex === 'female' ? 140 : 170)));
+}
+
+/** Strength Level row for any bodyweight (linear between table rows, clamped to the table's range). */
+export function strengthLevelRow(lift: LiftId, bodyweightLbs: number, sex: Sex = 'male'): number[] {
+  const rows = strengthTables(sex)[lift].rows;
+  const bw = clampTableBodyweight(lift, bodyweightLbs, sex);
   for (let i = 1; i < rows.length; i++) {
     if (bw <= rows[i][0]) {
       const a = rows[i - 1];
@@ -173,9 +243,10 @@ export function strengthLevelRow(lift: LiftId, bodyweightLbs: number): number[] 
 }
 
 /** Level thresholds in the lift's unit (× bodyweight for barbell lifts, reps for pull-ups). */
-export function percentileThresholds(lift: LiftId, bodyweightLbs = 170): number[] {
-  const row = strengthLevelRow(lift, bodyweightLbs);
-  return STRENGTH_LEVEL_TABLES[lift].unit === 'reps' ? row : row.map((v) => v / Math.min(310, Math.max(110, bodyweightLbs || 170)));
+export function percentileThresholds(lift: LiftId, bodyweightLbs = 170, sex: Sex = 'male'): number[] {
+  const row = strengthLevelRow(lift, bodyweightLbs, sex);
+  const bw = clampTableBodyweight(lift, bodyweightLbs, sex);
+  return strengthTables(sex)[lift].unit === 'reps' ? row : row.map((v) => v / bw);
 }
 
 /** Cooper Institute bench press / bodyweight norms for men (percentile → ratio), by age band. */
@@ -186,6 +257,16 @@ export const COOPER_BENCH_NORMS_MEN: { maxAge: number; points: [number, number][
   { maxAge: 49, points: [[5, 0.59], [20, 0.72], [40, 0.8], [60, 0.88], [80, 1.0], [95, 1.2]] },
   { maxAge: 59, points: [[5, 0.53], [20, 0.63], [40, 0.71], [60, 0.79], [80, 0.9], [95, 1.05]] },
   { maxAge: 200, points: [[5, 0.49], [20, 0.57], [40, 0.66], [60, 0.72], [80, 0.82], [95, 0.94]] },
+];
+
+/** Cooper Institute bench press / bodyweight norms for women (percentile → ratio), by age band. */
+export const COOPER_BENCH_NORMS_WOMEN: { maxAge: number; points: [number, number][] }[] = [
+  { maxAge: 19, points: [[5, 0.41], [20, 0.53], [40, 0.58], [60, 0.65], [80, 0.77], [95, 0.88]] },
+  { maxAge: 29, points: [[5, 0.44], [20, 0.51], [40, 0.59], [60, 0.7], [80, 0.8], [95, 1.01]] },
+  { maxAge: 39, points: [[5, 0.39], [20, 0.47], [40, 0.53], [60, 0.6], [80, 0.7], [95, 0.82]] },
+  { maxAge: 49, points: [[5, 0.35], [20, 0.43], [40, 0.5], [60, 0.54], [80, 0.62], [95, 0.77]] },
+  { maxAge: 59, points: [[5, 0.31], [20, 0.39], [40, 0.44], [60, 0.48], [80, 0.55], [95, 0.68]] },
+  { maxAge: 200, points: [[5, 0.26], [20, 0.38], [40, 0.43], [60, 0.47], [80, 0.54], [95, 0.72]] },
 ];
 
 export type SourceId =
@@ -252,13 +333,13 @@ export const SOURCES: Record<SourceId, SourceInfo> = {
   strengthlevel: {
     id: 'strengthlevel',
     citation:
-      'Strength Level. Strength standards for squat, deadlift, bench press, military press and pull-ups, male bodyweight tables 110–310 lb (community data from tens of millions of logged lifts; Beginner/Novice/Intermediate/Advanced/Elite = stronger than 5/20/50/80/95% of lifters).',
+      'Strength Level. Strength standards for squat, deadlift, bench press, military press and pull-ups, male (110–310 lb) and female (90–260 lb) bodyweight tables (community data from tens of millions of logged lifts; Beginner/Novice/Intermediate/Advanced/Elite = stronger than 5/20/50/80/95% of lifters).',
     url: 'https://strengthlevel.com/strength-standards',
   },
   cooper: {
     id: 'cooper',
     citation:
-      'The Cooper Institute. Physical Fitness Assessments and Norms for Adults and Law Enforcement — 1RM bench press / body weight, men (reprinted in ACE Bench Press Assessment Protocol).',
+      'The Cooper Institute. Physical Fitness Assessments and Norms for Adults and Law Enforcement — 1RM bench press / body weight, men and women (reprinted in ACE Bench Press Assessment Protocol).',
     url: 'https://contentcdn.eacefitness.com/assets/certification/ace-answers/forms/pt/38_Bench-Press_Assessment_Protocol.pdf',
   },
   epley: {
@@ -464,6 +545,8 @@ export interface LiftContext {
   currentBodyweightLbs?: number;
   /** age from the profile */
   age?: number;
+  /** picks the male or female standards; defaults to male */
+  sex?: Sex;
 }
 
 export function computeLiftResults(
@@ -471,7 +554,7 @@ export function computeLiftResults(
   history: CompletedWorkoutSession[] = [],
   now: Date = new Date(),
   ctx: LiftContext = {}
-): { bodyweightLbs: number; age: number | null; lifts: Partial<Record<LiftId, LiftResult>> } {
+): { bodyweightLbs: number; age: number | null; sex: Sex; lifts: Partial<Record<LiftId, LiftResult>> } {
   const assessedBw = assessment?.bodyweightLbs && assessment.bodyweightLbs > 0 ? assessment.bodyweightLbs : 168;
   const bwAt = (date: string) => {
     const v = ctx.bodyweightAt?.(date);
@@ -540,7 +623,7 @@ export function computeLiftResults(
     });
   });
 
-  return { bodyweightLbs, age: ctx.age ?? assessment?.age ?? null, lifts };
+  return { bodyweightLbs, age: ctx.age ?? assessment?.age ?? null, sex: ctx.sex ?? 'male', lifts };
 }
 
 // ---------------------------------------------------------------------------
@@ -560,12 +643,12 @@ export function tierFromScore(percentile: number): StrengthTier {
  * Estimated percentile among lifters (1–99), interpolated linearly between the
  * Strength Level anchors; 0 at no load, 99 at 15% past the Elite line.
  */
-export function liftPercentile(lift: LiftId, value: number, bodyweightLbs = 170): number {
+export function liftPercentile(lift: LiftId, value: number, bodyweightLbs = 170, sex: Sex = 'male'): number {
   if (!(value > 0)) return 1;
-  // outside the 110–310 lb tables, compare absolute loads at the nearest table bodyweight
-  const bwClamped = Math.min(310, Math.max(110, bodyweightLbs || 170));
-  if (STRENGTH_LEVEL_TABLES[lift].unit === 'lb' && bwClamped !== bodyweightLbs) value = (value * bodyweightLbs) / bwClamped;
-  const t = percentileThresholds(lift, bwClamped);
+  // outside the tables' bodyweight range, compare absolute loads at the nearest table bodyweight
+  const bwClamped = clampTableBodyweight(lift, bodyweightLbs, sex);
+  if (strengthTables(sex)[lift].unit === 'lb' && bodyweightLbs > 0 && bwClamped !== bodyweightLbs) value = (value * bodyweightLbs) / bwClamped;
+  const t = percentileThresholds(lift, bwClamped, sex);
   const anchors: [number, number][] = [
     [0, 0],
     ...t.map((x, i) => [x, PERCENTILE_ANCHORS[i]] as [number, number]),
@@ -574,6 +657,7 @@ export function liftPercentile(lift: LiftId, value: number, bodyweightLbs = 170)
   for (let i = 1; i < anchors.length; i++) {
     const [x1, y1] = anchors[i];
     const [x0, y0] = anchors[i - 1];
+    if (x1 <= x0) continue; // two levels on the same line (women's pull-ups: Beginner = Novice)
     if (value <= x1) return Math.min(99, Math.max(1, Math.round(y0 + ((value - x0) / (x1 - x0)) * (y1 - y0))));
   }
   return 99;
@@ -587,8 +671,9 @@ export function ordinal(n: number): string {
 }
 
 /** Percentile against Cooper Institute bench norms for the user's age band (clamped to 5–95). */
-export function cooperBenchPercentile(ratio: number, age: number): number {
-  const band = COOPER_BENCH_NORMS_MEN.find((b) => age <= b.maxAge) ?? COOPER_BENCH_NORMS_MEN[COOPER_BENCH_NORMS_MEN.length - 1];
+export function cooperBenchPercentile(ratio: number, age: number, sex: Sex = 'male'): number {
+  const norms = sex === 'female' ? COOPER_BENCH_NORMS_WOMEN : COOPER_BENCH_NORMS_MEN;
+  const band = norms.find((b) => age <= b.maxAge) ?? norms[norms.length - 1];
   const pts = band.points;
   if (ratio <= pts[0][1]) return pts[0][0];
   if (ratio >= pts[pts.length - 1][1]) return pts[pts.length - 1][0];
@@ -646,7 +731,7 @@ export function buildStrengthProfile(
     let reference: AthleteLiftReference | null = null;
     if (result) {
       if (!group) {
-        score = liftPercentile(id, result.value, result.bodyweightLbs);
+        score = liftPercentile(id, result.value, result.bodyweightLbs, input.sex);
       } else {
         reference = group.lifts[id] ?? null;
         if (reference) score = Math.round((result.value / reference.value) * 100);

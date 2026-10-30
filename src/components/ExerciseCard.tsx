@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { WorkoutExercise, isUnilateralExercise, formatMMSS, extractTargetReps, getEffectiveExerciseTempo } from '../domain/programData';
 import { ExerciseDiagram } from './ExerciseDiagram';
 import { EXERCISE_VISUALS, ExerciseVisual } from '../domain/exerciseVisualsData';
-import { CUE_CARDS, CueCard } from '../domain/cueCardsData';
+import { useCueCardLookup } from '../domain/cueCardStore';
 import {
   ShieldAlert,
   Clock,
@@ -102,13 +102,6 @@ export const DEAD_HANG_CLUB_DRILLS: DeadHangClubDrill[] = [
 ];
 
 // Pre-computed O(1) lookup map for Cue Cards by ID, exerciseId, exerciseName, and title
-const CUE_CARD_LOOKUP = new Map<string, CueCard>();
-for (const card of CUE_CARDS) {
-  CUE_CARD_LOOKUP.set(card.id, card);
-  CUE_CARD_LOOKUP.set(card.exerciseId, card);
-  CUE_CARD_LOOKUP.set(card.exerciseName.toLowerCase(), card);
-  CUE_CARD_LOOKUP.set(card.title.toLowerCase(), card);
-}
 
 // Pre-computed O(1) lookup map for Exercise Visuals by ID and lowercase name
 const VISUAL_BY_NAME_LOOKUP = new Map<string, ExerciseVisual>();
@@ -678,11 +671,12 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     setIsManuallyCollapsed(null);
   }, [defaultCollapsed, collapseRevision]);
 
+  const CUE_CARD_LOOKUP = useCueCardLookup();
   const matchingCueCard = useMemo(
     () =>
       CUE_CARD_LOOKUP.get(exercise.id) ||
       CUE_CARD_LOOKUP.get(exercise.name.toLowerCase()),
-    [exercise.id, exercise.name]
+    [exercise.id, exercise.name, CUE_CARD_LOOKUP]
   );
 
   const currentTier = TIER_CONFIG[exercise.tier] || TIER_CONFIG.T3;

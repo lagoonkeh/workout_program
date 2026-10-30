@@ -7,6 +7,10 @@ import {
   StrengthHeatmapWidget,
   AthleteProfileCard,
   preloadLazyViews,
+  CueCardModal,
+  WeeklyEvaluationModal,
+  WorkoutCompletionModal,
+  WorkoutHistoryModal,
 } from './lazyView';
 import {
   WORKOUT_PROGRAM,
@@ -17,13 +21,13 @@ import {
   isUnilateralExercise,
   extractTargetReps,
 } from './domain/programData';
-import { CUE_CARDS, CueCard } from './domain/cueCardsData';
+import type { CueCard } from './domain/cueCardTypes';
+import { loadCueCards, useCueCardLookup } from './domain/cueCardStore';
 import { audioSynthesizer } from './audio/audioSynthesizer';
 import { storageManager, CompletedWorkoutSession } from './storage/storageManager';
 import { Header, AppViewMode } from './components/Header';
 import { SessionNav, SessionProgressStats } from './components/SessionNav';
 import { ExerciseCard, SetLogRecord } from './components/ExerciseCard';
-import { CueCardModal } from './components/CueCardModal';
 import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget';
 import { TempoMetronomeWidget } from './components/TempoMetronomeWidget';
 import { MuscleHeatmapWidget } from './components/MuscleHeatmapWidget';
@@ -34,11 +38,9 @@ import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
 import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, History, X } from 'lucide-react';
 import { scanLastWorkout, LastWorkoutScanResult } from './services/sheetSyncService';
 import { useSheetsSync } from './hooks/useSheetsSync';
+import { restoreAppBackupIfNewer, startAppBackupAutoSync } from './services/appBackupService';
 import { useCloudSync } from './hooks/useCloudSync';
 import { isTestEnvironment } from './services/firebaseAuth';
-import { WeeklyEvaluationModal } from './components/WeeklyEvaluationModal';
-import { WorkoutCompletionModal } from './components/WorkoutCompletionModal';
-import { WorkoutHistoryModal } from './components/WorkoutHistoryModal';
 import {
   auditSessionCompletion,
   applySkippedExerciseAdjustments,
@@ -72,14 +74,8 @@ function ViewLoadingFallback() {
   );
 }
 
-// Pre-computed O(1) lookup map for Cue Cards
-const CUE_CARD_MAP = new Map<string, CueCard>();
-for (const card of CUE_CARDS) {
-  CUE_CARD_MAP.set(card.id, card);
-  CUE_CARD_MAP.set(card.exerciseId, card);
-  CUE_CARD_MAP.set(card.exerciseName.toLowerCase(), card);
-  CUE_CARD_MAP.set(card.title.toLowerCase(), card);
-}
+// The cue card data (~130 KB) is its own chunk; start fetching it as soon as the app module runs
+void loadCueCards().catch(() => {});
 
 const TIER_META: Record<string, { label: string; desc: string; badgeClass: string }> = {
   T1: {
@@ -112,6 +108,8 @@ function createDefaultExerciseLogs(exercise: WorkoutExercise): SetLogRecord[] {
 
 export function WorkoutAppMain() {
   const { user } = useAuth();
+  // O(1) lookup by id, exercise id, name or title; empty until the cue card chunk arrives
+  const CUE_CARD_MAP = useCueCardLookup();
 
   // Fetch the secondary view chunks once the main screen is up, so tab switches are instant (and work offline)
   useEffect(() => {
@@ -518,6 +516,12 @@ export function WorkoutAppMain() {
     handleSyncToSheets,
     handleManualSyncToSheets,
   } = useSheetsSync(activeSessionId, workoutLogs);
+
+  // Google Drive backup of profile, weigh-ins and assessments: restore on a new device, back up on change
+  useEffect(() => {
+    void restoreAppBackupIfNewer();
+    return startAppBackupAutoSync();
+  }, []);
 
   // 5c. Auto-sync tracker ref for 100% completion
   const lastAutoSyncedSessionRef = useRef<string | null>(null);
@@ -1609,7 +1613,7 @@ export function WorkoutAppMain() {
       };
     }
     return null;
-  }, [activeCueCardId, activeSession]);
+  }, [activeCueCardId, activeSession, CUE_CARD_MAP]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950 w-full max-w-full overflow-x-hidden min-w-0">
@@ -3160,6 +3164,8 @@ export function WorkoutAppMain() {
         </div>
       )}
 
+      {/* Modals are separate chunks; nothing shows while one loads */}
+      <Suspense fallback={null}>
       {/* Creator Cue Card Modal */}
       <CueCardModal
         cueCard={activeCueCard}
@@ -3207,6 +3213,7 @@ export function WorkoutAppMain() {
           handleScanLastWorkout();
         }}
       />
+      </Suspense>
 
       {/* 1-Tap Muscle Fatigue & Recovery Heatmap Modal */}
       {isHeatmapModalOpen && (

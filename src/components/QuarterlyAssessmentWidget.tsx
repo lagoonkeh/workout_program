@@ -65,7 +65,8 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
     const loaded = loadQuarterlyAssessments();
     if (loaded.length === 0) {
       // Seed default baseline
-      saveQuarterlyAssessment(DEFAULT_BASELINE_ASSESSMENT);
+      // seeding the starter record is not a user edit, so it must not trigger or win a backup
+      saveQuarterlyAssessment(DEFAULT_BASELINE_ASSESSMENT, { silent: true });
       return [DEFAULT_BASELINE_ASSESSMENT];
     }
     return loaded;
@@ -171,11 +172,11 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
   // Computed Evaluations
   const rowEval = useMemo(() => evaluateRow2k(activeRecord.scores.row2kSeconds || 450), [activeRecord]);
   const cooperEval = useMemo(() => evaluateCooperRun(activeRecord.scores.cooperRunMiles || 1.3), [activeRecord]);
-  const dlEval = useMemo(() => evaluateDeadlift(activeRecord.scores.deadlift1rmLbs || 0, activeRecord.bodyweightLbs), [activeRecord]);
-  const squatEval = useMemo(() => evaluateSquat(activeRecord.scores.squat1rmLbs || 0, activeRecord.bodyweightLbs), [activeRecord]);
-  const benchEval = useMemo(() => evaluateBenchPress(activeRecord.scores.bench1rmLbs || 0, activeRecord.bodyweightLbs), [activeRecord]);
-  const ohpEval = useMemo(() => evaluateOverheadPress(activeRecord.scores.ohp1rmLbs || 0, activeRecord.bodyweightLbs), [activeRecord]);
-  const pullupsEval = useMemo(() => evaluatePullups(activeRecord.scores.strictPullupsReps || 0, activeRecord.bodyweightLbs), [activeRecord]);
+  const dlEval = useMemo(() => evaluateDeadlift(activeRecord.scores.deadlift1rmLbs || 0, activeRecord.bodyweightLbs, profile.sex), [activeRecord, profile.sex]);
+  const squatEval = useMemo(() => evaluateSquat(activeRecord.scores.squat1rmLbs || 0, activeRecord.bodyweightLbs, profile.sex), [activeRecord, profile.sex]);
+  const benchEval = useMemo(() => evaluateBenchPress(activeRecord.scores.bench1rmLbs || 0, activeRecord.bodyweightLbs, profile.sex), [activeRecord, profile.sex]);
+  const ohpEval = useMemo(() => evaluateOverheadPress(activeRecord.scores.ohp1rmLbs || 0, activeRecord.bodyweightLbs, profile.sex), [activeRecord, profile.sex]);
+  const pullupsEval = useMemo(() => evaluatePullups(activeRecord.scores.strictPullupsReps || 0, activeRecord.bodyweightLbs, profile.sex), [activeRecord, profile.sex]);
   const pushupsEval = useMemo(() => evaluatePushups(activeRecord.scores.pushupsReps || 0), [activeRecord]);
   const deadHangEval = useMemo(() => evaluateDeadHang(activeRecord.scores.deadHangSec || 0), [activeRecord]);
 

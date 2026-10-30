@@ -10,3 +10,6 @@ _archive/
 tsconfig.tsbuildinfo
 .pytest_cache/
 __pycache__/
+
+# local agent notes (kept on disk, not in the repo)
+.agents/

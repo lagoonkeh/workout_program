@@ -9,3 +9,5 @@ coverage/
 *.py
 TEST_READY.md
 _archive/
+scripts/
+docs/

@@ -86,9 +86,19 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Check if authenticated user is the strict owner of this userId path
+    // Only these Google accounts may use the database at all. Mirrors the allowlist in
+    // src/services/firebaseAuth.ts and api/sync.js; without this, any Google account could sign in
+    // and store data in this project (it could not read anyone else's, but it would use the quota).
+    // Add an address here AND in VITE_ALLOWED_EMAILS to let someone else in.
+    function isAllowedUser() {
+      return isAuthenticated() &&
+             request.auth.token.email_verified == true &&
+             request.auth.token.email.lower() in ['lagoonkeh@gmail.com'];
+    }
+
+    // Check if the allowed, authenticated user is the strict owner of this userId path
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return isAllowedUser() && request.auth.uid == userId;
     }
 
     // Validate that document contains only allowed fields (Strict Schema Enforcement)
@@ -249,7 +259,7 @@ service cloud.firestore {
       // Subcollection: /users/{userId}/state
       // -------------------------------------------------------------
       match /state/{stateDoc} {
-        // Disallow listing the /state subcollection
+        // Owner may list their own /state subcollection
         allow list: if isOwner(userId);
 
         // Strict lockdown for active workout state document

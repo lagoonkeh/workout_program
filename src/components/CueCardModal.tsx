@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CueCard } from '../domain/cueCardsData';
+import type { CueCard } from '../domain/cueCardTypes';
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { ExerciseDiagram } from './ExerciseDiagram';
 import { EXERCISE_VISUALS } from '../domain/exerciseVisualsData';

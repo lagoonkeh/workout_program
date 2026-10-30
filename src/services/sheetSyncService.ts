@@ -4,6 +4,7 @@ import { storageManager } from '../storage/storageManager';
 import { MobilityEntry } from '../domain/mobility';
 import { SetLogRecord } from '../components/ExerciseCard';
 import { getIdToken } from './firebaseAuth';
+import { collectAppBackup, type AppBackup } from './appBackupService';
 
 export const STORAGE_KEY_LAST_SYNC = 'workout_app_last_sheets_sync_v1';
 export const STORAGE_KEY_LAST_SCANNED_WORKOUT = 'workout_app_last_scanned_workout_v1';
@@ -205,6 +206,8 @@ export interface SyncPayload {
   activeSessionId: string;
   workoutLogs: SyncedWorkoutItem[];
   mobilityEntries: SyncedMobilityItem[];
+  /** profile, weigh-ins and quarterly assessments (device-only data) */
+  appBackup?: AppBackup;
 }
 
 export interface SyncResult {
@@ -307,6 +310,7 @@ export function buildSyncPayload(
     activeSessionId,
     workoutLogs,
     mobilityEntries,
+    appBackup: collectAppBackup(),
   };
 }
 
@@ -347,7 +351,7 @@ export async function syncToGoogleSheets(payload: SyncPayload): Promise<SyncResu
       success: true,
       message: `Successfully synchronized ${data.syncedWorkouts || 0} workout sets and ${
         data.syncedMobility || 0
-      } mobility tests to Google Sheets!`,
+      } mobility tests to Google Sheets${data.backedUpProfile ? ', plus your profile and assessments' : ''}!`,
       syncedWorkouts: data.syncedWorkouts,
       syncedMobility: data.syncedMobility,
       timestamp,

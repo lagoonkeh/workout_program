@@ -16,7 +16,8 @@
  *   - Ben Patrick (ATG) & Lucas Hardie (Range of Strength) Loaded Mobility
  */
 
-import { liftPercentile, ordinal, tierFromScore, type LiftId } from './strengthStandards';
+import { liftPercentile, ordinal, tierFromScore, type LiftId, type Sex } from './strengthStandards';
+import { touchAppData } from '../storage/appDataClock';
 
 export const ATHLETE_PROFILE = {
   dob: '1991-10-10',
@@ -187,9 +188,14 @@ const STRENGTH_BADGES: Record<'Elite' | 'Advanced' | 'Intermediate' | 'Novice' |
   Beginner: { badgeClass: 'bg-rose-950/70 border-rose-500 text-rose-300', dotClass: 'bg-rose-400' },
 };
 
-export function evaluateLiftPercentile(lift: LiftId, value: number, bodyweightLbs: number = 168): ScoreTierInfo & { percentile: number } {
+export function evaluateLiftPercentile(
+  lift: LiftId,
+  value: number,
+  bodyweightLbs: number = 168,
+  sex: Sex = 'male'
+): ScoreTierInfo & { percentile: number } {
   const ratio = lift === 'pullups' ? value : value / (bodyweightLbs || 168);
-  const percentile = liftPercentile(lift, ratio, bodyweightLbs);
+  const percentile = liftPercentile(lift, ratio, bodyweightLbs, sex);
   const tier = tierFromScore(percentile);
   const amount = lift === 'pullups' ? `${value} strict reps` : `${ratio.toFixed(2)}x BW`;
   return {
@@ -201,27 +207,27 @@ export function evaluateLiftPercentile(lift: LiftId, value: number, bodyweightLb
   };
 }
 
-export function evaluateDeadlift(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  return evaluateLiftPercentile('deadlift', weightLbs, bodyweightLbs);
+export function evaluateDeadlift(weightLbs: number, bodyweightLbs: number = 168, sex: Sex = 'male'): ScoreTierInfo {
+  return evaluateLiftPercentile('deadlift', weightLbs, bodyweightLbs, sex);
 }
 
-export function evaluateSquat(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  return evaluateLiftPercentile('squat', weightLbs, bodyweightLbs);
+export function evaluateSquat(weightLbs: number, bodyweightLbs: number = 168, sex: Sex = 'male'): ScoreTierInfo {
+  return evaluateLiftPercentile('squat', weightLbs, bodyweightLbs, sex);
 }
 
-export function evaluateBenchPress(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  return evaluateLiftPercentile('bench', weightLbs, bodyweightLbs);
+export function evaluateBenchPress(weightLbs: number, bodyweightLbs: number = 168, sex: Sex = 'male'): ScoreTierInfo {
+  return evaluateLiftPercentile('bench', weightLbs, bodyweightLbs, sex);
 }
 
-export function evaluateOverheadPress(weightLbs: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  return evaluateLiftPercentile('ohp', weightLbs, bodyweightLbs);
+export function evaluateOverheadPress(weightLbs: number, bodyweightLbs: number = 168, sex: Sex = 'male'): ScoreTierInfo {
+  return evaluateLiftPercentile('ohp', weightLbs, bodyweightLbs, sex);
 }
 
 /**
  * 4. Calisthenics & Muscular Endurance
  */
-export function evaluatePullups(reps: number, bodyweightLbs: number = 168): ScoreTierInfo {
-  return evaluateLiftPercentile('pullups', reps, bodyweightLbs);
+export function evaluatePullups(reps: number, bodyweightLbs: number = 168, sex: Sex = 'male'): ScoreTierInfo {
+  return evaluateLiftPercentile('pullups', reps, bodyweightLbs, sex);
 }
 
 export function evaluatePushups(reps: number): ScoreTierInfo {
@@ -400,7 +406,10 @@ export function loadQuarterlyAssessments(): QuarterlyAssessmentRecord[] {
 /**
  * Saves or updates a quarterly assessment record.
  */
-export function saveQuarterlyAssessment(record: QuarterlyAssessmentRecord): QuarterlyAssessmentRecord[] {
+export function saveQuarterlyAssessment(
+  record: QuarterlyAssessmentRecord,
+  opts: { silent?: boolean } = {}
+): QuarterlyAssessmentRecord[] {
   const current = loadQuarterlyAssessments();
   const existingIdx = current.findIndex((r) => r.id === record.id || r.quarterLabel === record.quarterLabel);
   let updated: QuarterlyAssessmentRecord[];
@@ -415,6 +424,7 @@ export function saveQuarterlyAssessment(record: QuarterlyAssessmentRecord): Quar
   } catch (err) {
     console.warn('Failed to persist assessment to localStorage:', err);
   }
+  if (!opts.silent) touchAppData();
   notifyAssessmentsChanged();
   return updated;
 }
@@ -430,6 +440,7 @@ export function deleteQuarterlyAssessment(id: string): QuarterlyAssessmentRecord
   } catch (err) {
     console.warn('Failed to persist updated assessments:', err);
   }
+  touchAppData();
   notifyAssessmentsChanged();
   return updated;
 }
