@@ -21,7 +21,7 @@ import { getAppDataModifiedAt, setAppDataModifiedAt, touchAppData } from '../../
 const remoteBackup = (savedAt: string, lbs = 181): AppBackup => ({
   version: 1,
   savedAt,
-  profile: { ...DEFAULT_PROFILE, sex: 'male', weighIns: [{ id: 'w1', date: '2026-10-01', lbs }] },
+  profile: { ...DEFAULT_PROFILE, weighIns: [{ id: 'w1', date: '2026-10-01', lbs }] },
   assessments: [],
 });
 

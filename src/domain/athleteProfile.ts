@@ -7,7 +7,6 @@
  * when you did it, and the quarterly assessments' recorded bodyweights count as weigh-ins too.
  */
 import { ATHLETE_PROFILE, calculateAthleteAge, type QuarterlyAssessmentRecord } from './fitnessAssessment';
-import type { Sex } from './strengthStandards';
 import { touchAppData } from '../storage/appDataClock';
 
 export interface WeighIn {
@@ -19,8 +18,6 @@ export interface WeighIn {
 
 export interface AthleteProfile {
   dob: string;
-  /** picks the male or female strength standards */
-  sex: Sex;
   heightInches: number;
   weighIns: WeighIn[];
 }
@@ -33,7 +30,6 @@ export const MAX_BODYWEIGHT_LBS = 500;
 
 export const DEFAULT_PROFILE: AthleteProfile = {
   dob: ATHLETE_PROFILE.dob,
-  sex: 'male',
   heightInches: ATHLETE_PROFILE.heightInches,
   weighIns: [],
 };
@@ -52,7 +48,6 @@ export function sanitizeProfile(raw: unknown): AthleteProfile {
     : [];
   return {
     dob: isDate(r.dob) ? r.dob : DEFAULT_PROFILE.dob,
-    sex: r.sex === 'female' ? 'female' : 'male',
     heightInches:
       typeof r.heightInches === 'number' && r.heightInches >= 48 && r.heightInches <= 96 ? r.heightInches : DEFAULT_PROFILE.heightInches,
     weighIns,

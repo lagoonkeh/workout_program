@@ -5,7 +5,7 @@ import { validateAppBackup, backupTables } from '../../api/sync.js';
 const backup = {
   version: 1,
   savedAt: '2026-10-25T10:00:00.000Z',
-  profile: { dob: '1990-01-01', sex: 'male', heightInches: 70, weighIns: [{ id: 'a', date: '2026-10-01', lbs: 180 }] },
+  profile: { dob: '1990-01-01', heightInches: 70, weighIns: [{ id: 'a', date: '2026-10-01', lbs: 180 }] },
   assessments: [
     { quarterLabel: 'Q4 2026', date: '2026-10-01', age: 36, bodyweightLbs: 182, scores: { squat1rmLbs: 300 }, notes: '=HYPERLINK("x")' },
     { quarterLabel: 'Q3 2026', date: '2026-07-01', age: 36, bodyweightLbs: 178, scores: {} },

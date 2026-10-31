@@ -17,7 +17,6 @@ import {
   type AthleteProfile,
 } from '../domain/athleteProfile';
 import { QUARTERLY_ASSESSMENTS_EVENT, loadQuarterlyAssessments } from '../domain/fitnessAssessment';
-import type { Sex } from '../domain/strengthStandards';
 
 export interface AthleteProfileCardProps {
   className?: string;
@@ -35,7 +34,6 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
   const [feet, setFeet] = useState(() => String(Math.floor(profile.heightInches / 12)));
   const [inches, setInches] = useState(() => String(Math.round(profile.heightInches % 12)));
   const [dob, setDob] = useState(profile.dob);
-  const [sex, setSex] = useState<Sex>(profile.sex);
 
   useEffect(() => {
     const refresh = () =>
@@ -78,12 +76,11 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
   const saveDetails = (e: React.FormEvent) => {
     e.preventDefault();
     const h = parseInt(feet, 10) * 12 + parseInt(inches || '0', 10);
-    const next = saveProfile({ ...profile, dob, sex, heightInches: Number.isFinite(h) ? h : profile.heightInches });
+    const next = saveProfile({ ...profile, dob, heightInches: Number.isFinite(h) ? h : profile.heightInches });
     setProfile(next);
     setFeet(String(Math.floor(next.heightInches / 12)));
     setInches(String(Math.round(next.heightInches % 12)));
     setDob(next.dob);
-    setSex(next.sex);
     setEditing(false);
   };
 
@@ -114,9 +111,9 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
             )}
           </div>
           <div className="rounded-xl bg-slate-950/80 border border-slate-800 px-3 py-1.5">
-            <span className="text-[10px] uppercase text-slate-400 block">Age · Height · Standards</span>
+            <span className="text-[10px] uppercase text-slate-400 block">Age · Height</span>
             <span data-testid="profile-age-height" className="text-white font-bold text-base">
-              {age} · {formatHeight(profile.heightInches)} · {profile.sex === 'female' ? 'F' : 'M'}
+              {age} · {formatHeight(profile.heightInches)}
             </span>
             <button type="button" onClick={() => setEditing((v) => !v)} className="block text-[10px] text-blue-300 hover:underline cursor-pointer">
               {editing ? 'Cancel' : 'Edit'}
@@ -126,7 +123,7 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
       </div>
 
       {editing && (
-        <form onSubmit={saveDetails} className="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end" data-testid="profile-details-form">
+        <form onSubmit={saveDetails} className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end" data-testid="profile-details-form">
           <label className="text-[11px] text-slate-400 col-span-2 sm:col-span-1">
             Birthday
             <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className={`${input} w-full mt-1`} aria-label="Birthday" />
@@ -138,13 +135,6 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
           <label className="text-[11px] text-slate-400">
             (in)
             <input type="number" min={0} max={11} value={inches} onChange={(e) => setInches(e.target.value)} className={`${input} w-full mt-1`} aria-label="Height inches" />
-          </label>
-          <label className="text-[11px] text-slate-400 col-span-2 sm:col-span-1">
-            Standards
-            <select value={sex} onChange={(e) => setSex(e.target.value === 'female' ? 'female' : 'male')} className={`${input} w-full mt-1`} aria-label="Strength standards">
-              <option value="male">Men&apos;s</option>
-              <option value="female">Women&apos;s</option>
-            </select>
           </label>
           <button type="submit" className="col-span-2 sm:col-span-1 min-h-[40px] rounded-lg bg-blue-500 hover:bg-blue-400 text-slate-950 text-sm font-bold cursor-pointer">
             Save

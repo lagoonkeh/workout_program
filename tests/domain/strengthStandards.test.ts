@@ -9,7 +9,6 @@ import {
   MUSCLES,
   SOURCES,
   buildStrengthProfile,
-  clampTableBodyweight,
   colorForScore,
   computeLiftResults,
   cooperBenchPercentile,
@@ -92,43 +91,6 @@ describe('domain/strengthStandards', () => {
     });
     it('uses a younger, stronger band for a 25-year-old', () => {
       expect(cooperBenchPercentile(1.12, 25)).toBeLessThan(cooperBenchPercentile(1.12, 35));
-    });
-  });
-
-  describe('women\'s standards', () => {
-    it('hits the female 140 lb row anchors', () => {
-      // squat 140 lb female: 74 / 114 / 165 / 226 / 292
-      expect(liftPercentile('squat', 165 / 140, 140, 'female')).toBe(50);
-      expect(liftPercentile('squat', 226 / 140, 140, 'female')).toBe(80);
-      expect(liftPercentile('bench', 201 / 140, 140, 'female')).toBe(95);
-    });
-
-    it('rates the same lift higher against women than men', () => {
-      expect(liftPercentile('bench', 1, 150, 'female')).toBeGreaterThan(liftPercentile('bench', 1, 150, 'male'));
-    });
-
-    it('handles the pull-up table where Beginner and Novice share a line', () => {
-      const values = [0.25, 0.5, 1, 3, 6, 12, 25].map((r) => liftPercentile('pullups', r, 140, 'female'));
-      values.forEach((v) => expect(Number.isFinite(v)).toBe(true));
-      for (let i = 1; i < values.length; i++) expect(values[i]).toBeGreaterThanOrEqual(values[i - 1]);
-      expect(liftPercentile('pullups', 6, 140, 'female')).toBe(50);
-    });
-
-    it('clamps to the 90–260 lb table and keeps absolute loads comparable', () => {
-      expect(clampTableBodyweight('squat', 300, 'female')).toBe(260);
-      expect(clampTableBodyweight('squat', 80, 'female')).toBe(90);
-      expect(liftPercentile('squat', 245 / 260, 260, 'female')).toBe(50);
-    });
-
-    it('uses the Cooper women\'s norms', () => {
-      expect(cooperBenchPercentile(0.53, 35, 'female')).toBe(40);
-      expect(cooperBenchPercentile(0.53, 35)).toBe(5);
-    });
-
-    it('computeLiftResults carries the sex through to the profile', () => {
-      const inputs = computeLiftResults(null, [], new Date('2026-10-30'), { sex: 'female' });
-      expect(inputs.sex).toBe('female');
-      expect(computeLiftResults(null).sex).toBe('male');
     });
   });
 

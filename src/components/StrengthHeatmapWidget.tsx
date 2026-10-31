@@ -156,7 +156,6 @@ export const StrengthHeatmapWidget: React.FC<StrengthHeatmapWidgetProps> = ({
       bodyweightAt: timeline.length ? (d) => bodyweightOn(timeline, d) : undefined,
       currentBodyweightLbs: timeline.length ? currentBodyweight(timeline) : undefined,
       age: profileAge(athlete, now),
-      sex: athlete.sex,
     });
   }, [assessment, allAssessments, athlete, history, now]);
   const profile = useMemo(() => buildStrengthProfile(inputs, mode), [inputs, mode]);
@@ -275,7 +274,6 @@ export const StrengthHeatmapWidget: React.FC<StrengthHeatmapWidgetProps> = ({
         {group && (
           <p data-testid="strength-group-caption" className="text-[11px] text-slate-400 mt-1.5">
             {group.label} — {group.population}.{group.caveat ? ` ${group.caveat}` : ''}
-            {inputs.sex === 'female' && ' These studies measured male athletes, so treat the comparison as rough.'}
           </p>
         )}
       </div>
@@ -396,7 +394,7 @@ export const StrengthHeatmapWidget: React.FC<StrengthHeatmapWidgetProps> = ({
               const ls = profile.lifts[id];
               const r = ls.result;
               const benchPct =
-                isGeneral && id === 'bench' && r && profile.age ? cooperBenchPercentile(r.value, profile.age, inputs.sex) : null;
+                isGeneral && id === 'bench' && r && profile.age ? cooperBenchPercentile(r.value, profile.age) : null;
               return (
                 <tr key={id} data-testid={`strength-lift-row-${id}`} className="text-slate-300">
                   <td className="px-3 py-2 font-semibold text-white whitespace-nowrap">{liftName(id)}</td>
@@ -418,7 +416,7 @@ export const StrengthHeatmapWidget: React.FC<StrengthHeatmapWidgetProps> = ({
                         <span style={{ color: colorForScore(ls.score, mode) }}>
                           {tierFromScore(ls.score)} · {ordinal(Math.round(ls.score))}
                           {benchPct !== null && (
-                            <span className="text-slate-400 block text-[10px]">~{ordinal(benchPct)} vs all {inputs.sex === 'female' ? 'women' : 'men'} {profile.age} (Cooper)</span>
+                            <span className="text-slate-400 block text-[10px]">~{ordinal(benchPct)} vs all men {profile.age} (Cooper)</span>
                           )}
                         </span>
                       )
@@ -458,10 +456,10 @@ export const StrengthHeatmapWidget: React.FC<StrengthHeatmapWidgetProps> = ({
           <p>
             Lift values are your best 1RM ÷ bodyweight: the latest quarterly test, or a higher Epley estimate from any
             logged set of ≤10 reps in the last 180 days (RDLs are not counted as deadlifts). General mode estimates your
-            percentile among lifters of your sex from Strength Level&apos;s bodyweight tables (set in your profile), which put Beginner at the 5th,
+            percentile among lifters from Strength Level&apos;s standards for a 170 lb man, which put Beginner at the 5th,
             Novice 20th, Intermediate 50th, Advanced 80th and Elite 95th percentile; values in between are interpolated.
             These are people who log their lifts, a stronger crowd than the general population — for bench, the Cooper
-            Institute line shows where you sit among all men or women your age. Athlete mode shows you as a % of each group&apos;s
+            Institute line shows where you sit among all men your age. Athlete mode shows you as a % of each group&apos;s
             published mean. Muscle percentiles average the lifts that load them (e.g. shoulders = 65% press, 35% bench).
           </p>
           {DATA_GAPS.map((g) => (
