@@ -500,6 +500,55 @@ export default async function handler(req, res) {
       });
     }
 
+    // 1c. Log Workout to Google Calendar
+    if (actionParam === 'log-calendar') {
+      try {
+        const calendarId =
+          body.calendarId ||
+          'f9b8d2847324743fc078081d1d421e4660bc06f309ee836ea06f17b20afc86eb@group.calendar.google.com';
+        const eventPayload = body.event;
+        if (!eventPayload) {
+          return res.status(400).json({ error: 'Missing calendar event payload.' });
+        }
+
+        const calRes = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventPayload),
+          }
+        );
+
+        if (calRes.ok) {
+          const created = await calRes.json();
+          return res.status(200).json({
+            success: true,
+            eventId: created.id,
+            eventLink: created.htmlLink,
+            message: "Successfully logged workout to 'Workouts' calendar.",
+          });
+        }
+
+        const errData = await calRes.text();
+        return res.status(200).json({
+          success: false,
+          status: calRes.status,
+          error: errData,
+          message: `Calendar API returned status ${calRes.status}`,
+        });
+      } catch (calErr) {
+        return res.status(200).json({
+          success: false,
+          error: calErr.message,
+          message: 'Failed to dispatch to Google Calendar API.',
+        });
+      }
+    }
+
     let syncedWorkouts = 0;
     let syncedMobility = 0;
     let backedUpProfile = false;

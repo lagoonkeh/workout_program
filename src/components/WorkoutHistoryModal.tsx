@@ -25,6 +25,7 @@ import {
   clearRemoteWorkoutHistory,
   STORAGE_KEY_LAST_SCANNED_WORKOUT,
 } from '../services/sheetSyncService';
+import { getGoogleCalendarUrl, getLoggedCalendarEventsMap } from '../services/calendarSyncService';
 import type { WorkoutSession } from '../domain/programData';
 import type { SetLogRecord } from './ExerciseCard';
 
@@ -248,35 +249,6 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
     } catch {
       return null;
     }
-  };
-
-  const getGoogleCalendarUrl = (session: CompletedWorkoutSession): string => {
-    const title = `Workout: ${session.sessionTitle || session.sessionId.toUpperCase()}`;
-    const startDate = session.startedAt ? new Date(session.startedAt) : new Date(session.date);
-    const endDate = session.completedAt
-      ? new Date(session.completedAt)
-      : new Date(startDate.getTime() + (session.totalDurationSeconds ? session.totalDurationSeconds * 1000 : 3600 * 1000));
-
-    const formatGCalDate = (d: Date) =>
-      d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-
-    const datesParam = `${formatGCalDate(startDate)}/${formatGCalDate(endDate)}`;
-    const description = [
-      `Session: ${session.sessionTitle || session.sessionId}`,
-      session.totalVolumeLbs ? `Total Volume: ${session.totalVolumeLbs.toLocaleString()} lbs` : '',
-      session.adherencePercentage !== undefined ? `Adherence: ${session.adherencePercentage}%` : '',
-      session.startedAt && session.completedAt
-        ? `Recorded Time: ${new Date(session.startedAt).toLocaleTimeString()} – ${new Date(session.completedAt).toLocaleTimeString()}`
-        : '',
-      session.totalDurationSeconds ? `Duration: ${formatDuration(session.totalDurationSeconds)}` : '',
-      'Logged via Workout App',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-      title
-    )}&dates=${datesParam}&details=${encodeURIComponent(description)}`;
   };
 
   return (
@@ -582,11 +554,19 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                         rel="noopener noreferrer"
                         data-testid={`add-to-calendar-${session.sessionId}`}
                         className="min-h-[44px] px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                        title="Add this workout to Google Calendar"
-                        aria-label={`Add ${session.sessionTitle || session.sessionId} workout to Google Calendar`}
+                        title={
+                          session.calendarEventId || getLoggedCalendarEventsMap()[session.id || session.date]
+                            ? 'View or edit this event on Google Calendar'
+                            : 'Add this workout to Google Calendar'
+                        }
+                        aria-label={`Open ${session.sessionTitle || session.sessionId} workout on Google Calendar`}
                       >
                         <CalendarPlus className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="hidden sm:inline">Add to Cal</span>
+                        <span className="hidden sm:inline">
+                          {session.calendarEventId || getLoggedCalendarEventsMap()[session.id || session.date]
+                            ? 'Cal Event ✓'
+                            : 'Add to Cal'}
+                        </span>
                       </a>
 
                       <button

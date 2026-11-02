@@ -130,8 +130,17 @@ export const signInWithGoogle = async (): Promise<User> => {
     throw new Error('Firebase Authentication is not configured. Please supply VITE_FIREBASE_API_KEY and VITE_FIREBASE_PROJECT_ID.');
   }
   const provider = new GoogleAuthProvider();
+  provider.addScope('https://www.googleapis.com/auth/calendar.events');
   provider.setCustomParameters({ prompt: 'select_account' });
   const result = await signInWithPopup(authInstance, provider);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (credential?.accessToken) {
+    try {
+      localStorage.setItem('workout_app_gcal_access_token', credential.accessToken);
+    } catch {
+      // safe fallback
+    }
+  }
   return result.user;
 };
 

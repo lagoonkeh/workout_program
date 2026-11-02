@@ -13,3 +13,4 @@ export const STORAGE_KEY_MOBILITY_SNOOZE = 'workout_mobility_prompt_snooze_v1';
 export const STORAGE_KEY_PHASE_TASKS = 'workout_phase_tasks_v1';
 export const STORAGE_KEY_SESSION_START_TIMES = 'workout_session_start_times_v1';
 export const STORAGE_KEY_TABLET_MODE = 'workout_tablet_mode_v1';
+export const STORAGE_KEY_CALENDAR_LOGGED_EVENTS = 'workout_calendar_logged_events_v1';

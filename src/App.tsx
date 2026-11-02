@@ -47,6 +47,7 @@ import { useSheetsSync } from './hooks/useSheetsSync';
 import { restoreAppBackupIfNewer, startAppBackupAutoSync } from './services/appBackupService';
 import { useCloudSync } from './hooks/useCloudSync';
 import { isTestEnvironment } from './services/firebaseAuth';
+import { autoLogWorkoutToGoogleCalendar } from './services/calendarSyncService';
 import {
   auditSessionCompletion,
   applySkippedExerciseAdjustments,
@@ -546,6 +547,8 @@ export function WorkoutAppMain() {
     nextTitle: string;
     nextId: string;
     durationSeconds?: number;
+    calendarLogged?: boolean;
+    calendarEventLink?: string;
   } | null>(null);
 
   // Save active session to LocalStorage & storageManager
@@ -1249,6 +1252,7 @@ export function WorkoutAppMain() {
           skippedExercises: [],
         };
         storageManager.saveCompletedWorkout(completedRecord);
+        autoLogWorkoutToGoogleCalendar(completedRecord);
       }
 
       if (!isTestEnvironment()) {
@@ -1404,6 +1408,13 @@ export function WorkoutAppMain() {
       skippedExercises: [],
     };
     storageManager.saveCompletedWorkout(completedRecord);
+    autoLogWorkoutToGoogleCalendar(completedRecord).then((res) => {
+      if (res.success) {
+        setSessionCompletionToast((prev) =>
+          prev ? { ...prev, calendarLogged: true, calendarEventLink: res.eventLink } : prev
+        );
+      }
+    });
 
     // Clear recorded start time for completed session
     setSessionStartTimes((prev) => {
@@ -1489,6 +1500,7 @@ export function WorkoutAppMain() {
       })),
     };
     storageManager.saveCompletedWorkout(completedRecord);
+    autoLogWorkoutToGoogleCalendar(completedRecord);
     handleScanLastWorkout();
   }, [
     activeSessionId,
@@ -1570,6 +1582,13 @@ export function WorkoutAppMain() {
         })),
       };
       storageManager.saveCompletedWorkout(completedRecord);
+      autoLogWorkoutToGoogleCalendar(completedRecord).then((res) => {
+        if (res.success) {
+          setSessionCompletionToast((prev) =>
+            prev ? { ...prev, calendarLogged: true, calendarEventLink: res.eventLink } : prev
+          );
+        }
+      });
 
       // Clear recorded start time for completed session
       setSessionStartTimes((prev) => {
@@ -1695,6 +1714,13 @@ export function WorkoutAppMain() {
       })),
     };
     storageManager.saveCompletedWorkout(completedRecord);
+    autoLogWorkoutToGoogleCalendar(completedRecord).then((res) => {
+      if (res.success) {
+        setSessionCompletionToast((prev) =>
+          prev ? { ...prev, calendarLogged: true, calendarEventLink: res.eventLink } : prev
+        );
+      }
+    });
 
     // Clear recorded start time for completed session
     setSessionStartTimes((prev) => {
@@ -2153,6 +2179,14 @@ export function WorkoutAppMain() {
                       <span className="text-emerald-300">
                         Card hidden & automatically moved to {sessionCompletionToast.nextTitle}.
                       </span>
+                      {sessionCompletionToast.calendarLogged && (
+                        <span
+                          data-testid="toast-calendar-logged-badge"
+                          className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-semibold"
+                        >
+                          📅 Logged to 'Workouts' Calendar
+                        </span>
+                      )}
                     </div>
                   </div>
 
