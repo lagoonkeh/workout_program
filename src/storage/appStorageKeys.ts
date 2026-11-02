@@ -11,3 +11,4 @@ export const STORAGE_KEY_SPLIT_SIDES = 'workout_split_sides_v1';
 export const STORAGE_KEY_HIDE_COMPLETED_SESSIONS = 'workout_hide_completed_sessions_v1';
 export const STORAGE_KEY_MOBILITY_SNOOZE = 'workout_mobility_prompt_snooze_v1';
 export const STORAGE_KEY_PHASE_TASKS = 'workout_phase_tasks_v1';
+export const STORAGE_KEY_SESSION_START_TIMES = 'workout_session_start_times_v1';

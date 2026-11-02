@@ -222,4 +222,31 @@ describe('WorkoutHistoryModal Component', () => {
     expect(screen.getByTestId('empty-history-state')).toBeInTheDocument();
     expect(Object.keys(storageManager.getCompletedWorkouts()).length).toBe(0);
   });
+
+  it('renders start time, completed time, duration, and Google Calendar export link', () => {
+    storageManager.saveCompletedWorkout({
+      id: 'session_timed_1',
+      date: '2026-11-01T15:00:00.000Z',
+      startedAt: '2026-11-01T14:15:00.000Z',
+      completedAt: '2026-11-01T15:00:00.000Z',
+      totalDurationSeconds: 2700, // 45 minutes
+      sessionId: 'lower_a',
+      sessionTitle: 'Lower A: Squat Focus',
+      adherencePercentage: 100,
+      totalVolumeLbs: 12500,
+      logs: {},
+    });
+
+    render(<WorkoutHistoryModal isOpen={true} onClose={vi.fn()} />);
+
+    // Duration should be formatted as 45m
+    expect(screen.getByText('(45m)')).toBeInTheDocument();
+
+    // Google Calendar export link should be present with correct target and URL
+    const calLink = screen.getByTestId('add-to-calendar-lower_a');
+    expect(calLink).toBeInTheDocument();
+    expect(calLink).toHaveAttribute('target', '_blank');
+    expect(calLink.getAttribute('href')).toContain('calendar.google.com/calendar/render?action=TEMPLATE');
+    expect(calLink.getAttribute('href')).toContain('Lower%20A%3A%20Squat%20Focus');
+  });
 });

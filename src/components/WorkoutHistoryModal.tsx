@@ -11,6 +11,8 @@ import {
   ChevronUp,
   AlertTriangle,
   Calendar,
+  CalendarPlus,
+  Clock,
   Dumbbell,
   Save,
 } from 'lucide-react';
@@ -126,6 +128,58 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
     } catch {
       return isoString;
     }
+  };
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds || seconds <= 0) return null;
+    const mins = Math.round(seconds / 60);
+    if (mins < 60) {
+      return `${mins}m`;
+    }
+    const hrs = Math.floor(mins / 60);
+    const remainingMins = mins % 60;
+    return remainingMins > 0 ? `${hrs}h ${remainingMins}m` : `${hrs}h`;
+  };
+
+  const formatTimeRange = (startIso?: string, endIso?: string) => {
+    if (!startIso || !endIso) return null;
+    try {
+      const s = new Date(startIso);
+      const e = new Date(endIso);
+      const timeOptions: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' };
+      return `${s.toLocaleTimeString('en-US', timeOptions)} – ${e.toLocaleTimeString('en-US', timeOptions)}`;
+    } catch {
+      return null;
+    }
+  };
+
+  const getGoogleCalendarUrl = (session: CompletedWorkoutSession): string => {
+    const title = `Workout: ${session.sessionTitle || session.sessionId.toUpperCase()}`;
+    const startDate = session.startedAt ? new Date(session.startedAt) : new Date(session.date);
+    const endDate = session.completedAt
+      ? new Date(session.completedAt)
+      : new Date(startDate.getTime() + (session.totalDurationSeconds ? session.totalDurationSeconds * 1000 : 3600 * 1000));
+
+    const formatGCalDate = (d: Date) =>
+      d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+
+    const datesParam = `${formatGCalDate(startDate)}/${formatGCalDate(endDate)}`;
+    const description = [
+      `Session: ${session.sessionTitle || session.sessionId}`,
+      session.totalVolumeLbs ? `Total Volume: ${session.totalVolumeLbs.toLocaleString()} lbs` : '',
+      session.adherencePercentage !== undefined ? `Adherence: ${session.adherencePercentage}%` : '',
+      session.startedAt && session.completedAt
+        ? `Recorded Time: ${new Date(session.startedAt).toLocaleTimeString()} – ${new Date(session.completedAt).toLocaleTimeString()}`
+        : '',
+      session.totalDurationSeconds ? `Duration: ${formatDuration(session.totalDurationSeconds)}` : '',
+      'Logged via Workout App',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+      title
+    )}&dates=${datesParam}&details=${encodeURIComponent(description)}`;
   };
 
   return (
@@ -274,6 +328,28 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                             <Calendar className="w-3 h-3 text-slate-500" />
                             <span>{formatDate(session.date)}</span>
                           </span>
+                          {(session.startedAt && session.completedAt) ? (
+                            <>
+                              <span>·</span>
+                              <span className="flex items-center gap-1 font-mono text-cyan-300">
+                                <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
+                                <span>{formatTimeRange(session.startedAt, session.completedAt)}</span>
+                                {session.totalDurationSeconds !== undefined && session.totalDurationSeconds > 0 && (
+                                  <span className="text-slate-400 font-sans text-[11px]">
+                                    ({formatDuration(session.totalDurationSeconds)})
+                                  </span>
+                                )}
+                              </span>
+                            </>
+                          ) : session.totalDurationSeconds ? (
+                            <>
+                              <span>·</span>
+                              <span className="flex items-center gap-1 font-mono text-cyan-300">
+                                <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
+                                <span>{formatDuration(session.totalDurationSeconds)}</span>
+                              </span>
+                            </>
+                          ) : null}
                           {session.totalVolumeLbs !== undefined && session.totalVolumeLbs > 0 && (
                             <>
                               <span>·</span>
@@ -310,6 +386,19 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                           <span>Save Changes</span>
                         </button>
                       )}
+
+                      <a
+                        href={getGoogleCalendarUrl(session)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid={`add-to-calendar-${session.sessionId}`}
+                        className="min-h-[44px] px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        title="Add this workout to Google Calendar"
+                        aria-label={`Add ${session.sessionTitle || session.sessionId} workout to Google Calendar`}
+                      >
+                        <CalendarPlus className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="hidden sm:inline">Add to Cal</span>
+                      </a>
 
                       <button
                         type="button"

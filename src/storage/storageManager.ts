@@ -32,6 +32,8 @@ export interface CompletedWorkoutSession {
   completedExercisesCount?: number;
   totalExercisesCount?: number;
   notes?: string;
+  startedAt?: string; // ISO 8601 string - first completed task timestamp
+  completedAt?: string; // ISO 8601 string - when finished workout was clicked
 }
 
 export interface StorageSettings {

@@ -64,6 +64,7 @@ import {
   STORAGE_KEY_HIDE_COMPLETED_SESSIONS,
   STORAGE_KEY_MOBILITY_SNOOZE,
   STORAGE_KEY_PHASE_TASKS,
+  STORAGE_KEY_SESSION_START_TIMES,
 } from './storage/appStorageKeys';
 
 function ViewLoadingFallback() {
@@ -255,6 +256,33 @@ export function WorkoutAppMain() {
     return {};
   });
 
+  const [sessionStartTimes, setSessionStartTimes] = useState<Record<string, string>>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_SESSION_START_TIMES);
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // safe fallback
+    }
+    return {};
+  });
+
+  // Record start time on first completed task (warmup drill, phase task, or exercise set)
+  const recordTaskCompletionStartTime = useCallback((sessionId?: string) => {
+    const targetId = sessionId || activeSessionId;
+    if (!targetId) return;
+    setSessionStartTimes((prev) => {
+      if (prev[targetId]) return prev;
+      const nowIso = new Date().toISOString();
+      const updated = { ...prev, [targetId]: nowIso };
+      try {
+        localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(updated));
+      } catch {
+        // safe fallback
+      }
+      return updated;
+    });
+  }, [activeSessionId]);
+
   const [collapsedWarmupDrills, setCollapsedWarmupDrills] = useState<Record<string, boolean>>({});
 
   const handleToggleWarmupDrillCollapse = useCallback((drillId: string, currentlyCollapsed: boolean) => {
@@ -267,6 +295,9 @@ export function WorkoutAppMain() {
   const handleToggleWarmupDrill = useCallback((drillId: string, totalPhases?: number) => {
     setCompletedWarmups((prev) => {
       const nextDone = !prev[drillId];
+      if (nextDone) {
+        recordTaskCompletionStartTime();
+      }
       const next = { ...prev, [drillId]: nextDone };
       try {
         localStorage.setItem(STORAGE_KEY_WARMUPS, JSON.stringify(next));
@@ -296,11 +327,14 @@ export function WorkoutAppMain() {
 
       return next;
     });
-  }, []);
+  }, [recordTaskCompletionStartTime]);
 
   const handleTogglePhaseTask = useCallback((phaseKey: string, drillId?: string, totalPhases?: number) => {
     setPhaseTasks((prev) => {
       const nextDone = !prev[phaseKey];
+      if (nextDone) {
+        recordTaskCompletionStartTime();
+      }
       const next = { ...prev, [phaseKey]: nextDone };
       try {
         localStorage.setItem(STORAGE_KEY_PHASE_TASKS, JSON.stringify(next));
@@ -334,7 +368,7 @@ export function WorkoutAppMain() {
 
       return next;
     });
-  }, []);
+  }, [recordTaskCompletionStartTime]);
 
   const handleToggleAllDrillPhases = useCallback((drillId: string, totalPhases: number) => {
     if (!drillId || totalPhases <= 0) return;
@@ -347,6 +381,9 @@ export function WorkoutAppMain() {
         }
       }
       const targetState = !allDone;
+      if (targetState) {
+        recordTaskCompletionStartTime();
+      }
       const next = { ...prev };
       for (let i = 0; i < totalPhases; i++) {
         next[`${drillId}_phase_${i}`] = targetState;
@@ -372,7 +409,7 @@ export function WorkoutAppMain() {
 
       return next;
     });
-  }, []);
+  }, [recordTaskCompletionStartTime]);
 
   const [expandedWarmupInstructions, setExpandedWarmupInstructions] = useState<Record<string, boolean>>({});
 
@@ -466,6 +503,7 @@ export function WorkoutAppMain() {
     completedId: string;
     nextTitle: string;
     nextId: string;
+    durationSeconds?: number;
   } | null>(null);
 
   // Save active session to LocalStorage & storageManager
@@ -805,6 +843,9 @@ export function WorkoutAppMain() {
   // Update a single set log record (stable across workoutLogs updates so memoized ExerciseCards do not re-render)
   const handleUpdateSetLog = useCallback(
     (exerciseId: string, setIndex: number, updated: Partial<SetLogRecord>) => {
+      if (updated.isCompleted === true) {
+        recordTaskCompletionStartTime();
+      }
       const targetExercise = sessionExercises.find((e) => e.id === exerciseId) ||
                              activeSession.dailyCoreFinisher?.find((e) => e.id === exerciseId);
 
@@ -893,7 +934,7 @@ export function WorkoutAppMain() {
         return { ...prev, [exerciseId]: nextLogs };
       });
     },
-    [sessionExercises, activeSession.dailyCoreFinisher, defaultLogsByExerciseId, getExerciseLogs]
+    [sessionExercises, activeSession.dailyCoreFinisher, defaultLogsByExerciseId, getExerciseLogs, recordTaskCompletionStartTime]
   );
 
   // Stable callbacks for memoized ExerciseCard, Header, and widget components
@@ -1106,6 +1147,18 @@ export function WorkoutAppMain() {
 
   // Reset logs for active session
   const handleResetSessionLogs = useCallback(() => {
+    setSessionStartTimes((prev) => {
+      if (!prev[activeSessionId]) return prev;
+      const nextTimes = { ...prev };
+      delete nextTimes[activeSessionId];
+      try {
+        localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
+      } catch {
+        // safe fallback
+      }
+      return nextTimes;
+    });
+
     setWorkoutLogs((prev) => {
       const next = { ...prev };
       const allToReset = [
@@ -1127,7 +1180,7 @@ export function WorkoutAppMain() {
       });
       return next;
     });
-  }, [sessionExercises, activeSession.dailyCoreFinisher]);
+  }, [activeSessionId, sessionExercises, activeSession.dailyCoreFinisher]);
 
   // Toggle or mark entire workout session as completed
   const handleToggleWorkoutCompleted = useCallback(() => {
@@ -1180,10 +1233,19 @@ export function WorkoutAppMain() {
         audioSynthesizer.playTone('completion');
       }
 
+      // Calculate workout duration from first completed task to completion click
+      const completedAt = new Date().toISOString();
+      const startedAt = sessionStartTimes[completedId] || completedAt;
+      const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
+      const totalDurationSeconds = Math.round(durationMs / 1000);
+
       // Persist completed workout session to history
       const completedRecord: CompletedWorkoutSession = {
         id: `completed_${completedId}_${Date.now()}`,
-        date: new Date().toISOString(),
+        date: completedAt,
+        startedAt,
+        completedAt,
+        totalDurationSeconds,
         sessionId: completedId,
         sessionTitle: completedTitle,
         logs: { ...workoutLogs },
@@ -1195,6 +1257,19 @@ export function WorkoutAppMain() {
       };
       storageManager.saveCompletedWorkout(completedRecord);
 
+      // Clear recorded start time for completed session
+      setSessionStartTimes((prev) => {
+        if (!prev[completedId]) return prev;
+        const nextTimes = { ...prev };
+        delete nextTimes[completedId];
+        try {
+          localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
+        } catch {
+          // safe fallback
+        }
+        return nextTimes;
+      });
+
       // Automatically advance to the next session
       setActiveSessionId(nextSessionId);
       storageManager.saveImmediate({ activeSessionId: nextSessionId });
@@ -1205,6 +1280,7 @@ export function WorkoutAppMain() {
         completedId,
         nextTitle: nextSession.title,
         nextId: nextSession.id,
+        durationSeconds: totalDurationSeconds,
       });
 
       // Auto-sync completed workout session to Google Sheets in the background
@@ -1229,6 +1305,7 @@ export function WorkoutAppMain() {
     sessionExercises,
     defaultLogsByExerciseId,
     isMuted,
+    sessionStartTimes,
     handleResetSessionLogs,
     handleSyncToSheets,
     handleScanLastWorkout,
@@ -1273,10 +1350,19 @@ export function WorkoutAppMain() {
       });
       storageManager.recordSkippedExercises(skippedRecords);
 
+      // Calculate workout duration from first completed task to completion click
+      const completedAt = new Date().toISOString();
+      const startedAt = sessionStartTimes[completedId] || completedAt;
+      const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
+      const totalDurationSeconds = Math.round(durationMs / 1000);
+
       // Persist completed workout session to history
       const completedRecord: CompletedWorkoutSession = {
         id: `completed_${completedId}_${Date.now()}`,
-        date: new Date().toISOString(),
+        date: completedAt,
+        startedAt,
+        completedAt,
+        totalDurationSeconds,
         sessionId: completedId,
         sessionTitle: completedTitle,
         logs: { ...annotatedLogs },
@@ -1295,6 +1381,19 @@ export function WorkoutAppMain() {
         })),
       };
       storageManager.saveCompletedWorkout(completedRecord);
+
+      // Clear recorded start time for completed session
+      setSessionStartTimes((prev) => {
+        if (!prev[completedId]) return prev;
+        const nextTimes = { ...prev };
+        delete nextTimes[completedId];
+        try {
+          localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
+        } catch {
+          // safe fallback
+        }
+        return nextTimes;
+      });
 
       // 3. Apply future adjustments into program adaptations
       const updatedAdaptations = applySkippedExerciseAdjustments(selectedAdjustments, programAdaptations);
@@ -1317,6 +1416,7 @@ export function WorkoutAppMain() {
         completedId,
         nextTitle: nextSession.title,
         nextId: nextSession.id,
+        durationSeconds: totalDurationSeconds,
       });
 
       if (!isTestEnvironment()) {
@@ -1334,6 +1434,7 @@ export function WorkoutAppMain() {
       workoutLogs,
       programAdaptations,
       isMuted,
+      sessionStartTimes,
       handleSyncToSheets,
       handleScanLastWorkout,
     ]
@@ -1374,10 +1475,19 @@ export function WorkoutAppMain() {
     }));
     storageManager.recordSkippedExercises(skippedRecords);
 
+    // Calculate workout duration from first completed task to completion click
+    const completedAt = new Date().toISOString();
+    const startedAt = sessionStartTimes[completedId] || completedAt;
+    const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
+    const totalDurationSeconds = Math.round(durationMs / 1000);
+
     // Persist completed workout session to history
     const completedRecord: CompletedWorkoutSession = {
       id: `completed_${completedId}_${Date.now()}`,
-      date: new Date().toISOString(),
+      date: completedAt,
+      startedAt,
+      completedAt,
+      totalDurationSeconds,
       sessionId: completedId,
       sessionTitle: completedTitle,
       logs: { ...annotatedLogs },
@@ -1397,6 +1507,19 @@ export function WorkoutAppMain() {
     };
     storageManager.saveCompletedWorkout(completedRecord);
 
+    // Clear recorded start time for completed session
+    setSessionStartTimes((prev) => {
+      if (!prev[completedId]) return prev;
+      const nextTimes = { ...prev };
+      delete nextTimes[completedId];
+      try {
+        localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
+      } catch {
+        // safe fallback
+      }
+      return nextTimes;
+    });
+
     // 3. Close modal and advance session
     setIsWorkoutCompletionModalOpen(false);
     setSessionAuditResult(null);
@@ -1413,6 +1536,7 @@ export function WorkoutAppMain() {
       completedId,
       nextTitle: nextSession.title,
       nextId: nextSession.id,
+      durationSeconds: totalDurationSeconds,
     });
 
     if (!isTestEnvironment()) {
@@ -1428,6 +1552,7 @@ export function WorkoutAppMain() {
     activeSessionId,
     workoutLogs,
     isMuted,
+    sessionStartTimes,
     handleSyncToSheets,
     handleScanLastWorkout,
   ]);
@@ -1820,6 +1945,11 @@ export function WorkoutAppMain() {
                       <span className="font-bold text-white">
                         {sessionCompletionToast.completedTitle} Completed!
                       </span>{' '}
+                      {sessionCompletionToast.durationSeconds !== undefined && sessionCompletionToast.durationSeconds > 0 && (
+                        <span className="font-semibold text-cyan-300 mr-1.5">
+                          ({Math.max(1, Math.round(sessionCompletionToast.durationSeconds / 60))} min) ·
+                        </span>
+                      )}
                       <span className="text-emerald-300">
                         Card hidden & automatically moved to {sessionCompletionToast.nextTitle}.
                       </span>
