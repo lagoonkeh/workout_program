@@ -80,6 +80,75 @@ async function getAccessToken() {
   return (await tokenRes.json()).access_token;
 }
 
+// ---------------------------------------------------------------------------
+// Edited workouts: replace every row of one workout (date + session) with its edited sets
+// ---------------------------------------------------------------------------
+
+/** "2026-10-28", "2026-10-28T…" or "10/28/2026" -> "2026-10-28" */
+function normSheetDate(value) {
+  const s = String(value ?? '').trim();
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
+  if (m) return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+  return s;
+}
+
+/** Text read back from the sheet that would turn into a formula when written again */
+function protectReadCell(value) {
+  const str = String(value ?? '');
+  return /^[=+@]/.test(str) || /^-(?!\d)/.test(str) ? `'${str}` : str;
+}
+
+function workoutRowValues(log) {
+  return [
+    sanitizeCell(log.date || new Date().toISOString().split('T')[0]),
+    sanitizeCell(log.session || log.sessionTitle || ''),
+    sanitizeCell(log.exerciseName || ''),
+    sanitizeCell(log.tier || ''),
+    String(log.setNumber || 1),
+    String(log.targetReps || ''),
+    String(log.weight !== undefined ? log.weight : 0),
+    String(log.reps !== undefined ? log.reps : 0),
+    log.isAmrap ? 'Yes' : 'No',
+    String(log.kneePain !== undefined ? log.kneePain : 0),
+    String(log.rpe !== undefined ? log.rpe : ''),
+    sanitizeCell(log.notes || ''),
+  ];
+}
+
+async function replaceWorkoutRows(accessToken, spreadsheetId, targets, logs) {
+  const keys = new Set(
+    targets
+      .filter((t) => t && t.date && t.session)
+      .map((t) => `${normSheetDate(t.date)}__${String(t.session).trim().toLowerCase()}`)
+  );
+  if (keys.size === 0) throw new Error('No workout to replace');
+  const range = "'Workout Logs'!A5:L";
+  const existing = await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(range)}`));
+  const rows = existing.values || [];
+  const keep = rows.filter(
+    (r) => !(r && r[0] && keys.has(`${normSheetDate(r[0])}__${String(r[1] || '').trim().toLowerCase()}`))
+  );
+  const added = logs.map(workoutRowValues);
+  const next = [...keep.map((r) => r.map(protectReadCell)), ...added].map((r) => {
+    const a = [...r];
+    while (a.length < 12) a.push('');
+    return a.slice(0, 12);
+  });
+  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
+    method: 'POST',
+    body: JSON.stringify({ ranges: [range] }),
+  });
+  if (next.length > 0) {
+    await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
+      method: 'POST',
+      body: JSON.stringify({ valueInputOption: 'USER_ENTERED', data: [{ range: "'Workout Logs'!A5", values: next }] }),
+    });
+  }
+  return { removed: rows.length - keep.length, added: added.length };
+}
+
 function sheetsUrl(spreadsheetId, path) {
   return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}${path}`;
 }
@@ -498,6 +567,16 @@ export default async function handler(req, res) {
         status: 'ok',
         message: 'Workout history cleared from Google Sheets.',
       });
+    }
+
+    // 1d. Replace one edited workout's rows (date and/or sets changed)
+    if (actionParam === 'replace-workout') {
+      try {
+        const result = await replaceWorkoutRows(accessToken, spreadsheetId, body.replace || [], workoutLogs);
+        return res.status(200).json({ success: true, ...result });
+      } catch (err) {
+        return res.status(500).json({ success: false, error: `Error updating workout: ${err.message}` });
+      }
     }
 
     // 1c. Log Workout to Google Calendar

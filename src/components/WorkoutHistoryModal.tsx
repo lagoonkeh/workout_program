@@ -28,6 +28,9 @@ import {
 import { getGoogleCalendarUrl, getLoggedCalendarEventsMap } from '../services/calendarSyncService';
 import type { WorkoutSession } from '../domain/programData';
 import type { SetLogRecord } from './ExerciseCard';
+import { ALL_APP_SESSIONS } from '../domain/programData';
+import { applyWorkoutEdit, exerciseDisplayName, getWhen, setsOf } from '../domain/historyEdit';
+import { replaceWorkoutInSheets } from '../services/sheetSyncService';
 
 export interface WorkoutHistoryModalProps {
   isOpen: boolean;
@@ -53,6 +56,8 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingLogs, setEditingLogs] = useState<Record<string, any>>({});
+  const [editingWhen, setEditingWhen] = useState<{ date: string; time: string; durationMin: number } | null>(null);
+  const [originalWhen, setOriginalWhen] = useState<{ date: string; time: string; durationMin: number } | null>(null);
   const [sessionToDelete, setSessionToDelete] = useState<CompletedWorkoutSession | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
   const [isSyncingSheets, setIsSyncingSheets] = useState<boolean>(false);
@@ -198,18 +203,39 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
   const handleStartEditing = (session: CompletedWorkoutSession) => {
     setEditingSessionId(session.id || session.date);
     setEditingLogs(JSON.parse(JSON.stringify(session.logs || {})));
+    const when = getWhen(session);
+    setEditingWhen(when);
+    setOriginalWhen(when);
     setExpandedSessionId(session.id || session.date);
+  };
+
+  const updateEditingSets = (exKey: string, fn: (sets: any[]) => any[]) => {
+    setEditingLogs((prev) => ({ ...prev, [exKey]: fn([...setsOf(prev[exKey])]) }));
   };
 
   // Save edited logs for a session
   const handleSaveEditedSession = (session: CompletedWorkoutSession) => {
     const recordId = session.id || session.date;
-    storageManager.updateCompletedWorkout(recordId, {
-      logs: editingLogs,
-    });
+    const previous = storageManager.getCompletedWorkouts()[recordId] || session;
+    const whenChanged =
+      !!editingWhen && JSON.stringify(editingWhen) !== JSON.stringify(originalWhen);
+    const updated = applyWorkoutEdit(previous, editingLogs, whenChanged ? editingWhen! : undefined);
+    storageManager.updateCompletedWorkout(recordId, updated);
     reloadSessions();
     setEditingSessionId(null);
     onSessionUpdated?.();
+
+    // Keep the Google Sheets copy in step, so a later pull from Sheets doesn't undo the edit
+    if (import.meta.env.MODE !== 'test') {
+      setSyncStatusMessage({ type: 'info', text: 'Saved. Updating Google Sheets...' });
+      replaceWorkoutInSheets(updated, previous).then((r) =>
+        setSyncStatusMessage(
+          r.success
+            ? { type: 'success', text: 'Workout saved and updated in Google Sheets.' }
+            : { type: 'error', text: `Workout saved on this device, but Google Sheets wasn't updated: ${r.message}` }
+        )
+      );
+    }
   };
 
   const formatDate = (isoString: string) => {
@@ -531,10 +557,10 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                           data-testid={`edit-logs-btn-${session.sessionId}`}
                           onClick={() => handleStartEditing(session)}
                           className="min-h-[44px] px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                          title="Edit set reps, weights, and notes"
+                          title="Edit this workout: date, time, sets, weights, reps and notes"
                         >
                           <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
-                          <span>Edit Logs</span>
+                          <span>Edit</span>
                         </button>
                       ) : (
                         <button
@@ -620,7 +646,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                       {isEditing && (
                         <div className="p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 text-cyan-200 text-xs flex items-center justify-between gap-2">
                           <span>
-                            <strong>Editing Mode Active:</strong> Modify weights, reps, or notes below, then click Save Changes.
+                            <strong>Editing Mode Active:</strong> Change the date, sets, weights, reps or notes, then tap Save Changes.
                           </span>
                           <button
                             type="button"
@@ -629,6 +655,45 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                           >
                             Cancel
                           </button>
+                        </div>
+                      )}
+
+                      {isEditing && editingWhen && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs" data-testid="edit-workout-when">
+                          <label className="col-span-2 sm:col-span-1 flex flex-col gap-1 text-slate-400">
+                            <span>Date</span>
+                            <input
+                              type="date"
+                              aria-label="Workout date"
+                              value={editingWhen.date}
+                              onChange={(e) => setEditingWhen({ ...editingWhen, date: e.target.value })}
+                              className="min-h-[40px] w-full bg-slate-900 border border-slate-700 rounded-lg px-2 text-slate-200"
+                            />
+                          </label>
+                          <label className="flex flex-col gap-1 text-slate-400">
+                            <span>Start time</span>
+                            <input
+                              type="time"
+                              aria-label="Start time"
+                              value={editingWhen.time}
+                              onChange={(e) => setEditingWhen({ ...editingWhen, time: e.target.value })}
+                              className="min-h-[40px] w-full bg-slate-900 border border-slate-700 rounded-lg px-2 text-slate-200"
+                            />
+                          </label>
+                          <label className="flex flex-col gap-1 text-slate-400">
+                            <span>Minutes</span>
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              aria-label="Duration in minutes"
+                              value={editingWhen.durationMin}
+                              onChange={(e) =>
+                                setEditingWhen({ ...editingWhen, durationMin: Math.max(0, Number(e.target.value) || 0) })
+                              }
+                              className="min-h-[40px] w-full bg-slate-900 border border-slate-700 rounded-lg px-2 text-slate-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
+                          </label>
                         </div>
                       )}
 
@@ -647,7 +712,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs font-bold text-slate-200 uppercase font-mono">
-                                    {exKey.replaceAll('_', ' ')}
+                                    {exerciseDisplayName(exKey)}
                                   </span>
                                   <span className="text-[11px] font-mono text-slate-400">
                                     {sets.filter((s) => s?.isCompleted || s?.completed).length}/{sets.length} sets completed
@@ -664,91 +729,74 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                                     const isNotDoneNote = notes.includes('[NOT DONE]');
 
                                     if (isEditing) {
+                                      const patchSet = (patch: Record<string, unknown>) =>
+                                        updateEditingSets(exKey, (list) => {
+                                          list[setIdx] = { ...list[setIdx], ...patch };
+                                          return list;
+                                        });
                                       return (
                                         <div
                                           key={setIdx}
-                                          className="grid grid-cols-12 gap-2 items-center p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs"
+                                          data-testid={`edit-set-row-${exKey}-${setIdx + 1}`}
+                                          className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs space-y-2"
                                         >
-                                          <div className="col-span-2 sm:col-span-1 font-mono font-bold text-slate-400">
-                                            #{setIdx + 1}
-                                          </div>
-                                          <div className="col-span-3 sm:col-span-2">
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="font-mono font-bold text-slate-400 w-6 shrink-0">#{setIdx + 1}</span>
                                             <input
                                               type="number"
+                                              inputMode="decimal"
                                               aria-label={`Set ${setIdx + 1} weight`}
                                               value={weight}
                                               onChange={(e) => {
                                                 const val = Number(e.target.value) || 0;
-                                                setEditingLogs((prev) => {
-                                                  const next = { ...prev };
-                                                  const exSets = [...(Array.isArray(next[exKey]) ? next[exKey] : [next[exKey]])];
-                                                  exSets[setIdx] = { ...exSets[setIdx], weightLbs: val, weight: val };
-                                                  next[exKey] = exSets;
-                                                  return next;
-                                                });
+                                                patchSet({ weightLbs: val, weight: val });
                                               }}
-                                              className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs text-center"
+                                              className="min-h-[40px] w-full min-w-0 flex-1 bg-slate-900 border border-slate-700 rounded-lg px-1 text-slate-200 text-sm text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                               placeholder="lbs"
                                             />
-                                          </div>
-                                          <div className="col-span-3 sm:col-span-2">
+                                            <span className="text-slate-500 shrink-0" aria-hidden="true">lbs ×</span>
                                             <input
                                               type="number"
+                                              inputMode="numeric"
                                               aria-label={`Set ${setIdx + 1} reps`}
                                               value={reps}
                                               onChange={(e) => {
                                                 const val = Number(e.target.value) || 0;
-                                                setEditingLogs((prev) => {
-                                                  const next = { ...prev };
-                                                  const exSets = [...(Array.isArray(next[exKey]) ? next[exKey] : [next[exKey]])];
-                                                  exSets[setIdx] = { ...exSets[setIdx], repsAchieved: val, reps: val };
-                                                  next[exKey] = exSets;
-                                                  return next;
-                                                });
+                                                patchSet({ repsAchieved: val, reps: val });
                                               }}
-                                              className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs text-center"
+                                              className="min-h-[40px] w-full min-w-0 flex-1 bg-slate-900 border border-slate-700 rounded-lg px-1 text-slate-200 text-sm text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                               placeholder="reps"
-                                            />
-                                          </div>
-                                          <div className="col-span-4 sm:col-span-7 flex items-center gap-2">
-                                            <input
-                                              type="text"
-                                              aria-label={`Set ${setIdx + 1} notes`}
-                                              value={notes}
-                                              onChange={(e) => {
-                                                const val = e.target.value;
-                                                setEditingLogs((prev) => {
-                                                  const next = { ...prev };
-                                                  const exSets = [...(Array.isArray(next[exKey]) ? next[exKey] : [next[exKey]])];
-                                                  exSets[setIdx] = { ...exSets[setIdx], notes: val };
-                                                  next[exKey] = exSets;
-                                                  return next;
-                                                });
-                                              }}
-                                              className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs"
-                                              placeholder="Notes / comments"
                                             />
                                             <button
                                               type="button"
-                                              onClick={() => {
-                                                const nextDone = !isDone;
-                                                setEditingLogs((prev) => {
-                                                  const next = { ...prev };
-                                                  const exSets = [...(Array.isArray(next[exKey]) ? next[exKey] : [next[exKey]])];
-                                                  exSets[setIdx] = { ...exSets[setIdx], isCompleted: nextDone, completed: nextDone };
-                                                  next[exKey] = exSets;
-                                                  return next;
-                                                });
-                                              }}
-                                              className={`w-7 h-7 rounded border flex items-center justify-center shrink-0 cursor-pointer ${
+                                              aria-label={`Set ${setIdx + 1} ${isDone ? 'done' : 'not done'}`}
+                                              aria-pressed={isDone}
+                                              onClick={() => patchSet({ isCompleted: !isDone, completed: !isDone })}
+                                              className={`w-9 h-10 rounded-lg border flex items-center justify-center shrink-0 cursor-pointer ${
                                                 isDone
                                                   ? 'bg-emerald-500 border-emerald-400 text-slate-950'
                                                   : 'bg-slate-900 border-slate-700 text-slate-600'
                                               }`}
                                             >
-                                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                              <Check className="w-4 h-4 stroke-[3]" />
+                                            </button>
+                                            <button
+                                              type="button"
+                                              aria-label={`Remove set ${setIdx + 1}`}
+                                              onClick={() => updateEditingSets(exKey, (list) => list.filter((_, i) => i !== setIdx))}
+                                              className="w-9 h-10 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 flex items-center justify-center shrink-0 cursor-pointer"
+                                            >
+                                              <Trash2 className="w-4 h-4" />
                                             </button>
                                           </div>
+                                          <input
+                                            type="text"
+                                            aria-label={`Set ${setIdx + 1} notes`}
+                                            value={notes}
+                                            onChange={(e) => patchSet({ notes: e.target.value })}
+                                            className="min-h-[36px] w-full bg-slate-900 border border-slate-700 rounded-lg px-2 text-slate-200"
+                                            placeholder="Notes"
+                                          />
                                         </div>
                                       );
                                     }
@@ -792,9 +840,99 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                                     );
                                   })}
                                 </div>
+                                {isEditing && sets.length === 0 && (
+                                  <p className="text-[11px] text-amber-300">No sets left: this exercise is removed when you save.</p>
+                                )}
+                                {isEditing && (
+                                  <button
+                                    type="button"
+                                    data-testid={`add-set-btn-${exKey}`}
+                                    onClick={() =>
+                                      updateEditingSets(exKey, (list) => {
+                                        const last = list[list.length - 1] || {};
+                                        return [
+                                          ...list,
+                                          {
+                                            ...last,
+                                            setNumber: list.length + 1,
+                                            isCompleted: true,
+                                            completed: true,
+                                            notes: '',
+                                            loggedAt: undefined,
+                                          },
+                                        ];
+                                      })
+                                    }
+                                    className="min-h-[40px] w-full rounded-lg border border-dashed border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>Add set</span>
+                                  </button>
+                                )}
                               </div>
                             );
                           })}
+                        </div>
+                      )}
+
+                      {isEditing && (() => {
+                        const program = ALL_APP_SESSIONS.find((x) => x.id === session.sessionId);
+                        const missing = program
+                          ? [...program.exercises, ...(program.dailyCoreFinisher || [])].filter((ex) => !editingLogs[ex.id])
+                          : [];
+                        if (missing.length === 0) return null;
+                        return (
+                          <select
+                            aria-label="Add an exercise"
+                            data-testid="add-exercise-select"
+                            value=""
+                            onChange={(e) => {
+                              const ex = missing.find((m) => m.id === e.target.value);
+                              if (!ex) return;
+                              setEditingLogs((prev) => ({
+                                ...prev,
+                                [ex.id]: [
+                                  {
+                                    setNumber: 1,
+                                    targetReps: ex.targetReps,
+                                    weightLbs: ex.defaultWeightLbs || ex.defaultWeight || 0,
+                                    repsAchieved: 0,
+                                    isCompleted: true,
+                                    notes: '',
+                                  },
+                                ],
+                              }));
+                            }}
+                            className="min-h-[44px] w-full bg-slate-900 border border-slate-700 rounded-xl px-3 text-xs text-slate-200"
+                          >
+                            <option value="">+ Add an exercise you did</option>
+                            {missing.map((ex) => (
+                              <option key={ex.id} value={ex.id}>
+                                {ex.name}
+                              </option>
+                            ))}
+                          </select>
+                        );
+                      })()}
+
+                      {isEditing && (
+                        <div className="flex items-center justify-end gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditingSessionId(null)}
+                            className="min-h-[44px] px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            data-testid={`save-logs-bottom-btn-${session.sessionId}`}
+                            onClick={() => handleSaveEditedSession(session)}
+                            className="min-h-[44px] px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Save className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>Save Changes</span>
+                          </button>
                         </div>
                       )}
                     </div>

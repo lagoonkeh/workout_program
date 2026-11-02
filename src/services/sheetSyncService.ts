@@ -5,6 +5,7 @@ import { MobilityEntry } from '../domain/mobility';
 import { SetLogRecord } from '../components/ExerciseCard';
 import { getIdToken } from './firebaseAuth';
 import { collectAppBackup, type AppBackup } from './appBackupService';
+import { buildSheetRowsForWorkout } from '../domain/historyEdit';
 
 export const STORAGE_KEY_LAST_SYNC = 'workout_app_last_sheets_sync_v1';
 export const STORAGE_KEY_LAST_SCANNED_WORKOUT = 'workout_app_last_scanned_workout_v1';
@@ -489,5 +490,38 @@ export async function syncToGoogleSheets(payload: SyncPayload): Promise<SyncResu
       success: false,
       message: err.message || 'Network error occurred while connecting to Google Sheets sync.',
     };
+  }
+}
+
+/**
+ * Push an edited past workout to Google Sheets: its old rows (at its old date) are replaced by the
+ * edited sets, so removed sets and a moved date don't leave stale rows behind.
+ */
+export async function replaceWorkoutInSheets(
+  updated: CompletedWorkoutSession,
+  previous: CompletedWorkoutSession
+): Promise<{ success: boolean; message: string }> {
+  const next = buildSheetRowsForWorkout(updated);
+  const before = buildSheetRowsForWorkout(previous);
+  try {
+    const res = await fetch('/api/sync?action=replace-workout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+      body: JSON.stringify({
+        action: 'replace-workout',
+        replace: [
+          { date: before.day, session: before.session },
+          { date: next.day, session: next.session },
+        ],
+        workoutLogs: next.rows,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      return { success: false, message: data.error || `Google Sheets returned HTTP ${res.status}` };
+    }
+    return { success: true, message: 'Saved and updated in Google Sheets.' };
+  } catch (err: any) {
+    return { success: false, message: err?.message || 'Network error' };
   }
 }
