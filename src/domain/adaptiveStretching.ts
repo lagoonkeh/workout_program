@@ -217,6 +217,58 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
     ],
     recommendedTempo: 'Isometric Stretch',
     tags: ['calf', 'calves', 'tibialis', 'foot']
+  },
+  {
+    id: 'stretch_ros_back_bridge',
+    name: 'Lucas Hardie (Range of Strength) Back Bridge & Thoracic Arc',
+    creator: 'Lucas Hardie (Range of Strength)',
+    targetArea: 'Full Spinal Column, Anterior Chest & Hip Flexors',
+    targetMuscles: ['Erector Spinae', 'Thoracic Spine', 'Rectus Abdominis', 'Iliopsoas', 'Anterior Deltoids', 'Pectoralis Major'],
+    durationSeconds: 60,
+    isBilateral: false,
+    priorityScore: 90,
+    triggerSource: 'preventive_maintenance',
+    triggerReason: 'Spinal Extension Restoration: Balances prolonged sitting, heavy deadlifts, and grappling flexion with active thoracic and hip extension.',
+    coachingQuote: 'The back bridge is the knees-over-toes concept for the lower back. Distributing the extension arc across the entire spine prevents back fragility.',
+    instructions: [
+      'Lie supine with knees bent and feet flat on floor hip-width apart.',
+      'Place palms flat next to your ears with fingers pointing toward your shoulders.',
+      'Press through heels and hands to arc hips toward the ceiling and push chest backward through shoulders.',
+      'Distribute the curve smoothly across the entire thoracic spine rather than hinging sharply at L4-S1.',
+      'Hold for 20–30 seconds with calm nasal breathing, slowly lower down bone by bone, and rest.'
+    ],
+    commonFaults: [
+      'Hinging exclusively at the lumbar spine without thoracic extension.',
+      'Holding breath in maximum extension.'
+    ],
+    recommendedTempo: '20-30s Controlled Isometric Arc',
+    tags: ['back', 'spine', 'extension', 'bridge', 'thoracic', 'posture', 'hip_flexor']
+  },
+  {
+    id: 'stretch_mpmd_parasympathetic_electrolytes',
+    name: 'Derek (More Plates More Dates) Down-Regulation Box Breathing & Recovery Flush',
+    creator: 'Derek (More Plates More Dates)',
+    targetArea: 'Autonomic Nervous System & Endocrine Recovery',
+    targetMuscles: ['Diaphragm', 'Vagus Nerve Tone', 'Heart Rate Variability (HRV)', 'Intercostals'],
+    durationSeconds: 120,
+    isBilateral: false,
+    priorityScore: 95,
+    triggerSource: 'preventive_maintenance',
+    triggerReason: 'Systemic Down-Regulation & Cortisol Clearance: Restores autonomic balance, aids post-sweat electrolyte uptake, and clears sympathetic stress for restorative slow-wave sleep.',
+    coachingQuote: 'Training cannot be separated from internal biochemistry. Shift out of sympathetic overdrive with controlled box breathing and replenish electrolytes to protect hormone levels and collagen turnover.',
+    instructions: [
+      'Lie comfortably on your back with legs elevated on a bench or couch at 90 degrees.',
+      'Inhale slowly through your nose into the deep belly for 4 seconds.',
+      'Hold with lungs gently full for 4 seconds without neck tension.',
+      'Exhale smoothly through your mouth for 4 seconds, feeling your ribcage deflate.',
+      'Hold empty for 4 seconds before the next breath cycle. Repeat for 2–3 minutes while hydrating with electrolyte water.'
+    ],
+    commonFaults: [
+      'Chest breathing with shoulder elevation.',
+      'Skipping electrolyte replenishment after high-sweat training.'
+    ],
+    recommendedTempo: '4s Inhale / 4s Hold / 4s Exhale / 4s Hold',
+    tags: ['recovery', 'sleep', 'cns', 'fatigue', 'parasympathetic', 'breathing', 'caffeine', 'electrolytes']
   }
 ];
 

@@ -561,11 +561,19 @@ export function analyzeBodyFeelingAndHistory(
           proposedValue: reducedLoad,
           proposedLabel: `${reducedLoad} lbs (-10% Autoregulated Load)`,
           rationale: 'Preserves bar velocity and motor grooving without digging a deeper recovery deficit.',
-          creatorInfluence: 'GZCL Method Autoregulation',
+          creatorInfluence: 'GZCL Method Autoregulation & Derek (MPMD) Connective Tissue Pacing',
           applied: false,
         });
       }
     }
+
+    injectedWarmups.push({
+      id: 'prehab_cns_downregulation_box_breathing',
+      name: 'Derek (MPMD) Down-Regulation Box Breathing & Hydration Prehab (3-5 min)',
+      rationale:
+        'Shifts autonomic nervous system from sympathetic fight-or-flight to parasympathetic recovery; verify 500-1000mg sodium/potassium electrolyte replenishment and adhere to an 8-10hr caffeine curfew before bedtime.',
+      creatorInfluence: 'Derek (More Plates More Dates)',
+    });
   }
 
   // --- 6. PEAK READINESS / CLEAR SIGNAL ---
@@ -589,7 +597,7 @@ export function analyzeBodyFeelingAndHistory(
       'All physiological lights are green! Full joint compliance, high systemic CNS energy, and zero residual tendon fatigue across past 2 weeks. You are fully primed for Tier 1 progressive overload and AMRAP personal records.';
   } else {
     const categoriesDiagnosed = diagnosedSymptoms.map((s) => s.label).join(', ');
-    biomechanicalSummary = `Biomechanical assessment identified: ${categoriesDiagnosed}. Adjustments have been constructed using ATG tendon remodeling, McGill spinal sparing, and scapular decompression principles to deliver full functional training stimulus with zero joint wear.`;
+    biomechanicalSummary = `Biomechanical assessment identified: ${categoriesDiagnosed}. Adjustments have been constructed using ATG tendon remodeling, McGill spinal sparing, Range of Strength loaded mobility, and Derek (MPMD) physiological recovery principles to deliver full functional training stimulus with zero joint wear.`;
   }
 
   return {

@@ -1793,5 +1793,71 @@ export const CUE_CARDS: CueCard[] = [
     rehabRegressions: [
       'Focus purely on the diaphragmatic 360° abdominal brace without lifting the head until neck endurance develops.'
     ]
+  },
+  {
+    id: 'cue_bjj_back_bridge',
+    exerciseId: 't3_bjj_back_bridge_extension',
+    exerciseName: 'Range of Strength Back Bridge & Thoracic Extension Arc',
+    title: 'Range of Strength Back Bridge & Thoracic Extension Arc',
+    tier: 'T3',
+    tempo: '0030',
+    prescribedTempo: 'Isometric Arc (Hold 20-30s / Smooth Nasal Breathing)',
+    primaryMuscles: ['Spinal Extensors (Erector Spinae)', 'Thoracic Spine', 'Gluteus Maximus', 'Pectorals & Anterior Deltoids'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Lie supine with knees bent and feet hip-width. Place hands next to ears with fingers pointing toward shoulders. Press through heels and palms to arc into extension.',
+    setupInstructions: [
+      'Phase 1 — Hand & Foot Rooting: Lie flat on your back, bend knees with feet flat near glutes. Plant palms beside your head with fingers pointing toward your shoulders.',
+      'Phase 2 — Pelvic & Chest Drive: Press firmly through heels and palms simultaneously to drive hips toward ceiling and push chest backward through your arms.',
+      'Phase 3 — Continuous Arc Distribution: Strive to distribute the curve smoothly across the entire thoracic and lumbar spine, rather than hinging sharply at L4-S1.',
+      'Phase 4 — Controlled Isometric Hold: Breathe smoothly through your nose for 20–30 seconds. Slowly tuck chin and lower down bone by bone.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Lucas Hardie (Range of Strength)',
+        quote: 'The back bridge is the knees-over-toes concept for the lower back. Avoiding spinal extension entirely makes the spine fragile and brittle. Distribute the extension arc evenly through the thoracic spine and open the ribcage to reverse thousands of seconds of grappling flexion.',
+        biomechanicalRationale: 'Restores active sagittal spinal extension and anterior chain compliance, decompressing anterior intervertebral disc margins compressed during prolonged guard play.'
+      }
+    ],
+    commonFaults: [
+      'Hinging sharply at the lumbar spine instead of pushing the thoracic spine through the shoulders.',
+      'Holding breath and panicking in deep spinal extension.',
+      'Feet splaying excessively outward.'
+    ],
+    rehabRegressions: [
+      'Elevate feet on an 8–12 inch box or perform tabletop glute bridge with hands on floor behind hips.'
+    ]
+  },
+  {
+    id: 'cue_bjj_downregulation_electrolytes',
+    exerciseId: 't3_bjj_downregulation_electrolytes',
+    exerciseName: 'Derek (MPMD) Down-Regulation Breathing & Electrolyte Hydration Protocol',
+    title: 'Derek (MPMD) Down-Regulation Breathing & Electrolyte Hydration Protocol',
+    tier: 'T3',
+    tempo: '4040',
+    prescribedTempo: '4040 (4s Inhale / 4s Hold / 4s Exhale / 4s Hold)',
+    primaryMuscles: ['Autonomic Nervous System (Parasympathetic Switch)', 'Diaphragm', 'Vagus Nerve Tone'],
+    equipment: 'Floor / Mat & High-Sodium Electrolyte Beverage',
+    setup: 'Lie flat on back with calves resting on a bench or wall (90/90 passive decompressed posture). Keep high-sodium electrolyte water at arm reach.',
+    setupInstructions: [
+      'Phase 1 — Supine Decompression: Lie supine with legs elevated on a bench or wall at 90 degrees to immediately reduce venous pooling and lower cardiac output.',
+      'Phase 2 — Nasal Box Breathing Cadence: Inhale slowly through your nose into the abdomen for 4 seconds, hold gently for 4 seconds, exhale smoothly through mouth for 4 seconds, hold empty for 4 seconds.',
+      'Phase 3 — Systemic Parasympathetic Activation: Continue for 3 to 5 minutes until heart rate drops below 90 BPM and autonomic nervous tone shifts out of fight-or-flight sympathetic overdrive.',
+      'Phase 4 — Targeted Electrolyte Replenishment: Sip 16–24 oz of water containing 500–1000mg sodium and 200–400mg potassium to replenish acute fluid and mineral losses from grappling.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Derek (More Plates More Dates)',
+        quote: 'Physical training and martial arts cannot be isolated from internal biochemistry and autonomic recovery. Heavy sweating depletes plasma volume, potassium, and sodium, leaving you in sympathetic overdrive. Standardize 5g daily creatine, replenish electrolytes post-session, and enforce an 8-to-10 hour caffeine curfew to protect sleep architecture and hormone levels.',
+        biomechanicalRationale: 'Accelerates cortisol clearance and vagal nerve activation via controlled diaphragmatic respiration, while sodium-potassium rehydration restores intravascular volume and prevents hyponatremic cramping.'
+      }
+    ],
+    commonFaults: [
+      'Chest breathing into the neck and shoulders instead of 360-degree abdominal expansion.',
+      'Drinking plain distilled water without electrolytes, diluting serum sodium further.',
+      'Consuming high-stimulant energy drinks late in the day after evening training sessions.'
+    ],
+    rehabRegressions: [
+      'Perform standard physiological sighs (two quick nasal inhales followed by one long extended exhale) if box breathing holds cause tension.'
+    ]
   }
 ];
