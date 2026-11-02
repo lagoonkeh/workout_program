@@ -36,7 +36,13 @@ import { AdaptiveBodyCoachWidget } from './components/AdaptiveBodyCoachWidget';
 import { ExerciseDiagram } from './components/ExerciseDiagram';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
 import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, History, X } from 'lucide-react';
-import { scanLastWorkout, LastWorkoutScanResult } from './services/sheetSyncService';
+import {
+  scanLastWorkout,
+  LastWorkoutScanResult,
+  clearRemoteWorkoutHistory,
+  STORAGE_KEY_LAST_SCANNED_WORKOUT,
+  STORAGE_KEY_LAST_SYNC,
+} from './services/sheetSyncService';
 import { useSheetsSync } from './hooks/useSheetsSync';
 import { restoreAppBackupIfNewer, startAppBackupAutoSync } from './services/appBackupService';
 import { useCloudSync } from './hooks/useCloudSync';
@@ -1301,6 +1307,30 @@ export function WorkoutAppMain() {
       return next;
     });
   }, [activeSessionId, sessionExercises, activeSession.dailyCoreFinisher]);
+
+  // Permanently delete all workout history and start completely fresh
+  const handleResetAllAndStartFresh = useCallback(() => {
+    storageManager.clearCompletedWorkouts();
+    storageManager.saveImmediate({ currentLogs: {} });
+    setWorkoutLogs({});
+    setSessionStartTimes({});
+    setActiveSessionId('lower_a');
+    try {
+      localStorage.removeItem(STORAGE_KEY_LAST_SCANNED_WORKOUT);
+      localStorage.removeItem(STORAGE_KEY_LAST_SYNC);
+      localStorage.removeItem(STORAGE_KEY_LOGS);
+      localStorage.removeItem(STORAGE_KEY_SESSION);
+      localStorage.removeItem(STORAGE_KEY_WARMUPS);
+      localStorage.removeItem(STORAGE_KEY_PHASE_TASKS);
+      localStorage.removeItem(STORAGE_KEY_SESSION_START_TIMES);
+      localStorage.removeItem('workout_session_start_time_v1');
+      localStorage.removeItem('workout_session_first_task_time_v1');
+    } catch {
+      // safe fallback
+    }
+    void clearRemoteWorkoutHistory();
+    handleScanLastWorkout();
+  }, [handleScanLastWorkout]);
 
   // Toggle or mark entire workout session as completed
   const handleToggleWorkoutCompleted = useCallback(() => {
@@ -3511,6 +3541,7 @@ export function WorkoutAppMain() {
         activeSession={activeSession}
         workoutLogs={workoutLogs}
         onSaveCurrentSessionToHistory={handleSaveCurrentSessionToHistory}
+        onResetAllAndStartFresh={handleResetAllAndStartFresh}
       />
       </Suspense>
 

@@ -287,6 +287,25 @@ export async function fetchWorkoutHistoryFromSheets(): Promise<FetchHistoryResul
   }
 }
 
+/**
+ * Clears recorded workout history from the remote Google Sheet.
+ */
+export async function clearRemoteWorkoutHistory(): Promise<{ success: boolean; message: string }> {
+  try {
+    const res = await fetch('/api/sync?action=clear-history', {
+      method: 'POST',
+      headers: await authHeaders(),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return { success: true, message: data.message || 'Remote history cleared.' };
+    }
+    return { success: false, message: `Failed to clear remote history: HTTP ${res.status}` };
+  } catch (err: any) {
+    return { success: false, message: `Error clearing remote history: ${err.message || 'Network error'}` };
+  }
+}
+
 export interface SyncedWorkoutItem {
   date: string;
   session: string;

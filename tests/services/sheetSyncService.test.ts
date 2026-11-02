@@ -5,6 +5,7 @@ import {
   syncToGoogleSheets,
   scanLastWorkout,
   fetchWorkoutHistoryFromSheets,
+  clearRemoteWorkoutHistory,
   parseSetRatings,
   toLocalDateStr,
   STORAGE_KEY_LAST_SYNC,
@@ -411,6 +412,33 @@ describe('sheetSyncService', () => {
       expect(res.success).toBe(true);
       expect(res.importedCount).toBe(0);
       expect(res.message).toContain('No previous workout logs found');
+    });
+  });
+
+  describe('clearRemoteWorkoutHistory', () => {
+    it('sends clear-history action to /api/sync and returns success', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          status: 'ok',
+          message: 'Workout history cleared from Google Sheets.',
+        }),
+      } as Response);
+
+      const res = await clearRemoteWorkoutHistory();
+      expect(res.success).toBe(true);
+      expect(res.message).toContain('Workout history cleared');
+    });
+
+    it('handles remote clearing failure gracefully', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      } as Response);
+
+      const res = await clearRemoteWorkoutHistory();
+      expect(res.success).toBe(false);
+      expect(res.message).toContain('HTTP 500');
     });
   });
 });

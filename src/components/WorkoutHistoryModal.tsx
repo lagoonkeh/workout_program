@@ -20,7 +20,11 @@ import {
   CloudDownload,
 } from 'lucide-react';
 import { storageManager, CompletedWorkoutSession } from '../storage/storageManager';
-import { fetchWorkoutHistoryFromSheets } from '../services/sheetSyncService';
+import {
+  fetchWorkoutHistoryFromSheets,
+  clearRemoteWorkoutHistory,
+  STORAGE_KEY_LAST_SCANNED_WORKOUT,
+} from '../services/sheetSyncService';
 import type { WorkoutSession } from '../domain/programData';
 import type { SetLogRecord } from './ExerciseCard';
 
@@ -31,6 +35,7 @@ export interface WorkoutHistoryModalProps {
   activeSession?: WorkoutSession;
   workoutLogs?: Record<string, SetLogRecord[]>;
   onSaveCurrentSessionToHistory?: () => void;
+  onResetAllAndStartFresh?: () => void;
 }
 
 export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
@@ -40,6 +45,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
   activeSession,
   workoutLogs: _workoutLogs,
   onSaveCurrentSessionToHistory,
+  onResetAllAndStartFresh,
 }) => {
   const [sessionsMap, setSessionsMap] = useState<Record<string, CompletedWorkoutSession>>({});
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
@@ -157,12 +163,34 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
     onSessionUpdated?.();
   };
 
-  // Handle clearing all history
-  const handleClearAllHistory = () => {
+  // Handle clearing all history and starting completely fresh
+  const handleClearAllHistory = async (alsoStartFresh: boolean = true) => {
+    setIsSyncingSheets(true);
     storageManager.clearCompletedWorkouts();
+    try {
+      localStorage.removeItem(STORAGE_KEY_LAST_SCANNED_WORKOUT);
+    } catch {
+      // safe fallback
+    }
+
+    if (alsoStartFresh && onResetAllAndStartFresh) {
+      onResetAllAndStartFresh();
+    }
+
+    try {
+      await clearRemoteWorkoutHistory();
+    } catch {
+      // non-blocking
+    }
+
     reloadSessions();
     setShowClearConfirm(false);
+    setIsSyncingSheets(false);
     onSessionUpdated?.();
+    setSyncStatusMessage({
+      type: 'info',
+      text: 'All previous workout history deleted. Fresh start initialized.',
+    });
   };
 
   // Start editing a workout session's logs
@@ -308,18 +336,18 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
               </button>
             )}
 
-            {sortedSessions.length > 0 && (
-              <button
-                type="button"
-                data-testid="clear-all-history-btn"
-                onClick={() => setShowClearConfirm(true)}
-                className="min-h-[44px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-700/80 hover:border-rose-500/40 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Clear all completed workout history"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Clear History</span>
-              </button>
-            )}
+            <button
+              type="button"
+              data-testid="clear-all-history-btn"
+              onClick={() => setShowClearConfirm(true)}
+              className="min-h-[44px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-700/80 hover:border-rose-500/40 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Delete all previous workout history and start fresh"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                {sortedSessions.length > 0 ? 'Clear History' : 'Start Fresh'}
+              </span>
+            </button>
 
             <button
               type="button"
@@ -863,20 +891,25 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 id="confirm-clear-title" className="text-base sm:text-lg font-bold text-white">
-                    Clear Entire Workout History?
+                  <h3
+                    id="confirm-clear-title"
+                    data-testid="confirm-clear-title"
+                    className="text-base sm:text-lg font-bold text-white"
+                  >
+                    Delete All History & Start Fresh?
                   </h3>
-                  <p className="text-xs text-slate-400">All completed sessions will be deleted</p>
+                  <p className="text-xs text-slate-400">All completed sessions and cloud logs will be erased</p>
                 </div>
               </div>
 
               <p className="text-xs sm:text-sm text-slate-300">
-                Are you sure you want to permanently erase all past completed workouts from your local history? This action cannot be reversed.
+                Are you sure you want to permanently erase all past completed workouts from your history and start fresh? This will reset all historical sessions, clear cloud logs in Google Sheets, and restart clean from Day 1.
               </p>
 
               <div className="flex items-center justify-end gap-2.5 pt-2">
                 <button
                   type="button"
+                  data-testid="cancel-clear-all-btn"
                   onClick={() => setShowClearConfirm(false)}
                   className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm cursor-pointer transition-colors"
                 >
@@ -885,11 +918,11 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                 <button
                   type="button"
                   data-testid="confirm-clear-all-btn"
-                  onClick={handleClearAllHistory}
+                  onClick={() => handleClearAllHistory(true)}
                   className="min-h-[44px] px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-rose-950/50 cursor-pointer transition-all"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span>Yes, Clear All History</span>
+                  <span>Yes, Delete All History & Start Fresh</span>
                 </button>
               </div>
             </div>

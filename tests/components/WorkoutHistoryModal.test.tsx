@@ -282,4 +282,35 @@ describe('WorkoutHistoryModal Component', () => {
     expect(sessionCard).toBeInTheDocument();
     expect(screen.getByText('Lower A: Quad Focus')).toBeInTheDocument();
   });
+
+  it('triggers onResetAllAndStartFresh when user confirms clearing entire history', () => {
+    const handleResetAllAndStartFresh = vi.fn();
+    storageManager.saveCompletedWorkout({
+      id: 'session_old_1',
+      date: '2026-10-15T10:00:00.000Z',
+      sessionId: 'lower_a',
+      sessionTitle: 'Old Lower A',
+      logs: {},
+    });
+
+    render(
+      <WorkoutHistoryModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onResetAllAndStartFresh={handleResetAllAndStartFresh}
+      />
+    );
+
+    const clearBtn = screen.getByTestId('clear-all-history-btn');
+    fireEvent.click(clearBtn);
+
+    expect(screen.getByTestId('confirm-clear-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('confirm-clear-title')).toHaveTextContent(/Delete All History & Start Fresh/i);
+
+    const confirmBtn = screen.getByTestId('confirm-clear-all-btn');
+    fireEvent.click(confirmBtn);
+
+    expect(handleResetAllAndStartFresh).toHaveBeenCalledTimes(1);
+    expect(Object.keys(storageManager.getCompletedWorkouts()).length).toBe(0);
+  });
 });

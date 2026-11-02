@@ -227,6 +227,26 @@ export default async function handler(req, res) {
       }
     }
 
+    if (action === 'clear-history' || action === 'reset-history') {
+      try {
+        const spreadsheetId =
+          process.env.GOOGLE_SPREADSHEET_ID || '18IDVdkxJnCLdC2hDYJQOcKc2OFrZCWK3bkc-N-p-3NA';
+        const accessToken = await getAccessToken();
+        if (accessToken) {
+          await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
+            method: 'POST',
+            body: JSON.stringify({ ranges: ["'Workout Logs'!A5:L2000"] }),
+          });
+        }
+        return res.status(200).json({
+          status: 'ok',
+          message: 'Workout history cleared from Google Sheets.',
+        });
+      } catch (err) {
+        return res.status(500).json({ error: `Error clearing workout history: ${err.message}` });
+      }
+    }
+
     if (action === 'last-workout' || action === 'scan' || action === 'history') {
       try {
         const spreadsheetId =
@@ -463,6 +483,22 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const workoutLogs = Array.isArray(body.workoutLogs) ? body.workoutLogs : [];
     const mobilityEntries = Array.isArray(body.mobilityEntries) ? body.mobilityEntries : [];
+
+    const actionParam =
+      req.query?.action ||
+      (req.url ? new URL(req.url, 'http://localhost').searchParams.get('action') : null) ||
+      body.action;
+
+    if (actionParam === 'clear-history' || actionParam === 'reset-history') {
+      await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
+        method: 'POST',
+        body: JSON.stringify({ ranges: ["'Workout Logs'!A5:L2000"] }),
+      });
+      return res.status(200).json({
+        status: 'ok',
+        message: 'Workout history cleared from Google Sheets.',
+      });
+    }
 
     let syncedWorkouts = 0;
     let syncedMobility = 0;
