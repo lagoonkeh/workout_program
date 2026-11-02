@@ -249,4 +249,37 @@ describe('WorkoutHistoryModal Component', () => {
     expect(calLink.getAttribute('href')).toContain('calendar.google.com/calendar/render?action=TEMPLATE');
     expect(calLink.getAttribute('href')).toContain('Lower%20A%3A%20Squat%20Focus');
   });
+
+  it('renders pull uploaded history button in empty state and triggers fetch', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        status: 'ok',
+        allWorkouts: [
+          {
+            id: 'sheet_2026-10-18_lower_a',
+            date: '2026-10-18T10:00:00.000Z',
+            sessionId: 'lower_a',
+            sessionTitle: 'Lower A: Quad Focus',
+            totalVolumeLbs: 11000,
+            completedExercisesCount: 5,
+            totalExercisesCount: 5,
+            adherencePercentage: 100,
+            logs: {},
+          },
+        ],
+      }),
+    } as Response);
+
+    render(<WorkoutHistoryModal isOpen={true} onClose={vi.fn()} />);
+
+    expect(screen.getByTestId('empty-history-state')).toBeInTheDocument();
+    const pullBtn = screen.getByTestId('pull-uploaded-history-btn');
+    expect(pullBtn).toBeInTheDocument();
+    expect(pullBtn).toHaveTextContent(/History from Google Sheets/i);
+
+    const sessionCard = await screen.findByTestId('history-session-card-lower_a');
+    expect(sessionCard).toBeInTheDocument();
+    expect(screen.getByText('Lower A: Quad Focus')).toBeInTheDocument();
+  });
 });

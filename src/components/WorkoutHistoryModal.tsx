@@ -1,5 +1,5 @@
 // src/components/WorkoutHistoryModal.tsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
   History,
@@ -17,8 +17,10 @@ import {
   Clock,
   Dumbbell,
   Save,
+  CloudDownload,
 } from 'lucide-react';
 import { storageManager, CompletedWorkoutSession } from '../storage/storageManager';
+import { fetchWorkoutHistoryFromSheets } from '../services/sheetSyncService';
 import type { WorkoutSession } from '../domain/programData';
 import type { SetLogRecord } from './ExerciseCard';
 
@@ -46,11 +48,50 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
   const [editingLogs, setEditingLogs] = useState<Record<string, any>>({});
   const [sessionToDelete, setSessionToDelete] = useState<CompletedWorkoutSession | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
+  const [isSyncingSheets, setIsSyncingSheets] = useState<boolean>(false);
+  const [syncStatusMessage, setSyncStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const hasAutoSyncedRef = useRef<boolean>(false);
 
   // Load completed sessions from storage
   const reloadSessions = () => {
     const records = storageManager.getCompletedWorkouts();
     setSessionsMap({ ...records });
+  };
+
+  const handleSyncFromSheets = async (silent: boolean = false) => {
+    setIsSyncingSheets(true);
+    if (!silent) {
+      setSyncStatusMessage({ type: 'info', text: 'Pulling workout history from Google Sheets...' });
+    }
+    try {
+      const res = await fetchWorkoutHistoryFromSheets();
+      if (res.success) {
+        reloadSessions();
+        onSessionUpdated?.();
+        if (!silent || res.importedCount > 0) {
+          setSyncStatusMessage({
+            type: 'success',
+            text: res.message,
+          });
+        }
+      } else {
+        if (!silent) {
+          setSyncStatusMessage({
+            type: 'error',
+            text: res.message,
+          });
+        }
+      }
+    } catch (err: any) {
+      if (!silent) {
+        setSyncStatusMessage({
+          type: 'error',
+          text: `Sync error: ${err.message || 'Unknown network error'}`,
+        });
+      }
+    } finally {
+      setIsSyncingSheets(false);
+    }
   };
 
   useEffect(() => {
@@ -59,6 +100,13 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
       setEditingSessionId(null);
       setSessionToDelete(null);
       setShowClearConfirm(false);
+
+      // Attempt automatic initial pull from Google Sheets if local history is empty
+      const current = storageManager.getCompletedWorkouts();
+      if (Object.keys(current).length === 0 && !hasAutoSyncedRef.current) {
+        hasAutoSyncedRef.current = true;
+        handleSyncFromSheets(true);
+      }
     }
   }, [isOpen]);
 
@@ -232,6 +280,18 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              data-testid="header-pull-sheets-history-btn"
+              onClick={() => handleSyncFromSheets(false)}
+              disabled={isSyncingSheets}
+              className="min-h-[44px] px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              title="Pull and restore past workout sessions from Google Sheets"
+            >
+              <CloudDownload className={`w-3.5 h-3.5 ${isSyncingSheets ? 'animate-bounce' : ''}`} />
+              <span className="hidden sm:inline">{isSyncingSheets ? 'Syncing...' : 'Pull Sheets History'}</span>
+            </button>
+
             {onSaveCurrentSessionToHistory && (
               <button
                 type="button"
@@ -273,6 +333,32 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
           </div>
         </div>
 
+        {/* Sync Status Banner */}
+        {syncStatusMessage && (
+          <div
+            data-testid="sync-status-banner"
+            className={`px-4 py-2 text-xs flex items-center justify-between border-b ${
+              syncStatusMessage.type === 'success'
+                ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/30'
+                : syncStatusMessage.type === 'error'
+                ? 'bg-rose-950/40 text-rose-300 border-rose-500/30'
+                : 'bg-cyan-950/40 text-cyan-300 border-cyan-500/30'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <CloudDownload className="w-3.5 h-3.5 shrink-0" />
+              <span>{syncStatusMessage.text}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSyncStatusMessage(null)}
+              className="text-slate-400 hover:text-white ml-2 text-xs font-bold px-1.5 py-0.5 rounded"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Filter Pills */}
         <div className="px-4 py-2.5 border-b border-slate-800/80 bg-slate-900/90 flex items-center gap-1.5 overflow-x-auto">
           {[
@@ -306,15 +392,39 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
           {sortedSessions.length === 0 ? (
             <div
               data-testid="empty-history-state"
-              className="p-8 sm:p-12 text-center rounded-2xl bg-slate-950/40 border border-slate-800/80 flex flex-col items-center justify-center space-y-3"
+              className="p-8 sm:p-12 text-center rounded-2xl bg-slate-950/40 border border-slate-800/80 flex flex-col items-center justify-center space-y-4"
             >
               <div className="w-14 h-14 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-400">
                 <Dumbbell className="w-7 h-7" />
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-white">No Completed Workouts Yet</h3>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-sm">
-                Finish your active session from the Routine tab to see completed workout logs, tonnage, and adherence records here.
-              </p>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white">No Completed Workouts Yet</h3>
+                <p className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto mt-1">
+                  Finish your active session from the Routine tab to see completed workout logs, tonnage, and adherence records here.
+                </p>
+              </div>
+
+              {/* Informative Card: Pull Uploaded History */}
+              <div className="w-full max-w-md p-4 rounded-xl bg-cyan-950/30 border border-cyan-800/40 text-left space-y-2.5">
+                <div className="flex items-center gap-2 text-cyan-300 font-semibold text-xs sm:text-sm">
+                  <CloudDownload className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <span>Looking for your previous uploaded history?</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  If you previously uploaded workouts or synced logs to Google Sheets, tap below to pull and restore all your sessions into this device.
+                </p>
+                <button
+                  type="button"
+                  data-testid="pull-uploaded-history-btn"
+                  onClick={() => handleSyncFromSheets(false)}
+                  disabled={isSyncingSheets}
+                  className="w-full py-2.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow"
+                >
+                  <CloudDownload className={`w-3.5 h-3.5 ${isSyncingSheets ? 'animate-bounce' : ''}`} />
+                  <span>{isSyncingSheets ? 'Pulling History from Google Sheets...' : 'Pull Uploaded History from Google Sheets'}</span>
+                </button>
+              </div>
+
               {activeSession && onSaveCurrentSessionToHistory && (
                 <button
                   type="button"
@@ -323,7 +433,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                     onSaveCurrentSessionToHistory();
                     reloadSessions();
                   }}
-                  className="mt-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg cursor-pointer transition-all active:scale-95"
+                  className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg cursor-pointer transition-all active:scale-95"
                 >
                   <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                   <span>Log Current {activeSession.title} to History</span>

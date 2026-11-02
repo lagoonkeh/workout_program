@@ -4,11 +4,13 @@ import {
   buildSyncPayload,
   syncToGoogleSheets,
   scanLastWorkout,
+  fetchWorkoutHistoryFromSheets,
   parseSetRatings,
   toLocalDateStr,
   STORAGE_KEY_LAST_SYNC,
   STORAGE_KEY_LAST_SCANNED_WORKOUT,
 } from '../../src/services/sheetSyncService';
+import { storageManager } from '../../src/storage/storageManager';
 import { SetLogRecord } from '../../src/components/ExerciseCard';
 import { MobilityEntry } from '../../src/domain/mobility';
 
@@ -299,6 +301,116 @@ describe('sheetSyncService', () => {
       const scanResult = await scanLastWorkout();
       expect(scanResult.lastWorkout).toBeNull();
       expect(scanResult.suggestedNextSession.id).toBe('lower_a');
+    });
+
+    it('auto-seeds completed workouts into storageManager when allWorkouts are in scan response', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          status: 'ok',
+          lastWorkout: {
+            date: '2026-10-22',
+            sessionTitle: 'Upper B (Vertical Push/Pull & Functional Calisthenics)',
+            exercises: ['Weighted Pull-Up'],
+            completedSets: 4,
+            totalVolumeLbs: 3200,
+          },
+          allWorkouts: [
+            {
+              id: 'sheet_2026-10-22_upper_b',
+              date: '2026-10-22T12:00:00.000Z',
+              sessionId: 'upper_b',
+              sessionTitle: 'Upper B (Vertical Push/Pull & Functional Calisthenics)',
+              totalVolumeLbs: 3200,
+              completedExercisesCount: 1,
+              totalExercisesCount: 1,
+              adherencePercentage: 100,
+              logs: {},
+            },
+          ],
+        }),
+      } as Response);
+
+      await scanLastWorkout();
+      const records = storageManager.getCompletedWorkouts();
+      expect(records['sheet_2026-10-22_upper_b']).toBeDefined();
+      expect(records['sheet_2026-10-22_upper_b'].sessionId).toBe('upper_b');
+    });
+  });
+
+  describe('fetchWorkoutHistoryFromSheets', () => {
+    it('fetches full workout history from Google Sheets and saves sessions into storageManager', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          status: 'ok',
+          allWorkouts: [
+            {
+              id: 'sheet_2026-10-14_lower_a',
+              date: '2026-10-14T10:00:00.000Z',
+              sessionId: 'lower_a',
+              sessionTitle: 'Lower A (Quad & Knee Bulletproofing)',
+              totalVolumeLbs: 12000,
+              completedExercisesCount: 5,
+              totalExercisesCount: 5,
+              adherencePercentage: 100,
+              notes: 'Felt great',
+              logs: {
+                t1_bb_squat: [{ isCompleted: true, weightLbs: 225, repsAchieved: 5 }],
+              },
+            },
+            {
+              id: 'sheet_2026-10-16_upper_a',
+              date: '2026-10-16T10:00:00.000Z',
+              sessionId: 'upper_a',
+              sessionTitle: 'Upper A (Horizontal Push/Pull)',
+              totalVolumeLbs: 9500,
+              completedExercisesCount: 4,
+              totalExercisesCount: 4,
+              adherencePercentage: 100,
+              notes: '',
+              logs: {},
+            },
+          ],
+        }),
+      } as Response);
+
+      const res = await fetchWorkoutHistoryFromSheets();
+      expect(res.success).toBe(true);
+      expect(res.importedCount).toBe(2);
+      expect(res.totalAvailable).toBe(2);
+
+      const saved = storageManager.getCompletedWorkouts();
+      expect(saved['sheet_2026-10-14_lower_a']).toBeDefined();
+      expect(saved['sheet_2026-10-14_lower_a'].totalVolumeLbs).toBe(12000);
+      expect(saved['sheet_2026-10-16_upper_a']).toBeDefined();
+      expect(saved['sheet_2026-10-16_upper_a'].totalVolumeLbs).toBe(9500);
+    });
+
+    it('handles 401 unauthenticated with informative message', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+      } as Response);
+
+      const res = await fetchWorkoutHistoryFromSheets();
+      expect(res.success).toBe(false);
+      expect(res.message).toContain('Sign-in required');
+    });
+
+    it('handles empty Google Sheets history gracefully', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          status: 'ok',
+          allWorkouts: [],
+        }),
+      } as Response);
+
+      const res = await fetchWorkoutHistoryFromSheets();
+      expect(res.success).toBe(true);
+      expect(res.importedCount).toBe(0);
+      expect(res.message).toContain('No previous workout logs found');
     });
   });
 });

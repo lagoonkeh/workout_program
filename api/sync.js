@@ -227,7 +227,7 @@ export default async function handler(req, res) {
       }
     }
 
-    if (action === 'last-workout' || action === 'scan') {
+    if (action === 'last-workout' || action === 'scan' || action === 'history') {
       try {
         const spreadsheetId =
           process.env.GOOGLE_SPREADSHEET_ID || '18IDVdkxJnCLdC2hDYJQOcKc2OFrZCWK3bkc-N-p-3NA';
@@ -239,6 +239,7 @@ export default async function handler(req, res) {
           return res.status(200).json({
             status: 'ok',
             lastWorkout: null,
+            allWorkouts: [],
             suggestedNextSession: { id: 'lower_a', title: 'Lower A (Quad & Knee Bulletproofing)' },
             message: 'Missing OAuth credentials.',
           });
@@ -283,6 +284,7 @@ export default async function handler(req, res) {
           return res.status(200).json({
             status: 'ok',
             lastWorkout: null,
+            allWorkouts: [],
             suggestedNextSession: { id: 'lower_a', title: 'Lower A (Quad & Knee Bulletproofing)' },
             message: 'No workout logs recorded yet in Google Sheet.',
           });
@@ -295,6 +297,9 @@ export default async function handler(req, res) {
           const date = r[0].trim();
           const sessionTitle = (r[1] || '').trim();
           const exercise = (r[2] || '').trim();
+          const tier = (r[3] || '').trim();
+          const setNumber = (r[4] || '1').trim();
+          const targetReps = (r[5] || '').trim();
           const weight = parseFloat(r[6]) || 0;
           const reps = parseInt(r[7], 10) || 0;
           const kneePain = parseInt(r[9], 10) || 0;
@@ -310,6 +315,7 @@ export default async function handler(req, res) {
               totalVolumeLbs: 0,
               maxKneePain: 0,
               notes: [],
+              logs: {},
             });
           }
           const entry = sessionsByDate.get(key);
@@ -318,6 +324,19 @@ export default async function handler(req, res) {
           entry.totalVolumeLbs += weight * reps;
           if (kneePain > entry.maxKneePain) entry.maxKneePain = kneePain;
           if (notes && !entry.notes.includes(notes)) entry.notes.push(notes);
+
+          const exKey = exercise.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+          if (!entry.logs[exKey]) {
+            entry.logs[exKey] = [];
+          }
+          entry.logs[exKey].push({
+            setNumber: parseInt(setNumber, 10) || (entry.logs[exKey].length + 1),
+            targetReps: targetReps || `${reps}`,
+            weightLbs: weight,
+            repsAchieved: reps,
+            isCompleted: true,
+            notes: notes ? (kneePain > 0 ? `${notes} (Knee Pain: ${kneePain}/10)` : notes) : (kneePain > 0 ? `Knee Pain: ${kneePain}/10` : ''),
+          });
         }
 
         const sortedSessions = Array.from(sessionsByDate.values()).sort((a, b) =>
@@ -325,6 +344,38 @@ export default async function handler(req, res) {
         );
 
         const latest = sortedSessions[0] || null;
+
+        const resolveSessionId = (title) => {
+          const t = (title || '').toLowerCase();
+          if (t.includes('lower a')) return 'lower_a';
+          if (t.includes('upper a')) return 'upper_a';
+          if (t.includes('lower b')) return 'lower_b';
+          if (t.includes('upper b')) return 'upper_b';
+          if (t.includes('daily abs') || t.includes('abs')) return 'daily_abs';
+          if (t.includes('run')) return 'run_conditioning';
+          if (t.includes('bjj')) return 'post_bjj_recovery';
+          return 'lower_a';
+        };
+
+        const allWorkouts = sortedSessions.map((s, idx) => {
+          const sessId = resolveSessionId(s.sessionTitle);
+          const dateStr = s.date.includes('T') ? s.date : `${s.date}T12:00:00.000Z`;
+          return {
+            id: `sheet_${s.date}_${sessId}_${idx}`,
+            date: dateStr,
+            sessionId: sessId,
+            sessionTitle: s.sessionTitle,
+            exercises: Array.from(s.exercises),
+            completedSets: s.completedSets,
+            totalVolumeLbs: Math.round(s.totalVolumeLbs),
+            maxKneePain: s.maxKneePain,
+            notes: s.notes.join('; '),
+            completedExercisesCount: s.exercises.size,
+            totalExercisesCount: s.exercises.size,
+            adherencePercentage: 100,
+            logs: s.logs,
+          };
+        });
 
         let suggestedNextSession = { id: 'lower_a', title: 'Lower A (Quad & Knee Bulletproofing)' };
         if (latest) {
@@ -355,6 +406,7 @@ export default async function handler(req, res) {
             : null,
           suggestedNextSession,
           historyCount: sortedSessions.length,
+          allWorkouts,
         });
       } catch (err) {
         return res.status(500).json({ error: `Error scanning last workout: ${err.message}` });

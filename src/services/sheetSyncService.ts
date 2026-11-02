@@ -1,6 +1,6 @@
 // src/services/sheetSyncService.ts
 import { WORKOUT_PROGRAM } from '../domain/programData';
-import { storageManager } from '../storage/storageManager';
+import { storageManager, CompletedWorkoutSession } from '../storage/storageManager';
 import { MobilityEntry } from '../domain/mobility';
 import { SetLogRecord } from '../components/ExerciseCard';
 import { getIdToken } from './firebaseAuth';
@@ -105,6 +105,28 @@ export async function scanLastWorkout(
           daysAgo,
         };
 
+        // If remote response contains full history, auto-seed any missing sessions into local storage
+        if (Array.isArray(data.allWorkouts) && data.allWorkouts.length > 0) {
+          const currentCompleted = storageManager.getCompletedWorkouts();
+          data.allWorkouts.forEach((w: any) => {
+            const key = w.id || `sheet_${w.date}_${w.sessionId}`;
+            if (!currentCompleted[key]) {
+              storageManager.saveCompletedWorkout({
+                id: key,
+                date: w.date || new Date().toISOString(),
+                sessionId: w.sessionId || resolveSessionIdFromTitle(w.sessionTitle || ''),
+                sessionTitle: w.sessionTitle,
+                logs: w.logs || {},
+                totalVolumeLbs: w.totalVolumeLbs || 0,
+                adherencePercentage: w.adherencePercentage ?? 100,
+                completedExercisesCount: w.completedExercisesCount || (w.exercises ? w.exercises.length : 0),
+                totalExercisesCount: w.totalExercisesCount || (w.exercises ? w.exercises.length : 0),
+                notes: w.notes || '',
+              });
+            }
+          });
+        }
+
         try {
           localStorage.setItem(STORAGE_KEY_LAST_SCANNED_WORKOUT, JSON.stringify(scanResult));
         } catch {
@@ -176,6 +198,93 @@ export async function scanLastWorkout(
     source: 'default',
     daysAgo: null,
   };
+}
+
+export interface FetchHistoryResult {
+  success: boolean;
+  importedCount: number;
+  totalAvailable: number;
+  workouts: CompletedWorkoutSession[];
+  message: string;
+}
+
+/**
+ * Fetches all recorded workout history from Google Sheets and imports
+ * any missing sessions into client storage.
+ */
+export async function fetchWorkoutHistoryFromSheets(): Promise<FetchHistoryResult> {
+  try {
+    const res = await fetch('/api/sync?action=history', { headers: await authHeaders() });
+    if (!res.ok) {
+      if (res.status === 401) {
+        return {
+          success: false,
+          importedCount: 0,
+          totalAvailable: 0,
+          workouts: [],
+          message: 'Sign-in required: Please authenticate with your Google account to access your workout history from Google Sheets.',
+        };
+      }
+      return {
+        success: false,
+        importedCount: 0,
+        totalAvailable: 0,
+        workouts: [],
+        message: `Google Sheets sync returned HTTP ${res.status}`,
+      };
+    }
+
+    const data = await res.json();
+    const workouts: any[] = Array.isArray(data.allWorkouts) ? data.allWorkouts : [];
+
+    if (workouts.length === 0) {
+      return {
+        success: true,
+        importedCount: 0,
+        totalAvailable: 0,
+        workouts: [],
+        message: 'No previous workout logs found in Google Sheets.',
+      };
+    }
+
+    const existingWorkouts = storageManager.getCompletedWorkouts();
+    let importedCount = 0;
+
+    workouts.forEach((w) => {
+      const recordId = w.id || `sheet_${w.date}_${w.sessionId}`;
+      storageManager.saveCompletedWorkout({
+        id: recordId,
+        date: w.date || new Date().toISOString(),
+        sessionId: w.sessionId || resolveSessionIdFromTitle(w.sessionTitle || ''),
+        sessionTitle: w.sessionTitle,
+        logs: w.logs || {},
+        totalVolumeLbs: w.totalVolumeLbs || 0,
+        adherencePercentage: w.adherencePercentage ?? 100,
+        completedExercisesCount: w.completedExercisesCount || (w.exercises ? w.exercises.length : 0),
+        totalExercisesCount: w.totalExercisesCount || (w.exercises ? w.exercises.length : 0),
+        notes: w.notes || '',
+      });
+      if (!existingWorkouts[recordId]) {
+        importedCount += 1;
+      }
+    });
+
+    return {
+      success: true,
+      importedCount,
+      totalAvailable: workouts.length,
+      workouts: Object.values(storageManager.getCompletedWorkouts()),
+      message: `Successfully synchronized ${workouts.length} workout session(s) from Google Sheets (${importedCount} new).`,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      importedCount: 0,
+      totalAvailable: 0,
+      workouts: [],
+      message: `Failed to fetch history: ${err.message || 'Network error'}`,
+    };
+  }
 }
 
 export interface SyncedWorkoutItem {
