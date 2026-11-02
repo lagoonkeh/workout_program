@@ -53,6 +53,12 @@ const isDone = (s: HistorySet) => !!(s?.isCompleted || s?.completed);
 const weightOf = (s: HistorySet) => Number(s?.weightLbs ?? s?.weight ?? 0) || 0;
 const repsOf = (s: HistorySet) => Number(s?.repsAchieved ?? s?.reps ?? 0) || 0;
 
+/** Set notes as the athlete wrote them: older workouts stamped "Workout Completed" on every set */
+export const setNotes = (s: HistorySet): string => {
+  const n = String(s?.notes ?? '');
+  return n.trim() === 'Workout Completed' ? '' : n;
+};
+
 /** Parse a stored date; a bare "YYYY-MM-DD" (from Sheets) is a local calendar day, not UTC midnight. */
 export function parseWorkoutDate(value?: string): Date {
   if (!value) return new Date(NaN);
@@ -85,7 +91,7 @@ export function applyWorkoutEdit(
   when?: { date: string; time: string; durationMin: number }
 ): CompletedWorkoutSession {
   const cleanLogs: Record<string, HistorySet[]> = {};
-  Object.entries(logs).forEach(([k, v]) => {
+  Object.entries(ownWorkoutLogs({ sessionId: rec.sessionId, logs })).forEach(([k, v]) => {
     const sets = setsOf(v).map((s, i) => ({ ...s, setNumber: i + 1 }));
     if (sets.length > 0) cleanLogs[k] = sets;
   });
@@ -132,11 +138,11 @@ export function buildSheetRowsForWorkout(rec: CompletedWorkoutSession) {
   const day = localDateStr(parseWorkoutDate(rec.completedAt || rec.date));
   const session = rec.sessionTitle || rec.sessionId;
   const rows: Record<string, unknown>[] = [];
-  Object.entries(rec.logs || {}).forEach(([key, raw]) => {
+  Object.entries(ownWorkoutLogs(rec)).forEach(([key, raw]) => {
     const ex = findExercise(key);
     setsOf(raw).forEach((s, i) => {
       if (!isDone(s) && weightOf(s) <= 0 && repsOf(s) <= 0) return;
-      const notes = String(s?.notes || '');
+      const notes = setNotes(s);
       const rpe = /RPE\s*(\d+(?:\.\d+)?)/i.exec(notes);
       const pain = Array.from(notes.matchAll(/Pain(?:-Free)?\s*(\d+(?:\.\d+)?)\s*\/\s*10/gi), (m) => parseFloat(m[1]));
       rows.push({
@@ -156,4 +162,21 @@ export function buildSheetRowsForWorkout(rec: CompletedWorkoutSession) {
     });
   });
   return { day, session, rows };
+}
+
+/**
+ * Logs that belong to the workout's own session. Older records stored every session's logs; the
+ * other sessions' exercises are left out when a workout is shown, edited or sent to Sheets.
+ */
+export function ownWorkoutLogs(rec: { sessionId: string; logs?: Record<string, any> }): Record<string, any> {
+  const logs = rec.logs || {};
+  const program = ALL_APP_SESSIONS.find((s) => s.id === rec.sessionId);
+  if (!program) return logs;
+  const ids = new Set([...program.exercises, ...(program.dailyCoreFinisher || [])].map((e) => e.id));
+  return Object.fromEntries(
+    Object.entries(logs).filter(([k]) => {
+      const ex = findExercise(k);
+      return !ex || ids.has(ex.id);
+    })
+  );
 }

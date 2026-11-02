@@ -29,7 +29,7 @@ import { getGoogleCalendarUrl, getLoggedCalendarEventsMap } from '../services/ca
 import type { WorkoutSession } from '../domain/programData';
 import type { SetLogRecord } from './ExerciseCard';
 import { ALL_APP_SESSIONS } from '../domain/programData';
-import { applyWorkoutEdit, exerciseDisplayName, getWhen, setsOf } from '../domain/historyEdit';
+import { applyWorkoutEdit, exerciseDisplayName, getWhen, ownWorkoutLogs, setNotes, setsOf } from '../domain/historyEdit';
 import { replaceWorkoutInSheets } from '../services/sheetSyncService';
 
 export interface WorkoutHistoryModalProps {
@@ -202,7 +202,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
   // Start editing a workout session's logs
   const handleStartEditing = (session: CompletedWorkoutSession) => {
     setEditingSessionId(session.id || session.date);
-    setEditingLogs(JSON.parse(JSON.stringify(session.logs || {})));
+    setEditingLogs(JSON.parse(JSON.stringify(ownWorkoutLogs(session))));
     const when = getWhen(session);
     setEditingWhen(when);
     setOriginalWhen(when);
@@ -289,17 +289,17 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="hidden sm:flex w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 items-center justify-center text-emerald-400 shrink-0">
               <History className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div className="min-w-0">
               <h2
                 id="workout-history-title"
-                className="text-base sm:text-xl font-bold text-white truncate"
+                className="text-base sm:text-xl font-bold text-white leading-tight sm:truncate"
               >
                 Workout History & Log Editor
               </h2>
-              <p className="text-xs text-slate-400 truncate mt-0.5">
+              <p className="hidden sm:block text-xs text-slate-400 truncate mt-0.5">
                 Review past sessions, edit logged sets and weights, or edit out workouts from history
               </p>
             </div>
@@ -475,7 +475,8 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
               const adherence = session.adherencePercentage ?? (skippedCount === 0 ? 100 : 80);
 
               // Gather exercise entries from logs
-              const exerciseIds = Object.keys(isEditing ? editingLogs : session.logs || {});
+              const shownLogs = isEditing ? editingLogs : ownWorkoutLogs(session);
+              const exerciseIds = Object.keys(shownLogs);
 
               return (
                 <div
@@ -702,7 +703,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                       ) : (
                         <div className="space-y-3">
                           {exerciseIds.map((exKey) => {
-                            const rawLog = (isEditing ? editingLogs : session.logs)[exKey];
+                            const rawLog = shownLogs[exKey];
                             const sets: any[] = Array.isArray(rawLog) ? rawLog : [rawLog];
 
                             return (
@@ -725,7 +726,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
                                     const isDone = !!(setObj?.isCompleted || setObj?.completed);
                                     const weight = setObj?.weightLbs ?? setObj?.weight ?? 0;
                                     const reps = setObj?.repsAchieved ?? setObj?.reps ?? 0;
-                                    const notes = setObj?.notes ?? '';
+                                    const notes = setNotes(setObj);
                                     const isNotDoneNote = notes.includes('[NOT DONE]');
 
                                     if (isEditing) {

@@ -36,6 +36,8 @@ export interface CompletedWorkoutSession {
   completedAt?: string; // ISO 8601 string - when finished workout was clicked
   calendarEventId?: string; // ID of event on Google Calendar
   calendarLoggedAt?: string; // ISO 8601 string of when logged to calendar
+  /** saved automatically when the session reached 100%; "Complete & Save" later updates this record */
+  autoSaved?: boolean;
 }
 
 export interface StorageSettings {

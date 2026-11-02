@@ -382,6 +382,34 @@ export const RestTimerWidget: React.FC<RestTimerWidgetProps> = ({
     const isRunning = isStopClockActive ? stopSnapshot.state === 'RUNNING' : countSnapshot.state === 'RUNNING';
     const isPaused = isStopClockActive ? stopSnapshot.state === 'PAUSED' : countSnapshot.state === 'PAUSED';
 
+    // Idle: a small start / expand button pair, so the timer doesn't cover the page when not in use
+    if (!isStopClockActive && countSnapshot.state === 'IDLE') {
+      return (
+        <div
+          data-testid="rest-timer-idle-pill"
+          className={`fixed bottom-14 right-3 md:bottom-4 sm:right-4 z-40 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 flex items-center gap-1 ${className}`}
+        >
+          <span className="sr-only">Rest timer idle</span>
+          <button
+            onClick={() => startCount(initialDuration)}
+            aria-label="Start Timer"
+            title={`Start a ${formatCountdown(initialDuration)} rest`}
+            className="p-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <Clock className="w-4 h-4" />
+            <span className="font-mono text-xs font-bold">{formatCountdown(initialDuration)}</span>
+          </button>
+          <button
+            onClick={() => setIsExpanded(true)}
+            aria-label="Expand Rest Timer"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div
         className={`fixed bottom-14 right-3 md:bottom-4 sm:right-4 z-40 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-2 sm:p-2.5 flex items-center gap-2.5 sm:gap-3 transition-all duration-300 hover:border-slate-600 ${className}`}

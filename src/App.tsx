@@ -13,7 +13,7 @@ import {
   WorkoutHistoryModal,
   DailyReadinessWidget,
 } from './lazyView';
-import { clearSessionMarks, isLeftoverFromEarlierDay, sessionLogKeys } from './domain/sessionReset';
+import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
 import {
   WORKOUT_PROGRAM,
   WORKOUT_SESSIONS,
@@ -535,17 +535,35 @@ export function WorkoutAppMain() {
     }
   }, [currentView]);
 
-  // Debounced auto-save of logs to LocalStorage
+  // Debounced auto-save of logs to LocalStorage. A pending save is written right away if the app is
+  // closed, backgrounded or unmounted first, so a set ticked just before leaving is never lost.
+  const pendingLogsRef = useRef<Record<string, SetLogRecord[]> | null>(null);
+  const writeLogsNow = useCallback(() => {
+    if (!pendingLogsRef.current) return;
+    try {
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(pendingLogsRef.current));
+      pendingLogsRef.current = null;
+    } catch (e) {
+      console.warn('Failed to save workout logs:', e);
+    }
+  }, []);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(workoutLogs));
-      } catch (e) {
-        console.warn('Failed to save workout logs:', e);
-      }
-    }, 300);
+    pendingLogsRef.current = workoutLogs;
+    const timer = setTimeout(writeLogsNow, 300);
     return () => clearTimeout(timer);
-  }, [workoutLogs]);
+  }, [workoutLogs, writeLogsNow]);
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') writeLogsNow();
+    };
+    window.addEventListener('pagehide', writeLogsNow);
+    document.addEventListener('visibilitychange', onHide);
+    return () => {
+      window.removeEventListener('pagehide', writeLogsNow);
+      document.removeEventListener('visibilitychange', onHide);
+      writeLogsNow();
+    };
+  }, [writeLogsNow]);
 
   // Audio mute toggle handler
   const handleToggleMute = useCallback(() => {
@@ -1203,10 +1221,8 @@ export function WorkoutAppMain() {
       const today = new Date().toISOString().split('T')[0];
       const completedId = activeSessionId;
       const completedTitle = activeSession.title;
-      const existingHistory = storageManager.getCompletedWorkouts();
-      const alreadySaved = Object.values(existingHistory).some(
-        (s) => s.sessionId === completedId && s.date.startsWith(today)
-      );
+      // compare local calendar days (an evening workout is already "tomorrow" in UTC)
+      const alreadySaved = finishedToday(Object.values(storageManager.getCompletedWorkouts()), completedId);
       if (!alreadySaved) {
         const completedAt = new Date().toISOString();
         const startedAt = sessionStartTimes[completedId] || completedAt;
@@ -1221,12 +1237,13 @@ export function WorkoutAppMain() {
           totalDurationSeconds,
           sessionId: completedId,
           sessionTitle: completedTitle,
-          logs: { ...workoutLogs },
+          logs: pickSessionLogs(activeSession, workoutLogs),
           adherencePercentage: 100,
           completedExercisesCount: sessionExercises.length,
           totalExercisesCount: sessionExercises.length,
           totalVolumeLbs: sessionTelemetry.totalTonnageLbs,
           skippedExercises: [],
+          autoSaved: true,
         };
         storageManager.saveCompletedWorkout(completedRecord);
         autoLogWorkoutToGoogleCalendar(completedRecord);
@@ -1392,7 +1409,7 @@ export function WorkoutAppMain() {
         isCompleted: true,
         repsAchieved: set.repsAchieved > 0 ? set.repsAchieved : parsedTarget,
         weightLbs: set.weightLbs > 0 ? set.weightLbs : (ex.defaultWeightLbs || ex.defaultWeight || 0),
-        notes: set.notes ? set.notes : 'Workout Completed',
+        notes: set.notes || '',
       }));
       finalLogs[ex.id] = updatedLogs;
 
@@ -1401,7 +1418,7 @@ export function WorkoutAppMain() {
           completed: true,
           weight: ex.defaultWeightLbs || ex.defaultWeight || 0,
           reps: parsedTarget,
-          notes: 'Workout Completed',
+          notes: '',
         });
       } catch {
         // non-blocking fallback
@@ -1420,15 +1437,18 @@ export function WorkoutAppMain() {
     const totalDurationSeconds = Math.round(durationMs / 1000);
 
     // Persist completed workout session to history
+    // Update today's auto-saved record (made when the session hit 100%) instead of logging the workout twice
+    const autoSaved = findAutoSavedToday(Object.values(storageManager.getCompletedWorkouts()), completedId);
     const completedRecord: CompletedWorkoutSession = {
-      id: `completed_${completedId}_${Date.now()}`,
+      id: autoSaved?.id || `completed_${completedId}_${Date.now()}`,
+      autoSaved: false,
       date: completedAt,
       startedAt,
       completedAt,
       totalDurationSeconds,
       sessionId: completedId,
       sessionTitle: completedTitle,
-      logs: finalLogs,
+      logs: pickSessionLogs(activeSession, finalLogs),
       adherencePercentage: 100,
       completedExercisesCount: sessionExercises.length,
       totalExercisesCount: sessionExercises.length,
@@ -1514,7 +1534,7 @@ export function WorkoutAppMain() {
       totalDurationSeconds,
       sessionId: activeSessionId,
       sessionTitle: activeSession.title,
-      logs: { ...workoutLogs },
+      logs: pickSessionLogs(activeSession, workoutLogs),
       adherencePercentage: adherence,
       completedExercisesCount: audit.completedExercises.length,
       totalExercisesCount: audit.totalExercises,
@@ -1586,15 +1606,18 @@ export function WorkoutAppMain() {
       const totalDurationSeconds = Math.round(durationMs / 1000);
 
       // Persist completed workout session to history
+      // Update today's auto-saved record (made when the session hit 100%) instead of logging the workout twice
+      const autoSaved = findAutoSavedToday(Object.values(storageManager.getCompletedWorkouts()), completedId);
       const completedRecord: CompletedWorkoutSession = {
-        id: `completed_${completedId}_${Date.now()}`,
+        id: autoSaved?.id || `completed_${completedId}_${Date.now()}`,
+        autoSaved: false,
         date: completedAt,
         startedAt,
         completedAt,
         totalDurationSeconds,
         sessionId: completedId,
         sessionTitle: completedTitle,
-        logs: { ...annotatedLogs },
+        logs: pickSessionLogs(activeSession, annotatedLogs),
         adherencePercentage: Math.round(
           (sessionAuditResult.completedExercises.length / sessionAuditResult.totalExercises) * 100
         ),
@@ -1718,15 +1741,18 @@ export function WorkoutAppMain() {
     const totalDurationSeconds = Math.round(durationMs / 1000);
 
     // Persist completed workout session to history
+    // Update today's auto-saved record (made when the session hit 100%) instead of logging the workout twice
+    const autoSaved = findAutoSavedToday(Object.values(storageManager.getCompletedWorkouts()), completedId);
     const completedRecord: CompletedWorkoutSession = {
-      id: `completed_${completedId}_${Date.now()}`,
+      id: autoSaved?.id || `completed_${completedId}_${Date.now()}`,
+      autoSaved: false,
       date: completedAt,
       startedAt,
       completedAt,
       totalDurationSeconds,
       sessionId: completedId,
       sessionTitle: completedTitle,
-      logs: { ...annotatedLogs },
+      logs: pickSessionLogs(activeSession, annotatedLogs),
       adherencePercentage: Math.round(
         (sessionAuditResult.completedExercises.length / sessionAuditResult.totalExercises) * 100
       ),

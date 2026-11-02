@@ -1144,7 +1144,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               />
             )}
 
-            <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex flex-col min-w-[11rem] flex-1">
               <h2 className="text-lg sm:text-2xl font-bold text-white tracking-tight break-words">
                 {activeExerciseName}
               </h2>

@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:sim": "node -e \"process.env.RUN_SIM='1';require('child_process').execSync('npx vitest run tests/sim --testTimeout=1800000',{stdio:'inherit',env:process.env})\""
   },
   "dependencies": {
     "firebase": "^13.0.0",

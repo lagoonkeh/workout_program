@@ -92,3 +92,31 @@ export function isLeftoverFromEarlierDay(
   );
   return !tickedSince;
 }
+
+const sameLocalDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+/**
+ * The history record saved automatically when this session reached 100% today (local day), if any.
+ * Tapping "Complete & Save" afterwards updates that record instead of logging the workout twice.
+ */
+export function findAutoSavedToday<T extends { id?: string; sessionId: string; date: string; completedAt?: string; autoSaved?: boolean }>(
+  history: T[],
+  sessionId: string,
+  now: Date = new Date()
+): T | undefined {
+  return history.find(
+    (w) => w.sessionId === sessionId && w.autoSaved && sameLocalDay(new Date(w.completedAt || w.date), now)
+  );
+}
+
+/** True if this session already has any history record finished today (local day). */
+export function finishedToday(history: { sessionId: string; date: string; completedAt?: string }[], sessionId: string, now: Date = new Date()): boolean {
+  return history.some((w) => w.sessionId === sessionId && sameLocalDay(new Date(w.completedAt || w.date), now));
+}
+
+/** Only the logs that belong to this session (the app keeps every session's logs side by side). */
+export function pickSessionLogs<T>(session: SessionLike, logs: Record<string, T>): Record<string, T> {
+  const keys = new Set(sessionLogKeys(session));
+  return Object.fromEntries(Object.entries(logs).filter(([k]) => keys.has(k)));
+}

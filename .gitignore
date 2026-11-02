@@ -13,3 +13,4 @@ __pycache__/
 
 # local agent notes (kept on disk, not in the repo)
 .agents/
+_sim/
