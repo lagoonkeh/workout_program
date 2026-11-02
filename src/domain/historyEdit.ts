@@ -38,12 +38,19 @@ export function findExercise(key: string): WorkoutExercise | undefined {
   return byId.get(base) || byName.get(normName(base));
 }
 
+/** Exercises no longer in the program that may still appear in past workouts */
+const RETIRED_NAMES: Record<string, string> = {
+  t2_landmine_meadows_row: 'Landmine Meadows Row',
+};
+
 /** Readable name for a log key, e.g. "Bulgarian Split Squat (Left Side)". */
 export function exerciseDisplayName(key: string): string {
   const side = sideOf(key);
   const ex = findExercise(key);
   const base = ex
     ? ex.name
+    : RETIRED_NAMES[baseKey(key)]
+    ? RETIRED_NAMES[baseKey(key)]
     : baseKey(key).split('_').filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   return side ? `${base} (${side === 'left' ? 'Left' : 'Right'} Side)` : base;
 }

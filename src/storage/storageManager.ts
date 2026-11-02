@@ -1,9 +1,8 @@
-// src/storage/storageManager.ts
+﻿// src/storage/storageManager.ts
 import { MobilityEntry, validateMobilityEntry } from '../domain/mobility';
 import { SkippedExerciseRecord } from '../domain/adaptiveAdjustments';
 
 export const STORAGE_KEY_V1 = 'workout_app_state_v1';
-export const SCHEMA_VERSION = 1 as const;
 
 export interface WorkoutLogEntry {
   completed: boolean;

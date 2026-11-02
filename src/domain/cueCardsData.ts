@@ -57,7 +57,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     rehabRegressions: [
       'Level 1: Barbell Box Squat to parallel (shins perpendicular, zero forward patellar shear).',
-      'Level 2: Landmine Hack Squat (shins angled away from bar to completely offload knees).'
+      'Level 2: Goblet box squat to a high box (upright torso and near-vertical shins offload the knees).'
     ]
   },
   {
@@ -167,7 +167,7 @@ export const CUE_CARDS: CueCard[] = [
       'Hyperextending the lower back at lockout instead of clenching the glutes.'
     ],
     rehabRegressions: [
-      'Regression 1: Landmine RDL (guided arc decreases lower back shear).',
+      'Regression 1: Kettlebell RDL (lighter load and shorter lever decrease lower back shear).',
       'Regression 2: Heavy Kettlebell RDL (35–40 lb KB held between feet).'
     ]
   },
@@ -218,53 +218,53 @@ export const CUE_CARDS: CueCard[] = [
     ]
   },
   {
-    id: 'cue_05_landmine_meadows_row',
-    exerciseId: 't2_landmine_meadows_row',
-    exerciseName: 'Landmine Meadows Row',
-    title: 'Landmine Meadows Row',
+    id: 'cue_05_kb_single_arm_row',
+    exerciseId: 't2_kb_single_arm_row',
+    exerciseName: 'Single-Arm Kettlebell Row',
+    title: 'Single-Arm Kettlebell Row',
     tier: 'T2',
     tempo: '31X1',
     prescribedTempo: '31X1',
     primaryMuscles: ['Latissimus Dorsi', 'Teres Major', 'Rhomboids', 'Posterior Deltoid'],
-    equipment: 'Olympic Barbell & Landmine Attachment',
-    setup: 'Stand perpendicular to loaded end of barbell in staggered stance; front forearm on front knee; grip sleeve with outside hand.',
+    equipment: 'Kettlebell & Flat Bench',
+    setup: 'Same-side knee and hand on the bench, other foot on the floor; flat back, bell hanging under the shoulder.',
     setupInstructions: [
-      'Phase 1 — Stance & Orientation: Position your body perpendicular to the loaded end of the landmine barbell. Adopt a stable staggered stance with the outside foot set back.',
-      'Phase 2 — Torso Support & Hip Hinge: Hinge at the hips with a flat back (approx. 45° torso angle). Rest your inside forearm across your front knee for rock-solid lumbar bracing.',
-      'Phase 3 — Overhand Grip & Dead-Stop Stretch: Grip the thick end sleeve of the barbell with the outside hand using an overhand (pronated) grip. Allow your shoulder blade to fully protract toward the floor for a 1-second dead-stop stretch.',
-      'Phase 4 — Diagonal Elbow Arc Pull (31X1 Tempo): Initiate the pull by driving your elbow backward toward your hip pocket in a sweeping diagonal arc, matching the natural fiber angle of your lower and mid lats.',
-      'Phase 5 — Peak Contraction & Lat Squeeze: Pull until your elbow reaches the plane of your torso. Squeeze your latissimus dorsi and rear delt hard at peak contraction for 1 second. Zero torso rotation or hip jerking.',
-      'Phase 6 — Controlled Negative: Lower the barbell smoothly over 3 seconds back down to the full stretch position before starting the next rep.'
+      'Phase 1 — Brace on the Bench: Put the non-working knee and hand on the bench, hand under the shoulder. Plant the working-side foot on the floor slightly out to the side.',
+      'Phase 2 — Flat Back: Hinge until your torso is close to parallel with the floor. Keep a neutral spine and your head in line with it.',
+      'Phase 3 — Dead-Stop Stretch: Let the bell hang straight down and allow the shoulder blade to reach toward the floor for a 1-second stretch.',
+      'Phase 4 — Elbow to Hip Pocket (31X1 Tempo): Drive the elbow back toward your hip in a slight arc, keeping the forearm vertical.',
+      'Phase 5 — Squeeze: Pause for 1 second with the elbow past the torso and the lat fully contracted. No twisting of the torso.',
+      'Phase 6 — Controlled Negative: Lower the bell over 3 seconds back to the full stretch.'
     ],
     creatorCues: [
       {
         creator: 'Coach Eugene Teo',
-        quote: 'Align your line of pull directly with your lat fibers. Initiate the row by driving your elbow back towards your hip pocket in a sweeping diagonal arc, rather than pulling straight up towards your chest with your biceps.',
-        biomechanicalRationale: 'Standing perpendicular to the landmine matches the diagonal orientation of the lower and mid-lat fibers, allowing the elbow arc to fully shorten the muscle without forearm interference.'
+        quote: 'Pull your elbow toward your back pocket, not straight up to your chest.',
+        biomechanicalRationale: 'A hip-ward arc matches the line of the lower and mid lat fibers, so the lat does the work instead of the upper traps and biceps.'
       },
       {
         creator: 'Jeff Nippard',
-        quote: 'At the bottom of every rep, allow your shoulder blade to fully protract and stretch the lat under load for a full 1-second dead-stop pause before pulling.',
-        biomechanicalRationale: 'Deep stretch under tension promotes stretch-mediated hypertrophy of the latissimus dorsi.'
+        quote: 'Let the shoulder blade fully protract at the bottom of every rep and pause in the stretch.',
+        biomechanicalRationale: 'Loading the lat at long muscle lengths drives stretch-mediated hypertrophy.'
       },
       {
         creator: 'Marcus Filly (FBB)',
-        quote: 'Maintain a stationary torso angle. Zero twisting, jerking, or momentum from your hips or lumbar spine.',
-        biomechanicalRationale: 'Strict unilateral stability forces the obliques and quadratus lumborum to contract isometrically against rotation.'
+        quote: 'Keep the torso still. If you have to twist to finish the rep, the bell is too heavy.',
+        biomechanicalRationale: 'Resisting rotation trains the obliques and quadratus lumborum isometrically.'
       }
     ],
     commonFaults: [
-      'Using torso heave and hip momentum to fling the barbell upward.',
-      'Pulling too high towards the collarbone, engaging upper traps rather than lats.',
-      'Failing to allow the scapula to protract at the bottom, missing the stretch-mediated hypertrophy.'
+      'Twisting the torso open to heave the bell up.',
+      'Pulling toward the armpit or collarbone, shrugging with the upper traps.',
+      'Cutting the bottom short and never reaching the stretch.'
     ],
     rehabRegressions: [
-      'Regression: Two-Handed Landmine T-Bar Row with chest support or straddle.'
+      'Regression: Inverted row under the rack bar (fully supported body, no lower back load).'
     ],
     lengthenedPartialsProtocol: {
-      recommendation: 'After reaching full-ROM fatigue, perform 3–4 bottom-half partial repetitions focusing exclusively on the deep lat stretch.',
-      targetRangeNote: 'From full arm extension/scapular protraction up to mid-shin height, keeping maximum stretch under tension.',
-      scientificRationale: 'Kassiano et al. (2023) & Wolf et al. (2024): Latissimus dorsi fibers demonstrate superior mechanical tension at long muscle lengths when the humerus is stretched anteriorly and diagonally.'
+      recommendation: 'After the last full rep, add 3–4 bottom-half partials focused on the deep lat stretch.',
+      targetRangeNote: 'From the arm hanging straight down to about halfway up.',
+      scientificRationale: 'Kassiano et al. (2023) & Wolf et al. (2024): the lats produce more mechanical tension at long muscle lengths, favouring stretch-focused partials.'
     }
   },
   {
@@ -339,7 +339,7 @@ export const CUE_CARDS: CueCard[] = [
       'Failing to actively shrug the shoulder blades at top lockout.'
     ],
     rehabRegressions: [
-      'Regression: Landmine Half-Kneeling Single-Arm Press (diagonal press arc avoids overhead impingement).'
+      'Regression: Half-Kneeling Single-Arm Kettlebell Press (scapular-plane press avoids overhead impingement).'
     ]
   },
   {

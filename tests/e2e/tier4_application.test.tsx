@@ -59,7 +59,7 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
     const squatWeightInput = screen.getAllByLabelText(/Set 1 Weight \(lbs\)/i)[0];
     fireEvent.change(squatWeightInput, { target: { value: '225' } });
 
-    const squatPlateBtn = screen.getByRole('button', { name: /Calculate plates for 225 lbs/i });
+    const squatPlateBtn = screen.getByRole('button', { name: /Show bar view for 225 lbs/i });
     fireEvent.click(squatPlateBtn);
 
     // Verify plate breakdown on sleeve: [45, 35, 10]
@@ -109,7 +109,7 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
   // =========================================================================
   // Scenario 2: Upper A Horizontal Push/Pull & Shoulder Health
   // =========================================================================
-  it('Scenario 2: Upper A horizontal push/pull & shoulder health (Indian Clubs -> T1 Bench -> T2 Meadows Row -> T3 ER Floor Press -> State Persisted)', () => {
+  it('Scenario 2: Upper A horizontal push/pull & shoulder health (Indian Clubs -> T1 Bench -> T2 Single-Arm KB Row -> T3 ER Floor Press -> State Persisted)', () => {
     render(<App />);
 
     // 1. Switch to Upper A session
@@ -141,10 +141,10 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
     fireEvent.click(benchDone1);
     expect(screen.getByRole('button', { name: /Mark set 1 as incomplete/i })).toBeInTheDocument();
 
-    // 6. T2 Landmine Meadows Row: check biomechanical rationale (Eugene Teo force vector)
+    // 6. T2 Single-Arm Kettlebell Row: check biomechanical rationale (elbow to hip pocket)
     const rowRationaleBtn = screen.getAllByRole('button', { name: /Biomechanical Rationale/i })[1];
     fireEvent.click(rowRationaleBtn);
-    expect(screen.getByText(/Eugene Teo force vector optimization/i)).toBeInTheDocument();
+    expect(screen.getByText(/Driving the elbow back toward the hip pocket/i)).toBeInTheDocument();
 
     // 7. T3 Athlean-X 20 Effective Reps (ER) Floor Press: test short rest-pause cluster preset
     const floorPressRestBtn = screen.getAllByTitle(/Start \d+s rest timer/i)[2];

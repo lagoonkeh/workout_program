@@ -155,7 +155,7 @@ describe('ExerciseDiagram Component', () => {
       'step_down',
       'core_mcgill',
       'bench_press',
-      'row',
+      'kb_row',
       'floor_press',
       'face_pull',
       'dead_hang',

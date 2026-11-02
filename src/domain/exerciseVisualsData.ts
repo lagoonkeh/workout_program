@@ -7,7 +7,7 @@ export type DiagramType =
   | 'step_down'
   | 'core_mcgill'
   | 'bench_press'
-  | 'row'
+  | 'kb_row'
   | 'floor_press'
   | 'face_pull'
   | 'dead_hang'
@@ -177,25 +177,25 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     safetyNote: 'Scapular centration protects rotator cuff and anterior shoulder capsule.'
   },
 
-  t2_landmine_meadows_row: {
-    id: 't2_landmine_meadows_row',
-    exerciseName: 'Landmine Meadows Row',
-    diagramType: 'row',
-    startPositionLabel: '1. Staggered Hinge & Full Lat Stretch',
-    bottomPositionLabel: '2. Elbow Drive Toward Hip Pocket',
-    caption: 'John Meadows row: perpendicular staggered stance, overhand grip on sleeve, pulling elbow to hip.',
+  t2_kb_single_arm_row: {
+    id: 't2_kb_single_arm_row',
+    exerciseName: 'Single-Arm Kettlebell Row',
+    diagramType: 'kb_row',
+    startPositionLabel: '1. Braced on Bench, Arm Long',
+    bottomPositionLabel: '2. Elbow Driven to the Hip Pocket',
+    caption: 'Knee and hand on the bench, flat back, row the bell toward the hip without twisting.',
     keyCues: [
-      'Staggered stance with hip hinged at 45–60 degrees',
-      'Pull elbow up and back toward the rear hip pocket, not the ceiling',
-      'Allow scapula to protract at bottom for full lat stretch',
-      'Keep wrist neutral and avoid curling the barbell'
+      'Hand and knee on the bench, flat back near parallel to the floor',
+      'Pull the elbow back toward the hip pocket, not up to the chest',
+      'Let the shoulder blade reach down at the bottom for a full stretch',
+      'Torso stays still: no twisting to finish the rep'
     ],
     jointAngleCues: {
-      start: 'Full lat stretch with straight arm',
-      bottom: '90° elbow bend with lat fully contracted'
+      start: 'Arm straight, lat stretched',
+      bottom: 'Elbow past the torso, about 90 degrees bent'
     },
-    trajectoryNote: 'Arcing pull following the natural curved pivot radius of the landmine.',
-    safetyNote: 'Line of pull follows the latissimus dorsi muscle fibers directly into the iliac crest.'
+    trajectoryNote: 'The bell travels up and slightly back in an arc toward the hip.',
+    safetyNote: 'The braced hand and knee keep the lower back unloaded.'
   },
 
   t3_kb_floor_press_er: {

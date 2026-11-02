@@ -61,7 +61,7 @@ describe('Tier 3: Cross-Feature Combinations', () => {
     fireEvent.change(weightInput, { target: { value: '225' } });
 
     // Click plate calculator shortcut button next to weight input
-    const plateShortcutBtn = screen.getByRole('button', { name: /Calculate plates for 225 lbs/i });
+    const plateShortcutBtn = screen.getByRole('button', { name: /Show bar view for 225 lbs/i });
     fireEvent.click(plateShortcutBtn);
 
     // Should open inline plate calculator with 225 lbs prefilled

@@ -29,6 +29,7 @@ import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { TempoMetronome, MetronomeSnapshot } from '../timer/tempoMetronome';
 import { audioSynthesizer } from '../audio/audioSynthesizer';
 import { PlateCalculatorWidget } from './PlateCalculatorWidget';
+import { PlateLoadStrip, platesPerSideText } from './PlateLoadStrip';
 import { RatingDefinitionsModal, RatingCategoryTab } from './RatingDefinitionsModal';
 import { SkipExerciseReasonModal } from './SkipExerciseReasonModal';
 
@@ -206,6 +207,21 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
       setPlateCalcWeight(logs[0].weightLbs);
     }
   }, [logs[0]?.weightLbs, showPlateCalculator]);
+
+  // Working weights on this card (in set order), shown with their plates per side
+  const plateWeights = React.useMemo(() => {
+    const ws = Array.from(new Set(logs.map((l) => l.weightLbs).filter((w) => w > 0)));
+    return ws.length ? ws : exercise.defaultWeightLbs ? [exercise.defaultWeightLbs] : [];
+  }, [logs, exercise.defaultWeightLbs]);
+  const toggleBarView = (w: number) => {
+    if (showPlateCalculator && plateCalcWeight === w) {
+      setShowPlateCalculator(false);
+      return;
+    }
+    setPlateCalcWeight(w);
+    setShowPlateCalculator(true);
+    onOpenPlateCalculator?.(w);
+  };
 
   // Dr. Stuart McGill Big 3 state & 10s isometric hold countdown
   const isMcGillBig3 = exercise.id === 't3_mcgill_big_3' || exercise.name.toLowerCase().includes('mcgill');
@@ -1317,24 +1333,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               </button>
             )}
 
-            {isBarbell && (
-              <button
-                type="button"
-                data-testid={`barbell-plates-toggle-${exercise.id}`}
-                onClick={() => setShowPlateCalculator((prev) => !prev)}
-                aria-expanded={showPlateCalculator}
-                aria-label={`Toggle plate loading calculator for ${exercise.name}`}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-xl border text-xs font-medium cursor-pointer transition-colors ${
-                  showPlateCalculator
-                    ? 'bg-red-500/20 text-red-300 border-red-500/50 ring-1 ring-red-500/30'
-                    : 'bg-slate-800/80 hover:bg-slate-700 text-red-300/90 border-slate-700/80'
-                }`}
-                title="Calculate barbell plate loading per side"
-              >
-                <Disc className="w-3.5 h-3.5 text-red-400" />
-                <span>Plate Calculator</span>
-              </button>
-            )}
 
             <button
               type="button"
@@ -1573,25 +1571,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     <span className="text-[10px] font-mono uppercase text-amber-400 font-bold">
                       W{wStage.stage} · {wStage.pct}
                     </span>
-                    {isBarbell && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPlateCalcWeight(wStage.weightLbs);
-                          setShowPlateCalculator(true);
-                          onOpenPlateCalculator?.(wStage.weightLbs);
-                        }}
-                        aria-label={`Calculate warm-up plates for ${wStage.weightLbs} lbs`}
-                        className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer min-w-[28px] min-h-[28px] flex items-center justify-center transition-colors"
-                        title={`View plates for ${wStage.weightLbs} lbs`}
-                      >
-                        <Disc className="w-3.5 h-3.5 text-red-400" />
-                      </button>
-                    )}
                   </div>
                   <div className="font-mono font-bold text-sm text-white">
                     {wStage.weightLbs} lbs × {wStage.reps}
                   </div>
+                  {isBarbell && (
+                    <div className="text-[10px] font-mono text-slate-400" data-testid={`warmup-plates-${wStage.stage}`}>
+                      per side: {platesPerSideText(wStage.weightLbs)}
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -1614,6 +1602,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             })}
           </div>
         </div>
+      )}
+
+      {isBarbell && (
+        <PlateLoadStrip
+          exerciseId={exercise.id}
+          weights={plateWeights}
+          openWeight={showPlateCalculator ? plateCalcWeight : null}
+          onToggleVisual={toggleBarView}
+        />
       )}
 
       {/* Inline Barbell Plate Loading Calculator Drawer (Only for Barbell Movements) */}
@@ -2343,21 +2340,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         step="5"
                         min="0"
                       />
-                      {isBarbell && set.weightLbs > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPlateCalcWeight(set.weightLbs);
-                            setShowPlateCalculator(true);
-                            onOpenPlateCalculator?.(set.weightLbs);
-                          }}
-                          className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer hidden xs:flex items-center justify-center min-w-[28px] min-h-[28px] transition-colors"
-                          title="Calculate barbell plates for this weight"
-                          aria-label={`Calculate plates for ${set.weightLbs} lbs`}
-                        >
-                          <Disc className="w-3.5 h-3.5 text-red-400" />
-                        </button>
-                      )}
                     </div>
                   )}
                 </td>

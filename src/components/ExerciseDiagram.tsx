@@ -52,7 +52,7 @@ const TRAIL_SAMPLES = 48;
 const FAR_OFFSET: Vec = [3.5, -2.5];
 
 function propCenter(p: PropDef, sk: Skeleton): Vec {
-  if (p.kind === 'cable' || p.kind === 'landmine') return sk[p.at];
+  if (p.kind === 'cable') return sk[p.at];
   if (p.kind === 'club') {
     const a = angleOf(sk[p.from], sk[p.at]);
     return polar(sk[p.at], a, p.len);
@@ -227,17 +227,6 @@ function Prop({ p, sk, ids }: { p: PropDef; sk: Skeleton; ids: string }) {
           <rect x={c[0] - 3} y={c[1] - 3} width={6} height={6} rx={1.5} fill="#e5e7eb" stroke="#475569" strokeWidth={0.8} />
         </g>
       );
-    case 'landmine': {
-      const a = angleOf(p.pivot, c);
-      const end = polar(c, a, p.overhang);
-      return (
-        <g>
-          <line x1={p.pivot[0]} y1={p.pivot[1]} x2={end[0]} y2={end[1]} stroke="#94a3b8" strokeWidth={3.5} strokeLinecap="round" />
-          <circle cx={end[0]} cy={end[1]} r={11} fill={`url(#${ids}-plate)`} stroke="#78350f" strokeWidth={1} />
-          <circle cx={p.pivot[0]} cy={p.pivot[1]} r={3} fill={COLORS.steel} />
-        </g>
-      );
-    }
   }
 }
 
@@ -355,7 +344,7 @@ export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, id
   const farProps = motion.props.filter((p) => 'at' in p && /F$/.test(p.at));
   const nearProps = motion.props.filter((p) => !farProps.includes(p));
   // bar on the back sits behind the near arm; held implements sit in front
-  const behind = nearProps.filter((p) => 'at' in p && (p.at === 'neck' || p.kind === 'cable' || p.kind === 'landmine'));
+  const behind = nearProps.filter((p) => 'at' in p && (p.at === 'neck' || p.kind === 'cable'));
   const front = nearProps.filter((p) => !behind.includes(p));
 
   return (

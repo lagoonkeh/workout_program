@@ -67,7 +67,7 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       expect(screen.getAllByText(/^BODYWEIGHT$/i).length).toBeGreaterThanOrEqual(1);
 
       fireEvent.click(screen.getByRole('button', { name: /Upper A/i }));
-      expect(screen.getAllByText(/^LANDMINE$/i).length).toBeGreaterThanOrEqual(1);
+      expect(screen.queryAllByText(/^LANDMINE$/i)).toHaveLength(0);
       expect(screen.getAllByText(/PULL UP/i).length).toBeGreaterThanOrEqual(1);
     });
   });
@@ -475,7 +475,7 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
 
       expect(screen.getAllByText(/Horizontal Push\/Pull & Shoulder Health/i).length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/Barbell Bench Press/i)).toBeInTheDocument();
-      expect(screen.getByText(/Landmine Meadows Row/i)).toBeInTheDocument();
+      expect(screen.getByText(/Single-Arm Kettlebell Row/i)).toBeInTheDocument();
     });
 
     it('F9.2: switches seamlessly to Lower B session with posterior chain exercises', () => {

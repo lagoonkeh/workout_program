@@ -79,9 +79,9 @@ const EXERCISE_MUSCLE_MAP: Record<string, string[]> = {
   // Upper B
   t1_bb_bench_press: ['chest', 'shoulders', 'triceps'],
   t1_bench_press: ['chest', 'shoulders', 'triceps'],
-  t2_landmine_meadows_row: ['lats', 'traps', 'biceps'],
   t2_barbell_row: ['lats', 'traps', 'biceps'],
   t2_incline_dumbbell_press: ['chest', 'shoulders', 'triceps'],
+  t2_kb_single_arm_row: ['lats', 'traps', 'biceps'],
   t3_kb_floor_press_er: ['chest', 'triceps', 'shoulders'],
   t3_push_up: ['chest', 'triceps', 'shoulders'],
   t3_athlean_face_pull: ['shoulders', 'traps'],

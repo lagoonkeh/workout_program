@@ -37,7 +37,7 @@ import { MuscleHeatmapWidget } from './components/MuscleHeatmapWidget';
 import { AdaptiveBodyCoachWidget } from './components/AdaptiveBodyCoachWidget';
 import { ExerciseDiagram } from './components/ExerciseDiagram';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
-import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, History, X } from 'lucide-react';
+import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X } from 'lucide-react';
 import {
   scanLastWorkout,
   LastWorkoutScanResult,
@@ -503,17 +503,13 @@ export function WorkoutAppMain() {
 
   // 4d. Scanned Last Workout & Suggested Session
   const [scannedWorkoutInfo, setScannedWorkoutInfo] = useState<LastWorkoutScanResult | null>(null);
-  const [isScanningLastWorkout, setIsScanningLastWorkout] = useState<boolean>(false);
 
   const handleScanLastWorkout = useCallback(async () => {
-    setIsScanningLastWorkout(true);
     try {
       const result = await scanLastWorkout(workoutLogs, activeSessionId);
       setScannedWorkoutInfo(result);
     } catch (err) {
       console.warn('[App] Error scanning last workout:', err);
-    } finally {
-      setIsScanningLastWorkout(false);
     }
   }, [workoutLogs, activeSessionId]);
 
@@ -1888,8 +1884,6 @@ export function WorkoutAppMain() {
     [sessionExercises, activeSession.dailyCoreFinisher]
   );
 
-  const [isSummaryCardCollapsed, setIsSummaryCardCollapsed] = useState<boolean>(false);
-
   // Identify the current active (first uncompleted) exercise and warmup drill for Focus Mode
   const activeFocusExerciseId = useMemo(() => {
     const firstUncompleted = sessionExercises.find((ex) => {
@@ -2138,67 +2132,6 @@ export function WorkoutAppMain() {
               onToggleAutoHideCompleted={handleToggleAutoHideCompletedSessions}
             />
 
-            {/* Last Workout Scanned & Smart Session Suggestion Banner */}
-            {scannedWorkoutInfo && (
-              <div
-                data-testid="last-workout-scanner-banner"
-                className="w-full max-w-7xl mx-auto px-2 sm:px-4 pt-2.5"
-              >
-                <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-900/90 border border-slate-800 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/30 shrink-0">
-                      <Sparkles className="w-4 h-4 text-sky-400" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-white uppercase tracking-wider text-[11px]">
-                          Smart Session Recommender:
-                        </span>
-                        {scannedWorkoutInfo.lastWorkout ? (
-                          <span className="text-slate-300">
-                            Last session scanned: <strong className="text-sky-300">{scannedWorkoutInfo.lastWorkout.sessionTitle}</strong> ({scannedWorkoutInfo.lastWorkout.date} · {scannedWorkoutInfo.daysAgo === 0 ? 'Today' : `${scannedWorkoutInfo.daysAgo}d ago`})
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">No prior workouts logged yet</span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Suggested for Today: <strong className="text-emerald-300">{scannedWorkoutInfo.suggestedNextSession.title}</strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    {activeSessionId !== scannedWorkoutInfo.suggestedNextSession.id && (
-                      <button
-                        type="button"
-                        data-testid="switch-to-suggested-session-btn"
-                        onClick={() => {
-                          setActiveSessionId(scannedWorkoutInfo.suggestedNextSession.id);
-                          storageManager.saveImmediate({ activeSessionId: scannedWorkoutInfo.suggestedNextSession.id });
-                        }}
-                        className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 min-h-[44px]"
-                      >
-                        <span>Switch to Suggested ➔</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      data-testid="rescan-last-workout-btn"
-                      onClick={handleScanLastWorkout}
-                      disabled={isScanningLastWorkout}
-                      title="Rescan last workout from Google Sheets / Storage"
-                      aria-label="Rescan last workout"
-                      className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5 min-h-[44px]"
-                    >
-                      <RotateCcw className={`w-3.5 h-3.5 text-slate-400 ${isScanningLastWorkout ? 'animate-spin' : ''}`} />
-                      <span>{isScanningLastWorkout ? 'Scanning...' : 'Rescan'}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Session Completion Celebration Toast */}
             {sessionCompletionToast && (
               <aside
@@ -2246,19 +2179,8 @@ export function WorkoutAppMain() {
                     </button>
                     <button
                       type="button"
-                      data-testid="toast-daily-abs-btn"
                       onClick={() => {
-                        setActiveSessionId('daily_abs');
-                        setSessionCompletionToast(null);
-                      }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold cursor-pointer flex items-center gap-1"
-                    >
-                      <span>🔥 Daily Abs ➔</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentView('mobility');
+                        setCurrentView('stretching');
                         setSessionCompletionToast(null);
                       }}
                       className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold cursor-pointer"
@@ -2279,16 +2201,6 @@ export function WorkoutAppMain() {
             )}
 
             <div className="px-1 sm:px-3 md:px-6 py-2 sm:py-5 w-full max-w-7xl mx-auto">
-              {/* Adaptive Body Feeling & Mobility Coach Widget */}
-              <AdaptiveBodyCoachWidget
-                activeSession={activeSession}
-                history={Object.values(completedWorkouts)}
-                appliedAdaptations={programAdaptations}
-                onApplyAdaptations={handleApplyWeeklyAdaptations}
-                onResetAdaptations={handleResetWeeklyAdaptations}
-                className="mb-3 sm:mb-5"
-              />
-
               {/* Session Overview Card (Collapsible) */}
               {isSessionOverviewCollapsed ? (
                 /* Collapsed Session Header Summary */
@@ -2415,17 +2327,6 @@ export function WorkoutAppMain() {
                         <span>{isFocusMode ? 'Focus: ON' : 'Focus Mode'}</span>
                       </button>
 
-                      <button
-                        type="button"
-                        data-testid="session-overview-history-btn"
-                        onClick={() => setIsWorkoutHistoryModalOpen(true)}
-                        title="Review and edit past workout logs or delete sessions"
-                        aria-label="Open Workout History"
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-                      >
-                        <History className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>History</span>
-                      </button>
 
                       <button
                         type="button"
@@ -2535,22 +2436,6 @@ export function WorkoutAppMain() {
                       <span>~{activeSession.estimatedDurationMinutes} Minutes</span>
                     </div>
 
-                    {/* Weekly Evaluation / Coach Trigger */}
-                    <button
-                      type="button"
-                      onClick={() => setIsWeeklyModalOpen(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-mono text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
-                      title="Evaluate weekly data & comments to adapt workouts"
-                      aria-label="Evaluate weekly performance and adapt workouts"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="hidden xs:inline">Evaluate Week</span>
-                      {weeklyEvaluation.adaptations.length > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-bold">
-                          {weeklyEvaluation.adaptations.length}
-                        </span>
-                      )}
-                    </button>
 
                     <button
                       type="button"
@@ -2562,85 +2447,6 @@ export function WorkoutAppMain() {
                       <RotateCcw className="w-4 h-4" />
                     </button>
                   </div>
-
-                  {/* Celebratory Session Complete Scorecard (Hevy / Boostcamp inspired) */}
-                  {currentSessionCompletion === 100 && (
-                    <div
-                      data-testid="session-summary-card"
-                      className="mt-3.5 rounded-xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-amber-950/40 border border-emerald-500/40 overflow-hidden shadow-md"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setIsSummaryCardCollapsed((prev) => !prev)}
-                        aria-expanded={!isSummaryCardCollapsed}
-                        aria-label={isSummaryCardCollapsed ? 'Expand session complete summary' : 'Collapse session complete summary'}
-                        className="w-full flex items-center justify-between px-3.5 py-2.5 text-left cursor-pointer hover:bg-emerald-900/20 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
-                          <span className="text-xs sm:text-sm font-bold text-emerald-200">
-                            Session Complete! {activeSession.title} Scorecard
-                          </span>
-                        </div>
-                        {isSummaryCardCollapsed ? (
-                          <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
-                        ) : (
-                          <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
-                        )}
-                      </button>
-                      {!isSummaryCardCollapsed && (
-                        <div className="px-3.5 pb-3 pt-1 border-t border-emerald-500/20 grid grid-cols-3 gap-2 text-center">
-                          <div className="bg-slate-950/70 rounded-lg p-2 border border-slate-800">
-                            <div className="text-[10px] uppercase tracking-wider text-slate-400">Sets Logged</div>
-                            <div className="text-sm font-mono font-bold text-emerald-300">
-                              {sessionStats[activeSessionId]?.completedSets || 0}/{sessionStats[activeSessionId]?.totalSets || 0}
-                            </div>
-                          </div>
-                          <div className="bg-slate-950/70 rounded-lg p-2 border border-slate-800">
-                            <div className="text-[10px] uppercase tracking-wider text-slate-400">Volume Tonnage</div>
-                            <div className="text-sm font-mono font-bold text-cyan-300">
-                              {sessionTelemetry.totalTonnageLbs.toLocaleString()} lbs
-                            </div>
-                          </div>
-                          <div className="bg-slate-950/70 rounded-lg p-2 border border-slate-800">
-                            <div className="text-[10px] uppercase tracking-wider text-slate-400">Top e1RM / PRs</div>
-                            <div className="text-sm font-mono font-bold text-amber-300">
-                              {sessionTelemetry.topE1RM > 0 ? `${sessionTelemetry.topE1RM} lbs` : 'BW'} ({sessionTelemetry.prCount} PRs)
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Athlean-X Daily Abs Finisher Prompt */}
-                  {currentSessionCompletion === 100 && activeSessionId !== 'daily_abs' && (
-                    <div
-                      data-testid="daily-abs-finisher-prompt"
-                      className="mt-3.5 p-3 rounded-xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-rose-950/30 border border-amber-500/30 flex items-center justify-between gap-3 flex-wrap shadow-md"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-xl shrink-0">🔥</span>
-                        <div>
-                          <div className="text-xs sm:text-sm font-bold text-amber-200">
-                            Athlean-X Daily Abs Finisher (6 Min)
-                          </div>
-                          <div className="text-[11px] text-slate-400">
-                            Jeff Cavaliere kinetic sequence: Bottom-Up ➔ Rotational ➔ Top-Down ➔ Plank
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        data-testid="start-daily-abs-finisher-btn"
-                        onClick={() => setActiveSessionId('daily_abs')}
-                        className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 shrink-0 shadow-sm"
-                      >
-                        <span>Start Daily Abs</span>
-                        <span>➔</span>
-                      </button>
-                    </div>
-                  )}
 
                   {/* Active Program Adaptations Banner */}
                   {Object.keys(programAdaptations).length > 0 && (
@@ -3306,16 +3112,6 @@ export function WorkoutAppMain() {
                         </span>
                       </button>
 
-                      {currentSessionCompletion === 100 && (
-                        <button
-                          type="button"
-                          data-testid="move-to-next-session-btn"
-                          onClick={handleToggleWorkoutCompleted}
-                          className="px-4 py-3 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-400 text-slate-950 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95"
-                        >
-                          Next Workout ➔
-                        </button>
-                      )}
                     </div>
                   </div>
 
@@ -3365,29 +3161,6 @@ export function WorkoutAppMain() {
                         className="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
                       >
                         <span>🧘 Post-Workout Stretching ➔</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentView('readiness')}
-                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
-                      >
-                        <span>📝 Daily Check-In</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleManualSyncToSheets}
-                        disabled={isSyncing}
-                        className="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50"
-                      >
-                        <span>☁ Sync to Sheets</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleResetSessionLogs}
-                        className="px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs cursor-pointer transition-colors"
-                        title="Reset session logs"
-                      >
-                        <span>↺ Reset Session</span>
                       </button>
                     </div>
                   </div>

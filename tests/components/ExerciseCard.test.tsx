@@ -154,8 +154,9 @@ describe('ExerciseCard Component', () => {
       />
     );
 
-    const plateCalcBtn = screen.getAllByTitle(/Calculate barbell plates for this weight/i)[0];
-    fireEvent.click(plateCalcBtn);
+    // plates are shown without tapping anything; "Bar view" opens the full loader
+    expect(screen.getByTestId('plate-load-t1_bb_squat-185')).toHaveTextContent(/185 lb.*45.*25/);
+    fireEvent.click(screen.getByRole('button', { name: /Show bar view for 185 lbs/i }));
     expect(plateCalcMock).toHaveBeenCalledWith(185);
   });
 
@@ -497,10 +498,9 @@ describe('ExerciseCard Component', () => {
     fireEvent.click(stage1Check);
     expect(restMock).toHaveBeenCalledWith(60);
 
-    // Click Plates on Warm-Up Stage 2 (50% of 185 = 95 lbs)
-    const stage2Plates = screen.getByRole('button', { name: /Calculate warm-up plates for 95 lbs/i });
-    fireEvent.click(stage2Plates);
-    expect(plateMock).toHaveBeenCalledWith(95);
+    // Warm-Up Stage 2 (50% of 185 = 95 lbs) shows its plates per side right on the card
+    expect(screen.getByTestId('warmup-plates-2')).toHaveTextContent('per side: 25');
+    void plateMock;
   });
 
   it('toggles 1-Tap RPE & Knee Pain Quick-Chips on the active set notes', () => {
@@ -966,7 +966,7 @@ describe('ExerciseCard Component', () => {
 
       const toggleBtn = screen.getByTestId('barbell-plates-toggle-t1_bb_squat');
       expect(toggleBtn).toBeInTheDocument();
-      expect(toggleBtn).toHaveTextContent(/Plate Calculator/i);
+      expect(toggleBtn).toHaveTextContent(/Bar view/i);
 
       // Initially closed
       expect(screen.queryByTestId('inline-plate-calculator-t1_bb_squat')).not.toBeInTheDocument();
@@ -982,7 +982,7 @@ describe('ExerciseCard Component', () => {
       expect(screen.queryByTestId('inline-plate-calculator-t1_bb_squat')).not.toBeInTheDocument();
     });
 
-    it('opens inline plate calculator when disc button on a set row is clicked', () => {
+    it('shows plates for each working weight without tapping, and opens the bar view for one', () => {
       render(
         <ExerciseCard
           exercise={mockExercise}
@@ -994,8 +994,8 @@ describe('ExerciseCard Component', () => {
         />
       );
 
-      const setPlateBtn = screen.getAllByLabelText(/Calculate plates for 185 lbs/i)[0];
-      fireEvent.click(setPlateBtn);
+      expect(screen.getByTestId('plate-load-strip-t1_bb_squat')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: /Show bar view for 185 lbs/i }));
 
       expect(screen.getByTestId('inline-plate-calculator-t1_bb_squat')).toBeInTheDocument();
       expect(screen.getAllByText(/185 lbs/i).length).toBeGreaterThanOrEqual(1);

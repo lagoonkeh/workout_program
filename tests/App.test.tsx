@@ -1,6 +1,6 @@
 // tests/App.test.tsx
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import App from '../src/App';
 import { storageManager } from '../src/storage/storageManager';
 import { restTimerSingleton } from '../src/timer/restTimerSingleton';
@@ -275,7 +275,7 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     expect(firstSetRepsInput.value).toBe('3');
   });
 
-  it('updates live session volume tonnage and renders celebratory scorecard upon session completion', () => {
+  it('updates live session volume tonnage and shows the totals in the completion card when done', () => {
     render(<App />);
 
     // Initially 0 tonnage badge is hidden
@@ -293,18 +293,10 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     const completeAllExButtons = screen.getAllByRole('button', { name: /Mark entire exercise .* as complete/i });
     completeAllExButtons.forEach((btn) => fireEvent.click(btn));
 
-    // Celebratory Session Complete Scorecard appears
-    expect(screen.getByTestId('session-summary-card')).toBeInTheDocument();
-    expect(screen.getByText(/Session Complete! Lower A Scorecard/i)).toBeInTheDocument();
-    expect(screen.getByText(/Volume Tonnage/i)).toBeInTheDocument();
-
-    // Collapse and expand scorecard
-    const toggleScorecardBtn = screen.getByRole('button', { name: /Collapse session complete summary/i });
-    fireEvent.click(toggleScorecardBtn);
-    expect(screen.queryByText(/Volume Tonnage/i)).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Expand session complete summary/i }));
-    expect(screen.getByText(/Volume Tonnage/i)).toBeInTheDocument();
+    // The completion card at the end carries the totals (no second scorecard at the top)
+    expect(screen.queryByTestId('session-summary-card')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workout-completion-badge')).toHaveTextContent(/100 \/ 100 Done/i);
+    expect(within(screen.getByTestId('workout-completion-card')).getByText(/Total Volume/i)).toBeInTheDocument();
   });
 
   it('switches to Readiness view and renders DailyReadinessWidget with check-in controls', () => {
@@ -435,7 +427,8 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
 
     // Badge on Lower A confirms 100 Done
     expect(screen.getByTestId('workout-completion-badge')).toHaveTextContent(/100 Done/i);
-    expect(screen.getByTestId('move-to-next-session-btn')).toBeInTheDocument();
+    // one finish button only ("Next Workout" did the same thing and was removed)
+    expect(screen.queryByTestId('move-to-next-session-btn')).not.toBeInTheDocument();
 
     // Post-workout shortcuts are available
     const stretchShortcutBtn = screen.getByRole('button', { name: /Post-Workout Stretching ➔/i });

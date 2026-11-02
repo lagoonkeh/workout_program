@@ -507,12 +507,10 @@ describe('Adversarial M3 Challenger 1: Workout Logging & UI Component Layer', ()
     it('navigates seamlessly from ExerciseCard plate icon directly to Barbell Plate Calculator view with target weight', () => {
       render(<App />);
 
-      // Find barbell plate calculator launcher button on Barbell Back Squat
-      const plateCalcButtons = screen.getAllByTitle(/Calculate barbell plates for this weight/i);
-      expect(plateCalcButtons.length).toBeGreaterThan(0);
-
-      // Click to launch plate calculator for 185 lbs
-      fireEvent.click(plateCalcButtons[0]);
+      // Plates are already shown on the Barbell Back Squat card; "Bar view" opens the full loader for 185 lbs
+      const barViewButtons = screen.getAllByRole('button', { name: /Show bar view for 185 lbs/i });
+      expect(barViewButtons.length).toBeGreaterThan(0);
+      fireEvent.click(barViewButtons[0]);
 
       // Renders PlateCalculatorWidget inline on the card
       expect(screen.getByText(/Barbell Plate Loading Calculator/i)).toBeInTheDocument();

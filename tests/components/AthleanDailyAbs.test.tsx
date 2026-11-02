@@ -215,7 +215,7 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
       expect(screen.getByText(/Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace/i)).toBeInTheDocument();
     });
 
-    it('launches Athlean-X Daily Abs directly via completion toast when workout is marked completed', () => {
+    it('does not offer a separate Daily Abs session after a workout: the finisher is already in every workout', () => {
       render(<App />);
 
       // Mark the active workout (Lower A) as completed via 1-tap button
@@ -228,13 +228,13 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
         fireEvent.click(modalConfirmBtn);
       }
 
-      // The toast contains the Daily Abs finisher button
-      const toastAbsBtn = screen.getByTestId('toast-daily-abs-btn');
-      expect(toastAbsBtn).toBeInTheDocument();
-      fireEvent.click(toastAbsBtn);
+      // The toast no longer duplicates the in-workout finisher with a "Daily Abs" button
+      expect(screen.getByTestId('session-completion-toast')).toBeInTheDocument();
+      expect(screen.queryByTestId('toast-daily-abs-btn')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('daily-abs-finisher-prompt')).not.toBeInTheDocument();
 
-      // Successfully switched to daily_abs
-      expect(screen.getAllByText(/Athlean-X Daily Abs/i).length).toBeGreaterThan(0);
+      // The next workout carries the Daily Core Finisher itself
+      expect(screen.getByTestId('daily-core-finisher-section')).toBeInTheDocument();
     });
   });
 

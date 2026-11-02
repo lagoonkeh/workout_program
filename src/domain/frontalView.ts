@@ -110,7 +110,7 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     track: { joint: 'hand', side: 'N', label: 'Bar stays level' },
     cue: 'Bar level, elbows ~45° — not flared to 90°',
   },
-  row: {
+  kb_row: {
     view: 'back', label: 'Back',
     lat: { hand: { N: [12, 13], F: 14 }, elbow: { N: [12, 17], F: 15 }, scap: { N: [11, 7], F: 9 }, knee: { N: 9, F: 11 }, ankle: { N: 10, F: 13 } },
     props: [{ kind: 'kettlebell', side: 'N', d: [0, 6] }],

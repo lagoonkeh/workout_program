@@ -1,4 +1,4 @@
-// src/domain/motionLibrary.ts
+﻿// src/domain/motionLibrary.ts
 /**
  * Keyframed side-view demonstrations for every DiagramType. Lifter faces right, floor at y = 180.
  * Feet and hands use IK targets, so planted contacts stay put and bars follow a real path.
@@ -14,7 +14,6 @@ export type PropDef =
   | { kind: 'dumbbell'; at: JointId; d?: Vec }
   | { kind: 'club'; at: JointId; from: JointId; len: number }
   | { kind: 'cable'; anchor: Vec; at: JointId }
-  | { kind: 'landmine'; pivot: Vec; at: JointId; overhang: number };
 
 export type SceneryDef =
   | { kind: 'rect'; x: number; y: number; w: number; h: number; r?: number; tone?: 'pad' | 'steel' | 'wall' | 'plate' }
@@ -34,7 +33,7 @@ export interface MotionDef {
   track: TrackRef;
   trackLabel: string;
   angle?: { joints: [JointId, JointId, JointId]; label: string };
-  /** x of a vertical reference line (bar over mid-foot, stacked joints…) */
+  /** x of a vertical reference line (bar over mid-foot, stacked jointsâ€¦) */
   plumb?: { x: number; label: string };
   startCue: string;
   endCue: string;
@@ -168,30 +167,30 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     trackLabel: 'J-curve bar path',
     angle: { joints: ['neck', 'elbowN', 'handN'], label: 'Elbow' },
     startCue: 'Bar stacked over shoulders',
-    endCue: 'Touch lower sternum, elbows ~45°',
+    endCue: 'Touch lower sternum, elbows ~45Â°',
   },
 
-  row: {
-    title: 'Landmine Meadows row',
+  kb_row: {
+    title: 'Single-arm kettlebell row',
     order: 'concentric-first',
     frames: two(
       {
-        hip: [80, 106], torso: -24, head: -12, armN: to(126, 140, -1), armF: to(116, 124, 1),
-        legN: to(100, 176), legF: to(62, 176),
+        hip: [80, 100], torso: -6, head: 8, armN: to(130, 146.4, 1), armF: to(134, 139, 1),
+        legN: to(92, 176), legF: ang(92, 180), footF: 180,
       },
       {
-        hip: [80, 106], torso: -26, head: -14, armN: to(110, 106, -1), armF: to(116, 124, 1),
-        legN: to(100, 176), legF: to(62, 176),
+        hip: [80, 100], torso: -6, head: 8, armN: to(108, 104, -1), armF: to(134, 139, 1),
+        legN: to(92, 176), legF: ang(92, 180), footF: 180,
       }
     ),
-    props: [{ kind: 'landmine', pivot: [186, 178], at: 'handN', overhang: 10 }],
-    scenery: [],
+    props: [{ kind: 'kettlebell', at: 'handN', d: [0, 9] }],
+    scenery: benchScenery(56, 140, 96),
     worked: ['uaN', 'torso'],
     track: { joint: 'handN' },
-    trackLabel: 'Hand arc',
+    trackLabel: 'Bell path',
     angle: { joints: ['neck', 'elbowN', 'handN'], label: 'Elbow' },
-    startCue: 'Hinge, long arm, lats stretched',
-    endCue: 'Elbow to back pocket',
+    startCue: 'Flat back, arm long, lat stretched',
+    endCue: 'Elbow to hip pocket, no twist',
   },
 
   floor_press: {
@@ -283,7 +282,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
   },
 
   biering_sorensen: {
-    title: 'Biering-Sørensen hold',
+    title: 'Biering-SÃ¸rensen hold',
     order: 'hold',
     frames: two(
       { hip: [104, 117], torso: 72, head: 82, armN: rel('neck', -12, 3, 1), legN: ang(180, 180), footN: -90 },
@@ -392,7 +391,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     trackLabel: 'Leg path',
     angle: { joints: ['neck', 'hip', 'kneeN'], label: 'Hip' },
     startCue: 'Tuck, shoulders pushed down',
-    endCue: 'Legs straight at 90°',
+    endCue: 'Legs straight at 90Â°',
   },
 
   arms: {

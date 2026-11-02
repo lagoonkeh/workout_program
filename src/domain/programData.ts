@@ -5,7 +5,6 @@ export type GZCLTier = 'T1' | 'T2' | 'T3' | 'Warmup';
 export type EquipmentType = 
   | 'barbell'
   | 'rack'
-  | 'landmine'
   | 'pull_up_bar'
   | 'kettlebell'
   | 'indian_clubs'
@@ -76,7 +75,6 @@ export function isUnilateralExercise(exercise: WorkoutExercise): boolean {
     name.includes('single-arm') ||
     name.includes('split squat') ||
     name.includes('step-down') ||
-    name.includes('meadows row') ||
     name.includes('suitcase carry') ||
     name.includes('cossack') ||
     name.includes('z-press') ||
@@ -649,7 +647,7 @@ export const SESSION_UPPER_A: WorkoutSession = {
   focus: 'Subacromial joint spacing, scapular retraction/depression, balanced horizontal press and row mechanics.',
   estimatedDurationMinutes: 50,
   creatorInfluences: ['Jeff Cavaliere (ATHLEAN-X)', 'Jeff Nippard', 'Coach Eugene Teo', 'Dr. Stuart McGill', 'Lucas Hardie (Range of Strength)'],
-  equipmentRequired: ['indian_clubs', 'barbell', 'rack', 'landmine', 'kettlebell', 'pull_up_bar'],
+  equipmentRequired: ['indian_clubs', 'barbell', 'rack', 'bench', 'kettlebell', 'pull_up_bar'],
   warmup: UPPER_A_WARMUP,
   warmupSequence: UPPER_A_WARMUP,
   exercises: [
@@ -677,25 +675,25 @@ export const SESSION_UPPER_A: WorkoutSession = {
       }
     },
     {
-      id: 't2_landmine_meadows_row',
-      name: 'Landmine Meadows Row',
+      id: 't2_kb_single_arm_row',
+      name: 'Single-Arm Kettlebell Row',
       tier: 'T2',
       targetSets: 3,
-      targetReps: '8–10',
+      targetReps: '8–10 / arm',
       isAmrapLastSet: false,
       tempo: '31X1',
       restSeconds: 120,
-      equipment: 'landmine',
-      defaultWeight: 50,
-      defaultWeightLbs: 50,
+      equipment: 'kettlebell',
+      defaultWeight: 30,
+      defaultWeightLbs: 30,
       muscleGroups: ['Latissimus Dorsi', 'Teres Major', 'Rhomboids', 'Posterior Deltoid'],
-      biomechanicalRationale: 'Eugene Teo force vector optimization: standing perpendicular to the landmine creates a diagonal arc matching the anatomical orientation of the lower lat fibers.',
-      progressionRule: 'Double progression: build to 10 strict reps/arm across all 3 sets before adding a 5 lb plate.',
+      biomechanicalRationale: 'Bench-supported horizontal pull that balances the bench press. Driving the elbow back toward the hip pocket (not up to the chest) lines the pull up with the lat fibers, and the braced hand and knee unload the lower back.',
+      progressionRule: 'Double progression: build to 10 strict reps/arm across all 3 sets, then add 5 lbs on the adjustable bell (40 lb max). At 40 lbs, add a 2-second squeeze at the top and a 4-second lowering.',
       regression: {
-        condition: 'Lower back fatigue or difficulty holding staggered stance',
-        exerciseId: 't2_landmine_two_handed_row',
-        name: 'Two-Handed Landmine T-Bar Row with Chest Support / Straddle',
-        instructions: 'Straddle the landmine bar with both feet square, hinge deeply, and row using a neutral grip handle or barbell sleeve to share load bilaterally.',
+        condition: 'Lower back fatigue or difficulty bracing on the bench',
+        exerciseId: 't2_inverted_row',
+        name: 'Inverted Row (Rack Bar)',
+        instructions: 'Set a barbell in the rack at hip height and hang underneath with straight legs or bent knees. Row your chest to the bar with elbows at about 45 degrees; the body is fully supported, so the lower back carries no load.',
         tempo: '3011'
       }
     },
@@ -826,9 +824,9 @@ export const SESSION_LOWER_B: WorkoutSession = {
       progressionRule: 'Add 10 lbs weekly. When < 15 total reps: Stage 2 = 6x2+; Stage 3 = 10x1+; then test & reset.',
       regression: {
         condition: 'Lower back shear, disc fatigue, or hamstring cramping',
-        exerciseId: 't1_landmine_rdl',
-        name: 'Landmine Romanian Deadlift',
-        instructions: 'Straddle or stand at end of landmine bar, gripping sleeve with both hands. The fixed rotational arc removes excessive anterior lumbar shear while guiding pure posterior hip excursion.',
+        exerciseId: 't1_kb_rdl',
+        name: 'Kettlebell Romanian Deadlift',
+        instructions: 'Hold one heavy kettlebell by the horns, soft knees, and push the hips straight back with the bell close to the legs. The lighter load and shorter lever take the shear off the lower back while still loading the hamstrings through a full stretch.',
         tempo: '31X1'
       }
     },
@@ -1004,9 +1002,9 @@ export const SESSION_UPPER_B: WorkoutSession = {
       progressionRule: 'Add 5 lbs weekly. When < 15 total reps: Stage 2 = 6x2+; Stage 3 = 10x1+; then test & reset.',
       regression: {
         condition: 'Shoulder impingement or inability to clear overhead without lumbar hyperextension',
-        exerciseId: 't1_landmine_half_kneeling_press',
-        name: 'Landmine Half-Kneeling Single-Arm Press',
-        instructions: 'Kneel with inside knee down, pressing landmine bar diagonally overhead. Angled arc eliminates subacromial pinch while forcing intense core anti-extension stability.',
+        exerciseId: 't1_kb_half_kneeling_press',
+        name: 'Half-Kneeling Single-Arm Kettlebell Press',
+        instructions: 'Kneel with the pressing-side knee down and the bell in the rack. Press up and slightly forward in the scapular plane; the half-kneeling stance locks the ribs down and a single arm lets the shoulder find a pain-free path.',
         tempo: '30X1'
       }
     },
