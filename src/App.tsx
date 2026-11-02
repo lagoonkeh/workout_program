@@ -13,6 +13,7 @@ import {
   WorkoutHistoryModal,
   DailyReadinessWidget,
 } from './lazyView';
+import { clearSessionMarks, isLeftoverFromEarlierDay, sessionLogKeys } from './domain/sessionReset';
 import {
   WORKOUT_PROGRAM,
   WORKOUT_SESSIONS,
@@ -1187,6 +1188,18 @@ export function WorkoutAppMain() {
   // Auto-record to Workout History & Auto-sync to Google Sheets whenever workout session reaches 100% completion
   useEffect(() => {
     if (currentSessionCompletion === 100) {
+      // leftover 100% from a workout finished on an earlier day: it is about to be cleared, not a new workout
+      if (
+        isLeftoverFromEarlierDay(
+          activeSession,
+          { logs: workoutLogs, warmups: completedWarmups, phases: phaseTasks },
+          Object.values(storageManager.getCompletedWorkouts()),
+          sessionStartTimes[activeSessionId],
+          new Date(new Date().toDateString()).getTime()
+        )
+      ) {
+        return;
+      }
       const today = new Date().toISOString().split('T')[0];
       const completedId = activeSessionId;
       const completedTitle = activeSession.title;
@@ -1238,6 +1251,57 @@ export function WorkoutAppMain() {
     isSyncing,
     handleSyncToSheets,
   ]);
+
+  // Every workout starts unmarked: a session finished on an earlier day has its set, warmup and phase
+  // check-offs cleared (weights kept). Today's finished workout stays visible until the day is over.
+  const [todayKey, setTodayKey] = useState(() => new Date().toDateString());
+  useEffect(() => {
+    const refresh = () => setTodayKey(new Date().toDateString());
+    const timer = setInterval(refresh, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+
+  useEffect(() => {
+    const startOfToday = new Date(todayKey).getTime();
+    // read history straight from storage: it is updated before React state when a workout is finished
+    const history = Object.values(storageManager.getCompletedWorkouts());
+    let marks = { logs: workoutLogs, warmups: completedWarmups, phases: phaseTasks };
+    let changed = false;
+    for (const session of [...WORKOUT_SESSIONS, ...RECOVERY_SESSIONS]) {
+      if (!isLeftoverFromEarlierDay(session, marks, history, sessionStartTimes[session.id], startOfToday)) continue;
+      marks = clearSessionMarks(session, marks);
+      changed = true;
+    }
+    if (!changed) return;
+    setWorkoutLogs(marks.logs);
+    setCompletedWarmups(marks.warmups);
+    setPhaseTasks(marks.phases);
+    for (const session of [...WORKOUT_SESSIONS, ...RECOVERY_SESSIONS]) {
+      sessionLogKeys(session).forEach((k) => {
+        if (workoutLogs[k] && marks.logs[k] !== workoutLogs[k]) {
+          try {
+            storageManager.updateWorkoutLog(k, { completed: false, reps: 0, notes: '' });
+          } catch {
+            // non-blocking fallback
+          }
+        }
+      });
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY_WARMUPS, JSON.stringify(marks.warmups));
+      localStorage.setItem(STORAGE_KEY_PHASE_TASKS, JSON.stringify(marks.phases));
+    } catch {
+      // safe fallback
+    }
+    // Runs on load and whenever history changes; reading the latest marks is intentional
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completedWorkouts, todayKey]);
 
   // Reset logs for active session
   const handleResetSessionLogs = useCallback(() => {
