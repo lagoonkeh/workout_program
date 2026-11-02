@@ -50,6 +50,10 @@ export const AthleteProfileCard = lazyView(() =>
   import('./components/AthleteProfileCard').then((m) => m.AthleteProfileCard)
 );
 
+export const DailyReadinessWidget = lazyView(() =>
+  import('./components/DailyReadinessWidget').then((m) => m.DailyReadinessWidget)
+);
+
 // Modals that are closed on first paint
 export const CueCardModal = lazyView(() => import('./components/CueCardModal').then((m) => m.CueCardModal));
 export const WeeklyEvaluationModal = lazyView(() =>
@@ -69,6 +73,7 @@ const LAZY_VIEWS = [
   QuarterlyAssessmentWidget,
   StrengthHeatmapWidget,
   AthleteProfileCard,
+  DailyReadinessWidget,
   CueCardModal,
   WeeklyEvaluationModal,
   WorkoutCompletionModal,

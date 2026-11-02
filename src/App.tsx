@@ -11,6 +11,7 @@ import {
   WeeklyEvaluationModal,
   WorkoutCompletionModal,
   WorkoutHistoryModal,
+  DailyReadinessWidget,
 } from './lazyView';
 import {
   WORKOUT_PROGRAM,
@@ -31,7 +32,6 @@ import { ExerciseCard, SetLogRecord } from './components/ExerciseCard';
 import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget';
 import { TempoMetronomeWidget } from './components/TempoMetronomeWidget';
 import { MuscleHeatmapWidget } from './components/MuscleHeatmapWidget';
-import { DailyReadinessWidget } from './components/DailyReadinessWidget';
 import { AdaptiveBodyCoachWidget } from './components/AdaptiveBodyCoachWidget';
 import { ExerciseDiagram } from './components/ExerciseDiagram';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
@@ -60,7 +60,6 @@ import { evaluateWeeklyPerformance, WorkoutAdaptation } from './domain/weeklyEva
 import { MobilityEntry, getMobilityCheckInStatus } from './domain/mobility';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthGate } from './components/AuthGate';
-import { TabletWorkoutView } from './components/tablet/TabletWorkoutView';
 import {
   STORAGE_KEY_LOGS,
   STORAGE_KEY_SESSION,
@@ -73,7 +72,6 @@ import {
   STORAGE_KEY_MOBILITY_SNOOZE,
   STORAGE_KEY_PHASE_TASKS,
   STORAGE_KEY_SESSION_START_TIMES,
-  STORAGE_KEY_TABLET_MODE,
 } from './storage/appStorageKeys';
 
 function ViewLoadingFallback() {
@@ -479,40 +477,6 @@ export function WorkoutAppMain() {
       const next = !prev;
       try {
         localStorage.setItem(STORAGE_KEY_HIDE_COMPLETED_SESSIONS, String(next));
-      } catch {
-        // safe fallback
-      }
-      return next;
-    });
-  }, []);
-
-  // 4c-2. Tablet Dual-Pane Mode (Optimized for Samsung Galaxy Tab A9+ 11" 1920x1200 / 16:10)
-  const [isTabletMode, setIsTabletMode] = useState<boolean>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY_TABLET_MODE);
-      if (stored !== null) return stored === 'true';
-      if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') {
-        return false;
-      }
-      if (typeof window !== 'undefined') {
-        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        const isTabletAgent = /tablet|ipad|playbook|silk/i.test(navigator.userAgent) || 
-          (/android/i.test(navigator.userAgent) && !/mobile/i.test(navigator.userAgent));
-        const w = window.innerWidth;
-        const isTabletWidth = w >= 768 && w <= 1400;
-        return isTabletAgent || (isTouch && isTabletWidth);
-      }
-    } catch {
-      // safe fallback
-    }
-    return false;
-  });
-
-  const handleToggleTabletMode = useCallback(() => {
-    setIsTabletMode((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(STORAGE_KEY_TABLET_MODE, String(next));
       } catch {
         // safe fallback
       }
@@ -1937,8 +1901,6 @@ export function WorkoutAppMain() {
         onOpenWeeklyEvaluation={handleOpenWeeklyEvaluation}
         weeklyAdaptationCount={weeklyEvaluation.adaptations.length}
         onOpenWorkoutHistory={() => setIsWorkoutHistoryModalOpen(true)}
-        isTabletMode={isTabletMode}
-        onToggleTabletMode={handleToggleTabletMode}
       />
 
       {/* Sync Notification Banner */}
@@ -2038,51 +2000,6 @@ export function WorkoutAppMain() {
 
         {/* View 1: Workout Routine */}
         {currentView === 'workout' && (
-          isTabletMode ? (
-            <TabletWorkoutView
-              activeSession={activeSession}
-              activeSessionId={activeSessionId}
-              onSelectSession={setActiveSessionId}
-              sessionStats={sessionStats}
-              sessionTelemetry={sessionTelemetry}
-              workoutLogs={workoutLogs}
-              onUpdateSetLog={handleUpdateSetLog}
-              onResetExercise={handleResetExerciseLogs}
-              onResetSessionLogs={handleResetSessionLogs}
-              sessionExercises={sessionExercises}
-              getExerciseLogs={getExerciseLogs}
-              completedWarmups={completedWarmups}
-              onToggleWarmupDrill={handleToggleWarmupDrill}
-              phaseTasks={phaseTasks}
-              onTogglePhaseTask={handleTogglePhaseTask}
-              collapsedWarmupDrills={collapsedWarmupDrills}
-              onToggleWarmupDrillCollapse={handleToggleWarmupDrillCollapse}
-              splitSidesExercises={splitSidesExercises}
-              onToggleSplitSides={handleToggleSplitSides}
-              onSwitchToPairedSide={handleSwitchToPairedSide}
-              onOpenCueCard={handleOpenCueCard}
-              activeRestSeconds={activeRestSeconds}
-              activeRestContext={activeRestContext}
-              onQuickStartRest={handleQuickStartRest}
-              onClearActivePreset={handleClearActivePreset}
-              onStartNextSet={handleStartNextSet}
-              activeTempo={activeTempo}
-              onQuickStartTempo={handleQuickStartTempo}
-              isMuted={isMuted}
-              programAdaptations={programAdaptations}
-              onApplyAdaptations={handleApplyWeeklyAdaptations}
-              onResetAdaptations={handleResetWeeklyAdaptations}
-              onCompleteWorkout={handleToggleWorkoutCompleted}
-              currentSessionCompletion={currentSessionCompletion}
-              sessionStartTime={sessionStartTimes[activeSessionId]}
-              isFocusMode={isFocusMode}
-              onToggleFocusMode={handleToggleFocusMode}
-              bulkCollapseState={bulkCollapseState}
-              collapseRevision={collapseRevision}
-              onToggleExpandCollapseAll={handleToggleBulkCollapse}
-              onOpenWeeklyEvaluation={handleOpenWeeklyEvaluation}
-            />
-          ) : (
           <div>
             {/* Session Navigation Tabs */}
             <SessionNav
@@ -3352,7 +3269,6 @@ export function WorkoutAppMain() {
               </div>
             </div>
           </div>
-          )
         )}
 
         {/* View: Daily Body Readiness & Recovery Check-In */}
@@ -3366,11 +3282,13 @@ export function WorkoutAppMain() {
               onResetAdaptations={handleResetWeeklyAdaptations}
               defaultExpanded={true}
             />
-            <DailyReadinessWidget
-              activeSession={activeSession}
-              onApplyAdaptations={handleApplyWeeklyAdaptations}
-              onNavigateToWorkout={() => setCurrentView('workout')}
-            />
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <DailyReadinessWidget
+                activeSession={activeSession}
+                onApplyAdaptations={handleApplyWeeklyAdaptations}
+                onNavigateToWorkout={() => setCurrentView('workout')}
+              />
+            </Suspense>
           </div>
         )}
 

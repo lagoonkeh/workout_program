@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Dumbbell, Activity, Cloud, Loader2, Check, Sparkles, TrendingUp, HeartPulse, LogOut, Trophy, History, Tablet } from 'lucide-react';
+import { Volume2, VolumeX, Dumbbell, Activity, Cloud, Loader2, Check, Sparkles, TrendingUp, HeartPulse, LogOut, Trophy, History } from 'lucide-react';
 import { AppLogo } from './AppLogo';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,8 +20,6 @@ export interface HeaderProps {
   onOpenWeeklyEvaluation?: () => void;
   weeklyAdaptationCount?: number;
   onOpenWorkoutHistory?: () => void;
-  isTabletMode?: boolean;
-  onToggleTabletMode?: () => void;
 }
 
 const HeaderComponent: React.FC<HeaderProps> = ({
@@ -39,8 +37,6 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   onOpenWeeklyEvaluation,
   weeklyAdaptationCount = 0,
   onOpenWorkoutHistory,
-  isTabletMode = false,
-  onToggleTabletMode,
 }) => {
   const { user, isGuestBypassed, isFirebaseReady, logout, cloudSyncStatus, lastCloudSyncedTime } = useAuth();
 
@@ -141,25 +137,6 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                   <Cloud className={`w-3.5 h-3.5 ${cloudSyncStatus === 'synced' ? 'text-cyan-400' : 'text-slate-400'}`} />
                 )}
               </div>
-            )}
-
-            {/* Mobile / Tablet Mode Toggle */}
-            {onToggleTabletMode && (
-              <button
-                type="button"
-                onClick={onToggleTabletMode}
-                aria-pressed={isTabletMode}
-                aria-label={isTabletMode ? 'Switch to Standard Phone Layout' : 'Switch to Tablet Dual-Pane Layout'}
-                title={isTabletMode ? 'Tablet Dual-Pane Active' : 'Switch to Tablet Dual-Pane (Galaxy Tab A9+)'}
-                data-testid="mobile-tablet-mode-toggle-btn"
-                className={`p-2 min-h-[44px] min-w-[44px] rounded-xl border transition-all flex items-center justify-center cursor-pointer active:scale-95 ${
-                  isTabletMode
-                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                    : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white'
-                }`}
-              >
-                <Tablet className="w-3.5 h-3.5" />
-              </button>
             )}
 
             <button
@@ -399,26 +376,6 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                 />
               </div>
             </div>
-
-            {/* Tablet Mode Toggle (Desktop & Tablet Toolbar) */}
-            {onToggleTabletMode && (
-              <button
-                type="button"
-                onClick={onToggleTabletMode}
-                aria-pressed={isTabletMode}
-                aria-label={isTabletMode ? 'Switch to Standard Layout' : 'Switch to Tablet Dual-Pane Layout'}
-                title={isTabletMode ? 'Tablet Dual-Pane Active (Click to switch to Standard)' : 'Switch to Tablet Dual-Pane (Optimized for Galaxy Tab A9+)'}
-                data-testid="tablet-mode-toggle-btn"
-                className={`p-2 rounded-xl border transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] ${
-                  isTabletMode
-                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-semibold shadow-sm ring-1 ring-emerald-500/40'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <Tablet className="w-4 h-4 text-emerald-400" />
-                <span className="hidden lg:inline text-xs font-semibold">Tablet</span>
-              </button>
-            )}
 
             <button
               type="button"

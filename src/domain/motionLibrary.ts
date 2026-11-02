@@ -63,7 +63,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Barbell back squat',
     order: 'eccentric-first',
     frames: two(
-      { hip: [96, 99], torso: -91, head: -88, armN: rel('neck', -3, -2, 1), legN: to(95, 176), legF: to(92, 176) },
+      { hip: [96, 98.3], torso: -91, head: -88, armN: rel('neck', -3, -2, 1), legN: to(95, 176), legF: to(92, 176) },
       { hip: [70, 140], torso: -50, head: -62, armN: rel('neck', -3, -2, 1), legN: to(95, 176), legF: to(92, 176) }
     ),
     props: [{ kind: 'barbell', at: 'neck', d: [-3, 2] }],
@@ -82,7 +82,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     order: 'eccentric-first',
     frames: two(
       { hip: [96, 104], torso: -88, head: -88, armN: ARMS_DOWN, legN: to(124, 176), legF: to(56, 170), footF: 40 },
-      { hip: [98, 146], torso: -84, head: -86, armN: ang(80, 70), legN: to(124, 176), legF: to(56, 170), footF: 40 }
+      { hip: [110, 146], torso: -86, head: -86, armN: ang(80, 70), legN: to(124, 176), legF: to(56, 170), footF: 40 }
     ),
     props: [],
     scenery: [],
@@ -215,8 +215,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Cable face pull',
     order: 'concentric-first',
     frames: two(
-      { hip: [94, 99], torso: -92, head: -90, armN: to(140, 60, -1), legN: to(100, 176), legF: to(84, 176) },
-      { hip: [94, 99], torso: -94, head: -90, armN: to(102, 38, -1), legN: to(100, 176), legF: to(84, 176) }
+      { hip: [94, 98.3], torso: -92, head: -90, armN: to(140, 60, -1), legN: to(100, 176), legF: to(84, 176) },
+      { hip: [94, 98.3], torso: -94, head: -90, armN: to(102, 38, -1), legN: to(100, 176), legF: to(84, 176) }
     ),
     props: [{ kind: 'cable', anchor: [172, 58], at: 'handN' }],
     scenery: [
@@ -235,8 +235,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Dead hang',
     order: 'hold',
     frames: two(
-      { hip: [100, 92], torso: -90, head: -90, armN: to(100, -10, 1), legN: ang(93, 89), footN: 70 },
-      { hip: [100, 85], torso: -90, head: -90, armN: to(100, -10, 1), legN: ang(96, 88), footN: 70 }
+      { hip: [100, 96], torso: -90, head: -90, armN: to(100, -10, 1), legN: ang(93, 89), footN: 70, shrug: 4 },
+      { hip: [100, 92], torso: -90, head: -90, armN: to(100, -10, 1), legN: ang(96, 88), footN: 70 }
     ),
     props: [],
     scenery: [{ kind: 'bar', y: -12, x1: 50, x2: 150 }],
@@ -324,9 +324,9 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Barbell overhead press',
     order: 'concentric-first',
     frames: [
-      kf(0, { hip: [96, 99], torso: -91, head: -88, armN: to(106, 54, -1), legN: to(96, 176), legF: to(93, 176) }),
-      kf(0.35, { hip: [97, 99], torso: -95, head: -100, armN: to(102, 30, -1), legN: to(96, 176), legF: to(93, 176) }),
-      kf(1, { hip: [96, 99], torso: -90, head: -86, armN: to(97, 0, -1), legN: to(96, 176), legF: to(93, 176) }),
+      kf(0, { hip: [96, 98.3], torso: -91, head: -88, armN: to(106, 54, -1), legN: to(96, 176), legF: to(93, 176) }),
+      kf(0.35, { hip: [97, 98.3], torso: -95, head: -100, armN: to(102, 30, -1), legN: to(96, 176), legF: to(93, 176) }),
+      kf(1, { hip: [96, 98.3], torso: -90, head: -86, armN: to(97, -3.5, -1), legN: to(96, 176), legF: to(93, 176) }),
     ],
     props: [{ kind: 'barbell', at: 'handN' }],
     scenery: [],
@@ -361,7 +361,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     order: 'concentric-first',
     frames: two(
       { hip: [70, 170], torso: -90, head: -88, armN: to(82, 112, -1), armF: ang(70, 100), legN: ang(0, 0), footN: -80 },
-      { hip: [70, 170], torso: -90, head: -86, armN: to(72, 70, -1), armF: ang(70, 100), legN: ang(0, 0), footN: -80 }
+      { hip: [70, 170], torso: -90, head: -86, armN: to(72, 68.5, -1), armF: ang(70, 100), legN: ang(0, 0), footN: -80 }
     ),
     props: [{ kind: 'kettlebell', at: 'handN', d: [2, -8] }],
     scenery: [],
@@ -378,7 +378,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'L-sit',
     order: 'hold',
     frames: two(
-      { hip: [80, 166], torso: -100, head: -92, armN: to(80, 164, -1), legN: to(106, 154, 1), footN: 30 },
+      { hip: [80, 166], torso: -100, head: -92, armN: to(80, 164, -1), legN: ang(-45, 60), footN: 30 },
       { hip: [80, 162], torso: -98, head: -88, armN: to(80, 164, -1), legN: ang(2, 2), footN: 4 }
     ),
     props: [],
@@ -399,8 +399,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Hammer curl + overhead extension',
     order: 'concentric-first',
     frames: two(
-      { hip: [100, 99], torso: -90, head: -90, armN: ang(92, 92), armF: ang(-98, 96), legN: to(102, 176), legF: to(96, 176) },
-      { hip: [100, 99], torso: -90, head: -90, armN: ang(94, -62), armF: ang(-98, -92), legN: to(102, 176), legF: to(96, 176) }
+      { hip: [100, 98.3], torso: -90, head: -90, armN: ang(92, 92), armF: ang(-98, 96), legN: to(102, 176), legF: to(96, 176) },
+      { hip: [100, 98.3], torso: -90, head: -90, armN: ang(94, -62), armF: ang(-98, -92), legN: to(102, 176), legF: to(96, 176) }
     ),
     props: [
       { kind: 'dumbbell', at: 'handN' },
@@ -493,8 +493,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Deficit calf raise',
     order: 'concentric-first',
     frames: two(
-      { hip: [92, 95], torso: -90, head: -90, armN: ARMS_DOWN, legN: to(92, 172), footN: -26 },
-      { hip: [99, 76], torso: -90, head: -90, armN: ARMS_DOWN, legN: to(99, 153), footN: 69 }
+      { hip: [92, 94.3], torso: -90, head: -90, armN: ARMS_DOWN, legN: to(92, 172), footN: -26 },
+      { hip: [96, 77.6], torso: -90, head: -90, armN: ARMS_DOWN, legN: to(95, 155.3), footN: 50 }
     ),
     props: [],
     scenery: [{ kind: 'rect', x: 100, y: 166, w: 40, h: 14, r: 2, tone: 'plate' }],
@@ -511,7 +511,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     order: 'hold',
     frames: two(
       { hip: [70, 138], torso: -90, head: -88, armN: ang(80, 70), legN: to(112, 176), legF: ang(95, 180), footF: 180 },
-      { hip: [84, 140], torso: -86, head: -86, armN: ang(50, 40), legN: to(112, 176), legF: ang(110, 182), footF: 182 }
+      { hip: [91, 145], torso: -86, head: -86, armN: ang(50, 40), legN: to(112, 176), legF: ang(124, 180), footF: 180 }
     ),
     props: [],
     scenery: [],
@@ -527,11 +527,11 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Indian club circles',
     order: 'loop',
     frames: [
-      kf(0, { hip: [96, 99], torso: -90, head: -90, armN: ang(60, 70), legN: to(98, 176), legF: to(92, 176) }),
-      kf(0.25, { hip: [96, 99], torso: -90, head: -90, armN: ang(-30, -40), legN: to(98, 176), legF: to(92, 176) }),
-      kf(0.5, { hip: [96, 99], torso: -90, head: -90, armN: ang(-110, -130), legN: to(98, 176), legF: to(92, 176) }),
-      kf(0.75, { hip: [96, 99], torso: -90, head: -90, armN: ang(-195, -215), legN: to(98, 176), legF: to(92, 176) }),
-      kf(1, { hip: [96, 99], torso: -90, head: -90, armN: ang(-300, -290), legN: to(98, 176), legF: to(92, 176) }),
+      kf(0, { hip: [96, 98.3], torso: -90, head: -90, armN: ang(60, 70), legN: to(98, 176), legF: to(92, 176) }),
+      kf(0.25, { hip: [96, 98.3], torso: -90, head: -90, armN: ang(-30, -40), legN: to(98, 176), legF: to(92, 176) }),
+      kf(0.5, { hip: [96, 98.3], torso: -90, head: -90, armN: ang(-110, -130), legN: to(98, 176), legF: to(92, 176) }),
+      kf(0.75, { hip: [96, 98.3], torso: -90, head: -90, armN: ang(-195, -215), legN: to(98, 176), legF: to(92, 176) }),
+      kf(1, { hip: [96, 98.3], torso: -90, head: -90, armN: ang(-300, -290), legN: to(98, 176), legF: to(92, 176) }),
     ],
     props: [{ kind: 'club', at: 'handN', from: 'elbowN', len: 24 }],
     scenery: [],
@@ -546,8 +546,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Scapular pull-down',
     order: 'concentric-first',
     frames: two(
-      { hip: [96, 99], torso: -90, head: -90, armN: ang(-84, -88), legN: to(98, 176), legF: to(92, 176) },
-      { hip: [96, 99], torso: -90, head: -90, armN: ang(105, -78), legN: to(98, 176), legF: to(92, 176) }
+      { hip: [96, 98.3], torso: -90, head: -90, armN: ang(-84, -88), legN: to(98, 176), legF: to(92, 176) },
+      { hip: [96, 98.3], torso: -90, head: -90, armN: ang(105, -78), legN: to(98, 176), legF: to(92, 176) }
     ),
     props: [],
     scenery: [],
@@ -580,8 +580,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Scapular hang pulls',
     order: 'concentric-first',
     frames: two(
-      { hip: [100, 92], torso: -90, head: -90, armN: to(100, -10, 1), legN: ang(93, 89), footN: 70 },
-      { hip: [100, 83], torso: -88, head: -90, armN: to(100, -10, 1), legN: ang(96, 88), footN: 70 }
+      { hip: [100, 97], torso: -90, head: -90, armN: to(100, -10, 1), legN: ang(93, 89), footN: 70, shrug: 5 },
+      { hip: [100, 92], torso: -90, head: -90, armN: to(100, -10, 1), legN: ang(96, 88), footN: 70 }
     ),
     props: [],
     scenery: [{ kind: 'bar', y: -12, x1: 50, x2: 150 }],
@@ -596,8 +596,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Wall slide',
     order: 'concentric-first',
     frames: two(
-      { hip: [68, 99], torso: -92, head: -90, armN: ang(92, -84), legN: to(76, 176), legF: to(72, 176) },
-      { hip: [68, 99], torso: -92, head: -90, armN: ang(-96, -94), legN: to(76, 176), legF: to(72, 176) }
+      { hip: [68, 98.6], torso: -92, head: -90, armN: ang(92, -84), legN: to(76, 176), legF: to(72, 176) },
+      { hip: [68, 98.6], torso: -92, head: -90, armN: ang(-96, -94), legN: to(76, 176), legF: to(72, 176) }
     ),
     props: [],
     scenery: [{ kind: 'rect', x: 52, y: -20, w: 8, h: 200, tone: 'wall' }],

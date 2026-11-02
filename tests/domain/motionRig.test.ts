@@ -71,8 +71,10 @@ describe('domain/motionRig', () => {
 
     it.each(entries)('%s keeps bone lengths and stays on screen through the whole rep', (_, m) => {
       for (let i = 0; i <= 20; i++) {
-        const sk = buildSkeleton(poseAt(m.frames, i / 20));
-        expect(dist(sk.hip, sk.neck)).toBeCloseTo(BONES.torso, 3);
+        const pose = poseAt(m.frames, i / 20);
+        const sk = buildSkeleton(pose);
+        // a shrug (passive hang) lifts the shoulders above the torso top; arms stay straight
+        expect(dist(sk.hip, sk.neck)).toBeCloseTo(BONES.torso + (pose.shrug ?? 0), 3);
         expect(dist(sk.neck, sk.elbowN)).toBeCloseTo(BONES.upperArm, 3);
         expect(dist(sk.elbowN, sk.handN)).toBeCloseTo(BONES.forearm, 3);
         expect(dist(sk.hip, sk.kneeN)).toBeCloseTo(BONES.thigh, 3);
@@ -84,6 +86,18 @@ describe('domain/motionRig', () => {
           expect(y).toBeGreaterThan(-28);
           expect(y).toBeLessThan(192);
         });
+      }
+    });
+
+    it('hangs keep the arms straight while the shoulders depress', () => {
+      for (const id of ['dead_hang', 'warmup_dead_hang'] as const) {
+        for (let i = 0; i <= 10; i++) {
+          const sk = buildSkeleton(poseAt(MOTIONS[id].frames, i / 10));
+          expect(dist(sk.neck, sk.handN)).toBeCloseTo(BONES.upperArm + BONES.forearm, 1);
+        }
+        const top = buildSkeleton(poseAt(MOTIONS[id].frames, 1));
+        const bottom = buildSkeleton(poseAt(MOTIONS[id].frames, 0));
+        expect(top.hip[1]).toBeLessThan(bottom.hip[1]);
       }
     });
 

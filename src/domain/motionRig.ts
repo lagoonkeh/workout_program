@@ -86,6 +86,8 @@ export interface PoseSpec {
   legF?: LimbSpec;
   footN?: number;
   footF?: number;
+  /** shoulder-girdle elevation: raises the shoulders this far above the torso top (passive hang) */
+  shrug?: number;
 }
 
 export type Skeleton = Record<JointId, Vec>;
@@ -137,8 +139,9 @@ function limbAngles(spec: LimbSpec, root: Vec, l1: number, l2: number, sk: Parti
 export function buildSkeleton(p: PoseSpec): Skeleton {
   const sk: Partial<Skeleton> = {};
   sk.hip = p.hip;
-  sk.neck = polar(p.hip, p.torso, BONES.torso);
-  sk.head = polar(sk.neck, p.head, BONES.neck);
+  const shrug = p.shrug ?? 0;
+  sk.neck = polar(p.hip, p.torso, BONES.torso + shrug);
+  sk.head = polar(sk.neck, p.head, BONES.neck - shrug);
 
   const arm = (spec: LimbSpec, e: 'elbowN' | 'elbowF', h: 'handN' | 'handF') => {
     const [a1, a2] = limbAngles(spec, sk.neck!, BONES.upperArm, BONES.forearm, sk);
@@ -204,6 +207,7 @@ export function lerpPose(a: PoseSpec, b: PoseSpec, t: number): PoseSpec {
     legF: lerpLimb(a.legF ?? a.legN, b.legF ?? b.legN, t, skA.hip, skB.hip, ...legL, skA, skB),
     footN: lerpAngle(a.footN ?? 0, b.footN ?? 0, t),
     footF: lerpAngle(a.footF ?? a.footN ?? 0, b.footF ?? b.footN ?? 0, t),
+    shrug: lerp(a.shrug ?? 0, b.shrug ?? 0, t),
   };
 }
 
