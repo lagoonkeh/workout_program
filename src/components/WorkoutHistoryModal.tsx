@@ -6,6 +6,8 @@ import {
   Trash2,
   Edit3,
   Check,
+  CheckCircle2,
+  Plus,
   FastForward,
   ChevronDown,
   ChevronUp,
@@ -17,17 +19,25 @@ import {
   Save,
 } from 'lucide-react';
 import { storageManager, CompletedWorkoutSession } from '../storage/storageManager';
+import type { WorkoutSession } from '../domain/programData';
+import type { SetLogRecord } from './ExerciseCard';
 
 export interface WorkoutHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSessionUpdated?: () => void;
+  activeSession?: WorkoutSession;
+  workoutLogs?: Record<string, SetLogRecord[]>;
+  onSaveCurrentSessionToHistory?: () => void;
 }
 
 export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
   isOpen,
   onClose,
   onSessionUpdated,
+  activeSession,
+  workoutLogs: _workoutLogs,
+  onSaveCurrentSessionToHistory,
 }) => {
   const [sessionsMap, setSessionsMap] = useState<Record<string, CompletedWorkoutSession>>({});
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
@@ -50,6 +60,17 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
       setSessionToDelete(null);
       setShowClearConfirm(false);
     }
+  }, [isOpen]);
+
+  // Live storage synchronization
+  useEffect(() => {
+    if (!isOpen) return;
+    const unsubscribe = storageManager.subscribe((data) => {
+      if (data.completedWorkouts) {
+        setSessionsMap({ ...data.completedWorkouts });
+      }
+    });
+    return () => unsubscribe();
   }, [isOpen]);
 
   useEffect(() => {
@@ -211,6 +232,22 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onSaveCurrentSessionToHistory && (
+              <button
+                type="button"
+                data-testid="header-save-active-history-btn"
+                onClick={() => {
+                  onSaveCurrentSessionToHistory();
+                  reloadSessions();
+                }}
+                className="min-h-[44px] px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Save your current in-progress workout session to history"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Log Current Session</span>
+              </button>
+            )}
+
             {sortedSessions.length > 0 && (
               <button
                 type="button"
@@ -278,6 +315,20 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
               <p className="text-xs sm:text-sm text-slate-400 max-w-sm">
                 Finish your active session from the Routine tab to see completed workout logs, tonnage, and adherence records here.
               </p>
+              {activeSession && onSaveCurrentSessionToHistory && (
+                <button
+                  type="button"
+                  data-testid="save-active-to-history-btn"
+                  onClick={() => {
+                    onSaveCurrentSessionToHistory();
+                    reloadSessions();
+                  }}
+                  className="mt-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg cursor-pointer transition-all active:scale-95"
+                >
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                  <span>Log Current {activeSession.title} to History</span>
+                </button>
+              )}
             </div>
           ) : (
             sortedSessions.map((session) => {

@@ -614,6 +614,14 @@ export function WorkoutAppMain() {
     }
   });
 
+  const [completedWorkouts, setCompletedWorkouts] = useState<Record<string, CompletedWorkoutSession>>(() => {
+    try {
+      return storageManager.getCompletedWorkouts();
+    } catch {
+      return {};
+    }
+  });
+
   const [mobilityHistory, setMobilityHistory] = useState<MobilityEntry[]>(() => {
     try {
       return storageManager.load().mobilityHistory;
@@ -622,17 +630,16 @@ export function WorkoutAppMain() {
     }
   });
 
-  // Re-sync mobility history if changed in storage
+  // Re-sync state whenever storage changes (completed workouts, mobility)
   useEffect(() => {
-    const handleStorageChange = () => {
-      try {
-        setMobilityHistory(storageManager.load().mobilityHistory);
-      } catch {
-        // safe fallback
+    return storageManager.subscribe((data) => {
+      if (data.completedWorkouts) {
+        setCompletedWorkouts({ ...data.completedWorkouts });
       }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+      if (data.mobilityHistory) {
+        setMobilityHistory(data.mobilityHistory);
+      }
+    });
   }, []);
 
   // 5b. Cloud Firestore Real-Time Bi-Directional Multi-Device Sync
@@ -1168,18 +1175,95 @@ export function WorkoutAppMain() {
     return Math.round((stat.completedSets / stat.totalSets) * 100);
   }, [sessionStats, activeSessionId]);
 
-  // Auto-sync to Google Sheets whenever workout session reaches 100% completion
+  // Live Session Telemetry (Tonnage, PR Count, Top e1RM) inspired by Hevy & Boostcamp
+  const sessionTelemetry = useMemo(() => {
+    let totalTonnageLbs = 0;
+    let prCount = 0;
+    let topE1RM = 0;
+
+    sessionExercises.forEach((ex) => {
+      const logs = workoutLogs[ex.id] || [];
+      const baseW = ex.defaultWeightLbs || ex.defaultWeight || 0;
+      const matches = String(ex.targetReps).match(/\d+/g);
+      const targetMax = matches && matches.length > 0 ? Math.max(...matches.map(Number)) : 8;
+      const baselineE1RM = baseW > 0 ? Math.round(baseW * (1 + targetMax / 30)) : 0;
+
+      let exHitPR = false;
+      logs.forEach((log) => {
+        if (log.isCompleted) {
+          const w = Number(log.weightLbs) || 0;
+          const r = Number(log.repsAchieved) || 0;
+          if (w > 0 && r > 0) {
+            totalTonnageLbs += w * r;
+            const e1rm = r === 1 ? w : Math.round(w * (1 + r / 30));
+            if (e1rm > topE1RM) topE1RM = e1rm;
+            if (baselineE1RM > 0 && e1rm > baselineE1RM) {
+              exHitPR = true;
+            }
+          } else if (r > targetMax) {
+            exHitPR = true;
+          }
+        }
+      });
+      if (exHitPR) prCount++;
+    });
+
+    return { totalTonnageLbs: Math.round(totalTonnageLbs), prCount, topE1RM };
+  }, [sessionExercises, workoutLogs]);
+
+  // Auto-record to Workout History & Auto-sync to Google Sheets whenever workout session reaches 100% completion
   useEffect(() => {
-    if (isTestEnvironment()) return;
     if (currentSessionCompletion === 100) {
       const today = new Date().toISOString().split('T')[0];
-      const syncKey = `${activeSessionId}_${today}_100`;
-      if (lastAutoSyncedSessionRef.current !== syncKey && !isSyncing) {
-        lastAutoSyncedSessionRef.current = syncKey;
-        handleSyncToSheets(activeSessionId, workoutLogs, true);
+      const completedId = activeSessionId;
+      const completedTitle = activeSession.title;
+      const existingHistory = storageManager.getCompletedWorkouts();
+      const alreadySaved = Object.values(existingHistory).some(
+        (s) => s.sessionId === completedId && s.date.startsWith(today)
+      );
+      if (!alreadySaved) {
+        const completedAt = new Date().toISOString();
+        const startedAt = sessionStartTimes[completedId] || completedAt;
+        const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
+        const totalDurationSeconds = Math.round(durationMs / 1000);
+
+        const completedRecord: CompletedWorkoutSession = {
+          id: `completed_${completedId}_${Date.now()}`,
+          date: completedAt,
+          startedAt,
+          completedAt,
+          totalDurationSeconds,
+          sessionId: completedId,
+          sessionTitle: completedTitle,
+          logs: { ...workoutLogs },
+          adherencePercentage: 100,
+          completedExercisesCount: sessionExercises.length,
+          totalExercisesCount: sessionExercises.length,
+          totalVolumeLbs: sessionTelemetry.totalTonnageLbs,
+          skippedExercises: [],
+        };
+        storageManager.saveCompletedWorkout(completedRecord);
+      }
+
+      if (!isTestEnvironment()) {
+        const syncKey = `${activeSessionId}_${today}_100`;
+        if (lastAutoSyncedSessionRef.current !== syncKey && !isSyncing) {
+          lastAutoSyncedSessionRef.current = syncKey;
+          handleSyncToSheets(activeSessionId, workoutLogs, true);
+        }
       }
     }
-  }, [currentSessionCompletion, activeSessionId, workoutLogs, isSyncing, handleSyncToSheets]);
+  }, [
+    currentSessionCompletion,
+    activeSessionId,
+    activeSession,
+    workoutLogs,
+    sessionExercises,
+    sessionTelemetry,
+    sessionStartTimes,
+    isSyncing,
+    handleSyncToSheets,
+  ]);
 
   // Reset logs for active session
   const handleResetSessionLogs = useCallback(() => {
@@ -1228,110 +1312,104 @@ export function WorkoutAppMain() {
     const completedTitle = activeSession.title;
     const completedId = activeSession.id;
 
-    if (!isCurrently100) {
-      // Audit active session for uncompleted or skipped exercises
-      const audit = auditSessionCompletion(activeSession, workoutLogs, programAdaptations);
-      if (audit.skippedExercises.length > 0) {
-        setSessionAuditResult(audit);
-        setIsWorkoutCompletionModalOpen(true);
-        return;
-      }
-
-      setWorkoutLogs((prev) => {
-        const next = { ...prev };
-        sessionExercises.forEach((ex) => {
-          const existing = prev[ex.id] || defaultLogsByExerciseId[ex.id] || createDefaultExerciseLogs(ex);
-          const parsedTarget = extractTargetReps(ex.targetReps, 10);
-          const updatedLogs = existing.map((set) => ({
-            ...set,
-            isCompleted: true,
-            repsAchieved: set.repsAchieved > 0 ? set.repsAchieved : parsedTarget,
-            weightLbs: set.weightLbs > 0 ? set.weightLbs : (ex.defaultWeightLbs || ex.defaultWeight || 0),
-            notes: set.notes ? set.notes : 'Workout Completed',
-          }));
-          next[ex.id] = updatedLogs;
-
-          try {
-            storageManager.updateWorkoutLog(ex.id, {
-              completed: true,
-              weight: ex.defaultWeightLbs || ex.defaultWeight || 0,
-              reps: parsedTarget,
-              notes: 'Workout Completed',
-            });
-          } catch {
-            // non-blocking fallback
-          }
-        });
-        return next;
-      });
-
-      if (!isMuted) {
-        audioSynthesizer.playTone('completion');
-      }
-
-      // Calculate workout duration from first completed task to completion click
-      const completedAt = new Date().toISOString();
-      const startedAt = sessionStartTimes[completedId] || completedAt;
-      const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
-      const totalDurationSeconds = Math.round(durationMs / 1000);
-
-      // Persist completed workout session to history
-      const completedRecord: CompletedWorkoutSession = {
-        id: `completed_${completedId}_${Date.now()}`,
-        date: completedAt,
-        startedAt,
-        completedAt,
-        totalDurationSeconds,
-        sessionId: completedId,
-        sessionTitle: completedTitle,
-        logs: { ...workoutLogs },
-        adherencePercentage: 100,
-        completedExercisesCount: sessionExercises.length,
-        totalExercisesCount: sessionExercises.length,
-        totalVolumeLbs: sessionTelemetry.totalTonnageLbs,
-        skippedExercises: [],
-      };
-      storageManager.saveCompletedWorkout(completedRecord);
-
-      // Clear recorded start time for completed session
-      setSessionStartTimes((prev) => {
-        if (!prev[completedId]) return prev;
-        const nextTimes = { ...prev };
-        delete nextTimes[completedId];
-        try {
-          localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
-        } catch {
-          // safe fallback
-        }
-        return nextTimes;
-      });
-
-      // Automatically advance to the next session
-      setActiveSessionId(nextSessionId);
-      storageManager.saveImmediate({ activeSessionId: nextSessionId });
-
-      // Announce via completion toast with quick shortcuts
-      setSessionCompletionToast({
-        completedTitle,
-        completedId,
-        nextTitle: nextSession.title,
-        nextId: nextSession.id,
-        durationSeconds: totalDurationSeconds,
-      });
-
-      // Auto-sync completed workout session to Google Sheets in the background
-      if (!isTestEnvironment()) {
-        const today = new Date().toISOString().split('T')[0];
-        lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
-        handleSyncToSheets(completedId, undefined, true);
-      }
-
-      // Re-scan last workout to update smart recommender
-      handleScanLastWorkout();
-    } else {
-      // If already 100%, user clicked to reset/uncomplete
-      handleResetSessionLogs();
+    // Audit active session for uncompleted or skipped exercises
+    const audit = auditSessionCompletion(activeSession, workoutLogs, programAdaptations);
+    if (audit.skippedExercises.length > 0 && !isCurrently100) {
+      setSessionAuditResult(audit);
+      setIsWorkoutCompletionModalOpen(true);
+      return;
     }
+
+    // Prepare complete workout logs for all exercises
+    const finalLogs: Record<string, SetLogRecord[]> = { ...workoutLogs };
+    sessionExercises.forEach((ex) => {
+      const existing = workoutLogs[ex.id] || defaultLogsByExerciseId[ex.id] || createDefaultExerciseLogs(ex);
+      const parsedTarget = extractTargetReps(ex.targetReps, 10);
+      const updatedLogs = existing.map((set) => ({
+        ...set,
+        isCompleted: true,
+        repsAchieved: set.repsAchieved > 0 ? set.repsAchieved : parsedTarget,
+        weightLbs: set.weightLbs > 0 ? set.weightLbs : (ex.defaultWeightLbs || ex.defaultWeight || 0),
+        notes: set.notes ? set.notes : 'Workout Completed',
+      }));
+      finalLogs[ex.id] = updatedLogs;
+
+      try {
+        storageManager.updateWorkoutLog(ex.id, {
+          completed: true,
+          weight: ex.defaultWeightLbs || ex.defaultWeight || 0,
+          reps: parsedTarget,
+          notes: 'Workout Completed',
+        });
+      } catch {
+        // non-blocking fallback
+      }
+    });
+    setWorkoutLogs(finalLogs);
+
+    if (!isMuted) {
+      audioSynthesizer.playTone('completion');
+    }
+
+    // Calculate workout duration from first completed task to completion click
+    const completedAt = new Date().toISOString();
+    const startedAt = sessionStartTimes[completedId] || completedAt;
+    const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
+    const totalDurationSeconds = Math.round(durationMs / 1000);
+
+    // Persist completed workout session to history
+    const completedRecord: CompletedWorkoutSession = {
+      id: `completed_${completedId}_${Date.now()}`,
+      date: completedAt,
+      startedAt,
+      completedAt,
+      totalDurationSeconds,
+      sessionId: completedId,
+      sessionTitle: completedTitle,
+      logs: finalLogs,
+      adherencePercentage: 100,
+      completedExercisesCount: sessionExercises.length,
+      totalExercisesCount: sessionExercises.length,
+      totalVolumeLbs: sessionTelemetry.totalTonnageLbs,
+      skippedExercises: [],
+    };
+    storageManager.saveCompletedWorkout(completedRecord);
+
+    // Clear recorded start time for completed session
+    setSessionStartTimes((prev) => {
+      if (!prev[completedId]) return prev;
+      const nextTimes = { ...prev };
+      delete nextTimes[completedId];
+      try {
+        localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
+      } catch {
+        // safe fallback
+      }
+      return nextTimes;
+    });
+
+    // Automatically advance to the next session
+    setActiveSessionId(nextSessionId);
+    storageManager.saveImmediate({ activeSessionId: nextSessionId });
+
+    // Announce via completion toast with quick shortcuts
+    setSessionCompletionToast({
+      completedTitle,
+      completedId,
+      nextTitle: nextSession.title,
+      nextId: nextSession.id,
+      durationSeconds: totalDurationSeconds,
+    });
+
+    // Auto-sync completed workout session to Google Sheets in the background
+    if (!isTestEnvironment()) {
+      const today = new Date().toISOString().split('T')[0];
+      lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
+      handleSyncToSheets(completedId, finalLogs, true);
+    }
+
+    // Re-scan last workout to update smart recommender
+    handleScanLastWorkout();
   }, [
     currentSessionCompletion,
     activeSessionId,
@@ -1342,8 +1420,53 @@ export function WorkoutAppMain() {
     defaultLogsByExerciseId,
     isMuted,
     sessionStartTimes,
-    handleResetSessionLogs,
+    sessionTelemetry.totalTonnageLbs,
     handleSyncToSheets,
+    handleScanLastWorkout,
+  ]);
+
+  // Save current active session directly into workout history
+  const handleSaveCurrentSessionToHistory = useCallback(() => {
+    const completedAt = new Date().toISOString();
+    const startedAt = sessionStartTimes[activeSessionId] || completedAt;
+    const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
+    const totalDurationSeconds = Math.round(durationMs / 1000);
+
+    const audit = auditSessionCompletion(activeSession, workoutLogs, programAdaptations);
+    const adherence = audit.totalExercises > 0
+      ? Math.round((audit.completedExercises.length / audit.totalExercises) * 100)
+      : 100;
+
+    const completedRecord: CompletedWorkoutSession = {
+      id: `completed_${activeSessionId}_${Date.now()}`,
+      date: completedAt,
+      startedAt,
+      completedAt,
+      totalDurationSeconds,
+      sessionId: activeSessionId,
+      sessionTitle: activeSession.title,
+      logs: { ...workoutLogs },
+      adherencePercentage: adherence,
+      completedExercisesCount: audit.completedExercises.length,
+      totalExercisesCount: audit.totalExercises,
+      totalVolumeLbs: sessionTelemetry.totalTonnageLbs,
+      skippedExercises: audit.skippedExercises.map((sk) => ({
+        exerciseId: sk.id,
+        exerciseName: sk.name,
+        reason: sk.reason,
+        skippedSets: sk.skippedSets,
+        targetSets: sk.targetSets,
+      })),
+    };
+    storageManager.saveCompletedWorkout(completedRecord);
+    handleScanLastWorkout();
+  }, [
+    activeSessionId,
+    activeSession,
+    workoutLogs,
+    programAdaptations,
+    sessionStartTimes,
+    sessionTelemetry.totalTonnageLbs,
     handleScanLastWorkout,
   ]);
 
@@ -1620,42 +1743,6 @@ export function WorkoutAppMain() {
   );
 
   const [isSummaryCardCollapsed, setIsSummaryCardCollapsed] = useState<boolean>(false);
-
-  // Live Session Telemetry (Tonnage, PR Count, Top e1RM) inspired by Hevy & Boostcamp
-  const sessionTelemetry = useMemo(() => {
-    let totalTonnageLbs = 0;
-    let prCount = 0;
-    let topE1RM = 0;
-
-    sessionExercises.forEach((ex) => {
-      const logs = workoutLogs[ex.id] || [];
-      const baseW = ex.defaultWeightLbs || ex.defaultWeight || 0;
-      const matches = String(ex.targetReps).match(/\d+/g);
-      const targetMax = matches && matches.length > 0 ? Math.max(...matches.map(Number)) : 8;
-      const baselineE1RM = baseW > 0 ? Math.round(baseW * (1 + targetMax / 30)) : 0;
-
-      let exHitPR = false;
-      logs.forEach((log) => {
-        if (log.isCompleted) {
-          const w = Number(log.weightLbs) || 0;
-          const r = Number(log.repsAchieved) || 0;
-          if (w > 0 && r > 0) {
-            totalTonnageLbs += w * r;
-            const e1rm = r === 1 ? w : Math.round(w * (1 + r / 30));
-            if (e1rm > topE1RM) topE1RM = e1rm;
-            if (baselineE1RM > 0 && e1rm > baselineE1RM) {
-              exHitPR = true;
-            }
-          } else if (r > targetMax) {
-            exHitPR = true;
-          }
-        }
-      });
-      if (exHitPR) prCount++;
-    });
-
-    return { totalTonnageLbs: Math.round(totalTonnageLbs), prCount, topE1RM };
-  }, [sessionExercises, workoutLogs]);
 
   // Identify the current active (first uncompleted) exercise and warmup drill for Focus Mode
   const activeFocusExerciseId = useMemo(() => {
@@ -2088,7 +2175,7 @@ export function WorkoutAppMain() {
               {/* Adaptive Body Feeling & Mobility Coach Widget */}
               <AdaptiveBodyCoachWidget
                 activeSession={activeSession}
-                history={Object.values(storageManager.getCompletedWorkouts())}
+                history={Object.values(completedWorkouts)}
                 appliedAdaptations={programAdaptations}
                 onApplyAdaptations={handleApplyWeeklyAdaptations}
                 onResetAdaptations={handleResetWeeklyAdaptations}
@@ -3107,7 +3194,7 @@ export function WorkoutAppMain() {
                         <Check className="w-5 h-5 stroke-[3]" />
                         <span>
                           {currentSessionCompletion === 100
-                            ? '✓ Completed (Tap to Reset)'
+                            ? '✓ Complete & Save to History'
                             : '✓ Mark Workout as Completed'}
                         </span>
                       </button>
@@ -3116,12 +3203,7 @@ export function WorkoutAppMain() {
                         <button
                           type="button"
                           data-testid="move-to-next-session-btn"
-                          onClick={() => {
-                            const allSessionIds: string[] = WORKOUT_SESSIONS.map((s) => s.id);
-                            const nextId = allSessionIds[(allSessionIds.indexOf(activeSessionId) + 1) % allSessionIds.length];
-                            setActiveSessionId(nextId);
-                            storageManager.saveImmediate({ activeSessionId: nextId });
-                          }}
+                          onClick={handleToggleWorkoutCompleted}
                           className="px-4 py-3 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-400 text-slate-950 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95"
                         >
                           Next Workout ➔
@@ -3214,7 +3296,7 @@ export function WorkoutAppMain() {
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
             <AdaptiveBodyCoachWidget
               activeSession={activeSession}
-              history={Object.values(storageManager.getCompletedWorkouts())}
+              history={Object.values(completedWorkouts)}
               appliedAdaptations={programAdaptations}
               onApplyAdaptations={handleApplyWeeklyAdaptations}
               onResetAdaptations={handleResetWeeklyAdaptations}
@@ -3256,7 +3338,7 @@ export function WorkoutAppMain() {
         {currentView === 'progress' && (
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
             <MuscleHeatmapWidget
-              history={Object.values(storageManager.getCompletedWorkouts())}
+              history={Object.values(completedWorkouts)}
               activeLogs={workoutLogs}
             />
             <Suspense fallback={<ViewLoadingFallback />}>
@@ -3274,7 +3356,7 @@ export function WorkoutAppMain() {
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
             <Suspense fallback={<ViewLoadingFallback />}>
               <AthleteProfileCard />
-              <StrengthHeatmapWidget history={Object.values(storageManager.getCompletedWorkouts())} />
+              <StrengthHeatmapWidget history={Object.values(completedWorkouts)} />
               <QuarterlyAssessmentWidget />
             </Suspense>
           </div>
@@ -3426,6 +3508,9 @@ export function WorkoutAppMain() {
         onSessionUpdated={() => {
           handleScanLastWorkout();
         }}
+        activeSession={activeSession}
+        workoutLogs={workoutLogs}
+        onSaveCurrentSessionToHistory={handleSaveCurrentSessionToHistory}
       />
       </Suspense>
 
@@ -3454,7 +3539,7 @@ export function WorkoutAppMain() {
               </button>
             </div>
             <MuscleHeatmapWidget
-              history={Object.values(storageManager.getCompletedWorkouts())}
+              history={Object.values(completedWorkouts)}
               activeLogs={workoutLogs}
             />
           </div>

@@ -125,8 +125,15 @@ export class StorageManager {
         ? raw.activeSessionId
         : DEFAULT_STORAGE_DATA.activeSessionId;
     const completedWorkouts =
-      raw.completedWorkouts && typeof raw.completedWorkouts === 'object'
+      raw.completedWorkouts && typeof raw.completedWorkouts === 'object' && !Array.isArray(raw.completedWorkouts)
         ? raw.completedWorkouts
+        : Array.isArray(raw.completedWorkouts)
+        ? raw.completedWorkouts.reduce((acc: any, item: any) => {
+            if (item && (item.id || item.date)) {
+              acc[item.id || item.date] = item;
+            }
+            return acc;
+          }, {})
         : {};
     const currentLogs =
       raw.currentLogs && typeof raw.currentLogs === 'object'
