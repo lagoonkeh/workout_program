@@ -30,7 +30,7 @@ import type { WorkoutSession } from '../domain/programData';
 import type { SetLogRecord } from './ExerciseCard';
 import { ALL_APP_SESSIONS } from '../domain/programData';
 import { applyWorkoutEdit, exerciseDisplayName, getWhen, ownWorkoutLogs, setNotes, setsOf } from '../domain/historyEdit';
-import { replaceWorkoutInSheets } from '../services/sheetSyncService';
+import { removeWorkoutFromSheets, replaceWorkoutInSheets } from '../services/sheetSyncService';
 
 export interface WorkoutHistoryModalProps {
   isOpen: boolean;
@@ -163,7 +163,16 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
 
   // Handle deleting a completed workout session
   const handleDeleteSession = (sessionId: string) => {
+    const deleted = storageManager.getCompletedWorkouts()[sessionId];
     storageManager.deleteCompletedWorkout(sessionId);
+    // also drop it from Google Sheets, or the next load would bring it back
+    if (deleted && import.meta.env.MODE !== 'test') {
+      void removeWorkoutFromSheets(deleted).then((r) => {
+        if (!r.success) {
+          setSyncStatusMessage({ type: 'error', text: `Deleted here, but Google Sheets wasn't updated: ${r.message}` });
+        }
+      });
+    }
     reloadSessions();
     setSessionToDelete(null);
     onSessionUpdated?.();

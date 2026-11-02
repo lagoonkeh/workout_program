@@ -17,6 +17,7 @@ import {
   AdaptiveBodyCoachWidget,
 } from './lazyView';
 import { sessionToOpen } from './domain/nextSession';
+import { removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
 import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
 import {
   WORKOUT_PROGRAM,
@@ -118,6 +119,8 @@ function createDefaultExerciseLogs(exercise: WorkoutExercise): SetLogRecord[] {
 
 export function WorkoutAppMain() {
   const { user } = useAuth();
+  // One-time history repair, before anything reads history (see services/historyRepair)
+  useState(() => removeSheetCopiesOnce());
   // O(1) lookup by id, exercise id, name or title; empty until the cue card chunk arrives
   const CUE_CARD_MAP = useCueCardLookup();
 
@@ -508,6 +511,8 @@ export function WorkoutAppMain() {
     try {
       const result = await scanLastWorkout(workoutLogs, activeSessionId);
       setScannedWorkoutInfo(result);
+      // workouts finished on another device may have just been added to history
+      setCompletedWorkouts(storageManager.getCompletedWorkouts());
     } catch (err) {
       console.warn('[App] Error scanning last workout:', err);
     }
@@ -516,6 +521,16 @@ export function WorkoutAppMain() {
   useEffect(() => {
     handleScanLastWorkout();
   }, []);
+
+  // Rebuild the Google Sheets workout log from this device's own workouts (once, needs sign-in),
+  // then pick up workouts finished on other devices.
+  useEffect(() => {
+    if (!user || isTestEnvironment()) return;
+    void repairSheetHistory().then((ok) => {
+      if (ok) handleScanLastWorkout();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const loadSyncDoneRef = useRef(false);
   useEffect(() => {
@@ -611,7 +626,7 @@ export function WorkoutAppMain() {
     lastSyncedTime,
     syncToast,
     setSyncToast,
-    handleSyncToSheets,
+    handleSyncFinishedWorkout,
     handleManualSyncToSheets,
   } = useSheetsSync(activeSessionId, workoutLogs);
 
@@ -1285,7 +1300,11 @@ export function WorkoutAppMain() {
         const syncKey = `${activeSessionId}_${today}_100`;
         if (lastAutoSyncedSessionRef.current !== syncKey && !isSyncing) {
           lastAutoSyncedSessionRef.current = syncKey;
-          handleSyncToSheets(activeSessionId, workoutLogs, true);
+          // write this finished workout (not the live logs of every session) to the sheet
+          const finished = Object.values(storageManager.getCompletedWorkouts())
+            .filter((w) => w.sessionId === activeSessionId)
+            .sort((a, b) => +new Date(b.completedAt || b.date) - +new Date(a.completedAt || a.date))[0];
+          if (finished) void handleSyncFinishedWorkout(finished);
         }
       }
     }
@@ -1298,7 +1317,7 @@ export function WorkoutAppMain() {
     sessionTelemetry,
     sessionStartTimes,
     isSyncing,
-    handleSyncToSheets,
+    handleSyncFinishedWorkout,
   ]);
 
   // Every workout starts unmarked: a session finished on an earlier day has its set, warmup and phase
@@ -1526,7 +1545,7 @@ export function WorkoutAppMain() {
     if (!isTestEnvironment()) {
       const today = new Date().toISOString().split('T')[0];
       lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
-      handleSyncToSheets(completedId, finalLogs, true);
+      void handleSyncFinishedWorkout(completedRecord);
     }
 
     // Re-scan last workout to update smart recommender
@@ -1542,7 +1561,7 @@ export function WorkoutAppMain() {
     isMuted,
     sessionStartTimes,
     sessionTelemetry.totalTonnageLbs,
-    handleSyncToSheets,
+    handleSyncFinishedWorkout,
     handleScanLastWorkout,
   ]);
 
@@ -1713,7 +1732,7 @@ export function WorkoutAppMain() {
       if (!isTestEnvironment()) {
         const today = new Date().toISOString().split('T')[0];
         lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
-        handleSyncToSheets(completedId, annotatedLogs, true);
+        void handleSyncFinishedWorkout(completedRecord);
       }
 
       handleScanLastWorkout();
@@ -1726,7 +1745,7 @@ export function WorkoutAppMain() {
       programAdaptations,
       isMuted,
       sessionStartTimes,
-      handleSyncToSheets,
+      handleSyncFinishedWorkout,
       handleScanLastWorkout,
     ]
   );
@@ -1843,7 +1862,7 @@ export function WorkoutAppMain() {
     if (!isTestEnvironment()) {
       const today = new Date().toISOString().split('T')[0];
       lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
-      handleSyncToSheets(completedId, annotatedLogs, true);
+      void handleSyncFinishedWorkout(completedRecord);
     }
 
     handleScanLastWorkout();
@@ -1854,7 +1873,7 @@ export function WorkoutAppMain() {
     workoutLogs,
     isMuted,
     sessionStartTimes,
-    handleSyncToSheets,
+    handleSyncFinishedWorkout,
     handleScanLastWorkout,
   ]);
 

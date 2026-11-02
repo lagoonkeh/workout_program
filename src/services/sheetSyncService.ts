@@ -5,7 +5,7 @@ import { MobilityEntry } from '../domain/mobility';
 import { SetLogRecord } from '../components/ExerciseCard';
 import { getIdToken } from './firebaseAuth';
 import { collectAppBackup, type AppBackup } from './appBackupService';
-import { buildSheetRowsForWorkout } from '../domain/historyEdit';
+import { buildSheetRowsForWorkout, localDateStr, parseWorkoutDate } from '../domain/historyEdit';
 
 export const STORAGE_KEY_LAST_SYNC = 'workout_app_last_sheets_sync_v1';
 export const STORAGE_KEY_LAST_SCANNED_WORKOUT = 'workout_app_last_scanned_workout_v1';
@@ -73,9 +73,12 @@ export async function scanLastWorkout(
   const defaultSuggestion = { id: 'lower_a', title: 'Lower A (Quad & Knee Bulletproofing)' };
 
   // 1. Try fetching latest recorded workout from remote Google Sheets sync API
+  //    (only once this device has repaired the sheet; before that its rows can't be trusted)
   try {
-    const res = await fetch('/api/sync?action=last-workout', { headers: await authHeaders() });
-    if (res.ok) {
+    const res = isHistoryRepaired()
+      ? await fetch('/api/sync?action=last-workout', { headers: await authHeaders() })
+      : null;
+    if (res && res.ok) {
       const data = await res.json();
       if (data && data.lastWorkout) {
         const last = data.lastWorkout;
@@ -106,26 +109,9 @@ export async function scanLastWorkout(
           daysAgo,
         };
 
-        // If remote response contains full history, auto-seed any missing sessions into local storage
+        // Bring in workouts finished on another device (only once this device's history is repaired)
         if (Array.isArray(data.allWorkouts) && data.allWorkouts.length > 0) {
-          const currentCompleted = storageManager.getCompletedWorkouts();
-          data.allWorkouts.forEach((w: any) => {
-            const key = w.id || `sheet_${w.date}_${w.sessionId}`;
-            if (!currentCompleted[key]) {
-              storageManager.saveCompletedWorkout({
-                id: key,
-                date: w.date || new Date().toISOString(),
-                sessionId: w.sessionId || resolveSessionIdFromTitle(w.sessionTitle || ''),
-                sessionTitle: w.sessionTitle,
-                logs: w.logs || {},
-                totalVolumeLbs: w.totalVolumeLbs || 0,
-                adherencePercentage: w.adherencePercentage ?? 100,
-                completedExercisesCount: w.completedExercisesCount || (w.exercises ? w.exercises.length : 0),
-                totalExercisesCount: w.totalExercisesCount || (w.exercises ? w.exercises.length : 0),
-                notes: w.notes || '',
-              });
-            }
-          });
+          importSheetWorkouts(data.allWorkouts);
         }
 
         try {
@@ -248,27 +234,7 @@ export async function fetchWorkoutHistoryFromSheets(): Promise<FetchHistoryResul
       };
     }
 
-    const existingWorkouts = storageManager.getCompletedWorkouts();
-    let importedCount = 0;
-
-    workouts.forEach((w) => {
-      const recordId = w.id || `sheet_${w.date}_${w.sessionId}`;
-      storageManager.saveCompletedWorkout({
-        id: recordId,
-        date: w.date || new Date().toISOString(),
-        sessionId: w.sessionId || resolveSessionIdFromTitle(w.sessionTitle || ''),
-        sessionTitle: w.sessionTitle,
-        logs: w.logs || {},
-        totalVolumeLbs: w.totalVolumeLbs || 0,
-        adherencePercentage: w.adherencePercentage ?? 100,
-        completedExercisesCount: w.completedExercisesCount || (w.exercises ? w.exercises.length : 0),
-        totalExercisesCount: w.totalExercisesCount || (w.exercises ? w.exercises.length : 0),
-        notes: w.notes || '',
-      });
-      if (!existingWorkouts[recordId]) {
-        importedCount += 1;
-      }
-    });
+    const importedCount = importSheetWorkouts(workouts);
 
     return {
       success: true,
@@ -383,46 +349,11 @@ export function buildSyncPayload(
   rawMobilityHistory?: MobilityEntry[]
 ): SyncPayload {
   const todayStr = toLocalDateStr(new Date());
+  // Workout rows are written from finished workouts only (pushWorkoutsToSheets), never from the live
+  // set logs: those hold every session's sets, many never done, and stamping them with today's date
+  // created workouts that never happened.
   const workoutLogs: SyncedWorkoutItem[] = [];
-
-  // Iterate across all exercises across all sessions to catch any logged data
-  Object.values(WORKOUT_PROGRAM).forEach((sessData) => {
-    sessData.exercises.forEach((ex) => {
-      const exerciseKeys = [ex.id, `${ex.id}__side_left`, `${ex.id}__side_right`];
-      exerciseKeys.forEach((key) => {
-        const logs = rawWorkoutLogs[key];
-        if (Array.isArray(logs)) {
-          const isLeft = key.endsWith('__side_left');
-          const isRight = key.endsWith('__side_right');
-          const sideSuffix = isLeft ? ' (Left Side)' : isRight ? ' (Right Side)' : '';
-          const resolvedName = `${ex.name}${sideSuffix}`;
-
-          logs.forEach((log) => {
-            // Include if marked completed OR has positive reps/weight
-            const hasWeight = typeof log.weightLbs === 'number' && log.weightLbs > 0;
-            const hasReps = typeof log.repsAchieved === 'number' && log.repsAchieved > 0;
-            if (log.isCompleted || hasWeight || hasReps) {
-              const { rpe, kneePain } = parseSetRatings(log.notes || '');
-              workoutLogs.push({
-                date: log.loggedAt ? toLocalDateStr(new Date(log.loggedAt)) : todayStr,
-                session: sessData.title,
-                exerciseName: resolvedName,
-                tier: ex.tier,
-                setNumber: log.setNumber,
-                targetReps: log.targetReps || ex.targetReps,
-                weight: log.weightLbs || 0,
-                reps: log.repsAchieved || 0,
-                isAmrap: ex.tier === 'T1' && log.setNumber === 3,
-                kneePain,
-                rpe,
-                notes: log.notes || '',
-              });
-            }
-          });
-        }
-      });
-    });
-  });
+  void rawWorkoutLogs;
 
   // Mobility history
   const mobilityHistory = rawMobilityHistory || storageManager.load().mobilityHistory || [];
@@ -501,27 +432,97 @@ export async function replaceWorkoutInSheets(
   updated: CompletedWorkoutSession,
   previous: CompletedWorkoutSession
 ): Promise<{ success: boolean; message: string }> {
-  const next = buildSheetRowsForWorkout(updated);
-  const before = buildSheetRowsForWorkout(previous);
+  const r = await pushWorkoutsToSheets([updated], { remove: [previous] });
+  return r.success ? { success: true, message: 'Saved and updated in Google Sheets.' } : r;
+}
+
+// ---------------------------------------------------------------------------
+// Workout history <-> Google Sheets
+// ---------------------------------------------------------------------------
+
+export const STORAGE_KEY_HISTORY_REPAIR = 'workout_history_sheet_repair_v1';
+/** Marks the one-time clean-up of the sheet's workout log (shared by every device) */
+export const SHEET_REPAIR_MARKER = 'history-repair-2026-11-02';
+
+export const isHistoryRepaired = (): boolean => {
+  try {
+    return localStorage.getItem(STORAGE_KEY_HISTORY_REPAIR) === 'done';
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Adds workouts read from the sheet to local history, skipping any that this device already has
+ * (same session on the same local day) so nothing shows up twice. Returns how many were added.
+ */
+export function importSheetWorkouts(workouts: any[]): number {
+  const existing = Object.values(storageManager.getCompletedWorkouts());
+  const have = new Set(
+    existing.map((w) => `${w.sessionId}|${localDateStr(parseWorkoutDate(w.completedAt || w.date))}`)
+  );
+  let added = 0;
+  for (const w of workouts) {
+    if (!w || !w.date) continue;
+    const sessionId = w.sessionId || resolveSessionIdFromTitle(w.sessionTitle || '');
+    const when = parseWorkoutDate(String(w.date));
+    if (isNaN(when.getTime())) continue;
+    const key = `${sessionId}|${localDateStr(when)}`;
+    if (have.has(key)) continue;
+    have.add(key);
+    storageManager.saveCompletedWorkout({
+      id: `sheet_${localDateStr(when)}_${sessionId}`,
+      date: when.toISOString(),
+      completedAt: when.toISOString(),
+      sessionId,
+      sessionTitle: w.sessionTitle,
+      logs: w.logs || {},
+      totalVolumeLbs: w.totalVolumeLbs || 0,
+      adherencePercentage: w.adherencePercentage ?? 100,
+      completedExercisesCount: w.completedExercisesCount || (w.exercises ? w.exercises.length : 0),
+      totalExercisesCount: w.totalExercisesCount || (w.exercises ? w.exercises.length : 0),
+      notes: w.notes || '',
+    });
+    added += 1;
+  }
+  return added;
+}
+
+/**
+ * Writes finished workouts to the sheet: each workout's rows (its date + session) are replaced with its
+ * completed sets. `remove` drops workouts' rows without writing new ones (e.g. a deleted workout).
+ * With `resetMarker`, the sheet's whole workout log is cleared first, once, by whichever device gets
+ * there first; later calls with the same marker only replace their own workouts.
+ */
+export async function pushWorkoutsToSheets(
+  workouts: CompletedWorkoutSession[],
+  opts: { remove?: CompletedWorkoutSession[]; resetMarker?: string } = {}
+): Promise<{ success: boolean; message: string }> {
+  const built = workouts.map(buildSheetRowsForWorkout);
+  const removed = (opts.remove || []).map(buildSheetRowsForWorkout);
+  const replace = [...built, ...removed].map((b) => ({ date: b.day, session: b.session }));
+  if (replace.length === 0 && !opts.resetMarker) return { success: true, message: 'Nothing to sync.' };
   try {
     const res = await fetch('/api/sync?action=replace-workout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
       body: JSON.stringify({
         action: 'replace-workout',
-        replace: [
-          { date: before.day, session: before.session },
-          { date: next.day, session: next.session },
-        ],
-        workoutLogs: next.rows,
+        replace,
+        workoutLogs: built.flatMap((b) => b.rows),
+        resetMarker: opts.resetMarker,
       }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.success) {
       return { success: false, message: data.error || `Google Sheets returned HTTP ${res.status}` };
     }
-    return { success: true, message: 'Saved and updated in Google Sheets.' };
+    return { success: true, message: `Synced ${built.length} workout${built.length === 1 ? '' : 's'} to Google Sheets.` };
   } catch (err: any) {
     return { success: false, message: err?.message || 'Network error' };
   }
 }
+
+/** Removes a deleted workout's rows from the sheet so it isn't pulled back in on the next load. */
+export const removeWorkoutFromSheets = (workout: CompletedWorkoutSession) =>
+  pushWorkoutsToSheets([], { remove: [workout] });

@@ -148,7 +148,8 @@ export function buildSheetRowsForWorkout(rec: CompletedWorkoutSession) {
   Object.entries(ownWorkoutLogs(rec)).forEach(([key, raw]) => {
     const ex = findExercise(key);
     setsOf(raw).forEach((s, i) => {
-      if (!isDone(s) && weightOf(s) <= 0 && repsOf(s) <= 0) return;
+      // only sets that were actually done go to the sheet
+      if (!isDone(s)) return;
       const notes = setNotes(s);
       const rpe = /RPE\s*(\d+(?:\.\d+)?)/i.exec(notes);
       const pain = Array.from(notes.matchAll(/Pain(?:-Free)?\s*(\d+(?:\.\d+)?)\s*\/\s*10/gi), (m) => parseFloat(m[1]));

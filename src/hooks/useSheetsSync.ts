@@ -1,7 +1,8 @@
 // src/hooks/useSheetsSync.ts
 import { useCallback, useState } from 'react';
 import { SetLogRecord } from '../components/ExerciseCard';
-import { buildSyncPayload, syncToGoogleSheets, STORAGE_KEY_LAST_SYNC } from '../services/sheetSyncService';
+import { buildSyncPayload, pushWorkoutsToSheets, syncToGoogleSheets, STORAGE_KEY_LAST_SYNC } from '../services/sheetSyncService';
+import { storageManager, type CompletedWorkoutSession } from '../storage/storageManager';
 
 export interface SheetsSyncToast {
   type: 'success' | 'error';
@@ -37,7 +38,12 @@ export function useSheetsSync(activeSessionId: string, workoutLogs: Record<strin
         const sessId = targetSessionId || activeSessionId;
         const logs = targetLogs || workoutLogs;
         const payload = buildSyncPayload(sessId, logs);
-        const result = await syncToGoogleSheets(payload);
+        const base = await syncToGoogleSheets(payload);
+        // Workout rows come from finished workouts (with their real dates), never from live set logs
+        const pushed = base.success
+          ? await pushWorkoutsToSheets(Object.values(storageManager.getCompletedWorkouts()))
+          : { success: false, message: base.message };
+        const result = { ...base, success: base.success && pushed.success, message: pushed.success ? base.message : pushed.message };
 
         if (result.success) {
           setSyncSuccessFlash(true);
@@ -71,6 +77,26 @@ export function useSheetsSync(activeSessionId: string, workoutLogs: Record<strin
     [activeSessionId, workoutLogs, isSyncing]
   );
 
+  /** After a workout is finished: write just that workout's sets to the sheet */
+  const handleSyncFinishedWorkout = useCallback(async (record: CompletedWorkoutSession) => {
+    const r = await pushWorkoutsToSheets([record]);
+    if (r.success) {
+      setSyncSuccessFlash(true);
+      setLastSyncedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      try {
+        localStorage.setItem(STORAGE_KEY_LAST_SYNC, new Date().toISOString());
+      } catch {
+        // safe fallback
+      }
+      setSyncToast({ type: 'success', message: 'Workout saved to Google Sheets.' });
+      setTimeout(() => setSyncSuccessFlash(false), 4000);
+      setTimeout(() => setSyncToast(null), 5000);
+    } else {
+      setSyncToast({ type: 'error', message: `Workout saved on this device, but Google Sheets wasn't updated: ${r.message}` });
+      setTimeout(() => setSyncToast(null), 7000);
+    }
+  }, []);
+
   const handleManualSyncToSheets = useCallback(() => {
     handleSyncToSheets();
   }, [handleSyncToSheets]);
@@ -82,6 +108,7 @@ export function useSheetsSync(activeSessionId: string, workoutLogs: Record<strin
     syncToast,
     setSyncToast,
     handleSyncToSheets,
+    handleSyncFinishedWorkout,
     handleManualSyncToSheets,
   };
 }

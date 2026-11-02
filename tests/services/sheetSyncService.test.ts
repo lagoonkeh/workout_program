@@ -39,25 +39,14 @@ describe('sheetSyncService', () => {
   });
 
   describe('buildSyncPayload dates and ratings', () => {
-    it('uses the local date the set was logged and passes ratings through', () => {
-      const loggedAt = new Date(2026, 9, 27, 21, 30).toISOString(); // 9:30pm local, Oct 27
+    it('does not turn live set logs into workout rows (finished workouts are pushed separately)', () => {
+      const loggedAt = new Date(2026, 9, 27, 21, 30).toISOString();
       const payload = buildSyncPayload('lower_a', {
         t1_bb_squat: [
-          {
-            setNumber: 1,
-            targetReps: '3',
-            weightLbs: 225,
-            repsAchieved: 3,
-            isCompleted: true,
-            notes: '@RPE 8, Knee Pain 2/10',
-            loggedAt,
-          },
+          { setNumber: 1, targetReps: '3', weightLbs: 225, repsAchieved: 3, isCompleted: true, notes: '@RPE 8, Knee Pain 2/10', loggedAt },
         ],
       }, []);
-      const squat = payload.workoutLogs.find((l) => l.exerciseName.includes('Squat'));
-      expect(squat?.date).toBe('2026-10-27');
-      expect(squat?.rpe).toBe(8);
-      expect(squat?.kneePain).toBe(2);
+      expect(payload.workoutLogs).toEqual([]);
     });
 
     it('formats dates in local time', () => {
@@ -66,72 +55,16 @@ describe('sheetSyncService', () => {
   });
 
   describe('buildSyncPayload', () => {
-    it('gathers completed and active workout set logs across program', () => {
+    it('carries mobility entries and the app backup, but no workout rows from live logs', () => {
       const mockLogs: Record<string, SetLogRecord[]> = {
-        t1_bb_squat: [
-          {
-            setNumber: 1,
-            targetReps: '3',
-            weightLbs: 225,
-            repsAchieved: 3,
-            isCompleted: true,
-            notes: 'Felt light',
-          },
-          {
-            setNumber: 2,
-            targetReps: '3',
-            weightLbs: 225,
-            repsAchieved: 3,
-            isCompleted: false, // has weight and reps
-            notes: '',
-          },
-          {
-            setNumber: 3,
-            targetReps: '3+',
-            weightLbs: 0,
-            repsAchieved: 0,
-            isCompleted: false, // untouched, should be omitted
-            notes: '',
-          },
-        ],
+        t1_bb_squat: [{ setNumber: 1, targetReps: '3', weightLbs: 225, repsAchieved: 3, isCompleted: true, notes: 'Felt light' }],
       };
-
-      const mockMobility: MobilityEntry[] = [
-        {
-          testId: 'knee-to-wall',
-          value: 4.8,
-          side: 'left',
-          notes: 'Great dorsiflexion',
-        },
-      ];
-
+      const mockMobility: MobilityEntry[] = [{ testId: 'knee-to-wall', value: 4.8, side: 'left', notes: 'Great dorsiflexion' }];
       const payload = buildSyncPayload('lower_a', mockLogs, mockMobility);
-
       expect(payload.activeSessionId).toBe('lower_a');
-      expect(payload.workoutLogs).toHaveLength(2);
-      expect(payload.workoutLogs[0]).toMatchObject({
-        exerciseName: 'Barbell Back Squat',
-        tier: 'T1',
-        setNumber: 1,
-        weight: 225,
-        reps: 3,
-        notes: 'Felt light',
-      });
-      expect(payload.workoutLogs[1]).toMatchObject({
-        exerciseName: 'Barbell Back Squat',
-        tier: 'T1',
-        setNumber: 2,
-        weight: 225,
-        reps: 3,
-      });
-
+      expect(payload.workoutLogs).toEqual([]);
       expect(payload.mobilityEntries).toHaveLength(1);
-      expect(payload.mobilityEntries[0]).toMatchObject({
-        testId: 'knee-to-wall',
-        value: 4.8,
-        side: 'left',
-        notes: 'Great dorsiflexion',
-      });
+      expect(payload.mobilityEntries[0].value).toBe(4.8);
     });
 
     it('handles empty inputs safely without throwing', () => {
@@ -221,8 +154,8 @@ describe('sheetSyncService', () => {
       };
 
       const payload = buildSyncPayload('lower_a', completedWorkoutLogs, []);
-      expect(payload.workoutLogs.length).toBeGreaterThan(0);
-      expect(payload.workoutLogs[0].reps).toBe(3);
+      // workout rows come from finished workouts (pushWorkoutsToSheets), not from live logs
+      expect(payload.workoutLogs).toEqual([]);
 
       const result = await syncToGoogleSheets(payload);
       expect(result.success).toBe(true);
@@ -232,6 +165,7 @@ describe('sheetSyncService', () => {
 
   describe('scanLastWorkout', () => {
     it('scans last recorded workout from /api/sync and suggests the next session in 4-day rotation', async () => {
+      localStorage.setItem('workout_history_sheet_repair_v1', 'done');
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -305,6 +239,7 @@ describe('sheetSyncService', () => {
     });
 
     it('auto-seeds completed workouts into storageManager when allWorkouts are in scan response', async () => {
+      localStorage.setItem('workout_history_sheet_repair_v1', 'done');
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
         ok: true,
         json: async () => ({

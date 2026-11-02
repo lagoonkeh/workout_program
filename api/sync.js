@@ -117,17 +117,25 @@ function workoutRowValues(log) {
   ];
 }
 
-async function replaceWorkoutRows(accessToken, spreadsheetId, targets, logs) {
+async function replaceWorkoutRows(accessToken, spreadsheetId, targets, logs, resetMarker) {
   const keys = new Set(
     targets
       .filter((t) => t && t.date && t.session)
       .map((t) => `${normSheetDate(t.date)}__${String(t.session).trim().toLowerCase()}`)
   );
-  if (keys.size === 0) throw new Error('No workout to replace');
+  if (keys.size === 0 && !resetMarker) throw new Error('No workout to replace');
   const range = "'Workout Logs'!A5:L";
+  // One-time clean-up shared by every device: the first request carrying a new marker clears the
+  // whole workout log; later ones (other devices) only replace their own workouts.
+  const markerRange = "'Workout Logs'!N1";
+  let resetNow = false;
+  if (resetMarker) {
+    const m = await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(markerRange)}`));
+    resetNow = String(((m.values || [])[0] || [])[0] || '') !== String(resetMarker);
+  }
   const existing = await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(range)}`));
   const rows = existing.values || [];
-  const keep = rows.filter(
+  const keep = resetNow ? [] : rows.filter(
     (r) => !(r && r[0] && keys.has(`${normSheetDate(r[0])}__${String(r[1] || '').trim().toLowerCase()}`))
   );
   const added = logs.map(workoutRowValues);
@@ -146,7 +154,13 @@ async function replaceWorkoutRows(accessToken, spreadsheetId, targets, logs) {
       body: JSON.stringify({ valueInputOption: 'USER_ENTERED', data: [{ range: "'Workout Logs'!A5", values: next }] }),
     });
   }
-  return { removed: rows.length - keep.length, added: added.length };
+  if (resetNow) {
+    await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
+      method: 'POST',
+      body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: markerRange, values: [[String(resetMarker)]] }] }),
+    });
+  }
+  return { removed: rows.length - keep.length, added: added.length, reset: resetNow };
 }
 
 function sheetsUrl(spreadsheetId, path) {
@@ -572,7 +586,7 @@ export default async function handler(req, res) {
     // 1d. Replace one edited workout's rows (date and/or sets changed)
     if (actionParam === 'replace-workout') {
       try {
-        const result = await replaceWorkoutRows(accessToken, spreadsheetId, body.replace || [], workoutLogs);
+        const result = await replaceWorkoutRows(accessToken, spreadsheetId, body.replace || [], workoutLogs, body.resetMarker);
         return res.status(200).json({ success: true, ...result });
       } catch (err) {
         return res.status(500).json({ success: false, error: `Error updating workout: ${err.message}` });

@@ -56,6 +56,8 @@ describe('refreshing the app', () => {
   });
 
   it('picks up a newer workout recorded in Google Sheets (another device)', () => {
+    // this device has already done the one-time history repair, so the cached sheet result is trusted
+    localStorage.setItem('workout_history_local_repair_v1', 'done');
     finish('upper_a', hoursAgo(50));
     localStorage.setItem(
       STORAGE_KEY_LAST_SCANNED_WORKOUT,

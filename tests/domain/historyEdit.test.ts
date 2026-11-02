@@ -1,4 +1,4 @@
-// tests/domain/historyEdit.test.ts
+﻿// tests/domain/historyEdit.test.ts
 import {
   applyWorkoutEdit,
   buildSheetRowsForWorkout,
@@ -67,7 +67,7 @@ describe('historyEdit', () => {
   it('builds Google Sheets rows for the logged sets only', () => {
     const { rows, session } = buildSheetRowsForWorkout(base as any);
     expect(session).toBe(SESSION_LOWER_A.title);
-    expect(rows).toHaveLength(2); // set 2 still has a weight logged
+    expect(rows).toHaveLength(1); // set 2 wasn't done, so it isn't sent
     expect(rows[0]).toMatchObject({ exerciseName: ex.name, setNumber: 1, weight: 200, reps: 5 });
   });
 });
