@@ -13,6 +13,8 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
       activeSessionId: 'lower_a',
       currentLogs: {},
       mobilityHistory: [],
+      // the app opens the workout after the last one finished, so start each test with no history
+      completedWorkouts: {},
     });
   });
 

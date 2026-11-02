@@ -13,6 +13,7 @@ import {
   WorkoutHistoryModal,
   DailyReadinessWidget,
 } from './lazyView';
+import { sessionToOpen } from './domain/nextSession';
 import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
 import {
   WORKOUT_PROGRAM,
@@ -129,17 +130,32 @@ export function WorkoutAppMain() {
   }, []);
 
   // 1. Navigation & View State
+  // On load (refresh), open the next workout in the rotation after the last one finished, or resume
+  // a workout in progress. Falls back to the last session that was open when there's no history.
   const [activeSessionId, setActiveSessionId] = useState<string>(() => {
+    let stored = 'lower_a';
     try {
       const fromManager = storageManager.load().activeSessionId;
-      if (fromManager && (fromManager in WORKOUT_PROGRAM)) return fromManager;
       const fromStorage = localStorage.getItem(STORAGE_KEY_SESSION);
-      if (fromStorage && (fromStorage in WORKOUT_PROGRAM)) return fromStorage;
+      if (fromManager && (fromManager in WORKOUT_PROGRAM)) stored = fromManager;
+      else if (fromStorage && (fromStorage in WORKOUT_PROGRAM)) stored = fromStorage;
+
+      const finished: { sessionId: string; date: string; completedAt?: string }[] = Object.values(
+        storageManager.getCompletedWorkouts()
+      );
+      const cachedScan = JSON.parse(localStorage.getItem(STORAGE_KEY_LAST_SCANNED_WORKOUT) || 'null');
+      if (cachedScan?.lastWorkout?.sessionId && cachedScan.lastWorkout.date) {
+        finished.push({ sessionId: cachedScan.lastWorkout.sessionId, date: cachedScan.lastWorkout.date });
+      }
+      const startTimes = JSON.parse(localStorage.getItem(STORAGE_KEY_SESSION_START_TIMES) || '{}');
+      const open = sessionToOpen({ finished, startTimes, isKnownSession: (id) => id in WORKOUT_PROGRAM });
+      if (open && open in WORKOUT_PROGRAM) return open;
     } catch {
       // fallback
     }
-    return 'lower_a';
+    return stored;
   });
+  const initialSessionIdRef = useRef(activeSessionId);
 
   const [currentView, setCurrentView] = useState<AppViewMode>(() => {
     try {
@@ -504,6 +520,26 @@ export function WorkoutAppMain() {
   useEffect(() => {
     handleScanLastWorkout();
   }, []);
+
+  const loadSyncDoneRef = useRef(false);
+  useEffect(() => {
+    if (loadSyncDoneRef.current || !scannedWorkoutInfo) return;
+    loadSyncDoneRef.current = true;
+    // only if nothing changed since load: the user hasn't picked another session or started one
+    if (activeSessionId !== initialSessionIdRef.current) return;
+    const last = scannedWorkoutInfo.lastWorkout;
+    if (scannedWorkoutInfo.source !== 'google_sheets' || !last?.sessionId) return;
+    const open = sessionToOpen({
+      finished: [
+        ...Object.values(storageManager.getCompletedWorkouts()),
+        { sessionId: last.sessionId, date: last.date },
+      ],
+      startTimes: sessionStartTimes,
+      isKnownSession: (id) => id in WORKOUT_PROGRAM,
+    });
+    if (open && open !== activeSessionId && open in WORKOUT_PROGRAM) setActiveSessionId(open);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scannedWorkoutInfo]);
 
   // 4e. Session completion announcement toast
   const [sessionCompletionToast, setSessionCompletionToast] = useState<{
