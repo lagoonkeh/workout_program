@@ -33,10 +33,30 @@
         max-width: 100vw;
         overflow-x: hidden;
       }
+      /* Loading screen painted before the app code arrives; React replaces it on first render */
+      .boot-bar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #1e293b; }
+      .boot-logo { width: 34px; height: 34px; border-radius: 10px; background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.35); }
+      .boot-title { font-weight: 700; font-size: 16px; color: #f8fafc; }
+      .boot-body { padding: 16px; display: grid; gap: 12px; max-width: 1280px; margin: 0 auto; }
+      .boot-card { height: 72px; border-radius: 16px; background: #0f172a; border: 1px solid #1e293b; animation: boot-pulse 1.4s ease-in-out infinite; }
+      .boot-card.tall { height: 180px; }
+      .boot-note { text-align: center; color: #64748b; font-size: 13px; padding-top: 4px; }
+      @keyframes boot-pulse { 50% { opacity: .55; } }
+      @media (prefers-reduced-motion: reduce) { .boot-card { animation: none; } }
     </style>
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased min-h-screen selection:bg-emerald-500 selection:text-slate-950">
-    <div id="root"></div>
+    <div id="root">
+      <div aria-busy="true" aria-label="Loading your workout">
+        <div class="boot-bar"><div class="boot-logo"></div><div class="boot-title">4-Day Upper/Lower</div></div>
+        <div class="boot-body">
+          <div class="boot-card"></div>
+          <div class="boot-card tall"></div>
+          <div class="boot-card tall"></div>
+          <div class="boot-note">Loading your workout…</div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
       // 1. Vite chunk load failure recovery

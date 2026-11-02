@@ -54,6 +54,26 @@ export const DailyReadinessWidget = lazyView(() =>
   import('./components/DailyReadinessWidget').then((m) => m.DailyReadinessWidget)
 );
 
+// Pieces only shown after a tap (tabs, dialogs, the tempo player, the bar-view loader)
+export const AdaptiveBodyCoachWidget = lazyView(() =>
+  import('./components/AdaptiveBodyCoachWidget').then((m) => m.AdaptiveBodyCoachWidget)
+);
+export const MuscleHeatmapWidget = lazyView(() =>
+  import('./components/MuscleHeatmapWidget').then((m) => m.MuscleHeatmapWidget)
+);
+export const TempoMetronomeWidget = lazyView(() =>
+  import('./components/TempoMetronomeWidget').then((m) => m.TempoMetronomeWidget)
+);
+export const RatingDefinitionsModal = lazyView(() =>
+  import('./components/RatingDefinitionsModal').then((m) => m.RatingDefinitionsModal)
+);
+export const SkipExerciseReasonModal = lazyView(() =>
+  import('./components/SkipExerciseReasonModal').then((m) => m.SkipExerciseReasonModal)
+);
+export const PlateCalculatorWidget = lazyView(() =>
+  import('./components/PlateCalculatorWidget').then((m) => m.PlateCalculatorWidget)
+);
+
 // Modals that are closed on first paint
 export const CueCardModal = lazyView(() => import('./components/CueCardModal').then((m) => m.CueCardModal));
 export const WeeklyEvaluationModal = lazyView(() =>
@@ -78,6 +98,12 @@ const LAZY_VIEWS = [
   WeeklyEvaluationModal,
   WorkoutCompletionModal,
   WorkoutHistoryModal,
+  AdaptiveBodyCoachWidget,
+  MuscleHeatmapWidget,
+  TempoMetronomeWidget,
+  RatingDefinitionsModal,
+  SkipExerciseReasonModal,
+  PlateCalculatorWidget,
 ];
 
 export const preloadLazyViews = () =>

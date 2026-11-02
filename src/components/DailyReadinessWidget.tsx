@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import {
   DailyReadinessEntry,
   COMMON_SORENESS_TAGS,
@@ -7,10 +7,8 @@ import {
 } from '../domain/dailyReadiness';
 import { WorkoutSession } from '../domain/programData';
 import { WorkoutAdaptation } from '../domain/weeklyEvaluator';
-import {
-  RatingDefinitionsModal,
-  RatingCategoryTab,
-} from './RatingDefinitionsModal';
+import type { RatingCategoryTab } from './RatingDefinitionsModal';
+import { RatingDefinitionsModal } from '../lazyView';
 import {
   HeartPulse,
   Sparkles,
@@ -662,11 +660,15 @@ export const DailyReadinessWidget: React.FC<DailyReadinessWidgetProps> = ({
       )}
 
       {/* Interactive Rating Scale Definitions Modal */}
-      <RatingDefinitionsModal
-        isOpen={isRatingModalOpen}
-        onClose={() => setIsRatingModalOpen(false)}
-        initialTab={initialRatingTab}
-      />
+      {isRatingModalOpen && (
+        <Suspense fallback={null}>
+          <RatingDefinitionsModal
+            isOpen={isRatingModalOpen}
+            onClose={() => setIsRatingModalOpen(false)}
+            initialTab={initialRatingTab}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

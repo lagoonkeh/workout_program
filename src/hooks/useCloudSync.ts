@@ -42,8 +42,15 @@ export function useCloudSync({
   useEffect(() => {
     if (!userId || isTestEnvironment() || !isFirebaseConfigured()) return;
 
+    // The app opens from local data; connect to the cloud once the first screen is up, so the
+    // Firestore library (the largest download) doesn't compete with startup.
+    let unsubscribeWorkout: () => void = () => {};
+    let unsubscribeMobility: () => void = () => {};
+    let cancelled = false;
+    const start = () => {
+      if (cancelled) return;
     // Real-time workout state subscription (bidirectional multi-device sync)
-    const unsubscribeWorkout = firestoreSyncService.subscribeToWorkoutState(userId, (remoteState) => {
+    unsubscribeWorkout = firestoreSyncService.subscribeToWorkoutState(userId, (remoteState) => {
       isRemoteSyncUpdateRef.current = true;
       if (remoteState.activeSessionId && remoteState.activeSessionId in WORKOUT_PROGRAM) {
         setActiveSessionId(remoteState.activeSessionId);
@@ -78,7 +85,7 @@ export function useCloudSync({
     });
 
     // Real-time mobility history subscription
-    const unsubscribeMobility = firestoreSyncService.subscribeToMobilityHistory(userId, (remoteEntries) => {
+    unsubscribeMobility = firestoreSyncService.subscribeToMobilityHistory(userId, (remoteEntries) => {
       isRemoteSyncUpdateRef.current = true;
       setMobilityHistory(remoteEntries);
       storageManager.saveImmediate({ mobilityHistory: remoteEntries });
@@ -87,7 +94,14 @@ export function useCloudSync({
       }, 100);
     });
 
+    };
+    const hasIdle = typeof window.requestIdleCallback === 'function';
+    const idle = hasIdle ? window.requestIdleCallback(start, { timeout: 3000 }) : globalThis.setTimeout(start, 1500);
+
     return () => {
+      cancelled = true;
+      if (hasIdle) window.cancelIdleCallback(idle as number);
+      else globalThis.clearTimeout(idle as ReturnType<typeof setTimeout>);
       unsubscribeWorkout();
       unsubscribeMobility();
     };

@@ -12,6 +12,9 @@ import {
   WorkoutCompletionModal,
   WorkoutHistoryModal,
   DailyReadinessWidget,
+  TempoMetronomeWidget,
+  MuscleHeatmapWidget,
+  AdaptiveBodyCoachWidget,
 } from './lazyView';
 import { sessionToOpen } from './domain/nextSession';
 import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
@@ -32,9 +35,6 @@ import { Header, AppViewMode } from './components/Header';
 import { SessionNav, SessionProgressStats } from './components/SessionNav';
 import { ExerciseCard, SetLogRecord } from './components/ExerciseCard';
 import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget';
-import { TempoMetronomeWidget } from './components/TempoMetronomeWidget';
-import { MuscleHeatmapWidget } from './components/MuscleHeatmapWidget';
-import { AdaptiveBodyCoachWidget } from './components/AdaptiveBodyCoachWidget';
 import { ExerciseDiagram } from './components/ExerciseDiagram';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
 import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X } from 'lucide-react';
@@ -3173,14 +3173,16 @@ export function WorkoutAppMain() {
         {/* View: Daily Body Readiness & Recovery Check-In */}
         {currentView === 'readiness' && (
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
-            <AdaptiveBodyCoachWidget
-              activeSession={activeSession}
-              history={Object.values(completedWorkouts)}
-              appliedAdaptations={programAdaptations}
-              onApplyAdaptations={handleApplyWeeklyAdaptations}
-              onResetAdaptations={handleResetWeeklyAdaptations}
-              defaultExpanded={true}
-            />
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <AdaptiveBodyCoachWidget
+                activeSession={activeSession}
+                history={Object.values(completedWorkouts)}
+                appliedAdaptations={programAdaptations}
+                onApplyAdaptations={handleApplyWeeklyAdaptations}
+                onResetAdaptations={handleResetWeeklyAdaptations}
+                defaultExpanded={true}
+              />
+            </Suspense>
             <Suspense fallback={<ViewLoadingFallback />}>
               <DailyReadinessWidget
                 activeSession={activeSession}
@@ -3218,10 +3220,12 @@ export function WorkoutAppMain() {
         {/* View 4: Progress Chart, Projections & Muscle Fatigue Heatmap */}
         {currentView === 'progress' && (
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
-            <MuscleHeatmapWidget
-              history={Object.values(completedWorkouts)}
-              activeLogs={workoutLogs}
-            />
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <MuscleHeatmapWidget
+                history={Object.values(completedWorkouts)}
+                activeLogs={workoutLogs}
+              />
+            </Suspense>
             <Suspense fallback={<ViewLoadingFallback />}>
               <ProgressChartWidget
                 workoutLogs={workoutLogs}
@@ -3298,45 +3302,47 @@ export function WorkoutAppMain() {
           aria-label="Marcus Filly Tempo Metronome"
         >
           <div className="max-w-2xl w-full my-auto">
-            <TempoMetronomeWidget
-              initialTempo={activeTempo}
-              initialTargetReps={(() => {
-                if (activeTempoTargetReps !== undefined) return activeTempoTargetReps;
-                if (!activeTempoExerciseId) return 10;
-                const allExs = [
-                  ...Object.values(adaptedSessions).flatMap((s) => [
-                    ...s.exercises,
-                    ...(s.dailyCoreFinisher || []),
-                  ]),
-                  ...sessionExercises,
-                  ...(activeSession.dailyCoreFinisher || []),
-                ];
-                const ex = allExs.find((e) => e.id === activeTempoExerciseId);
-                if (!ex) return 10;
-                const tempoLower = (ex.tempo || '').toLowerCase();
-                const targetRepsLower = (ex.targetReps || '').toLowerCase();
-                const isHold =
-                  tempoLower.includes('hold') ||
-                  tempoLower.includes('isometric') ||
-                  tempoLower.startsWith('hold-') ||
-                  targetRepsLower.includes('hold') ||
-                  (targetRepsLower.includes('s') && (targetRepsLower.includes('–') || targetRepsLower.includes('-')));
-
-                if (isHold && !targetRepsLower.includes('reps')) {
-                  return 1;
-                }
-                const currentLogs = getExerciseLogs(ex);
-                const nextUncompleted = currentLogs.find((s) => !s.isCompleted);
-                return extractTargetReps(nextUncompleted?.targetReps || ex.targetReps, 10);
-              })()}
-              exerciseId={activeTempoExerciseId || undefined}
-              autoStart={true}
-              onSetComplete={handleTempoSetComplete}
-              onClose={() => {
-                setActiveTempo(null);
-                setActiveTempoExerciseId(null);
-              }}
-            />
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <TempoMetronomeWidget
+                initialTempo={activeTempo}
+                initialTargetReps={(() => {
+                  if (activeTempoTargetReps !== undefined) return activeTempoTargetReps;
+                  if (!activeTempoExerciseId) return 10;
+                  const allExs = [
+                    ...Object.values(adaptedSessions).flatMap((s) => [
+                      ...s.exercises,
+                      ...(s.dailyCoreFinisher || []),
+                    ]),
+                    ...sessionExercises,
+                    ...(activeSession.dailyCoreFinisher || []),
+                  ];
+                  const ex = allExs.find((e) => e.id === activeTempoExerciseId);
+                  if (!ex) return 10;
+                  const tempoLower = (ex.tempo || '').toLowerCase();
+                  const targetRepsLower = (ex.targetReps || '').toLowerCase();
+                  const isHold =
+                    tempoLower.includes('hold') ||
+                    tempoLower.includes('isometric') ||
+                    tempoLower.startsWith('hold-') ||
+                    targetRepsLower.includes('hold') ||
+                    (targetRepsLower.includes('s') && (targetRepsLower.includes('–') || targetRepsLower.includes('-')));
+  
+                  if (isHold && !targetRepsLower.includes('reps')) {
+                    return 1;
+                  }
+                  const currentLogs = getExerciseLogs(ex);
+                  const nextUncompleted = currentLogs.find((s) => !s.isCompleted);
+                  return extractTargetReps(nextUncompleted?.targetReps || ex.targetReps, 10);
+                })()}
+                exerciseId={activeTempoExerciseId || undefined}
+                autoStart={true}
+                onSetComplete={handleTempoSetComplete}
+                onClose={() => {
+                  setActiveTempo(null);
+                  setActiveTempoExerciseId(null);
+                }}
+              />
+            </Suspense>
           </div>
         </div>
       )}
@@ -3420,10 +3426,12 @@ export function WorkoutAppMain() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <MuscleHeatmapWidget
-              history={Object.values(completedWorkouts)}
-              activeLogs={workoutLogs}
-            />
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <MuscleHeatmapWidget
+                history={Object.values(completedWorkouts)}
+                activeLogs={workoutLogs}
+              />
+            </Suspense>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
 import { WorkoutExercise, isUnilateralExercise, formatMMSS, extractTargetReps, getEffectiveExerciseTempo } from '../domain/programData';
 import { ExerciseDiagram } from './ExerciseDiagram';
 import { EXERCISE_VISUALS, ExerciseVisual } from '../domain/exerciseVisualsData';
@@ -28,10 +28,9 @@ import {
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { TempoMetronome, MetronomeSnapshot } from '../timer/tempoMetronome';
 import { audioSynthesizer } from '../audio/audioSynthesizer';
-import { PlateCalculatorWidget } from './PlateCalculatorWidget';
 import { PlateLoadStrip, platesPerSideText } from './PlateLoadStrip';
-import { RatingDefinitionsModal, RatingCategoryTab } from './RatingDefinitionsModal';
-import { SkipExerciseReasonModal } from './SkipExerciseReasonModal';
+import type { RatingCategoryTab } from './RatingDefinitionsModal';
+import { PlateCalculatorWidget, RatingDefinitionsModal, SkipExerciseReasonModal } from '../lazyView';
 
 const QUICK_LOG_CHIPS = [
   '@RPE 7',
@@ -1642,6 +1641,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               Close
             </button>
           </div>
+          <Suspense fallback={null}>
           <PlateCalculatorWidget
             initialWeight={plateCalcWeight}
             onWeightChange={(newWeight) => {
@@ -1650,6 +1650,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             onClose={() => setShowPlateCalculator(false)}
             className="w-full bg-slate-900 border border-slate-800 p-3 sm:p-4 shadow-none"
           />
+          </Suspense>
         </div>
       )}
 
@@ -2609,13 +2610,19 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
       )}
 
       {/* Interactive Rating Scale Definitions Modal */}
+      {isRatingModalOpen && (
+      <Suspense fallback={null}>
       <RatingDefinitionsModal
         isOpen={isRatingModalOpen}
         onClose={() => setIsRatingModalOpen(false)}
         initialTab={initialRatingTab}
       />
+      </Suspense>
+      )}
 
       {/* Skip Exercise Reason Modal */}
+      {isSkipModalOpen && (
+      <Suspense fallback={null}>
       <SkipExerciseReasonModal
         isOpen={isSkipModalOpen}
         onClose={() => setIsSkipModalOpen(false)}
@@ -2627,6 +2634,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         onConfirmSkip={handleConfirmSkip}
         onUnskip={handleUnskipExercise}
       />
+      </Suspense>
+      )}
     </article>
   );
 };
