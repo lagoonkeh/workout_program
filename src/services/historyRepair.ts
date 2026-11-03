@@ -1,11 +1,11 @@
-// src/services/historyRepair.ts
+﻿// src/services/historyRepair.ts
 /**
  * One-time repair of workout history (Nov 2026).
  *
  * The old Google Sheets sync wrote every session's live set logs to the sheet, stamping any set without
  * a timestamp with that day's date, and every app load copied the sheet back into history. That created
  * workouts that never happened. The fix:
- *  1. on this device, drop the history entries that were copied in from the sheet (ids "sheet_…");
+ *  1. on this device, drop the history entries that were copied in from the sheet (ids "sheet_â€¦");
  *  2. rewrite the sheet's workout log from the workouts the app recorded itself. The first device to
  *     get there clears the whole log (shared marker on the sheet); each device then adds its own.
  * Until step 2 succeeds, this device neither imports from the sheet nor trusts its "last workout".
@@ -109,4 +109,53 @@ export function repairSheetHistory(): Promise<boolean> {
       });
   }
   return pending;
+}
+
+const STORAGE_KEY_MEADOWS_MIGRATION = 'workout_meadows_to_kb_row_v1';
+const KB_ROW = 't2_kb_single_arm_row';
+const isMeadowsKey = (k: string) => /landmine_meadows_row/.test(k);
+
+/**
+ * One-time switch from the retired Landmine Meadows Row to the Single-Arm Kettlebell Row.
+ * In every past workout, Meadows Row sets become Kettlebell Row sets (dropped if that workout already
+ * has Kettlebell Row sets); leftover Meadows Row sets in the current workout are removed.
+ * Returns how many past workouts changed.
+ */
+export function migrateMeadowsRowOnce(): number {
+  try {
+    if (localStorage.getItem(STORAGE_KEY_MEADOWS_MIGRATION) === 'done') return 0;
+    let changed = 0;
+    for (const w of Object.values(storageManager.getCompletedWorkouts())) {
+      const keys = Object.keys(w.logs || {}).filter(isMeadowsKey);
+      if (!w.id || keys.length === 0) continue;
+      const logs: Record<string, any> = { ...(w.logs || {}) };
+      for (const k of keys) {
+        const target = k.replace(/(t2_)?landmine_meadows_row/, KB_ROW);
+        if (!logs[target]) logs[target] = logs[k];
+        delete logs[k];
+      }
+      storageManager.updateCompletedWorkout(w.id, { logs });
+      changed += 1;
+    }
+    // current set logs (both stores the app reads from)
+    try {
+      const raw = localStorage.getItem('workout_app_set_logs_v1');
+      if (raw) {
+        const cur = JSON.parse(raw);
+        Object.keys(cur).filter(isMeadowsKey).forEach((k) => delete cur[k]);
+        localStorage.setItem('workout_app_set_logs_v1', JSON.stringify(cur));
+      }
+      const current = { ...(storageManager.load().currentLogs || {}) } as Record<string, unknown>;
+      if (Object.keys(current).some(isMeadowsKey)) {
+        Object.keys(current).filter(isMeadowsKey).forEach((k) => delete current[k]);
+        storageManager.saveImmediate({ currentLogs: current as any });
+      }
+    } catch {
+      // safe fallback
+    }
+    localStorage.setItem(STORAGE_KEY_MEADOWS_MIGRATION, 'done');
+    return changed;
+  } catch {
+    return 0;
+  }
 }

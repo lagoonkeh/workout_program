@@ -17,7 +17,7 @@ import {
   AdaptiveBodyCoachWidget,
 } from './lazyView';
 import { sessionToOpen } from './domain/nextSession';
-import { removeNov1PhantomsOnce, removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
+import { migrateMeadowsRowOnce, removeNov1PhantomsOnce, removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
 import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
 import {
   WORKOUT_PROGRAM,
@@ -123,6 +123,7 @@ export function WorkoutAppMain() {
   useState(() => {
     removeSheetCopiesOnce();
     removeNov1PhantomsOnce();
+    migrateMeadowsRowOnce();
   });
   // O(1) lookup by id, exercise id, name or title; empty until the cue card chunk arrives
   const CUE_CARD_MAP = useCueCardLookup();

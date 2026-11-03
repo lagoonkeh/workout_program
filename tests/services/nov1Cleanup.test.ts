@@ -36,3 +36,25 @@ describe('Nov 1 phantom clean-up', () => {
     expect(Object.keys(ownWorkoutLogs({ sessionId: 'upper_a', logs }))).toContain('t2_landmine_meadows_row');
   });
 });
+
+describe('Meadows Row ? Single-Arm Kettlebell Row', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storageManager.clear();
+  });
+
+  it('turns Meadows Row sets into Kettlebell Row sets and clears them from the current workout', async () => {
+    const { migrateMeadowsRowOnce } = await import('../../src/services/historyRepair');
+    storageManager.saveCompletedWorkout({ id: 'a', sessionId: 'upper_a', date: at(1, 20), logs: { t2_landmine_meadows_row: sets(3), t1_bb_bench: sets(5) } } as any);
+    storageManager.saveCompletedWorkout({ id: 'b', sessionId: 'upper_a', date: at(1, 23), logs: { t2_landmine_meadows_row: sets(3), t2_kb_single_arm_row: sets(2) } } as any);
+    localStorage.setItem('workout_app_set_logs_v1', JSON.stringify({ t2_landmine_meadows_row__side_left: sets(1), t1_bb_bench: sets(1) }));
+
+    expect(migrateMeadowsRowOnce()).toBe(2);
+    const all = storageManager.getCompletedWorkouts() as any;
+    expect(Object.keys(all.a.logs).sort()).toEqual(['t1_bb_bench', 't2_kb_single_arm_row']);
+    expect(all.a.logs.t2_kb_single_arm_row).toHaveLength(3);
+    expect(Object.keys(all.b.logs)).toEqual(['t2_kb_single_arm_row']);
+    expect(all.b.logs.t2_kb_single_arm_row).toHaveLength(2); // existing KB row sets kept
+    expect(Object.keys(JSON.parse(localStorage.getItem('workout_app_set_logs_v1')!))).toEqual(['t1_bb_bench']);
+  });
+});
