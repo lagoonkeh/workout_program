@@ -440,9 +440,9 @@ export async function replaceWorkoutInSheets(
 // Workout history <-> Google Sheets
 // ---------------------------------------------------------------------------
 
-export const STORAGE_KEY_HISTORY_REPAIR = 'workout_history_sheet_repair_v1';
+export const STORAGE_KEY_HISTORY_REPAIR = 'workout_history_sheet_repair_v2';
 /** Marks the one-time clean-up of the sheet's workout log (shared by every device) */
-export const SHEET_REPAIR_MARKER = 'history-repair-2026-11-02';
+export const SHEET_REPAIR_MARKER = 'history-repair-2026-11-02b';
 
 export const isHistoryRepaired = (): boolean => {
   try {

@@ -1,4 +1,4 @@
-// tests/services/sheetSyncService.test.ts
+﻿// tests/services/sheetSyncService.test.ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   buildSyncPayload,
@@ -10,6 +10,7 @@ import {
   toLocalDateStr,
   STORAGE_KEY_LAST_SYNC,
   STORAGE_KEY_LAST_SCANNED_WORKOUT,
+  STORAGE_KEY_HISTORY_REPAIR,
 } from '../../src/services/sheetSyncService';
 import { storageManager } from '../../src/storage/storageManager';
 import { SetLogRecord } from '../../src/components/ExerciseCard';
@@ -165,7 +166,7 @@ describe('sheetSyncService', () => {
 
   describe('scanLastWorkout', () => {
     it('scans last recorded workout from /api/sync and suggests the next session in 4-day rotation', async () => {
-      localStorage.setItem('workout_history_sheet_repair_v1', 'done');
+      localStorage.setItem(STORAGE_KEY_HISTORY_REPAIR, 'done');
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -239,7 +240,7 @@ describe('sheetSyncService', () => {
     });
 
     it('auto-seeds completed workouts into storageManager when allWorkouts are in scan response', async () => {
-      localStorage.setItem('workout_history_sheet_repair_v1', 'done');
+      localStorage.setItem(STORAGE_KEY_HISTORY_REPAIR, 'done');
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
         ok: true,
         json: async () => ({

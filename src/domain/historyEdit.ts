@@ -184,7 +184,10 @@ export function ownWorkoutLogs(rec: { sessionId: string; logs?: Record<string, a
   return Object.fromEntries(
     Object.entries(logs).filter(([k]) => {
       const ex = findExercise(k);
-      return !ex || ids.has(ex.id);
+      if (ex) return ids.has(ex.id);
+      // retired exercises stay only with the session they belonged to
+      const retiredSession = /landmine_meadows_row/.test(k) ? 'upper_a' : null;
+      return !retiredSession || retiredSession === rec.sessionId;
     })
   );
 }

@@ -17,7 +17,7 @@ import {
   AdaptiveBodyCoachWidget,
 } from './lazyView';
 import { sessionToOpen } from './domain/nextSession';
-import { removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
+import { removeNov1PhantomsOnce, removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
 import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
 import {
   WORKOUT_PROGRAM,
@@ -120,7 +120,10 @@ function createDefaultExerciseLogs(exercise: WorkoutExercise): SetLogRecord[] {
 export function WorkoutAppMain() {
   const { user } = useAuth();
   // One-time history repair, before anything reads history (see services/historyRepair)
-  useState(() => removeSheetCopiesOnce());
+  useState(() => {
+    removeSheetCopiesOnce();
+    removeNov1PhantomsOnce();
+  });
   // O(1) lookup by id, exercise id, name or title; empty until the cue card chunk arrives
   const CUE_CARD_MAP = useCueCardLookup();
 
