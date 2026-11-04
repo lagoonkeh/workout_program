@@ -25,7 +25,10 @@ import {
   Mic,
   FastForward,
   Copy,
+  Layers,
 } from 'lucide-react';
+import { getExerciseVariations, ExerciseVariation, saveCustomVariation, WorkoutCycle } from '../domain/exerciseVariations';
+import { ExerciseVariationModal } from './ExerciseVariationModal';
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { TempoMetronome, MetronomeSnapshot } from '../timer/tempoMetronome';
 import { audioSynthesizer } from '../audio/audioSynthesizer';
@@ -164,6 +167,8 @@ export interface ExerciseCardProps {
   onToggleSplitSides?: (exerciseId: string) => void;
   onSwitchToPairedSide?: (targetSideExerciseId: string) => void;
   isSideSplitActive?: boolean;
+  onSelectVariation?: (baseExerciseId: string, variation: ExerciseVariation) => void;
+  currentCycle?: WorkoutCycle;
 }
 
 const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
@@ -180,6 +185,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   onToggleSplitSides,
   onSwitchToPairedSide,
   isSideSplitActive,
+  onSelectVariation,
+  currentCycle = 'A',
 }) => {
   const [showRationale, setShowRationale] = useState(false);
   const [showRegression, setShowRegression] = useState(false);
@@ -189,6 +196,23 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   const [completedWarmupStages, setCompletedWarmupStages] = useState<Record<number, boolean>>({});
   const [isSwappedToRegression, setIsSwappedToRegression] = useState(false);
   const [isManuallyCollapsed, setIsManuallyCollapsed] = useState<boolean | null>(null);
+  const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
+
+  const baseExerciseKey = exercise.baseExerciseId || exercise.id;
+  const availableVariations = useMemo(
+    () => getExerciseVariations(baseExerciseKey),
+    [baseExerciseKey]
+  );
+
+  const handleSelectVariation = useCallback(
+    (variation: ExerciseVariation) => {
+      if (onSelectVariation) {
+        onSelectVariation(baseExerciseKey, variation);
+      }
+      saveCustomVariation(baseExerciseKey, variation.id);
+    },
+    [baseExerciseKey, onSelectVariation]
+  );
   const [isAmrapRunning, setIsAmrapRunning] = useState(false);
   const [amrapSeconds, setAmrapSeconds] = useState(0);
   const [isSkipModalOpen, setIsSkipModalOpen] = useState(false);
@@ -1027,6 +1051,19 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 self-stretch sm:self-center justify-end shrink-0 pt-1.5 sm:pt-0 border-t border-slate-800/60 sm:border-t-0">
+            {availableVariations.length > 1 && (
+              <button
+                type="button"
+                data-testid={`collapsed-variations-btn-${exercise.id}`}
+                onClick={() => setIsVariationModalOpen(true)}
+                aria-label={`View variations for ${activeExerciseName}`}
+                title={`Browse ${availableVariations.length} science-verified variations`}
+                className="p-2 min-h-[44px] min-w-[44px] rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700/80 transition-colors cursor-pointer flex items-center justify-center"
+              >
+                <Layers className="w-3.5 h-3.5 text-blue-400" />
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleReset}
@@ -1360,6 +1397,20 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               </button>
             )}
 
+
+            {availableVariations.length > 1 && (
+              <button
+                type="button"
+                data-testid={`exercise-variations-btn-${exercise.id}`}
+                onClick={() => setIsVariationModalOpen(true)}
+                aria-label={`View variations for ${activeExerciseName}`}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-blue-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+                title={`Browse ${availableVariations.length} science-verified variations`}
+              >
+                <Layers className="w-3.5 h-3.5 text-blue-400" />
+                <span>Variations ({availableVariations.length})</span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -2804,6 +2855,19 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
       />
       </Suspense>
       )}
+
+      {/* Exercise Variation Selector Modal */}
+      {isVariationModalOpen && (
+        <ExerciseVariationModal
+          isOpen={isVariationModalOpen}
+          onClose={() => setIsVariationModalOpen(false)}
+          baseExercise={exercise}
+          variations={availableVariations}
+          activeVariationId={exercise.id}
+          onSelectVariation={handleSelectVariation}
+          currentCycle={currentCycle}
+        />
+      )}
     </article>
   );
 };
@@ -2816,5 +2880,7 @@ export const ExerciseCard = React.memo(
     prev.defaultCollapsed === next.defaultCollapsed &&
     prev.collapseRevision === next.collapseRevision &&
     prev.onUpdateSetLog === next.onUpdateSetLog &&
-    prev.onResetExercise === next.onResetExercise
+    prev.onResetExercise === next.onResetExercise &&
+    prev.currentCycle === next.currentCycle &&
+    prev.onSelectVariation === next.onSelectVariation
 );

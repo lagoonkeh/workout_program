@@ -1987,5 +1987,312 @@ export const CUE_CARDS: CueCard[] = [
     rehabRegressions: [
       'Place a light 5 lb sandbag or book on the belly to provide tactile biofeedback for diaphragmatic rise.'
     ]
+  },
+  // ==========================================
+  // PERIODIZED VARIATIONS (CYCLE B & ALTERNATIVES)
+  // ==========================================
+  {
+    id: 'cue_var_pause_squat',
+    exerciseId: 't1_bb_pause_squat',
+    exerciseName: 'Barbell 2-Second Pause Squat',
+    title: 'Barbell 2-Second Pause Squat',
+    tier: 'T1',
+    tempo: '32X1',
+    prescribedTempo: '32X1 (3s Eccentric / 2s Dead-Stop Pause / Explosive Drive / 1s Reset)',
+    primaryMuscles: ['Quadriceps (VMO)', 'Gluteus Maximus', 'Adductor Magnus', 'Spinal Erectors'],
+    equipment: 'Olympic Barbell & Squat Rack',
+    setup: 'Step under bar at mid-sternum height; unpack into shoulder-width stance; root tripod and descend with 3s tempo, pausing 2 full seconds in the hole.',
+    setupInstructions: [
+      'Phase 1 — Setup & Unrack: Set bar across upper traps/rear delts, establish shoulder-width stance with toes flared 15–30° and foot tripod rooted.',
+      'Phase 2 — 360° Cylinder Brace: Inhale deeply into belly and obliques, locking ribs down over pelvis.',
+      'Phase 3 — 3-Second Controlled Descent: Lower hips and knees simultaneously for 3 deliberate seconds without rushing.',
+      'Phase 4 — 2-Second Dead-Stop Pause: Freeze in the hole (hip crease below parallel) for 2 full seconds without relaxing abdominal pressure or dropping chest.',
+      'Phase 5 — Pure Concentric Drive: Explode upward purely from muscular tension, driving the floor away without bounce.',
+      'Phase 6 — Lockout & Reset: Stand tall, exhale, and re-brace.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Jeff Nippard',
+        quote: 'A strict 2-second pause completely dissipates elastic tendon recoil. You eliminate passive rebound and force the quad fibers to generate pure contractile force from the deepest knee angle.',
+        biomechanicalRationale: 'Removes the stretch-shortening cycle (SSC), increasing motor unit synchronization and rate of force development (RFD).'
+      },
+      {
+        creator: 'Dr. Aaron Horschig (Squat University)',
+        quote: 'Do not let your chest collapse or butt wink during the pause. Keep the 360-degree intra-abdominal pressure locked solid throughout the 2 seconds.',
+        biomechanicalRationale: 'Maintains neutral spine against compressive axial load, preventing lumbar ligamentous flexion strain.'
+      }
+    ],
+    commonFaults: [
+      'Cutting the pause short (under 2 full seconds).',
+      'Relaxing core tension in the bottom position.'
+    ],
+    rehabRegressions: [
+      'Barbell Box Squat to Parallel to provide tactile depth feedback.'
+    ]
+  },
+  {
+    id: 'cue_var_landmine_hack',
+    exerciseId: 't2_landmine_hack_squat',
+    exerciseName: 'Landmine Hack Squat',
+    title: 'Landmine Hack Squat',
+    tier: 'T2',
+    tempo: '3010',
+    prescribedTempo: '3010 (3s Eccentric / 0s Pause / 1s Concentric / 0s Reset)',
+    primaryMuscles: ['Vastus Lateralis', 'Rectus Femoris', 'Gluteus Maximus', 'Adductors'],
+    equipment: 'Olympic Barbell & Landmine Attachment',
+    setup: 'Lean back against landmine barbell collar, feet positioned 12-18" forward, spine neutral.',
+    setupInstructions: [
+      'Phase 1 — Position & Lean: Rest the landmine collar comfortably against upper back/shoulder shelf; walk feet 12–18" forward.',
+      'Phase 2 — Torso Angle: Lean back firmly into the bar angle; keep core braced.',
+      'Phase 3 — 3-Second Descent: Lower hips back and down for 3 seconds, letting knees track forward over toes.',
+      'Phase 4 — Deep Quad Stretch: Descend to full depth without lifting heels.',
+      'Phase 5 — Drive Through Midfoot: Push smoothly through midfoot and heel back to starting position.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Coach Eugene Teo',
+        quote: 'Leaning back into the angled barbell changes the resultant force vector. It removes shearing force from the lumbar spine and allows pain-free, deep knee flexion directly onto the quads.',
+        biomechanicalRationale: 'Posterior center of mass displacement dramatically reduces shear across the patellar tendon while maximizing quad fiber stretch.'
+      }
+    ],
+    commonFaults: [
+      'Allowing heels to lift off the floor.',
+      'Rounding the upper back away from the collar.'
+    ],
+    rehabRegressions: [
+      'Elevate heels slightly on a 5 lb plate or reduce barbell loading.'
+    ]
+  },
+  {
+    id: 'cue_var_close_grip_bench',
+    exerciseId: 't1_bb_close_grip_bench',
+    exerciseName: 'Barbell Close-Grip Bench Press',
+    title: 'Barbell Close-Grip Bench Press',
+    tier: 'T1',
+    tempo: '31X1',
+    prescribedTempo: '31X1 (3s Descent / 1s Touch / Explosive Press / 1s Reset)',
+    primaryMuscles: ['Triceps Brachii', 'Pectoralis Major (Clavicular)', 'Anterior Deltoid'],
+    equipment: 'Olympic Barbell & Squat Rack',
+    setup: 'Lie supine on bench; hands spaced shoulder-width apart (14–16"); elbows tucked 30° to ribcage.',
+    setupInstructions: [
+      'Phase 1 — Hand Placement: Grip bar exactly shoulder-width apart (thumbs around bar, wrists neutral).',
+      'Phase 2 — Scapular Retraction: Pin shoulder blades back and down into bench; plant feet firmly on floor.',
+      'Phase 3 — 3-Second Lowering: Lower bar over 3 seconds, touching lower sternum with elbows tucked tightly.',
+      'Phase 4 — 1-Second Chest Touch: Pause motionless for 1s on chest with zero bounce.',
+      'Phase 5 — Explosive Triceps Drive: Press bar vertically, locking out with triceps and chest.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Jeff Nippard',
+        quote: 'Close-grip bench press shifts the moment arm to the elbow joint, heavily recruiting all three heads of the triceps while keeping the humerus inside a narrow 30-degree tuck that spares the rotator cuff.',
+        biomechanicalRationale: 'Reduces shoulder abduction angle, eliminating subacromial impingement during maximal horizontal pushing.'
+      }
+    ],
+    commonFaults: [
+      'Grip too narrow (touching hands together, which hyperextends wrists).',
+      'Flaring elbows out horizontally.'
+    ],
+    rehabRegressions: [
+      'Barbell Floor Press to limit humeral extension depth.'
+    ]
+  },
+  {
+    id: 'cue_var_landmine_meadows',
+    exerciseId: 't2_landmine_meadows_row',
+    exerciseName: 'Landmine Meadows / Single-Arm Row',
+    title: 'Landmine Meadows / Single-Arm Row',
+    tier: 'T2',
+    tempo: '3011',
+    prescribedTempo: '3011 (3s Eccentric / 0s Pause / 1s Concentric / 1s Peak Squeeze)',
+    primaryMuscles: ['Latissimus Dorsi (Lower Fibers)', 'Teres Major', 'Rhomboids', 'Brachialis'],
+    equipment: 'Olympic Barbell & Landmine Attachment',
+    setup: 'Stand perpendicular to barbell sleeve in staggered stance; hinge 45 degrees; grip collar with overhand grip.',
+    setupInstructions: [
+      'Phase 1 — Staggered Stance: Stand perpendicular to the barbell tip with working-side leg back.',
+      'Phase 2 — 45° Torso Hinge: Hinge hips back, resting non-working forearm on front knee for spinal support.',
+      'Phase 3 — Collar Grip: Grip the thick end of the barbell sleeve firmly with overhand grip.',
+      'Phase 4 — Elbow Drive: Pull the collar in a gentle arc toward your hip pocket, squeezing the lat hard at peak.',
+      'Phase 5 — 3-Second Stretch: Lower slowly over 3 seconds, letting the lat reach a full stretch at bottom.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Coach Eugene Teo',
+        quote: 'Pull the barbell in an arc towards the hip, not straight up to your armpit. The arc matches the oblique angle of the lower lat fibers for superior recruitment.',
+        biomechanicalRationale: 'Aligns the line of pull with lat pennation angles while unilateral bracing removes spinal shear.'
+      }
+    ],
+    commonFaults: [
+      'Yanking with torso momentum instead of driving with the elbow.',
+      'Rounding the lower back.'
+    ],
+    rehabRegressions: [
+      'Single-Arm Kettlebell Row with knee and hand braced on flat bench.'
+    ]
+  },
+  {
+    id: 'cue_var_deficit_rdl',
+    exerciseId: 't1_bb_deficit_rdl',
+    exerciseName: 'Barbell Deficit Romanian Deadlift (1–2" Plate Elevation)',
+    title: 'Barbell Deficit Romanian Deadlift (1–2" Plate Elevation)',
+    tier: 'T1',
+    tempo: '31X1',
+    prescribedTempo: '31X1 (3s Descent / 1s Bottom Stretch / Explosive Drive / 1s Reset)',
+    primaryMuscles: ['Hamstrings (Long Head)', 'Gluteus Maximus', 'Erector Spinae'],
+    equipment: 'Olympic Barbell & Weight Plates',
+    setup: 'Stand on a 25 lb plate; hold barbell at thighs; soft knees; hinge hips back over 3 seconds into deep hamstring stretch.',
+    setupInstructions: [
+      'Phase 1 — Deficit Stance: Stand on a stable 25 lb Olympic plate with feet hip-width apart.',
+      'Phase 2 — Soft Knee & Packed Lats: Soften knees 15 degrees and lock lats into back pockets.',
+      'Phase 3 — 3-Second Hip Hinge: Push hips backward toward wall, keeping bar scraping along shins.',
+      'Phase 4 — Deep Hamstring Stretch: Descend past regular floor level into maximum loaded hamstring lengthening.',
+      'Phase 5 — 1-Second Hold: Pause for 1 second at full stretch with spine neutral.',
+      'Phase 6 — Glute Push: Drive hips forward to lockout, standing tall without arching lower back.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Jeff Nippard',
+        quote: 'The 1 to 2 inch deficit allows the barbell to travel into the deepest stretch possible before bottoming out, producing powerful stretch-mediated hypertrophy across the entire hamstring belly.',
+        biomechanicalRationale: 'Maximizes mechanical tension at long muscle lengths where titin filament signaling and sarcomere addition in series are stimulated.'
+      }
+    ],
+    commonFaults: [
+      'Rounding the lumbar spine to reach deeper instead of hinging from the hips.',
+      'Bending knees into a conventional squat.'
+    ],
+    rehabRegressions: [
+      'Standard Barbell Romanian Deadlift on flat floor or Kettlebell Romanian Deadlift.'
+    ]
+  },
+  {
+    id: 'cue_var_b_stance_rdl',
+    exerciseId: 't2_kb_b_stance_rdl',
+    exerciseName: 'Single-Leg Kettlebell Romanian Deadlift (B-Stance)',
+    title: 'Single-Leg Kettlebell Romanian Deadlift (B-Stance)',
+    tier: 'T2',
+    tempo: '31X1',
+    prescribedTempo: '31X1 (3s Descent / 1s Bottom Hold / Concentric Drive / 1s Reset)',
+    primaryMuscles: ['Gluteus Medius', 'Biceps Femoris', 'Adductor Magnus', 'Foot Tripod'],
+    equipment: 'Bowflex SelectTech 840 Kettlebell (8–40 lbs)',
+    setup: 'Stand with working foot forward, rear foot kickstanded on toe behind heel; hold kettlebell in contralateral or ipsilateral hand.',
+    setupInstructions: [
+      'Phase 1 — B-Stance Setup: Position working foot flat on floor; place rear toes aligned with front heel (kickstand).',
+      'Phase 2 — 90/10 Weight Distribution: Keep 90% of your bodyweight on the front working heel and tripod.',
+      'Phase 3 — Hinge Descent (3s Tempo): Push hips straight back, keeping both hip bones pointing squarely forward.',
+      'Phase 4 — 1-Second Glute/Hamstring Squeeze: Pause at bottom stretch, feeling working hamstring engage.',
+      'Phase 5 — Stand & Lockout: Push through front heel to stand tall; repeat for 8–10 reps per side.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Dr. Alyssa Lu (Proformance)',
+        quote: 'The B-stance gives you all the unilateral benefits of single-leg loading—pelvic centering and glute medius activation—without the balance wobble that steals tension from the hamstring.',
+        biomechanicalRationale: 'Tri-planar pelvic stability with isolated sagittal plane posterior chain loading.'
+      }
+    ],
+    commonFaults: [
+      'Putting too much weight on the rear kickstand foot.',
+      'Allowing the pelvis to rotate open toward the non-working side.'
+    ],
+    rehabRegressions: [
+      'Two-legged Kettlebell Good Mornings or Goblet Cossack Squat.'
+    ]
+  },
+  {
+    id: 'cue_var_pin_press',
+    exerciseId: 't1_bb_overhead_pin_press',
+    exerciseName: 'Barbell Overhead Pin Press (Chin Level)',
+    title: 'Barbell Overhead Pin Press (Chin Level)',
+    tier: 'T1',
+    tempo: '31X1',
+    prescribedTempo: '31X1 (3s Descent / 1s Dead-Stop on Pins / Explosive Drive / 1s Lockout)',
+    primaryMuscles: ['Deltoids (Anterior & Lateral)', 'Triceps Brachii', 'Upper Trapezius', 'Core'],
+    equipment: 'Olympic Barbell & Squat Rack with Pins',
+    setup: 'Set safety pins in rack at chin level; rest bar on pins; brace core and explode straight up.',
+    setupInstructions: [
+      'Phase 1 — Pin Setup: Adjust rack safety pins so the barbell rests at chin/collarbone height.',
+      'Phase 2 — Grip & Wedging: Wedge hands shoulder-width apart, elbows pointing forward 30° in scapular plane.',
+      'Phase 3 — 360° Standing Brace: Squeeze glutes and clench abs, neutralizing lumbar arch.',
+      'Phase 4 — Dead-Stop Concentric Drive: Press the bar off the pins without rocking or bouncing.',
+      'Phase 5 — Full Overhead Lockout: Lock out overhead with biceps by ears; lower slowly back onto pins for 1s rest.'
+    ],
+    creatorCues: [
+      {
+        creator: 'GZCL & Jeff Nippard',
+        quote: 'Pin presses force you to overcome inertia from a dead stop. You cannot rely on a bounce or stretch reflex, which builds incredible neural drive at your sticking point.',
+        biomechanicalRationale: 'Concentric-only initiation stimulates high-threshold motor unit recruitment without tendon microtrauma.'
+      }
+    ],
+    commonFaults: [
+      'Excessive backward lean through the lumbar spine.',
+      'Bouncing the bar violently off the steel pins.'
+    ],
+    rehabRegressions: [
+      'Half-Kneeling Single-Arm Kettlebell Press.'
+    ]
+  },
+  {
+    id: 'cue_var_neutral_chinup',
+    exerciseId: 't2_neutral_chinup_ladders',
+    exerciseName: 'Neutral-Grip / Chin-Up Ladders with 4s Negatives',
+    title: 'Neutral-Grip / Chin-Up Ladders with 4s Negatives',
+    tier: 'T2',
+    tempo: '40X1',
+    prescribedTempo: '40X1 (4s Slow Eccentric / 0s Bottom / Explosive Pull / 1s Hold)',
+    primaryMuscles: ['Brachialis', 'Biceps Brachii', 'Latissimus Dorsi', 'Teres Major'],
+    equipment: 'Pull-Up Bar with Neutral Handles or Barbell in Rack',
+    setup: 'Grip parallel handles or supinated barbell; depress shoulder blades; pull chest to bar; lower for 4 full seconds.',
+    setupInstructions: [
+      'Phase 1 — Grip Setup: Take a neutral (palms facing each other) or supinated grip on pull-up bar.',
+      'Phase 2 — Active Scapular Depression: Pull shoulder blades down away from ears before initiating pull.',
+      'Phase 3 — Explosive Pull: Pull chest up to handle level, driving elbows down and back.',
+      'Phase 4 — 4-Second Eccentric Negative: Resist gravity over 4 complete seconds until arms are fully extended.',
+      'Phase 5 — Gate Ladder Execution: Execute in 1-2-3 ladder sets with short 20–30s micro-rests.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Coach Eugene Teo & Yellow Dude',
+        quote: 'Neutral and supinated grips place the biceps and brachialis in their strongest line of pull while sparing the wrist and medial elbow tendons from rotational torque.',
+        biomechanicalRationale: 'Spares the medial epicondyle while maintaining high lat mechanical tension and eccentric tenocyte stimulation.'
+      }
+    ],
+    commonFaults: [
+      'Kicking legs or kipping to get over the bar.',
+      'Dropping quickly through the negative phase.'
+    ],
+    rehabRegressions: [
+      'Inverted Barbell Rows in Rack with feet flat on the floor.'
+    ]
+  },
+  {
+    id: 'cue_var_landmine_z_press',
+    exerciseId: 't3_landmine_kneeling_press',
+    exerciseName: 'Single-Arm Landmine Half-Kneeling Press',
+    title: 'Single-Arm Landmine Half-Kneeling Press',
+    tier: 'T3',
+    tempo: '30X1',
+    prescribedTempo: '30X1 (3s Eccentric / 0s Pause / Explosive Press / 1s Reset)',
+    primaryMuscles: ['Anterior Deltoid', 'Serratus Anterior', 'Upper Pectoralis', 'Obliques'],
+    equipment: 'Olympic Barbell & Landmine Attachment',
+    setup: 'Half-kneel with pressing side knee on mat; hold barbell collar at shoulder height; press upward along landmine arc.',
+    setupInstructions: [
+      'Phase 1 — Half-Kneeling Stance: Place pressing-side knee down on mat, opposite foot flat in front.',
+      'Phase 2 — Collar Hold: Cup the barbell sleeve at upper shoulder level, elbow at 45° angle.',
+      'Phase 3 — Pelvis & Rib Lock: Squeeze down-knee glute and draw ribs inward to lock core.',
+      'Phase 4 — Arc Press: Press collar upward and forward along the bar natural trajectory.',
+      'Phase 5 — Top Protraction: Push smoothly through the top to engage the serratus anterior; lower under 3s control.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Marcus Filly (Functional Bodybuilding)',
+        quote: 'The ~45-degree angle of the landmine gives you the vertical pressing stimulus without requiring complete 180-degree overhead shoulder mobility. It is the premier shoulder longevity press.',
+        biomechanicalRationale: 'Aligns perfectly with the plane of the scapula (scaption), preventing acromial impingement.'
+      }
+    ],
+    commonFaults: [
+      'Twisting the torso as you press.',
+      'Arching lower back instead of pressing with the shoulder and arm.'
+    ],
+    rehabRegressions: [
+      'Marcus Filly Single-Arm Kettlebell Z-Press on floor.'
+    ]
   }
 ];

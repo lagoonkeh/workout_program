@@ -29,6 +29,18 @@ import {
   isUnilateralExercise,
   extractTargetReps,
 } from './domain/programData';
+import {
+  WorkoutCycle,
+  ExerciseVariation,
+  loadSessionCycles,
+  saveSessionCycle,
+  loadCustomVariations,
+  saveCustomVariation,
+  getExerciseVariations,
+  getCycleVariation,
+  variationToWorkoutExercise,
+  STORAGE_KEY_CUSTOM_VARIATIONS,
+} from './domain/exerciseVariations';
 import type { CueCard } from './domain/cueCardTypes';
 import { loadCueCards, useCueCardLookup } from './domain/cueCardStore';
 import { audioSynthesizer } from './audio/audioSynthesizer';
@@ -40,7 +52,7 @@ import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget
 import { ExerciseDiagram } from './components/ExerciseDiagram';
 import { WarmupPhaseSubCard } from './components/WarmupPhaseSubCard';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
-import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X } from 'lucide-react';
+import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X, Layers } from 'lucide-react';
 import {
   scanLastWorkout,
   LastWorkoutScanResult,
@@ -660,6 +672,23 @@ export function WorkoutAppMain() {
     }
   });
 
+  // Workout Cycles (Cycle A: Base Focus vs Cycle B: Periodized Wave) & Custom Exercise Variations
+  const [sessionCycles, setSessionCycles] = useState<Record<string, WorkoutCycle>>(() => {
+    try {
+      return loadSessionCycles();
+    } catch {
+      return {};
+    }
+  });
+
+  const [customVariations, setCustomVariations] = useState<Record<string, string>>(() => {
+    try {
+      return loadCustomVariations();
+    } catch {
+      return {};
+    }
+  });
+
   const [completedWorkouts, setCompletedWorkouts] = useState<Record<string, CompletedWorkoutSession>>(() => {
     try {
       return storageManager.getCompletedWorkouts();
@@ -741,38 +770,101 @@ export function WorkoutAppMain() {
     return evaluateWeeklyPerformance(workoutLogs, WORKOUT_SESSIONS, mobilityHistory, 1);
   }, [workoutLogs, mobilityHistory]);
 
-  // Apply adaptations dynamically over WORKOUT_PROGRAM
+  // Apply adaptations and cycle/custom variations dynamically over WORKOUT_PROGRAM
   const adaptedSessions = useMemo(() => {
     const baseMap = { ...WORKOUT_PROGRAM };
     const result: Record<string, (typeof baseMap)['lower_a']> = {};
 
     Object.entries(baseMap).forEach(([sId, session]) => {
+      const currentCycle = sessionCycles[sId] || 'A';
       const adaptedExercises = session.exercises.map((ex) => {
+        let currentEx = ex;
+        const customVarId = customVariations[ex.id] || customVariations[ex.baseExerciseId || ''];
+        if (customVarId) {
+          const allVars = getExerciseVariations(ex.baseExerciseId || ex.id);
+          const chosen = allVars.find((v) => v.id === customVarId);
+          if (chosen) {
+            currentEx = variationToWorkoutExercise(chosen, ex);
+          }
+        } else if (currentCycle === 'B') {
+          const cycleBVar = getCycleVariation(ex.baseExerciseId || ex.id, 'B');
+          if (cycleBVar && cycleBVar.id !== ex.id) {
+            currentEx = variationToWorkoutExercise(cycleBVar, ex);
+          }
+        }
+
         const adaptation = programAdaptations[ex.id];
-        if (!adaptation) return ex;
+        if (!adaptation) return currentEx;
 
         return {
-          ...ex,
+          ...currentEx,
           ...adaptation,
-          targetSets: adaptation.targetSets ?? ex.targetSets,
-          priorityBadge: adaptation.priorityBadge ?? ex.priorityBadge,
-          missedLastSession: adaptation.missedLastSession ?? ex.missedLastSession,
-          defaultWeightLbs: adaptation.defaultWeightLbs ?? ex.defaultWeightLbs,
-          tempo: adaptation.tempo ?? ex.tempo,
-          restSeconds: adaptation.restSeconds ?? ex.restSeconds,
+          targetSets: adaptation.targetSets ?? currentEx.targetSets,
+          priorityBadge: adaptation.priorityBadge ?? currentEx.priorityBadge,
+          missedLastSession: adaptation.missedLastSession ?? currentEx.missedLastSession,
+          defaultWeightLbs: adaptation.defaultWeightLbs ?? currentEx.defaultWeightLbs,
+          tempo: adaptation.tempo ?? currentEx.tempo,
+          restSeconds: adaptation.restSeconds ?? currentEx.restSeconds,
         };
       });
 
       result[sId] = {
         ...session,
+        subtitle: currentCycle === 'B' ? `${session.subtitle} · [Cycle B Wave]` : session.subtitle,
         exercises: adaptedExercises,
       };
     });
 
     return result;
-  }, [programAdaptations]);
+  }, [programAdaptations, sessionCycles, customVariations]);
 
   const activeSession = adaptedSessions[activeSessionId] || adaptedSessions.lower_a;
+
+  const currentSessionCycle: WorkoutCycle = sessionCycles[activeSessionId] || 'A';
+
+  const handleToggleSessionCycle = useCallback((sessionId?: string) => {
+    const targetId = sessionId || activeSessionId;
+    setSessionCycles((prev) => {
+      const current = prev[targetId] || 'A';
+      const nextCycle: WorkoutCycle = current === 'A' ? 'B' : 'A';
+      const updated = { ...prev, [targetId]: nextCycle };
+      saveSessionCycle(targetId, nextCycle);
+      audioSynthesizer.playTone('completion');
+      return updated;
+    });
+  }, [activeSessionId]);
+
+  const handleSelectExerciseVariation = useCallback(
+    (baseExerciseId: string, variation: ExerciseVariation) => {
+      setCustomVariations((prev) => {
+        const updated = { ...prev, [baseExerciseId]: variation.id };
+        saveCustomVariation(baseExerciseId, variation.id);
+        return updated;
+      });
+      audioSynthesizer.playTone('completion');
+    },
+    []
+  );
+
+  const handleResetSessionVariations = useCallback((sessionId?: string) => {
+    const targetId = sessionId || activeSessionId;
+    setCustomVariations((prev) => {
+      const next = { ...prev };
+      const session = WORKOUT_PROGRAM[targetId as keyof typeof WORKOUT_PROGRAM];
+      if (session) {
+        session.exercises.forEach((ex) => {
+          delete next[ex.id];
+          if (ex.baseExerciseId) delete next[ex.baseExerciseId];
+        });
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY_CUSTOM_VARIATIONS, JSON.stringify(next));
+      } catch {
+        // safe fallback
+      }
+      return next;
+    });
+  }, [activeSessionId]);
 
   // Dynamically expand exercises in activeSession where Left/Right split is active
   const sessionExercises = useMemo(() => {
@@ -2210,6 +2302,47 @@ export function WorkoutAppMain() {
                     </button>
 
                     <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 max-w-full justify-start sm:justify-end shrink-0">
+                      {/* Periodized Cycle Wave Selector */}
+                      <div
+                        data-testid="session-cycle-selector"
+                        className="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-700/80 shrink-0"
+                      >
+                        <button
+                          type="button"
+                          data-testid="cycle-a-btn"
+                          onClick={() => {
+                            if (currentSessionCycle !== 'A') handleToggleSessionCycle();
+                          }}
+                          aria-pressed={currentSessionCycle === 'A'}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            currentSessionCycle === 'A'
+                              ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                          title="Cycle A: Primary Baseline Compound Strength & Hypertrophy"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>Cycle A (Base)</span>
+                        </button>
+                        <button
+                          type="button"
+                          data-testid="cycle-b-btn"
+                          onClick={() => {
+                            if (currentSessionCycle !== 'B') handleToggleSessionCycle();
+                          }}
+                          aria-pressed={currentSessionCycle === 'B'}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            currentSessionCycle === 'B'
+                              ? 'bg-purple-500 text-slate-950 shadow-sm font-black'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                          title="Cycle B: Periodized Variations (Pause Squats, Deficit RDLs, Landmine, etc.)"
+                        >
+                          <Layers className="w-3 h-3" />
+                          <span>Cycle B (Wave)</span>
+                        </button>
+                      </div>
+
                       <button
                         type="button"
                         onClick={handleToggleFocusMode}
@@ -2298,6 +2431,47 @@ export function WorkoutAppMain() {
                     </button>
 
                     <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 max-w-full justify-start sm:justify-end shrink-0">
+                      {/* Periodized Cycle Wave Selector */}
+                      <div
+                        data-testid="session-cycle-selector"
+                        className="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-700/80 shrink-0"
+                      >
+                        <button
+                          type="button"
+                          data-testid="cycle-a-btn"
+                          onClick={() => {
+                            if (currentSessionCycle !== 'A') handleToggleSessionCycle();
+                          }}
+                          aria-pressed={currentSessionCycle === 'A'}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            currentSessionCycle === 'A'
+                              ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                          title="Cycle A: Primary Baseline Compound Strength & Hypertrophy"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>Cycle A (Base)</span>
+                        </button>
+                        <button
+                          type="button"
+                          data-testid="cycle-b-btn"
+                          onClick={() => {
+                            if (currentSessionCycle !== 'B') handleToggleSessionCycle();
+                          }}
+                          aria-pressed={currentSessionCycle === 'B'}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            currentSessionCycle === 'B'
+                              ? 'bg-purple-500 text-slate-950 shadow-sm font-black'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                          title="Cycle B: Periodized Variations (Pause Squats, Deficit RDLs, Landmine, etc.)"
+                        >
+                          <Layers className="w-3 h-3" />
+                          <span>Cycle B (Wave)</span>
+                        </button>
+                      </div>
+
                       <button
                         type="button"
                         onClick={handleToggleFocusMode}
@@ -2450,6 +2624,26 @@ export function WorkoutAppMain() {
                         className="text-xs text-emerald-400 hover:text-emerald-300 underline font-semibold ml-2 cursor-pointer whitespace-nowrap"
                       >
                         Review & Edit
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Custom Exercise Variations Active Banner */}
+                  {Object.keys(customVariations).length > 0 && (
+                    <div className="mt-2.5 p-2.5 sm:p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 flex items-center justify-between text-xs text-blue-200">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-blue-400 shrink-0" />
+                        <span>
+                          <strong>Variable Workout Active:</strong> {Object.keys(customVariations).length} custom variation{Object.keys(customVariations).length === 1 ? '' : 's'} selected.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        data-testid="reset-all-variations-btn"
+                        onClick={() => handleResetSessionVariations()}
+                        className="text-xs text-blue-400 hover:text-blue-300 underline font-semibold ml-2 cursor-pointer whitespace-nowrap"
+                      >
+                        Reset to Cycle Defaults
                       </button>
                     </div>
                   )}
@@ -2846,6 +3040,8 @@ export function WorkoutAppMain() {
                                   onToggleSplitSides={handleToggleSplitSides}
                                   onSwitchToPairedSide={handleSwitchToPairedSide}
                                   isSideSplitActive={!!splitSidesExercises[exercise.baseExerciseId || exercise.id]}
+                                  onSelectVariation={handleSelectExerciseVariation}
+                                  currentCycle={currentSessionCycle}
                                 />
                               );
                             })}
@@ -2948,6 +3144,8 @@ export function WorkoutAppMain() {
                               onQuickStartTempo={handleQuickStartTempo}
                               onToggleSplitSides={handleToggleSplitSides}
                               onSwitchToPairedSide={handleSwitchToPairedSide}
+                              onSelectVariation={handleSelectExerciseVariation}
+                              currentCycle={currentSessionCycle}
                             />
                           );
                         })}
@@ -2989,6 +3187,8 @@ export function WorkoutAppMain() {
                         onToggleSplitSides={handleToggleSplitSides}
                         onSwitchToPairedSide={handleSwitchToPairedSide}
                         isSideSplitActive={!!splitSidesExercises[exercise.baseExerciseId || exercise.id]}
+                        onSelectVariation={handleSelectExerciseVariation}
+                        currentCycle={currentSessionCycle}
                       />
                     );
                   })}
