@@ -5,7 +5,7 @@ import {
   getCycleVariation,
   variationToWorkoutExercise,
 } from '../../src/domain/exerciseVariations';
-import { WORKOUT_PROGRAM, WorkoutExercise, BOWFLEX_840_KETTLEBELL_SETTINGS } from '../../src/domain/programData';
+import { WORKOUT_PROGRAM } from '../../src/domain/programData';
 
 describe('Exercise Variations Domain & Science Validation', () => {
   it('every kettlebell variation adheres strictly to official Bowflex SelectTech 840 dial notches', () => {

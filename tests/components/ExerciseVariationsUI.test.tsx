@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ExerciseVariationModal } from '../../src/components/ExerciseVariationModal';
@@ -12,6 +11,7 @@ describe('Exercise Variations & Rotations UI', () => {
 
   const defaultLogs: SetLogRecord[] = Array.from({ length: 5 }, (_, i) => ({
     setNumber: i + 1,
+    targetReps: '3',
     weightLbs: 185,
     repsAchieved: 3,
     isCompleted: false,
