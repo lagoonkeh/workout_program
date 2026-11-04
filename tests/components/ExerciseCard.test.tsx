@@ -1247,6 +1247,114 @@ describe('ExerciseCard Component', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByText(/RPE & Reps in Reserve \(RIR Scale\)/i)).toBeInTheDocument();
     });
+
+    it('copies Set 1 weight down to Set 2 through Set 5 when clicking Set 1 copy button', () => {
+      const exercise = { ...mockExercise, targetSets: 5 };
+      const updateLogMock = vi.fn();
+      const mockLogs: SetLogRecord[] = [
+        { setNumber: 1, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 225, notes: '' },
+        { setNumber: 2, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 3, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 4, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 5, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+      ];
+
+      render(
+        <ExerciseCard
+          exercise={exercise}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      const copyBtn = screen.getByTestId(`copy-set1-weight-btn-${exercise.id}`);
+      expect(copyBtn).toBeInTheDocument();
+      expect(copyBtn).toHaveTextContent(/copy ↓/i);
+
+      fireEvent.click(copyBtn);
+
+      // Should copy 225 to sets 2, 3, 4, 5 (indices 1, 2, 3, 4)
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 1, { weightLbs: 225 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 2, { weightLbs: 225 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { weightLbs: 225 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 225 });
+    });
+
+    it('copies Set 1 weight down to all sets via header and action bar buttons', () => {
+      const exercise = { ...mockExercise, targetSets: 5 };
+      const updateLogMock = vi.fn();
+      const mockLogs: SetLogRecord[] = [
+        { setNumber: 1, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 315, notes: '' },
+        { setNumber: 2, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 3, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 4, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 5, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+      ];
+
+      render(
+        <ExerciseCard
+          exercise={exercise}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      const actionBtn = screen.getByTestId(`copy-set1-weight-action-${exercise.id}`);
+      expect(actionBtn).toBeInTheDocument();
+      expect(actionBtn).toHaveTextContent(/Copy Set 1 Weight to Sets 2–5/i);
+
+      fireEvent.click(actionBtn);
+
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 1, { weightLbs: 315 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 2, { weightLbs: 315 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { weightLbs: 315 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 315 });
+
+      // Also header button
+      const thBtn = screen.getByTestId(`copy-set1-weight-th-${exercise.id}`);
+      expect(thBtn).toBeInTheDocument();
+      fireEvent.click(thBtn);
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 315 });
+    });
+
+    it('populates Set 1 through 5 using defaultWeightLbs when Set 1 is 0/empty', () => {
+      const exercise = { ...mockExercise, defaultWeightLbs: 185, targetSets: 5 };
+      const updateLogMock = vi.fn();
+      const mockLogs: SetLogRecord[] = [
+        { setNumber: 1, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 2, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 3, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 4, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 5, targetReps: '5', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+      ];
+
+      render(
+        <ExerciseCard
+          exercise={exercise}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      const copyBtn = screen.getByTestId(`copy-set1-weight-btn-${exercise.id}`);
+      fireEvent.click(copyBtn);
+
+      // Should populate Set 1 (index 0) AND sets 2..5 with defaultWeightLbs 185
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 0, { weightLbs: 185 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 1, { weightLbs: 185 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 2, { weightLbs: 185 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { weightLbs: 185 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 185 });
+    });
   });
 });
 

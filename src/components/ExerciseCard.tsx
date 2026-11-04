@@ -24,6 +24,7 @@ import {
   Pause,
   Mic,
   FastForward,
+  Copy,
 } from 'lucide-react';
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { TempoMetronome, MetronomeSnapshot } from '../timer/tempoMetronome';
@@ -856,6 +857,33 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
       });
     }
   }, [onResetExercise, exercise.id, logs, onUpdateSetLog, handleStopInlineTempo]);
+
+  // Copy Set 1 working weight down to all subsequent sets (Sets 2..N)
+  const [copyWeightFlash, setCopyWeightFlash] = useState<boolean>(false);
+  const handleCopySet1WeightToAll = useCallback(() => {
+    const rawSet1 = logs[0]?.weightLbs;
+    const fallbackDefault = exercise.defaultWeightLbs || 0;
+    const targetWeight = rawSet1 !== undefined && rawSet1 > 0 ? rawSet1 : fallbackDefault;
+
+    if (targetWeight <= 0 && (!rawSet1 || rawSet1 <= 0)) {
+      return;
+    }
+
+    // If Set 1 was empty or 0 and we fell back to defaultWeightLbs, also fill Set 1
+    if ((!rawSet1 || rawSet1 <= 0) && targetWeight > 0) {
+      onUpdateSetLog(exercise.id, 0, { weightLbs: targetWeight });
+    }
+
+    // Fill all subsequent sets (e.g. Set 2 through Set 5)
+    for (let idx = 1; idx < logs.length; idx++) {
+      onUpdateSetLog(exercise.id, idx, { weightLbs: targetWeight });
+    }
+
+    setCopyWeightFlash(true);
+    setTimeout(() => {
+      setCopyWeightFlash(false);
+    }, 1800);
+  }, [logs, exercise.id, exercise.defaultWeightLbs, onUpdateSetLog]);
 
   const isExerciseSkipped = useMemo(() => {
     return logs.some((l) => l.notes?.includes('[NOT DONE]'));
@@ -2213,6 +2241,47 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </div>
       )}
 
+      {/* Interactive Set Logger Header / Action Toolbar */}
+      {logs.length > 1 && !isMcGillBig3 && !isDeadHangClubMills && (
+        <div className="flex items-center justify-between pb-1.5 px-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400">
+              Sets ({logs.filter((s) => s.isCompleted).length}/{logs.length})
+            </span>
+            {copyWeightFlash && (
+              <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full animate-fadeIn">
+                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                <span>Copied to Sets 2–{logs.length}!</span>
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            data-testid={`copy-set1-weight-action-${exercise.id}`}
+            onClick={handleCopySet1WeightToAll}
+            title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets`}
+            aria-label={`Copy Set 1 weight down to all sets`}
+            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all cursor-pointer active:scale-95 ${
+              copyWeightFlash
+                ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'
+                : 'bg-slate-900 hover:bg-emerald-950/70 text-slate-300 hover:text-emerald-300 border-slate-700 hover:border-emerald-500/40'
+            }`}
+          >
+            {copyWeightFlash ? (
+              <>
+                <Check className="w-3 h-3 stroke-[3]" />
+                <span>Copied to Sets 2–{logs.length}!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3 text-emerald-400" />
+                <span>Copy Set 1 Weight to Sets 2–{logs.length}</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Interactive Set Logger */}
       <div className="mb-2.5 w-full max-w-full overflow-x-auto no-scrollbar">
         <table className="w-full table-fixed text-center text-xs font-mono border-collapse min-w-[340px]">
@@ -2231,7 +2300,34 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 </div>
               </th>
               <th className="py-1 px-0.5 text-center w-14 sm:w-16 whitespace-nowrap">
-                {isMcGillBig3 || isDeadHangClubMills ? 'Type' : 'LBS'}
+                {isMcGillBig3 || isDeadHangClubMills ? (
+                  'Type'
+                ) : (
+                  <div className="flex items-center justify-center gap-1">
+                    <span>LBS</span>
+                    {logs.length > 1 && (
+                      <button
+                        type="button"
+                        data-testid={`copy-set1-weight-th-${exercise.id}`}
+                        onClick={handleCopySet1WeightToAll}
+                        title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets`}
+                        aria-label={`Copy Set 1 weight down to all sets`}
+                        className={`text-[9px] px-1 py-0.5 rounded border transition-colors flex items-center gap-0.5 cursor-pointer font-sans normal-case tracking-normal active:scale-95 ${
+                          copyWeightFlash
+                            ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
+                            : 'bg-slate-800 hover:bg-emerald-950/70 border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-300'
+                        }`}
+                      >
+                        {copyWeightFlash ? (
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        ) : (
+                          <Copy className="w-2.5 h-2.5" />
+                        )}
+                        <span>↓ all</span>
+                      </button>
+                    )}
+                  </div>
+                )}
               </th>
               <th className="py-1 px-0.5 text-center w-11 sm:w-12">
                 <span className="sr-only">Reps Done</span>
@@ -2327,7 +2423,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   ) : isDeadHangClubMills ? (
                     <span className="text-[11px] font-bold text-sky-300">BW / Clubs</span>
                   ) : (
-                    <div className="flex items-center justify-center gap-0.5 mx-auto">
+                    <div className="flex flex-col items-center justify-center gap-0.5 mx-auto">
                       <input
                         type="number"
                         aria-label={`Set ${set.setNumber} Weight (lbs)`}
@@ -2341,6 +2437,32 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         step="5"
                         min="0"
                       />
+                      {idx === 0 && logs.length > 1 && (
+                        <button
+                          type="button"
+                          data-testid={`copy-set1-weight-btn-${exercise.id}`}
+                          onClick={handleCopySet1WeightToAll}
+                          title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets (Sets 2–${logs.length})`}
+                          aria-label={`Copy Set 1 weight down to all sets`}
+                          className={`text-[9px] font-semibold px-1 py-0.5 rounded border transition-all cursor-pointer flex items-center justify-center gap-0.5 whitespace-nowrap active:scale-95 -mt-0.5 ${
+                            copyWeightFlash
+                              ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'
+                              : 'bg-slate-900 hover:bg-emerald-950/70 border-slate-700 hover:border-emerald-500/50 text-slate-400 hover:text-emerald-300'
+                          }`}
+                        >
+                          {copyWeightFlash ? (
+                            <>
+                              <Check className="w-2.5 h-2.5 stroke-[3]" />
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-2.5 h-2.5" />
+                              <span>copy ↓</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   )}
                 </td>
