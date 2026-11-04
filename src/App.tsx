@@ -38,7 +38,7 @@ import { ExerciseCard, SetLogRecord } from './components/ExerciseCard';
 import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget';
 import { ExerciseDiagram } from './components/ExerciseDiagram';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
-import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X } from 'lucide-react';
+import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X, Eye } from 'lucide-react';
 import {
   scanLastWorkout,
   LastWorkoutScanResult,
@@ -2835,6 +2835,19 @@ export function WorkoutAppMain() {
                                                       >
                                                         {isPhaseDone ? 'Completed' : 'Tap to Complete'}
                                                       </span>
+                                                      <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          setActiveCueCardId(drill.id);
+                                                        }}
+                                                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 px-2 py-0.5 rounded transition-all cursor-pointer"
+                                                        title={`View visual demo for ${drill.name}`}
+                                                        aria-label={`View visual demo for ${drill.name}`}
+                                                      >
+                                                        <Eye className="w-3 h-3 text-emerald-400" />
+                                                        <span>Demo</span>
+                                                      </button>
                                                     </div>
                                                     <p className={`text-xs leading-relaxed transition-colors ${isPhaseDone ? 'text-slate-400' : 'text-slate-300'}`}>
                                                       {body}

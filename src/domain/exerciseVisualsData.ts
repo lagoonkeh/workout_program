@@ -1068,5 +1068,89 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     },
     trajectoryNote: 'Minimal thoracic elevation with zero lumbar movement.',
     safetyNote: 'Golden standard for spinal sparing: zeroes out disc shear.'
+  },
+
+  w_run_1: {
+    id: 'w_run_1',
+    exerciseName: 'Squat U Ankle Mobilization & Tripod Rooting',
+    diagramType: 'warmup_ankle',
+    startPositionLabel: '1. Half-Kneeling Tripod Setup',
+    bottomPositionLabel: '2. Knee Drive Over 2nd/3rd Toe',
+    caption: 'Dr. Aaron Horschig pre-run primer: roots foot tripod and mobilizes talocrural dorsiflexion to eliminate running foot collapse and knee valgus.',
+    keyCues: [
+      'Pin front heel firmly to the floor',
+      'Root big toe knuckle, pinky toe knuckle, and heel center',
+      'Drive knee over 2nd and 3rd toes into deep closed-chain dorsiflexion',
+      'Hold 2 seconds at peak stretch per side'
+    ],
+    jointAngleCues: {
+      start: '90° half-kneeling ankle angle',
+      bottom: 'Deep closed-chain dorsiflexion with planted heel'
+    },
+    trajectoryNote: 'Horizontal forward knee translation over rooted foot.',
+    safetyNote: 'Restores ankle dorsiflexion to prevent shin splints and knee ache.'
+  },
+
+  w_run_2: {
+    id: 'w_run_2',
+    exerciseName: 'ATG Tibialis Wall Raises',
+    diagramType: 'tibialis',
+    startPositionLabel: '1. Wall Lean Heel Contact',
+    bottomPositionLabel: '2. Peak Tibialis Dorsiflexion Squeeze',
+    caption: 'Ben Patrick ATG pre-run primer: activates tibialis anterior to absorb 3–4x bodyweight ground impact forces and protect patellar tendons.',
+    keyCues: [
+      'Lean hips against wall with straight legs 12–18 inches out',
+      'Pull toes and balls of feet as high toward shins as possible',
+      'Pause 1 full second at peak contraction',
+      'Lower down under a slow 2-second control'
+    ],
+    jointAngleCues: {
+      start: 'Flat foot on floor with straight knees',
+      bottom: 'Maximum active ankle dorsiflexion'
+    },
+    trajectoryNote: 'Vertical angular foot dorsiflexion pivot.',
+    safetyNote: 'Primary decelerator for running: prevents shin splints.'
+  },
+
+  w_run_3: {
+    id: 'w_run_3',
+    exerciseName: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
+    diagramType: 'split_squat',
+    startPositionLabel: '1. Single-Leg Athletic Stance',
+    bottomPositionLabel: '2. Horizontal Pelvic Hold & Glute Squeeze',
+    caption: 'Dr. Alyssa Lu pre-run primer: stabilizes the pelvis in single-leg stance, eliminating Trendelenburg hip drop and IT band friction during running.',
+    keyCues: [
+      'Stand on one leg with a soft knee and slight athletic hip hinge',
+      'Keep pelvis perfectly level with floor—do not let opposite hip drop',
+      'Squeeze lateral glute medius hard to stabilize stance for 2 seconds',
+      'Alternate sides smoothly for 10 reps each'
+    ],
+    jointAngleCues: {
+      start: 'Upright single-leg balance posture',
+      bottom: 'Horizontal pelvis with active lateral hip abductor contraction'
+    },
+    trajectoryNote: 'Isometric frontal plane pelvic stabilization.',
+    safetyNote: 'Locks hip stability to protect runner IT bands and knees.'
+  },
+
+  w_bjj_1: {
+    id: 'w_bjj_1',
+    exerciseName: 'McGill Down-Regulation Diaphragmatic Breathing',
+    diagramType: 'warmup_90_90',
+    startPositionLabel: '1. Supine 90/90 Decompressed Position',
+    bottomPositionLabel: '2. 360° Expansion & Long Mouth Exhale',
+    caption: 'Dr. Stuart McGill recovery reset: down-regulates high sympathetic nervous system tone and resets ribcage positioning following intense grappling.',
+    keyCues: [
+      'Lie flat on back with calves elevated on bench or couch at 90°',
+      'Inhale 4 seconds deeply through nose, expanding belly and ribcage',
+      'Exhale smoothly through pursed lips for 7 seconds',
+      'Continue for 3 minutes to shift into parasympathetic recovery'
+    ],
+    jointAngleCues: {
+      start: '90° hip and knee flexion supine decompression',
+      bottom: 'Depressed ribcage with relaxed neutral spine'
+    },
+    trajectoryNote: 'Diaphragmatic expansion and parasympathetic recovery flush.',
+    safetyNote: 'Releases spinal compression and clears systemic cortisol.'
   }
 };

@@ -1859,5 +1859,133 @@ export const CUE_CARDS: CueCard[] = [
     rehabRegressions: [
       'Perform standard physiological sighs (two quick nasal inhales followed by one long extended exhale) if box breathing holds cause tension.'
     ]
+  },
+  {
+    id: 'cue_w_run_1',
+    exerciseId: 'w_run_1',
+    exerciseName: 'Squat U Ankle Mobilization & Tripod Rooting',
+    title: 'Squat U Ankle Mobilization & Tripod Rooting',
+    tier: 'Warmup',
+    tempo: '2020',
+    prescribedTempo: '2020 (2s Forward Glide / 0s / 2s End-Range Hold / 0s Reset)',
+    primaryMuscles: ['Talocrural Joint', 'Soleus', 'Achilles Tendon', 'Plantar Fascia Foot Tripod'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Half-kneeling or standing with front foot 3–4 inches from wall or post. Root big toe knuckle, pinky toe knuckle, and heel center.',
+    setupInstructions: [
+      'Phase 1 — Stance Setup: Stand or half-kneel with front foot 3–4 inches from wall or post.',
+      'Phase 2 — Root Tripod: Press big toe knuckle, pinky toe knuckle, and heel firmly into floor.',
+      'Phase 3 — Ankle Glide: Drive knee over 2nd toe with heel pinned down.',
+      'Phase 4 — 2s End-Range Hold: Hold end-range dorsiflexion for 2 seconds; repeat 10 reps per side.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Dr. Aaron Horschig (Squat University)',
+        quote: 'Dorsiflexion restriction forces the foot into pronation and the knee into valgus collapse during ground strike. Root the foot tripod and drive the knee over the second toe without letting the heel lift.',
+        biomechanicalRationale: 'Restores posterior talar glide within the mortise joint, preventing tibial internal rotational torque.'
+      }
+    ],
+    commonFaults: [
+      'Allowing the heel to lift off the floor during the forward knee drive.',
+      'Collapsing the medial longitudinal arch into knee valgus.'
+    ],
+    rehabRegressions: [
+      'Use a light resistance band anchored behind the ankle across the talus to assist posterior glide.'
+    ]
+  },
+  {
+    id: 'cue_w_run_2',
+    exerciseId: 'w_run_2',
+    exerciseName: 'ATG Tibialis Wall Raises',
+    title: 'ATG Tibialis Wall Raises',
+    tier: 'Warmup',
+    tempo: '2011',
+    prescribedTempo: '2011 (2s Lower / 0s / 1s Pull / 1s Squeeze)',
+    primaryMuscles: ['Tibialis Anterior', 'Extensor Digitorum Longus', 'Anterior Compartment'],
+    equipment: 'Smooth Wall & Bodyweight',
+    setup: 'Lean hips and upper back against wall with legs straight, feet positioned 12–18 inches away from wall.',
+    setupInstructions: [
+      'Phase 1 — Wall Lean Setup: Lean back against wall with legs straight and heels 12–18" out.',
+      'Phase 2 — Dorsiflexion Pull: Pull toes and balls of feet up toward shins as high as possible.',
+      'Phase 3 — 1-Second Tibialis Squeeze: Hold top contraction for 1 second, burning the tibialis anterior.',
+      'Phase 4 — Controlled Lowering: Lower slowly over 2 seconds; complete 15 reps to prepare for ground impact.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Ben Patrick (ATG)',
+        quote: 'The tibialis anterior is the first line of defense for ground impact deceleration. Bulletproofing the tibialis protects the knees, ankles, and shins from 3–4x bodyweight running impact.',
+        biomechanicalRationale: 'Builds eccentric force absorption capacity in the anterior compartment, preventing shin splints.'
+      }
+    ],
+    commonFaults: [
+      'Bending the knees to cheat the ankle range of motion.',
+      'Bouncing heels off the floor without a 1-second isometric hold.'
+    ],
+    rehabRegressions: [
+      'Step heels closer to the wall (6–8 inches) to decrease resistance and leverage.'
+    ]
+  },
+  {
+    id: 'cue_w_run_3',
+    exerciseId: 'w_run_3',
+    exerciseName: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
+    title: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
+    tier: 'Warmup',
+    tempo: '2020',
+    prescribedTempo: '2020 (2s Single-Leg Level / 0s / 2s Glute Hold / 0s Switch)',
+    primaryMuscles: ['Gluteus Medius', 'Gluteus Minimus', 'Tensor Fasciae Latae', 'Pelvic Stabilizers'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Stand upright on one leg with soft knee and slight athletic hip hinge, hands resting on iliac crests.',
+    setupInstructions: [
+      'Phase 1 — Single-Leg Stance: Stand on one leg with soft knee and slight athletic hip hinge.',
+      'Phase 2 — Pelvic Leveling: Keep pelvis perfectly horizontal without dropping contralateral hip.',
+      'Phase 3 — Glute Medius Hold: Squeeze lateral glute to stabilize stance for 2 seconds.',
+      'Phase 4 — Alternation: Perform 10 controlled reps per side to eliminate runner IT band friction.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Dr. Alyssa Lu (Proformance)',
+        quote: 'Running is a continuous series of single-leg landings. If the glute medius is dormant, the opposite hip drops and the stance knee rotates inward, causing IT band friction and runner knee.',
+        biomechanicalRationale: 'Activates lateral hip abductors to maintain horizontal pelvic alignment in the frontal plane.'
+      }
+    ],
+    commonFaults: [
+      'Contralateral hip dipping downward (Trendelenburg sign).',
+      'Leaning torso sideways to compensate for glute medius weakness.'
+    ],
+    rehabRegressions: [
+      'Keep fingertips lightly touching a wall or chair for balance assistance.'
+    ]
+  },
+  {
+    id: 'cue_w_bjj_1',
+    exerciseId: 'w_bjj_1',
+    exerciseName: 'McGill Down-Regulation Diaphragmatic Breathing',
+    title: 'McGill Down-Regulation Diaphragmatic Breathing',
+    tier: 'Warmup',
+    tempo: '4070',
+    prescribedTempo: '4070 (4s Nasal Inhale / 0s Hold / 7s Mouth Exhale / 0s Reset)',
+    primaryMuscles: ['Diaphragm', 'Intercostals', 'Autonomic Vagus Nerve', 'Spinal Decompressors'],
+    equipment: 'Mat / Floor & Elevated Bench',
+    setup: 'Lie supine on back with calves elevated at 90 degrees on bench or couch. Hands resting gently on lower ribs.',
+    setupInstructions: [
+      'Phase 1 — Supine Decompression: Lie flat on back with knees bent or calves elevated on bench.',
+      'Phase 2 — 4-Second Nasal Inhale: Inhale 4s through nose, expanding abdomen and lateral ribs 360 degrees.',
+      'Phase 3 — 7-Second Mouth Exhale: Exhale smoothly through mouth for 7s, allowing all grappling tension to melt.',
+      'Phase 4 — 3-Minute Down-Regulation: Continue rhythm for 3 minutes to activate parasympathetic recovery.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Dr. Stuart McGill',
+        quote: 'After extreme spinal flexion and combat stress, the sympathetic nervous system locks muscles into guarded splinting. Long, controlled diaphragmatic exhalations reset tone and decompress intervertebral discs.',
+        biomechanicalRationale: 'Activates parasympathetic vagal stimulation, lowering heart rate and normalizing intra-abdominal resting pressure.'
+      }
+    ],
+    commonFaults: [
+      'Chest breathing into the clavicles rather than expanding lateral lower ribs.',
+      'Rushing the exhalation without allowing full ribcage depression.'
+    ],
+    rehabRegressions: [
+      'Place a light 5 lb sandbag or book on the belly to provide tactile biofeedback for diaphragmatic rise.'
+    ]
   }
 ];
