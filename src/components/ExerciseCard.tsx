@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
-import { WorkoutExercise, isUnilateralExercise, formatMMSS, extractTargetReps, getEffectiveExerciseTempo } from '../domain/programData';
+import { WorkoutExercise, isUnilateralExercise, formatMMSS, extractTargetReps, getEffectiveExerciseTempo, BOWFLEX_840_KETTLEBELL_SETTINGS } from '../domain/programData';
 import { ExerciseDiagram } from './ExerciseDiagram';
 import { EXERCISE_VISUALS, ExerciseVisual } from '../domain/exerciseVisualsData';
 import { useCueCardLookup } from '../domain/cueCardStore';
@@ -1640,6 +1640,52 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         />
       )}
 
+      {/* Bowflex SelectTech 840 Quick Dial Selector (For Kettlebell Movements) */}
+      {exercise.equipment === 'kettlebell' && (
+        <div
+          data-testid={`bowflex-840-dial-${exercise.id}`}
+          className="mb-3 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+        >
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50" />
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-white tracking-tight flex items-center gap-1">
+                Bowflex 840 Dial Setting
+              </span>
+              <span className="text-[10px] text-slate-400">1-tap select working weight</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            {BOWFLEX_840_KETTLEBELL_SETTINGS.map((weight) => {
+              const currentSet1Weight = logs[0]?.weightLbs || exercise.defaultWeightLbs;
+              const isSelected = currentSet1Weight === weight;
+              return (
+                <button
+                  key={weight}
+                  type="button"
+                  data-testid={`bowflex-dial-btn-${exercise.id}-${weight}`}
+                  onClick={() => {
+                    for (let idx = 0; idx < logs.length; idx++) {
+                      onUpdateSetLog(exercise.id, idx, { weightLbs: weight });
+                    }
+                  }}
+                  title={`Set all sets to ${weight} lbs (Bowflex SelectTech 840 setting)`}
+                  aria-label={`Select ${weight} lbs Bowflex kettlebell setting`}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
+                    isSelected
+                      ? 'bg-red-500/25 text-red-200 border border-red-500/60 shadow-md shadow-red-950/40 ring-1 ring-red-500/40'
+                      : 'bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 hover:border-slate-600'
+                  }`}
+                >
+                  {weight} lbs
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Inline Barbell Plate Loading Calculator Drawer (Only for Barbell Movements) */}
       {isBarbell && showPlateCalculator && (
         <div
@@ -2260,7 +2306,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             data-testid={`copy-set1-weight-action-${exercise.id}`}
             onClick={handleCopySet1WeightToAll}
             title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets`}
-            aria-label={`Copy Set 1 weight down to all sets`}
+            aria-label="Replicate set 1 load down to all sets"
             className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all cursor-pointer active:scale-95 ${
               copyWeightFlash
                 ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'
@@ -2311,7 +2357,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         data-testid={`copy-set1-weight-th-${exercise.id}`}
                         onClick={handleCopySet1WeightToAll}
                         title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets`}
-                        aria-label={`Copy Set 1 weight down to all sets`}
+                        aria-label="Replicate set 1 load down to all sets"
                         className={`text-[9px] px-1 py-0.5 rounded border transition-colors flex items-center gap-0.5 cursor-pointer font-sans normal-case tracking-normal active:scale-95 ${
                           copyWeightFlash
                             ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
@@ -2443,7 +2489,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                           data-testid={`copy-set1-weight-btn-${exercise.id}`}
                           onClick={handleCopySet1WeightToAll}
                           title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets (Sets 2–${logs.length})`}
-                          aria-label={`Copy Set 1 weight down to all sets`}
+                          aria-label="Replicate set 1 load down to all sets"
                           className={`text-[9px] font-semibold px-1 py-0.5 rounded border transition-all cursor-pointer flex items-center justify-center gap-0.5 whitespace-nowrap active:scale-95 -mt-0.5 ${
                             copyWeightFlash
                               ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'

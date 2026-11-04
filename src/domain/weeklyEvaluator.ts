@@ -1,5 +1,5 @@
 // src/domain/weeklyEvaluator.ts
-import { WorkoutExercise, WorkoutSession } from './programData';
+import { WorkoutExercise, WorkoutSession, BOWFLEX_840_KETTLEBELL_SETTINGS } from './programData';
 import { SetLogRecord } from '../components/ExerciseCard';
 import { MobilityEntry } from './mobility';
 
@@ -321,26 +321,42 @@ export function evaluateWeeklyPerformance(
       }
       // Case 2: Positive performance + AMRAP crushed OR note says easy -> Progressive Overload
       else if ((amrapOverperformed || hasPositiveNote) && !failedSets && (completedForExercise >= Math.min(3, ex.targetSets) || amrapOverperformed)) {
-        // Upper body: +5 lbs; Lower body: +10 lbs (or +5 for kettlebell)
+        // Upper body: +5 lbs; Lower body: +10 lbs; Kettlebell: next Bowflex 840 dial notch (8, 12, 20, 25, 35, 40 lbs)
         const isLower = session.id.includes('lower');
-        const increment = ex.equipment === 'kettlebell' ? 4 : isLower ? 10 : 5;
-        const newWeight = maxWeightForExercise + increment;
+        let increment = 5;
+        let newWeight = maxWeightForExercise;
 
-        adaptations.push({
-          id: `adapt_${ex.id}_weight_up`,
-          exerciseId: ex.id,
-          exerciseName: ex.name,
-          action: 'increase_weight',
-          parameter: 'weightLbs',
-          currentValue: maxWeightForExercise,
-          proposedValue: newWeight,
-          proposedLabel: `+${increment} lbs (${maxWeightForExercise} → ${newWeight} lbs)`,
-          rationale: amrapOverperformed
-            ? `AMRAP set exceeded target (+${(logs[logs.length - 1]?.repsAchieved || 0) - (parseInt(ex.targetReps, 10) || 3)} reps). GZCL linear progression applies.`
-            : 'Smooth execution and positive comment log indicate mechanical readiness for load progression.',
-          creatorInfluence: 'GZCL & Jeff Nippard',
-          applied: false,
-        });
+        if (ex.equipment === 'kettlebell') {
+          const nextSetting = BOWFLEX_840_KETTLEBELL_SETTINGS.find((w) => w > maxWeightForExercise);
+          if (nextSetting) {
+            newWeight = nextSetting;
+            increment = nextSetting - maxWeightForExercise;
+          } else {
+            newWeight = 40;
+            increment = 0;
+          }
+        } else {
+          increment = isLower ? 10 : 5;
+          newWeight = maxWeightForExercise + increment;
+        }
+
+        if (increment > 0) {
+          adaptations.push({
+            id: `adapt_${ex.id}_weight_up`,
+            exerciseId: ex.id,
+            exerciseName: ex.name,
+            action: 'increase_weight',
+            parameter: 'weightLbs',
+            currentValue: maxWeightForExercise,
+            proposedValue: newWeight,
+            proposedLabel: `+${increment} lbs (${maxWeightForExercise} → ${newWeight} lbs${ex.equipment === 'kettlebell' ? ' · Bowflex 840' : ''})`,
+            rationale: amrapOverperformed
+              ? `AMRAP set exceeded target (+${(logs[logs.length - 1]?.repsAchieved || 0) - (parseInt(ex.targetReps, 10) || 3)} reps). GZCL linear progression applies.`
+              : 'Smooth execution and positive comment log indicate mechanical readiness for load progression.',
+            creatorInfluence: 'GZCL & Jeff Nippard',
+            applied: false,
+          });
+        }
       }
       // Case 3: Failed sets or severe fatigue noted -> Rest Interval Increase or Load Hold
       else if (failedSets || hasFatigueNote) {

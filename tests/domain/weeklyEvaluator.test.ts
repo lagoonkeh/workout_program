@@ -173,5 +173,42 @@ describe('weeklyEvaluator Domain Engine', () => {
       expect(ankleAdaptation?.proposedLabel).toContain('31X1');
       expect(ankleAdaptation?.creatorInfluence).toContain('Dr. Aaron Horschig');
     });
+
+    it('advances kettlebell movements strictly to the next Bowflex 840 notch (e.g. 20 -> 25 lbs)', () => {
+      const kbExercise: WorkoutExercise = {
+        id: 't3_horse_stance',
+        name: 'Range of Strength Horse Stance Pulses',
+        tier: 'T3',
+        targetSets: 3,
+        targetReps: '10',
+        isAmrapLastSet: false,
+        tempo: '2020',
+        restSeconds: 90,
+        equipment: 'kettlebell',
+        defaultWeightLbs: 20,
+        muscleGroups: ['Adductors', 'Hips'],
+        biomechanicalRationale: 'Groin & hip strengthener.',
+        progressionRule: 'Advance to next Bowflex 840 setting.',
+      };
+
+      const customSession = {
+        ...WORKOUT_PROGRAM.lower_a,
+        exercises: [kbExercise],
+      };
+
+      const logs: Record<string, SetLogRecord[]> = {
+        t3_horse_stance: [
+          { setNumber: 1, targetReps: '10', weightLbs: 20, repsAchieved: 10, isCompleted: true, notes: 'Flew up, felt super light and easy' },
+          { setNumber: 2, targetReps: '10', weightLbs: 20, repsAchieved: 10, isCompleted: true, notes: '' },
+          { setNumber: 3, targetReps: '10', weightLbs: 20, repsAchieved: 10, isCompleted: true, notes: '' },
+        ],
+      };
+
+      const result = evaluateWeeklyPerformance(logs, [customSession], [], 1);
+      const kbAdaptation = result.adaptations.find((a) => a.exerciseId === 't3_horse_stance' && a.action === 'increase_weight');
+      expect(kbAdaptation).toBeDefined();
+      expect(kbAdaptation?.proposedValue).toBe(25);
+      expect(kbAdaptation?.proposedLabel).toContain('20 → 25 lbs · Bowflex 840');
+    });
   });
 });

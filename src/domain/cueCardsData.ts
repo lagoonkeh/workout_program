@@ -879,7 +879,7 @@ export const CUE_CARDS: CueCard[] = [
     setup: 'Establish a 3-step heel-to-toe stance; toes pointing outward 30–45 degrees; hold kettlebell low between thighs.',
     setupInstructions: [
       'Phase 1 — 3-Step Stance Setup: From a shoulder-width stance, perform 3 deliberate heel-to-toe step-outs to establish a wide horse stance. Turn feet outward 30–45 degrees so knees track precisely over the second toes.',
-      'Phase 2 — Low Kettlebell Load Placement: Hold your BowFlex kettlebell (18–25 lbs) by the handle hanging straight down between your legs. Keep arms relaxed with shoulder blades lightly retracted.',
+      'Phase 2 — Low Kettlebell Load Placement: Hold your BowFlex kettlebell (20–25 lbs) by the handle hanging straight down between your legs. Keep arms relaxed with shoulder blades lightly retracted.',
       'Phase 3 — Anterior Pelvic Tilt & Knee Abduction: Slightly roll your pelvis into an anterior pelvic tilt. Lucas Hardie notes that an anterior tilt clears the femoral head against the acetabular rim, allowing deep hip abduction without bony impingement.',
       'Phase 4 — Controlled Descent (3s Tempo): Descend over 3 seconds by pushing your knees wide and sinking your hips straight down toward knee height (thighs approaching parallel to floor).',
       'Phase 5 — Quasi-Isometric End-Range Pulses (2s Pulse): At maximum loaded adductor stretch, perform small, rhythmic, 1-inch pulses over 2 seconds. This quasi-isometric stimulus overrides the stretch reflex and builds active neural control at the tissue boundary.',
@@ -1060,10 +1060,10 @@ export const CUE_CARDS: CueCard[] = [
     tempo: '3110',
     prescribedTempo: '3110 (3s Hinge / 1s Stretch / 1s Drive)',
     primaryMuscles: ['Biceps Femoris', 'Semitendinosus', 'Gluteus Maximus'],
-    equipment: 'BowFlex Kettlebell (18–25 lbs)',
-    setup: 'Hold light 18-25 lb kettlebell by horns in front of thighs; feet hip-width; knees soft; pack lats.',
+    equipment: 'BowFlex Kettlebell (20–25 lbs)',
+    setup: 'Hold light 20-25 lb kettlebell by horns in front of thighs; feet hip-width; knees soft; pack lats.',
     setupInstructions: [
-      'Phase 1 — Stance & Grip Setup: Hold a light 18–25 lb BowFlex kettlebell by the horns in front of your thighs. Stand with feet hip-width apart and toes pointing straight ahead.',
+      'Phase 1 — Stance & Grip Setup: Hold a light 20–25 lb BowFlex kettlebell by the horns in front of your thighs. Stand with feet hip-width apart and toes pointing straight ahead.',
       'Phase 2 — Soft Knee Unlock & Lat Pack: Softly unlock your knees (approx. 15° bend) and freeze that knee bend. Retract and depress shoulder blades to lock your lats.',
       'Phase 3 — Posterior Hip Hinge (3s Tempo): Inhale into your core cylinder and push your hips straight backward toward the wall. Lower the kettlebell over 3 seconds while keeping it glued against your shins.',
       'Phase 4 — 1-Second Hamstring Stretch Hold: Pause for 1 second at the bottom when your hamstrings reach full active elongation. Keep your lumbar spine locked in rigid neutral lordosis.',

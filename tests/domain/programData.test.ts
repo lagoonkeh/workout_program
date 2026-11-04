@@ -3,6 +3,7 @@ import {
   WORKOUT_SESSIONS,
   REST_PRESETS,
   getEffectiveExerciseTempo,
+  BOWFLEX_840_KETTLEBELL_SETTINGS,
 } from '../../src/domain/programData';
 import { CUE_CARDS } from '../../src/domain/cueCardsData';
 
@@ -71,12 +72,13 @@ describe('Workout Program Data & Biomechanical Architecture', () => {
       });
     });
 
-    it('restricts kettlebell exercise loading to BowFlex 840 capacity (8 to 40 lbs)', () => {
+    it('restricts kettlebell exercise loading to exact BowFlex SelectTech 840 dial settings (8, 12, 20, 25, 35, 40 lbs)', () => {
+      const validSettings: number[] = [...BOWFLEX_840_KETTLEBELL_SETTINGS];
       WORKOUT_SESSIONS.forEach((session) => {
         session.exercises.forEach((exercise) => {
           if (exercise.equipment === 'kettlebell' && exercise.defaultWeight) {
-            expect(exercise.defaultWeight).toBeGreaterThanOrEqual(8);
-            expect(exercise.defaultWeight).toBeLessThanOrEqual(40);
+            expect(validSettings).toContain(exercise.defaultWeight);
+            expect(validSettings).toContain(exercise.defaultWeightLbs);
           }
         });
       });

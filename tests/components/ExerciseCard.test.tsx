@@ -1356,6 +1356,79 @@ describe('ExerciseCard Component', () => {
       expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 185 });
     });
   });
+
+  describe('Bowflex SelectTech 840 Quick Dial Selector', () => {
+    const kbExercise: WorkoutExercise = {
+      ...mockExercise,
+      id: 't3_horse_stance',
+      name: 'Range of Strength Horse Stance Pulses',
+      equipment: 'kettlebell',
+      defaultWeight: 20,
+      defaultWeightLbs: 20,
+      targetSets: 3,
+      targetReps: '10',
+    };
+
+    it('renders all 6 Bowflex SelectTech 840 dial notches (8, 12, 20, 25, 35, 40 lbs) for kettlebell movements', () => {
+      render(
+        <ExerciseCard
+          exercise={kbExercise}
+          logs={mockLogs}
+          onUpdateSetLog={vi.fn()}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      const dialContainer = screen.getByTestId(`bowflex-840-dial-${kbExercise.id}`);
+      expect(dialContainer).toBeInTheDocument();
+      expect(screen.getByText('Bowflex 840 Dial Setting')).toBeInTheDocument();
+
+      const expectedWeights = [8, 12, 20, 25, 35, 40];
+      expectedWeights.forEach((w) => {
+        const btn = screen.getByTestId(`bowflex-dial-btn-${kbExercise.id}-${w}`);
+        expect(btn).toBeInTheDocument();
+        expect(btn).toHaveTextContent(`${w} lbs`);
+      });
+    });
+
+    it('updates all sets when a Bowflex dial setting is clicked', () => {
+      const updateLogMock = vi.fn();
+      render(
+        <ExerciseCard
+          exercise={kbExercise}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      const dial25Btn = screen.getByTestId(`bowflex-dial-btn-${kbExercise.id}-25`);
+      fireEvent.click(dial25Btn);
+
+      expect(updateLogMock).toHaveBeenCalledWith(kbExercise.id, 0, { weightLbs: 25 });
+      expect(updateLogMock).toHaveBeenCalledWith(kbExercise.id, 1, { weightLbs: 25 });
+      expect(updateLogMock).toHaveBeenCalledWith(kbExercise.id, 2, { weightLbs: 25 });
+    });
+
+    it('does not render Bowflex dial selector for non-kettlebell exercises', () => {
+      render(
+        <ExerciseCard
+          exercise={mockExercise}
+          logs={mockLogs}
+          onUpdateSetLog={vi.fn()}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId(`bowflex-840-dial-${mockExercise.id}`)).not.toBeInTheDocument();
+    });
+  });
 });
 
 

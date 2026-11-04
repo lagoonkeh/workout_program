@@ -1,5 +1,12 @@
 // src/domain/programData.ts
 
+/**
+ * Official weight dial settings for the Bowflex SelectTech 840 Adjustable Kettlebell.
+ * Settings are strictly: 8, 12, 20, 25, 35, 40 lbs.
+ */
+export const BOWFLEX_840_KETTLEBELL_SETTINGS = [8, 12, 20, 25, 35, 40] as const;
+export type BowflexKettlebellWeight = typeof BOWFLEX_840_KETTLEBELL_SETTINGS[number];
+
 export type GZCLTier = 'T1' | 'T2' | 'T3' | 'Warmup';
 
 export type EquipmentType = 
@@ -323,9 +330,9 @@ const LOWER_A_WARMUP: WarmupExercise[] = [
     creatorAttribution: 'Coach Eugene Teo',
     equipment: 'kettlebell',
     biomechanicalPurpose: 'Pre-activates the hamstring co-contraction mechanism at the knee joint prior to quad loading, actively pulling the tibia posteriorly to guard against patellar stress.',
-    coachingNotes: 'Use 18–25 lb KB. Push hips back, 3s eccentric down, 1s active hamstring stretch.',
+    coachingNotes: 'Use 20 or 25 lb Bowflex KB. Push hips back, 3s eccentric down, 1s active hamstring stretch.',
     setupInstructions: [
-      'Phase 1 — Stance & Grip: Stand hip-width apart holding an 18–25 lb kettlebell with both hands.',
+      'Phase 1 — Stance & Grip: Stand hip-width apart holding a 20 or 25 lb Bowflex kettlebell with both hands.',
       'Phase 2 — Knee Unlock & Lat Pack: Soften knees slightly and pack lats back and down.',
       'Phase 3 — Hip Hinge Descent (3s Tempo): Push hips straight back over 3 seconds, keeping shins nearly vertical.',
       'Phase 4 — 1-Second Hamstring Stretch: Hold end-range hinge for 1 second, loading hamstrings and glutes.',
@@ -433,7 +440,7 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
     equipment: 'bodyweight',
     muscleGroups: ['Upper Rectus Abdominis', 'Transversus Abdominis'],
     biomechanicalRationale: 'Jeff Cavaliere Kinetic Sequence Step 5: Top-Down Flexion. Upper rectus abdominis has the lightest lever arm (torso only, with legs grounded) and can reach fatigue safely at the end of the circuit without hip flexor dominance.',
-    progressionRule: 'Hold an 8–10 lb BowFlex kettlebell or weight plate at chest once 3x15 bodyweight reps are executed with complete exhalation.',
+    progressionRule: 'Hold an 8 or 12 lb Bowflex kettlebell or weight plate at chest once 3x15 bodyweight reps are executed with complete exhalation.',
     regression: {
       condition: 'Neck discomfort or cervical strain',
       exerciseId: 't3_athlean_supported_curlup',
@@ -580,11 +587,11 @@ export const SESSION_LOWER_A: WorkoutSession = {
       tempo: '3112',
       restSeconds: 60,
       equipment: 'kettlebell',
-      defaultWeight: 18,
-      defaultWeightLbs: 18,
+      defaultWeight: 20,
+      defaultWeightLbs: 20,
       muscleGroups: ['Adductor Magnus', 'Adductor Longus', 'Gluteus Medius', 'Pelvic Floor'],
       biomechanicalRationale: 'Lucas Hardie loaded end-range stimulus. Holding kettlebell low in a 3-step horse stance with slight anterior pelvic tilt overrides femoral neck impingement and exposes the adductor complex to extreme loaded stretch, maximizing stretch-mediated adductor hypertrophy and pelvic stability.',
-      progressionRule: 'Double progression: build from 3x30s to 3x45s holds before increasing kettlebell weight notch.'
+      progressionRule: 'Double progression: build from 3x30s to 3x45s holds before stepping up to the next Bowflex kettlebell notch (20 → 25 → 35 lbs).'
     }
   ],
   dailyCoreFinisher: createDailyAbsExercises('lower_a')
@@ -684,11 +691,11 @@ export const SESSION_UPPER_A: WorkoutSession = {
       tempo: '31X1',
       restSeconds: 120,
       equipment: 'kettlebell',
-      defaultWeight: 30,
-      defaultWeightLbs: 30,
+      defaultWeight: 25,
+      defaultWeightLbs: 25,
       muscleGroups: ['Latissimus Dorsi', 'Teres Major', 'Rhomboids', 'Posterior Deltoid'],
       biomechanicalRationale: 'Bench-supported horizontal pull that balances the bench press. Driving the elbow back toward the hip pocket (not up to the chest) lines the pull up with the lat fibers, and the braced hand and knee unload the lower back.',
-      progressionRule: 'Double progression: build to 10 strict reps/arm across all 3 sets, then add 5 lbs on the adjustable bell (40 lb max). At 40 lbs, add a 2-second squeeze at the top and a 4-second lowering.',
+      progressionRule: 'Double progression: build to 10 strict reps/arm across all 3 sets, then advance to the next Bowflex kettlebell notch (25 → 35 → 40 lbs max). At 40 lbs, add a 2-second squeeze at the top and a 4-second lowering.',
       regression: {
         condition: 'Lower back fatigue or difficulty bracing on the bench',
         exerciseId: 't2_inverted_row',
@@ -907,11 +914,11 @@ export const SESSION_LOWER_B: WorkoutSession = {
       tempo: '4111',
       restSeconds: 60,
       equipment: 'kettlebell',
-      defaultWeight: 15,
-      defaultWeightLbs: 15,
+      defaultWeight: 12,
+      defaultWeightLbs: 12,
       muscleGroups: ['Hamstrings (Distal Tendon Focus)', 'Multifidus', 'Erector Spinae', 'Thoracolumbar Fascia'],
-      biomechanicalRationale: 'Lucas Hardie & Ben Patrick posterior chain mobility drill. Light progressive loaded flexion at long muscle lengths. NOTE: Strictly capped at 10–15 lbs as a mobility drill, not an ego lift.',
-      progressionRule: 'Strictly capped at 10–15 lbs for spinal longevity. If lower back fatigue, disc sensitivity, or stiffness is present, swap to McGill Big 3 spinal stabilization regression.',
+      biomechanicalRationale: 'Lucas Hardie & Ben Patrick posterior chain mobility drill. Light progressive loaded flexion at long muscle lengths. NOTE: Strictly capped at 8–12 lbs on the Bowflex kettlebell as a mobility drill, not an ego lift.',
+      progressionRule: 'Strictly capped at 8–12 lbs on the Bowflex kettlebell for spinal longevity. If lower back fatigue, disc sensitivity, or stiffness is present, swap to McGill Big 3 spinal stabilization regression.',
       regression: {
         condition: 'Lumbar spine stiffness, disc sensitivity, or back fatigue',
         exerciseId: 't3_mcgill_big_3_regression',
