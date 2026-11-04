@@ -17,6 +17,7 @@ export interface WorkoutCompletionModalProps {
   audit: SessionCompletionAudit;
   onApplyAdjustmentsAndComplete: (selectedAdjustments: SkippedExerciseAdjustment[]) => void;
   onCompleteWithoutAdjustments: () => void;
+  isSaving?: boolean;
 }
 
 export const WorkoutCompletionModal: React.FC<WorkoutCompletionModalProps> = ({
@@ -26,6 +27,7 @@ export const WorkoutCompletionModal: React.FC<WorkoutCompletionModalProps> = ({
   audit,
   onApplyAdjustmentsAndComplete,
   onCompleteWithoutAdjustments,
+  isSaving = false,
 }) => {
   const [selectedAdjustmentIds, setSelectedAdjustmentIds] = useState<Set<string>>(() => {
     return new Set(audit.proposedAdjustments.map((a) => a.exerciseId));
@@ -266,7 +268,8 @@ export const WorkoutCompletionModal: React.FC<WorkoutCompletionModalProps> = ({
             type="button"
             data-testid="resume-workout-btn"
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition-colors"
+            disabled={isSaving}
+            className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition-colors disabled:opacity-50"
           >
             Resume Workout
           </button>
@@ -276,7 +279,8 @@ export const WorkoutCompletionModal: React.FC<WorkoutCompletionModalProps> = ({
               type="button"
               data-testid="complete-without-adjustments-btn"
               onClick={onCompleteWithoutAdjustments}
-              className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+              disabled={isSaving}
+              className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-semibold cursor-pointer transition-colors disabled:opacity-50"
             >
               Complete Without Adjustments
             </button>
@@ -286,14 +290,24 @@ export const WorkoutCompletionModal: React.FC<WorkoutCompletionModalProps> = ({
             type="button"
             data-testid="confirm-completion-adjustments-btn"
             onClick={hasSkipped ? handleApply : onCompleteWithoutAdjustments}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer min-h-[44px] transition-all"
+            disabled={isSaving}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 cursor-pointer min-h-[44px] transition-all disabled:opacity-75"
           >
-            <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-            <span>
-              {hasSkipped
-                ? `Apply Adjustments (${selectedAdjustmentIds.size}) & Complete`
-                : 'Complete & Advance'}
-            </span>
+            {isSaving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                <span>Saving Data & Refreshing...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                <span>
+                  {hasSkipped
+                    ? `Apply Adjustments (${selectedAdjustmentIds.size}) & Complete`
+                    : 'Complete & Advance'}
+                </span>
+              </>
+            )}
           </button>
         </div>
       </div>

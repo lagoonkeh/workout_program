@@ -24,6 +24,7 @@ import {
   WORKOUT_SESSIONS,
   RECOVERY_SESSIONS,
   WorkoutExercise,
+  WorkoutSession,
   createUnilateralSideExercises,
   isUnilateralExercise,
   extractTargetReps,
@@ -647,6 +648,7 @@ export function WorkoutAppMain() {
   // 6. Weekly Evaluation & Adaptation State
   const [isWeeklyModalOpen, setIsWeeklyModalOpen] = useState<boolean>(false);
   const [isWorkoutCompletionModalOpen, setIsWorkoutCompletionModalOpen] = useState<boolean>(false);
+  const [isSavingAndAdvancing, setIsSavingAndAdvancing] = useState<boolean>(false);
   const [isWorkoutHistoryModalOpen, setIsWorkoutHistoryModalOpen] = useState<boolean>(false);
   const [isHeatmapModalOpen, setIsHeatmapModalOpen] = useState<boolean>(false);
   const [sessionAuditResult, setSessionAuditResult] = useState<SessionCompletionAudit | null>(null);
@@ -1441,6 +1443,105 @@ export function WorkoutAppMain() {
     handleScanLastWorkout();
   }, [handleScanLastWorkout]);
 
+  // Finalize workout completion, guarantee data persistence, and refresh page to next workout
+  const finalizeSessionCompletionAndRefresh = useCallback(
+    async (
+      completedRecord: CompletedWorkoutSession,
+      nextSessionId: string,
+      nextSession: WorkoutSession,
+      finalLogs: Record<string, SetLogRecord[]>
+    ) => {
+      setIsSavingAndAdvancing(true);
+
+      // 1. Durably persist completed workout into storageManager memory and LocalStorage
+      storageManager.saveCompletedWorkout(completedRecord);
+      setCompletedWorkouts(storageManager.getCompletedWorkouts());
+
+      // 2. Direct synchronous localStorage write for instant persistence across page refreshes
+      try {
+        localStorage.setItem(STORAGE_KEY_SESSION, nextSessionId);
+        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(finalLogs));
+      } catch (e) {
+        console.warn('[App] Direct storage flush warning:', e);
+      }
+      storageManager.saveImmediate({ activeSessionId: nextSessionId });
+
+      // 3. Clear session start times for the completed session
+      setSessionStartTimes((prev) => {
+        const nextTimes = { ...prev };
+        delete nextTimes[completedRecord.sessionId];
+        try {
+          localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
+        } catch {
+          // safe fallback
+        }
+        return nextTimes;
+      });
+
+      // 4. Remote Google Sheets auto-sync with confirmed await
+      if (!isTestEnvironment()) {
+        const today = new Date().toISOString().split('T')[0];
+        lastAutoSyncedSessionRef.current = `${completedRecord.sessionId}_${today}_100`;
+        try {
+          await Promise.race([
+            handleSyncFinishedWorkout(completedRecord),
+            new Promise((resolve) => setTimeout(resolve, 1500)),
+          ]);
+        } catch (err) {
+          console.warn('[App] Remote sheets sync error:', err);
+        }
+      }
+
+      // 5. Google Calendar auto-log
+      void autoLogWorkoutToGoogleCalendar(completedRecord).then((res) => {
+        if (res.success) {
+          setSessionCompletionToast((prev) =>
+            prev ? { ...prev, calendarLogged: true, calendarEventLink: res.eventLink } : prev
+          );
+        }
+      });
+
+      // 6. Close modal & audio chime
+      setIsWorkoutCompletionModalOpen(false);
+      setSessionAuditResult(null);
+      if (!isMuted) {
+        audioSynthesizer.playTone('completion');
+      }
+
+      // 7. Update activeSessionId and toast
+      setActiveSessionId(nextSessionId);
+      setSessionCompletionToast({
+        completedTitle: completedRecord.sessionTitle || completedRecord.sessionId,
+        completedId: completedRecord.sessionId,
+        nextTitle: nextSession.title,
+        nextId: nextSession.id,
+        durationSeconds: completedRecord.totalDurationSeconds,
+      });
+
+      // 8. Re-scan last workout to update smart recommender
+      handleScanLastWorkout();
+
+      // 9. Automatically refresh to the next workout page
+      if (typeof window !== 'undefined' && !isTestEnvironment()) {
+        try {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        } catch {
+          // fallback
+        }
+        setTimeout(() => {
+          try {
+            window.location.reload();
+          } catch {
+            setIsSavingAndAdvancing(false);
+          }
+        }, 500);
+      } else {
+        setIsSavingAndAdvancing(false);
+      }
+    },
+    [handleSyncFinishedWorkout, handleScanLastWorkout, isMuted]
+  );
+
   // Toggle or mark entire workout session as completed
   const handleToggleWorkoutCompleted = useCallback(() => {
     const isCurrently100 = currentSessionCompletion === 100;
@@ -1486,10 +1587,6 @@ export function WorkoutAppMain() {
     });
     setWorkoutLogs(finalLogs);
 
-    if (!isMuted) {
-      audioSynthesizer.playTone('completion');
-    }
-
     // Calculate workout duration from first completed task to completion click
     const completedAt = new Date().toISOString();
     const startedAt = sessionStartTimes[completedId] || completedAt;
@@ -1515,50 +1612,8 @@ export function WorkoutAppMain() {
       totalVolumeLbs: sessionTelemetry.totalTonnageLbs,
       skippedExercises: [],
     };
-    storageManager.saveCompletedWorkout(completedRecord);
-    autoLogWorkoutToGoogleCalendar(completedRecord).then((res) => {
-      if (res.success) {
-        setSessionCompletionToast((prev) =>
-          prev ? { ...prev, calendarLogged: true, calendarEventLink: res.eventLink } : prev
-        );
-      }
-    });
 
-    // Clear recorded start time for completed session
-    setSessionStartTimes((prev) => {
-      if (!prev[completedId]) return prev;
-      const nextTimes = { ...prev };
-      delete nextTimes[completedId];
-      try {
-        localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
-      } catch {
-        // safe fallback
-      }
-      return nextTimes;
-    });
-
-    // Automatically advance to the next session
-    setActiveSessionId(nextSessionId);
-    storageManager.saveImmediate({ activeSessionId: nextSessionId });
-
-    // Announce via completion toast with quick shortcuts
-    setSessionCompletionToast({
-      completedTitle,
-      completedId,
-      nextTitle: nextSession.title,
-      nextId: nextSession.id,
-      durationSeconds: totalDurationSeconds,
-    });
-
-    // Auto-sync completed workout session to Google Sheets in the background
-    if (!isTestEnvironment()) {
-      const today = new Date().toISOString().split('T')[0];
-      lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
-      void handleSyncFinishedWorkout(completedRecord);
-    }
-
-    // Re-scan last workout to update smart recommender
-    handleScanLastWorkout();
+    void finalizeSessionCompletionAndRefresh(completedRecord, nextSessionId, nextSession, finalLogs);
   }, [
     currentSessionCompletion,
     activeSessionId,
@@ -1567,11 +1622,9 @@ export function WorkoutAppMain() {
     programAdaptations,
     sessionExercises,
     defaultLogsByExerciseId,
-    isMuted,
     sessionStartTimes,
     sessionTelemetry.totalTonnageLbs,
-    handleSyncFinishedWorkout,
-    handleScanLastWorkout,
+    finalizeSessionCompletionAndRefresh,
   ]);
 
   // Save current active session directly into workout history
@@ -1692,59 +1745,13 @@ export function WorkoutAppMain() {
           targetSets: sk.targetSets,
         })),
       };
-      storageManager.saveCompletedWorkout(completedRecord);
-      autoLogWorkoutToGoogleCalendar(completedRecord).then((res) => {
-        if (res.success) {
-          setSessionCompletionToast((prev) =>
-            prev ? { ...prev, calendarLogged: true, calendarEventLink: res.eventLink } : prev
-          );
-        }
-      });
-
-      // Clear recorded start time for completed session
-      setSessionStartTimes((prev) => {
-        if (!prev[completedId]) return prev;
-        const nextTimes = { ...prev };
-        delete nextTimes[completedId];
-        try {
-          localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
-        } catch {
-          // safe fallback
-        }
-        return nextTimes;
-      });
 
       // 3. Apply future adjustments into program adaptations
       const updatedAdaptations = applySkippedExerciseAdjustments(selectedAdjustments, programAdaptations);
       setProgramAdaptations(updatedAdaptations);
       storageManager.saveProgramAdaptations(updatedAdaptations);
 
-      // 4. Close modal and advance session
-      setIsWorkoutCompletionModalOpen(false);
-      setSessionAuditResult(null);
-
-      if (!isMuted) {
-        audioSynthesizer.playTone('completion');
-      }
-
-      setActiveSessionId(nextSessionId);
-      storageManager.saveImmediate({ activeSessionId: nextSessionId });
-
-      setSessionCompletionToast({
-        completedTitle,
-        completedId,
-        nextTitle: nextSession.title,
-        nextId: nextSession.id,
-        durationSeconds: totalDurationSeconds,
-      });
-
-      if (!isTestEnvironment()) {
-        const today = new Date().toISOString().split('T')[0];
-        lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
-        void handleSyncFinishedWorkout(completedRecord);
-      }
-
-      handleScanLastWorkout();
+      void finalizeSessionCompletionAndRefresh(completedRecord, nextSessionId, nextSession, annotatedLogs);
     },
     [
       sessionAuditResult,
@@ -1752,10 +1759,9 @@ export function WorkoutAppMain() {
       activeSessionId,
       workoutLogs,
       programAdaptations,
-      isMuted,
       sessionStartTimes,
-      handleSyncFinishedWorkout,
-      handleScanLastWorkout,
+      sessionTelemetry.totalTonnageLbs,
+      finalizeSessionCompletionAndRefresh,
     ]
   );
 
@@ -1827,63 +1833,16 @@ export function WorkoutAppMain() {
         targetSets: sk.targetSets,
       })),
     };
-    storageManager.saveCompletedWorkout(completedRecord);
-    autoLogWorkoutToGoogleCalendar(completedRecord).then((res) => {
-      if (res.success) {
-        setSessionCompletionToast((prev) =>
-          prev ? { ...prev, calendarLogged: true, calendarEventLink: res.eventLink } : prev
-        );
-      }
-    });
 
-    // Clear recorded start time for completed session
-    setSessionStartTimes((prev) => {
-      if (!prev[completedId]) return prev;
-      const nextTimes = { ...prev };
-      delete nextTimes[completedId];
-      try {
-        localStorage.setItem(STORAGE_KEY_SESSION_START_TIMES, JSON.stringify(nextTimes));
-      } catch {
-        // safe fallback
-      }
-      return nextTimes;
-    });
-
-    // 3. Close modal and advance session
-    setIsWorkoutCompletionModalOpen(false);
-    setSessionAuditResult(null);
-
-    if (!isMuted) {
-      audioSynthesizer.playTone('completion');
-    }
-
-    setActiveSessionId(nextSessionId);
-    storageManager.saveImmediate({ activeSessionId: nextSessionId });
-
-    setSessionCompletionToast({
-      completedTitle,
-      completedId,
-      nextTitle: nextSession.title,
-      nextId: nextSession.id,
-      durationSeconds: totalDurationSeconds,
-    });
-
-    if (!isTestEnvironment()) {
-      const today = new Date().toISOString().split('T')[0];
-      lastAutoSyncedSessionRef.current = `${completedId}_${today}_100`;
-      void handleSyncFinishedWorkout(completedRecord);
-    }
-
-    handleScanLastWorkout();
+    void finalizeSessionCompletionAndRefresh(completedRecord, nextSessionId, nextSession, annotatedLogs);
   }, [
     sessionAuditResult,
     activeSession,
     activeSessionId,
     workoutLogs,
-    isMuted,
     sessionStartTimes,
-    handleSyncFinishedWorkout,
-    handleScanLastWorkout,
+    sessionTelemetry.totalTonnageLbs,
+    finalizeSessionCompletionAndRefresh,
   ]);
 
   // Reset logs for a single exercise card
@@ -3071,19 +3030,29 @@ export function WorkoutAppMain() {
                         type="button"
                         data-testid="mark-workout-completed-btn"
                         onClick={handleToggleWorkoutCompleted}
+                        disabled={isSavingAndAdvancing}
                         className={`px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
                           currentSessionCompletion === 100
                             ? 'bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-300 border border-emerald-500/50 ring-1 ring-emerald-500/30'
                             : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-950/50 hover:shadow-emerald-900/60'
-                        }`}
+                        } ${isSavingAndAdvancing ? 'opacity-80 cursor-wait' : ''}`}
                         aria-label={currentSessionCompletion === 100 ? 'Workout Completed (100% Done)' : 'Mark Workout as Completed'}
                       >
-                        <Check className="w-5 h-5 stroke-[3]" />
-                        <span>
-                          {currentSessionCompletion === 100
-                            ? '✓ Complete & Save to History'
-                            : '✓ Mark Workout as Completed'}
-                        </span>
+                        {isSavingAndAdvancing ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            <span>Confirming & Saving Workout...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-5 h-5 stroke-[3]" />
+                            <span>
+                              {currentSessionCompletion === 100
+                                ? '✓ Complete & Save to History'
+                                : '✓ Mark Workout as Completed'}
+                            </span>
+                          </>
+                        )}
                       </button>
 
                     </div>
@@ -3356,7 +3325,9 @@ export function WorkoutAppMain() {
           audit={sessionAuditResult}
           onApplyAdjustmentsAndComplete={handleApplyCompletionAdjustments}
           onCompleteWithoutAdjustments={handleCompleteWithoutAdjustments}
+          isSaving={isSavingAndAdvancing}
           onClose={() => {
+            if (isSavingAndAdvancing) return;
             setIsWorkoutCompletionModalOpen(false);
             setSessionAuditResult(null);
           }}
