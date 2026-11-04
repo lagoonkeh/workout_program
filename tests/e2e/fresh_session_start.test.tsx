@@ -40,6 +40,7 @@ const seed = (daysAgo: number) => {
 describe('Each workout starts unmarked', () => {
   beforeEach(() => {
     localStorage.clear();
+    localStorage.setItem('workout_history_nov1_cleanup_v1', 'done');
     storageManager.clear();
   });
 

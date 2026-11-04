@@ -37,8 +37,9 @@ import { SessionNav, SessionProgressStats } from './components/SessionNav';
 import { ExerciseCard, SetLogRecord } from './components/ExerciseCard';
 import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget';
 import { ExerciseDiagram } from './components/ExerciseDiagram';
+import { WarmupPhaseSubCard } from './components/WarmupPhaseSubCard';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
-import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X, Eye } from 'lucide-react';
+import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X } from 'lucide-react';
 import {
   scanLastWorkout,
   LastWorkoutScanResult,
@@ -1365,7 +1366,9 @@ export function WorkoutAppMain() {
         }
       });
     }
+    pendingLogsRef.current = marks.logs;
     try {
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(marks.logs));
       localStorage.setItem(STORAGE_KEY_WARMUPS, JSON.stringify(marks.warmups));
       localStorage.setItem(STORAGE_KEY_PHASE_TASKS, JSON.stringify(marks.phases));
     } catch {
@@ -2766,94 +2769,27 @@ export function WorkoutAppMain() {
                                               </button>
                                             </div>
                                           </div>
-                                          <div className="space-y-2 pt-0.5">
+                                          <div className="space-y-2.5 pt-1">
                                             {warmupInstructions.map((instruction, sIdx) => {
                                               const phaseKey = `${drill.id}_phase_${sIdx}`;
                                               const isPhaseDone = !!phaseTasks[phaseKey];
-                                              const colonIndex = instruction.indexOf(':');
-                                              const hasPrefix = colonIndex > 0 && colonIndex < 45;
-                                              const prefix = hasPrefix ? instruction.substring(0, colonIndex).trim() : null;
-                                              const body = hasPrefix ? instruction.substring(colonIndex + 1).trim() : instruction;
 
                                               return (
-                                                <div
+                                                <WarmupPhaseSubCard
                                                   key={sIdx}
-                                                  onClick={() => handleTogglePhaseTask(phaseKey, drill.id, warmupInstructions.length)}
-                                                  role="checkbox"
-                                                  aria-checked={isPhaseDone}
-                                                  tabIndex={0}
-                                                  onKeyDown={(e) => {
-                                                    if (e.key === ' ' || e.key === 'Enter') {
-                                                      e.preventDefault();
-                                                      handleTogglePhaseTask(phaseKey, drill.id, warmupInstructions.length);
-                                                    }
-                                                  }}
-                                                  className={`group flex items-start gap-3 p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer min-h-[48px] select-none ${
-                                                    isPhaseDone
-                                                      ? 'bg-emerald-950/25 border-emerald-500/50 shadow-sm shadow-emerald-950/20'
-                                                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
-                                                  }`}
-                                                >
-                                                  <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      handleTogglePhaseTask(phaseKey, drill.id, warmupInstructions.length);
-                                                    }}
-                                                    aria-label={`Mark phase ${sIdx + 1} as ${isPhaseDone ? 'incomplete' : 'complete'}`}
-                                                    className={`flex-shrink-0 w-6 h-6 mt-0.5 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
-                                                      isPhaseDone
-                                                        ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm shadow-emerald-900/40'
-                                                        : 'bg-slate-900 border-slate-700 text-slate-400 group-hover:border-slate-500'
-                                                    }`}
-                                                  >
-                                                    {isPhaseDone ? (
-                                                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                                    ) : (
-                                                      <span className="text-[10px] font-mono font-bold text-slate-400 group-hover:text-slate-200">
-                                                        {sIdx + 1}
-                                                      </span>
-                                                    )}
-                                                  </button>
-                                                  <div className="flex-1 space-y-0.5">
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                      {prefix ? (
-                                                        <strong className={`font-semibold text-xs block transition-colors ${isPhaseDone ? 'text-emerald-300' : 'text-slate-200'}`}>
-                                                          {prefix}
-                                                        </strong>
-                                                      ) : (
-                                                        <strong className={`font-semibold text-xs block transition-colors ${isPhaseDone ? 'text-emerald-300' : 'text-slate-300'}`}>
-                                                          Phase {sIdx + 1}
-                                                        </strong>
-                                                      )}
-                                                      <span
-                                                        className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded border transition-colors ${
-                                                          isPhaseDone
-                                                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                                            : 'bg-slate-800 text-slate-400 border-slate-700'
-                                                        }`}
-                                                      >
-                                                        {isPhaseDone ? 'Completed' : 'Tap to Complete'}
-                                                      </span>
-                                                      <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          setActiveCueCardId(drill.id);
-                                                        }}
-                                                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 px-2 py-0.5 rounded transition-all cursor-pointer"
-                                                        title={`View visual demo for ${drill.name}`}
-                                                        aria-label={`View visual demo for ${drill.name}`}
-                                                      >
-                                                        <Eye className="w-3 h-3 text-emerald-400" />
-                                                        <span>Demo</span>
-                                                      </button>
-                                                    </div>
-                                                    <p className={`text-xs leading-relaxed transition-colors ${isPhaseDone ? 'text-slate-400' : 'text-slate-300'}`}>
-                                                      {body}
-                                                    </p>
-                                                  </div>
-                                                </div>
+                                                  drillId={drill.id}
+                                                  drillName={drill.name}
+                                                  phaseIndex={sIdx}
+                                                  totalPhases={warmupInstructions.length}
+                                                  instruction={instruction}
+                                                  isDone={isPhaseDone}
+                                                  onToggleDone={() =>
+                                                    handleTogglePhaseTask(phaseKey, drill.id, warmupInstructions.length)
+                                                  }
+                                                  drillVisual={drillVisual}
+                                                  onOpenDemoModal={() => setActiveCueCardId(drill.id)}
+                                                  onStartTimer={(seconds) => handleQuickStartRest(seconds)}
+                                                />
                                               );
                                             })}
                                           </div>
