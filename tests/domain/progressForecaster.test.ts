@@ -122,5 +122,24 @@ describe('progressForecaster Domain Engine', () => {
       expect(kneeToWall?.currentValue).toBe(3.5);
       expect(kneeToWall?.projectedValues['1y']).toBeGreaterThanOrEqual(5.0);
     });
+
+    it('leverages completedWorkouts history over months of training when active session logs are empty', () => {
+      const emptyActiveLogs: Record<string, SetLogRecord[]> = {};
+      const completedHistory = [
+        {
+          logs: {
+            t1_bb_squat: [
+              { isCompleted: true, weightLbs: 235, repsAchieved: 3, notes: 'Month 2 PR' },
+            ],
+          },
+        },
+      ];
+
+      const report = generateProgramProjections(emptyActiveLogs, undefined, [], '3m', {}, completedHistory);
+      const squat = report.lifts.find((l) => l.exerciseId === 't1_bb_squat');
+      expect(squat).toBeDefined();
+      expect(squat?.currentWeightLbs).toBe(235);
+      expect(squat?.projectedWeightLbs['3m']).toBeGreaterThan(235);
+    });
   });
 });

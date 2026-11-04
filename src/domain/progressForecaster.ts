@@ -254,7 +254,8 @@ export function generateProgramProjections(
   sessions: WorkoutSession[] = Object.values(WORKOUT_PROGRAM),
   mobilityHistory: MobilityEntry[] = [],
   horizon: TimeHorizon = '3m',
-  programAdaptations: Record<string, Partial<WorkoutExercise>> = {}
+  programAdaptations: Record<string, Partial<WorkoutExercise>> = {},
+  completedWorkouts: Array<{ logs?: Record<string, any> }> = []
 ): ProgramProjectionsReport {
   // 1. Generate Lift Projections
   const keyLiftIds = [
@@ -289,14 +290,23 @@ export function generateProgramProjections(
     const baseWeight =
       adaptation?.defaultWeightLbs || exercise.defaultWeightLbs || exercise.defaultWeight || 135;
 
-    // Check logs for highest completed weight (supporting aliases)
-    const logs = workoutLogs[exId] || 
+    // Check logs for highest completed weight (supporting aliases across active logs and past completed workout history)
+    const activeExLogs = workoutLogs[exId] || 
       (exId === 't1_bb_bench_press' ? workoutLogs['t1_bench'] || workoutLogs['t1_bb_bench'] : undefined) ||
       (exId === 't2_pullup_ladders' ? workoutLogs['t2_pull_up_ladder'] || workoutLogs['t2_pullups'] : undefined) ||
       [];
-    const completedWeights = logs
-      .filter((l) => l.isCompleted && l.weightLbs > 0)
-      .map((l) => l.weightLbs);
+    const historyExLogs = completedWorkouts.flatMap((w) => {
+      const l = w.logs?.[exId] ||
+        (exId === 't1_bb_bench_press' ? w.logs?.['t1_bench'] || w.logs?.['t1_bb_bench'] : undefined) ||
+        (exId === 't2_pullup_ladders' ? w.logs?.['t2_pull_up_ladder'] || w.logs?.['t2_pullups'] : undefined) ||
+        [];
+      return l;
+    });
+
+    const allLogs = [...activeExLogs, ...historyExLogs];
+    const completedWeights = allLogs
+      .filter((l) => l && (l.isCompleted || (l as any).completed) && Number(l.weightLbs) > 0)
+      .map((l) => Number(l.weightLbs));
     const currentWeight = completedWeights.length > 0
       ? Math.max(...completedWeights)
       : baseWeight;

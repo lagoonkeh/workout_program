@@ -849,9 +849,10 @@ export function WorkoutAppMain() {
   // Apply selected weekly adaptations
   const handleApplyWeeklyAdaptations = useCallback(
     (selectedAdaptations: WorkoutAdaptation[]) => {
+      let updatedLogs = { ...workoutLogs };
+
       setProgramAdaptations((prev) => {
         const next = { ...prev };
-        const updatedLogs = { ...workoutLogs };
 
         selectedAdaptations.forEach((adapt) => {
           const current = next[adapt.exerciseId] || {};
@@ -890,9 +891,10 @@ export function WorkoutAppMain() {
 
         storageManager.saveProgramAdaptations(next);
         storageManager.saveWeeklyEvaluation(weeklyEvaluation);
-        setWorkoutLogs(updatedLogs);
         return next;
       });
+
+      setWorkoutLogs(updatedLogs);
     },
     [workoutLogs, weeklyEvaluation]
   );
@@ -3203,6 +3205,7 @@ export function WorkoutAppMain() {
                 workoutLogs={workoutLogs}
                 mobilityHistory={mobilityHistory}
                 programAdaptations={programAdaptations}
+                history={Object.values(completedWorkouts)}
               />
             </Suspense>
           </div>

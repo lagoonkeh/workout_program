@@ -313,4 +313,64 @@ describe('WorkoutHistoryModal Component', () => {
     expect(handleResetAllAndStartFresh).toHaveBeenCalledTimes(1);
     expect(Object.keys(storageManager.getCompletedWorkouts()).length).toBe(0);
   });
+
+  it('renders cumulative 2-month summary ribbon with total workouts, tonnage, adherence, and duration', () => {
+    storageManager.saveCompletedWorkout({
+      id: 's1',
+      date: '2026-09-10T10:00:00.000Z',
+      sessionId: 'lower_a',
+      sessionTitle: 'Lower A',
+      totalVolumeLbs: 12000,
+      adherencePercentage: 100,
+      totalDurationSeconds: 3600, // 1h
+      logs: {},
+    });
+    storageManager.saveCompletedWorkout({
+      id: 's2',
+      date: '2026-09-12T10:00:00.000Z',
+      sessionId: 'upper_a',
+      sessionTitle: 'Upper A',
+      totalVolumeLbs: 8500,
+      adherencePercentage: 90,
+      totalDurationSeconds: 2700, // 45m
+      logs: {},
+    });
+
+    render(<WorkoutHistoryModal isOpen={true} onClose={vi.fn()} />);
+
+    const ribbon = screen.getByTestId('history-summary-ribbon');
+    expect(ribbon).toBeInTheDocument();
+    expect(ribbon).toHaveTextContent('2'); // Total Workouts
+    expect(ribbon).toHaveTextContent('20,500 lbs'); // Total Tonnage
+    expect(ribbon).toHaveTextContent('95%'); // Avg Adherence (100 + 90) / 2
+    expect(ribbon).toHaveTextContent('1h 45m'); // Total Time
+  });
+
+  it('filters sessions using expanded category pills (Cardio, Post-BJJ, Daily Abs)', () => {
+    storageManager.saveCompletedWorkout({
+      id: 's_run',
+      date: '2026-09-15T08:00:00.000Z',
+      sessionId: 'run_conditioning',
+      sessionTitle: 'Outdoor Run Conditioning',
+      logs: {},
+    });
+    storageManager.saveCompletedWorkout({
+      id: 's_bjj',
+      date: '2026-09-16T20:00:00.000Z',
+      sessionId: 'post_bjj_recovery',
+      sessionTitle: 'Post-BJJ Recovery',
+      logs: {},
+    });
+
+    render(<WorkoutHistoryModal isOpen={true} onClose={vi.fn()} />);
+
+    expect(screen.getByTestId('filter-history-run_conditioning')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-history-post_bjj_recovery')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-history-daily_abs')).toBeInTheDocument();
+
+    // Filter to Cardio only
+    fireEvent.click(screen.getByTestId('filter-history-run_conditioning'));
+    expect(screen.getByTestId('history-session-card-run_conditioning')).toBeInTheDocument();
+    expect(screen.queryByTestId('history-session-card-post_bjj_recovery')).not.toBeInTheDocument();
+  });
 });

@@ -627,7 +627,9 @@ export const DailyReadinessWidget: React.FC<DailyReadinessWidgetProps> = ({
 
           {showHistory && (
             <div className="p-4 pt-0 space-y-2 border-t border-slate-800/80">
-              {history.map((item) => (
+              {[...history]
+                .sort((a, b) => b.date.localeCompare(a.date))
+                .map((item) => (
                 <div
                   key={item.id}
                   onClick={() => setSelectedDate(item.date)}

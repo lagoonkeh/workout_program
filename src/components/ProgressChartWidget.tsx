@@ -25,12 +25,14 @@ export interface ProgressChartWidgetProps {
   workoutLogs: Record<string, SetLogRecord[]>;
   mobilityHistory: MobilityEntry[];
   programAdaptations?: Record<string, Partial<WorkoutExercise>>;
+  history?: Array<{ logs?: Record<string, any> }>;
 }
 
 export const ProgressChartWidget: React.FC<ProgressChartWidgetProps> = ({
   workoutLogs,
   mobilityHistory,
   programAdaptations = {},
+  history = [],
 }) => {
   // 1. Controls State
   const [selectedCategory, setSelectedCategory] = useState<'strength' | 'mobility'>('strength');
@@ -48,9 +50,10 @@ export const ProgressChartWidget: React.FC<ProgressChartWidgetProps> = ({
       undefined,
       mobilityHistory,
       selectedHorizon,
-      programAdaptations
+      programAdaptations,
+      history
     );
-  }, [workoutLogs, mobilityHistory, selectedHorizon, programAdaptations]);
+  }, [workoutLogs, mobilityHistory, selectedHorizon, programAdaptations, history]);
 
   const activeLift = useMemo(() => {
     return report.lifts.find((l) => l.exerciseId === selectedLiftId) || report.lifts[0];

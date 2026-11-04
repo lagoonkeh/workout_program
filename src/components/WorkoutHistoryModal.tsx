@@ -159,6 +159,24 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
     return list.filter((s) => s.sessionId === selectedFilter);
   }, [sessionsMap, selectedFilter]);
 
+  const summaryStats = useMemo(() => {
+    let totalTonnage = 0;
+    let totalSeconds = 0;
+    let adherenceSum = 0;
+    sortedSessions.forEach((s) => {
+      totalTonnage += s.totalVolumeLbs || 0;
+      totalSeconds += s.totalDurationSeconds || 0;
+      adherenceSum += s.adherencePercentage ?? 100;
+    });
+    const avgAdherence = sortedSessions.length > 0 ? Math.round(adherenceSum / sortedSessions.length) : 100;
+    return {
+      count: sortedSessions.length,
+      totalTonnage,
+      totalSeconds,
+      avgAdherence,
+    };
+  }, [sortedSessions]);
+
   if (!isOpen) return null;
 
   // Handle deleting a completed workout session
@@ -394,14 +412,46 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
           </div>
         )}
 
+        {/* Cumulative Summary Stats Ribbon */}
+        {sortedSessions.length > 0 && (
+          <div
+            data-testid="history-summary-ribbon"
+            className="px-4 py-2.5 bg-slate-950/70 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center"
+          >
+            <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80 flex flex-col">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Total Workouts</span>
+              <span className="text-sm sm:text-base font-mono font-bold text-white">{summaryStats.count}</span>
+            </div>
+            <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80 flex flex-col">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Total Tonnage</span>
+              <span className="text-sm sm:text-base font-mono font-bold text-cyan-300">
+                {summaryStats.totalTonnage.toLocaleString()} lbs
+              </span>
+            </div>
+            <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80 flex flex-col">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Avg Adherence</span>
+              <span className="text-sm sm:text-base font-mono font-bold text-emerald-300">{summaryStats.avgAdherence}%</span>
+            </div>
+            <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80 flex flex-col">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Total Time</span>
+              <span className="text-sm sm:text-base font-mono font-bold text-amber-300">
+                {formatDuration(summaryStats.totalSeconds) || '0m'}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Filter Pills */}
-        <div className="px-4 py-2.5 border-b border-slate-800/80 bg-slate-900/90 flex items-center gap-1.5 overflow-x-auto">
+        <div className="px-4 py-2.5 border-b border-slate-800/80 bg-slate-900/90 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           {[
             { id: 'all', label: 'All Sessions' },
             { id: 'lower_a', label: 'Lower A' },
             { id: 'upper_a', label: 'Upper A' },
             { id: 'lower_b', label: 'Lower B' },
             { id: 'upper_b', label: 'Upper B' },
+            { id: 'run_conditioning', label: 'Cardio' },
+            { id: 'post_bjj_recovery', label: 'Post-BJJ' },
+            { id: 'daily_abs', label: 'Daily Abs' },
           ].map((tab) => (
             <button
               key={tab.id}
