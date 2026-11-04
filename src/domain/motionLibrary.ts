@@ -114,11 +114,11 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Patrick step-down',
     order: 'eccentric-first',
     frames: two(
-      { hip: [94, 80], torso: -90, head: -88, armN: ang(85, 80), legN: to(96, 156), legF: to(110, 150), footF: 15 },
-      { hip: [88, 110], torso: -80, head: -82, armN: ang(-4, -4), legN: to(96, 156), legF: to(134, 172), footF: -22 }
+      { hip: [94, 85], torso: -90, head: -88, armN: ang(85, 80), legN: to(96, 162), legF: to(110, 154), footF: 15 },
+      { hip: [92, 102.5], torso: -82, head: -84, armN: ang(-4, -4), legN: to(96, 162), legF: to(110, 174), footF: -18 }
     ),
     props: [],
-    scenery: [{ kind: 'rect', x: 76, y: 160, w: 44, h: 20, r: 2, tone: 'plate' }],
+    scenery: [{ kind: 'rect', x: 76, y: 166, w: 44, h: 14, r: 2, tone: 'plate' }],
     worked: ['thN', 'shN'],
     track: { joint: 'kneeN' },
     trackLabel: 'Knee over toe',
@@ -253,7 +253,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     frames: [
       kf(0, { hip: [92, 99], torso: -90, head: -88, armN: ang(82, 82), legN: to(94, 176), legF: to(91, 176) }),
       kf(0.5, { hip: [78, 102.5], torso: -52, head: -46, armN: ang(98.6, 98.6), legN: to(94, 176), legF: to(91, 176) }),
-      kf(1, { hip: [64, 106], torso: -14, head: -4, armN: ang(100, 100), legN: to(94, 176), legF: to(91, 176) }),
+      kf(1, { hip: [63, 108], torso: -14, head: -4, armN: ang(100, 100), legN: to(94, 176), legF: to(91, 176) }),
     ],
     props: [{ kind: 'barbell', at: 'handN' }],
     scenery: [],
@@ -271,7 +271,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     order: 'eccentric-first',
     frames: two(
       { hip: [92, 99], torso: -90, head: -88, armN: rel('neck', 6, 12, 1), legN: to(94, 176), legF: to(91, 176) },
-      { hip: [64, 105], torso: -12, head: -4, armN: rel('neck', 6, 12, 1), legN: to(94, 176), legF: to(91, 176) }
+      { hip: [67, 106], torso: -38, head: -30, armN: rel('neck', 6, 12, 1), legN: to(94, 176), legF: to(91, 176) }
     ),
     props: [{ kind: 'kettlebell', at: 'handN', d: [3, 0] }],
     scenery: [],
@@ -287,7 +287,7 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Biering-SÃ¸rensen hold',
     order: 'hold',
     frames: two(
-      { hip: [104, 97], torso: 72, head: 82, armN: rel('neck', -12, 3, 1), legN: ang(180, 180), footN: -90 },
+      { hip: [104, 97], torso: 35, head: 45, armN: rel('neck', -12, 3, 1), legN: ang(180, 180), footN: -90 },
       { hip: [104, 97], torso: 0, head: 0, armN: rel('neck', -12, 3, 1), legN: ang(180, 180), footN: -90 }
     ),
     props: [],
@@ -454,8 +454,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Rower',
     order: 'concentric-first',
     frames: two(
-      { hip: [94, 156], torso: -62, head: -50, armN: to(154, 138, 1), legN: to(146, 158, 1), footN: -62 },
-      { hip: [70, 156], torso: -108, head: -96, armN: to(76, 126, 1), legN: to(146, 158, 1), footN: -62 }
+      { hip: [108, 156], torso: -62, head: -52, armN: ang(54, 46), legN: to(146, 158, 1), footN: -62 },
+      { hip: [69, 156], torso: -110, head: -98, armN: ang(100, -4), legN: to(146, 158, 1), footN: -62 }
     ),
     props: [{ kind: 'cable', anchor: [168, 146], at: 'handN' }],
     scenery: [

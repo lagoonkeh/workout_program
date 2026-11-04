@@ -91,7 +91,7 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
   step_down: {
     view: 'front', label: 'Front',
     lat: { knee: { N: 8, F: 9 }, ankle: { N: 7, F: 9 }, toe: { N: 9, F: 11 }, hand: [18, 24] },
-    props: [], scenery: [{ kind: 'rect', x: CX - 30, y: 160, w: 60, h: 20, r: 2, tone: 'plate' }], guide: 'toes',
+    props: [], scenery: [{ kind: 'rect', x: CX - 30, y: 166, w: 60, h: 14, r: 2, tone: 'plate' }], guide: 'toes',
     track: { joint: 'knee', side: 'N', label: 'Stance knee path' },
     cue: 'Stance knee stays over the toes, hips level',
   },
