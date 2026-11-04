@@ -62,7 +62,7 @@ const benchEndOn: FrontalScenery[] = [
   { kind: 'line', from: [CX + 12, 133], to: [CX + 12, FLOOR_Y], w: 4 },
   { kind: 'rect', x: CX - 16, y: 129, w: 32, h: 9, r: 3, tone: 'pad' },
 ];
-const pullBar: FrontalScenery[] = [{ kind: 'bar', y: -12, half: 52 }];
+const pullBar: FrontalScenery[] = [{ kind: 'bar', y: 0, half: 52 }];
 const plumbFeetWide = { ankle: 13, toe: 17 } as const;
 
 export const FRONTAL: Record<DiagramType, FrontalConfig> = {
@@ -161,7 +161,7 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     view: 'back', label: 'Head-end',
     lat: { hand: 6, elbow: 13, knee: 6, ankle: 6, toe: 6 },
     props: [],
-    scenery: [{ kind: 'rect', x: CX - 15, y: 122, w: 30, h: 9, r: 3, tone: 'pad' }, { kind: 'line', from: [CX - 10, 131], to: [CX - 10, FLOOR_Y], w: 4 }, { kind: 'line', from: [CX + 10, 131], to: [CX + 10, FLOOR_Y], w: 4 }],
+    scenery: [{ kind: 'rect', x: CX - 15, y: 102, w: 30, h: 9, r: 3, tone: 'pad' }, { kind: 'line', from: [CX - 10, 111], to: [CX - 10, FLOOR_Y], w: 4 }, { kind: 'line', from: [CX + 10, 111], to: [CX + 10, FLOOR_Y], w: 4 }],
     guide: 'midline',
     track: { joint: 'neck', side: 'mid', label: 'Torso rises straight' },
     cue: 'Torso rises without twisting',

@@ -160,14 +160,21 @@ function Scenery({ s }: { s: SceneryDef }) {
           strokeLinecap="round"
         />
       );
-    case 'bar':
+    case 'bar': {
+      // Side view: the bar runs toward the viewer, so it reads as its end (a dot) in front of a faint frame;
+      // a full-width line here made the head pass "through" the bar at the top of a pull-up.
+      const cx = (s.x1 + s.x2) / 2;
       return (
         <g>
-          <line x1={s.x1} y1={s.y} x2={s.x2} y2={s.y} stroke="#94a3b8" strokeWidth={4} strokeLinecap="round" />
-          <line x1={s.x1} y1={s.y} x2={s.x1} y2={s.y - 30} stroke={COLORS.steel} strokeWidth={3} />
-          <line x1={s.x2} y1={s.y} x2={s.x2} y2={s.y - 30} stroke={COLORS.steel} strokeWidth={3} />
+          <g opacity={0.3}>
+            <line x1={s.x1} y1={s.y} x2={s.x2} y2={s.y} stroke={COLORS.steel} strokeWidth={2} strokeLinecap="round" />
+            <line x1={s.x1} y1={s.y} x2={s.x1} y2={s.y - 30} stroke={COLORS.steel} strokeWidth={3} />
+            <line x1={s.x2} y1={s.y} x2={s.x2} y2={s.y - 30} stroke={COLORS.steel} strokeWidth={3} />
+          </g>
+          <circle cx={cx} cy={s.y} r={3.4} fill="#94a3b8" stroke="#cbd5e1" strokeWidth={0.8} />
         </g>
       );
+    }
     case 'wheel':
       return (
         <g>

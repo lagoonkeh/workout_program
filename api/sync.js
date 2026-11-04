@@ -278,6 +278,16 @@ async function readAppBackup(accessToken, spreadsheetId) {
   }
 }
 
+/**
+ * ?action=… from the request. Reads req.url with the WHATWG URL API first: touching req.query makes
+ * Vercel's Node helper call the deprecated url.parse() (DEP0169 warning on every /api/sync request).
+ */
+function queryAction(req) {
+  // Only fall back to req.query when there is no URL (e.g. unit tests); otherwise never touch it.
+  if (req.url) return new URL(req.url, 'http://localhost').searchParams.get('action');
+  return req.query?.action || null;
+}
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
@@ -293,9 +303,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    const action =
-      req.query?.action ||
-      (req.url ? new URL(req.url, 'http://localhost').searchParams.get('action') : null);
+    const action = queryAction(req);
 
     if (action === 'backup') {
       try {
@@ -567,10 +575,7 @@ export default async function handler(req, res) {
     const workoutLogs = Array.isArray(body.workoutLogs) ? body.workoutLogs : [];
     const mobilityEntries = Array.isArray(body.mobilityEntries) ? body.mobilityEntries : [];
 
-    const actionParam =
-      req.query?.action ||
-      (req.url ? new URL(req.url, 'http://localhost').searchParams.get('action') : null) ||
-      body.action;
+    const actionParam = queryAction(req) || body.action;
 
     if (actionParam === 'clear-history' || actionParam === 'reset-history') {
       await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {

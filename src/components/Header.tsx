@@ -49,8 +49,10 @@ const HeaderComponent: React.FC<HeaderProps> = ({
             <AppLogo size={34} className="transform hover:scale-105 transition-transform shrink-0" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <h1 className="text-sm sm:text-lg md:text-xl font-bold tracking-tight text-white truncate">
-                  4-Day Upper/Lower
+                {/* 14px clipped to "4-Day Upper/Lo…" on a 375px phone; 13px fits, and phones narrower than 375px drop "4-Day" */}
+                <h1 className="text-[13px] min-[400px]:text-sm sm:text-lg md:text-xl font-bold tracking-tight text-white truncate">
+                  <span className="max-[374px]:hidden">4-Day Upper/Lower</span>
+                  <span className="hidden max-[374px]:inline" aria-hidden="true">Upper/Lower</span>
                 </h1>
                 <span className="hidden sm:inline-block text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
                   GZCL + 9 Creators
