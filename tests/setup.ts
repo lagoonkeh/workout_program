@@ -9,6 +9,8 @@ beforeAll(async () => {
   await preloadLazyViews();
   const { loadCueCards } = await import('../src/domain/cueCardStore');
   await loadCueCards();
+  const { preloadExerciseDiagram } = await import('../src/components/LazyExerciseDiagram');
+  await preloadExerciseDiagram();
 });
 
 // 1. Mock LocalStorage

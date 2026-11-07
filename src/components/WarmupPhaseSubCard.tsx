@@ -11,7 +11,7 @@ import {
   Maximize2,
   Compass,
 } from 'lucide-react';
-import { ExerciseDiagram } from './ExerciseDiagram';
+import { LazyExerciseDiagram as ExerciseDiagram } from './LazyExerciseDiagram';
 import { type ExerciseVisual } from '../domain/exerciseVisualsData';
 
 export interface WarmupPhaseSubCardProps {

@@ -1,14 +1,8 @@
 // src/services/firebaseAuth.ts
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import {
-  getAuth,
-  signInWithPopup,
-  signOut,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  User,
-  Auth,
-} from 'firebase/auth';
+// The Firebase SDK (~200 KB) is loaded on demand so it never holds up the first paint; everything here that
+// needs it awaits loadFirebaseAuth(). The last confirmed sign-in is remembered so the app can open straight
+// to the workout while Firebase restores the session in the background.
+import type { User, Auth } from 'firebase/auth';
 
 export interface AuthUserProfile {
   uid: string;
@@ -28,6 +22,26 @@ const firebaseConfig = {
 
 export const STORAGE_KEY_AUTH_GUEST_BYPASS = 'workout_app_guest_auth_bypass_v1';
 export const STORAGE_KEY_LOCAL_ALLOWED_EMAIL = 'workout_app_local_allowed_email_v1';
+/** Profile of the last sign-in Firebase confirmed on this device (cleared on sign-out / expiry). */
+export const STORAGE_KEY_AUTH_LAST_USER = 'workout_app_auth_last_user_v1';
+
+export function loadLastKnownUser(): AuthUserProfile | null {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY_AUTH_LAST_USER) || 'null');
+    return raw && typeof raw.uid === 'string' ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveLastKnownUser(user: AuthUserProfile | null): void {
+  try {
+    if (user) localStorage.setItem(STORAGE_KEY_AUTH_LAST_USER, JSON.stringify(user));
+    else localStorage.removeItem(STORAGE_KEY_AUTH_LAST_USER);
+  } catch {
+    // storage blocked: the app just waits for Firebase on the next start
+  }
+}
 
 export const isFirebaseConfigured = (): boolean => {
   if (isTestEnvironment()) {
@@ -51,30 +65,47 @@ export const isTestEnvironment = (): boolean => {
   }
 };
 
-let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
+let authLoading: Promise<Auth | null> | null = null;
+type AuthSdk = typeof import('firebase/auth');
+let sdk: AuthSdk | null = null;
 
-export const getFirebaseAuth = (): Auth | null => {
-  if (!isFirebaseConfigured()) return null;
-  try {
-    if (!app) {
-      app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    }
-    if (!auth) {
-      auth = getAuth(app);
-    }
-    return auth;
-  } catch (err) {
-    console.error('Failed to initialize Firebase Auth:', err);
-    return null;
+/** Loads the Firebase SDK (once) and returns the Auth instance; null when Firebase isn't configured. */
+export function loadFirebaseAuth(): Promise<Auth | null> {
+  if (!isFirebaseConfigured()) return Promise.resolve(null);
+  if (!authLoading) {
+    authLoading = Promise.all([import('firebase/app'), import('firebase/auth')])
+      .then(([appSdk, authSdk]) => {
+        const app = appSdk.getApps().length > 0 ? appSdk.getApp() : appSdk.initializeApp(firebaseConfig);
+        sdk = authSdk;
+        auth = authSdk.getAuth(app);
+        return auth;
+      })
+      .catch((err) => {
+        console.error('Failed to initialize Firebase Auth:', err);
+        authLoading = null; // offline: try again next time
+        return null;
+      });
   }
-};
+  return authLoading;
+}
+
+/** The Auth instance if the SDK has already loaded (synchronous callers that run after sign-in). */
+export const getFirebaseAuth = (): Auth | null => auth;
 
 /**
  * Returns a fresh Firebase ID token for the signed-in user, used to authenticate /api/sync calls.
+ * Waits for Firebase to restore a saved session first, so early calls don't come back empty.
  */
 export const getIdToken = async (): Promise<string | null> => {
-  const user = getFirebaseAuth()?.currentUser;
+  const a = await loadFirebaseAuth();
+  if (!a) return null;
+  try {
+    await a.authStateReady();
+  } catch {
+    // older SDKs: fall through to currentUser
+  }
+  const user = a.currentUser;
   if (!user) return null;
   try {
     return await user.getIdToken();
@@ -125,10 +156,11 @@ export const isEmailAuthorized = (email: string | null | undefined): boolean => 
 };
 
 export const signInWithGoogle = async (): Promise<User> => {
-  const authInstance = getFirebaseAuth();
-  if (!authInstance) {
+  const authInstance = await loadFirebaseAuth();
+  if (!authInstance || !sdk) {
     throw new Error('Firebase Authentication is not configured. Please supply VITE_FIREBASE_API_KEY and VITE_FIREBASE_PROJECT_ID.');
   }
+  const { GoogleAuthProvider, signInWithPopup } = sdk;
   const provider = new GoogleAuthProvider();
   provider.addScope('https://www.googleapis.com/auth/calendar.events');
   provider.setCustomParameters({ prompt: 'select_account' });
@@ -145,10 +177,11 @@ export const signInWithGoogle = async (): Promise<User> => {
 };
 
 export const signOutUser = async (): Promise<void> => {
-  const authInstance = getFirebaseAuth();
-  if (authInstance) {
-    await signOut(authInstance);
+  const authInstance = await loadFirebaseAuth();
+  if (authInstance && sdk) {
+    await sdk.signOut(authInstance);
   }
+  saveLastKnownUser(null);
   try {
     localStorage.removeItem(STORAGE_KEY_AUTH_GUEST_BYPASS);
   } catch {
@@ -159,10 +192,18 @@ export const signOutUser = async (): Promise<void> => {
 export const subscribeToAuthState = (
   callback: (user: User | null) => void
 ): (() => void) => {
-  const authInstance = getFirebaseAuth();
-  if (!authInstance) {
-    callback(null);
-    return () => {};
-  }
-  return onAuthStateChanged(authInstance, callback);
+  let unsubscribe: (() => void) | null = null;
+  let cancelled = false;
+  void loadFirebaseAuth().then((authInstance) => {
+    if (cancelled) return;
+    if (!authInstance || !sdk) {
+      callback(null);
+      return;
+    }
+    unsubscribe = sdk.onAuthStateChanged(authInstance, callback);
+  });
+  return () => {
+    cancelled = true;
+    unsubscribe?.();
+  };
 };

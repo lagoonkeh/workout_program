@@ -61,3 +61,10 @@
 /* Exercise name drawn via CSS so it doesn't duplicate card text for screen readers/tests; aria-label carries it. */
 .jump-next-name::after{content:attr(data-name);}
 
+
+/* Exercise cards off-screen skip layout and paint until scrolled near (the workout page is ~4,000 elements).
+   "auto" remembers each card's last rendered height so the scrollbar doesn't jump. */
+.cv-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+}

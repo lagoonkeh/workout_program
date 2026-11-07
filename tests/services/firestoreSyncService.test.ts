@@ -118,7 +118,7 @@ describe('firestoreSyncService', () => {
     it('calls setDoc with merge: true when pushWorkoutStateImmediate is executed with an active db', async () => {
       vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
       vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
-      vi.spyOn(firebaseAuth, 'getFirebaseAuth').mockReturnValue({ app: {} } as any);
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: { uid: 'u1' }, authStateReady: () => Promise.resolve() } as any);
 
       await firestoreSyncService.pushWorkoutStateImmediate('user_abc', {
         activeSessionId: 'upper_a',
@@ -142,10 +142,27 @@ describe('firestoreSyncService', () => {
       expect(firestoreSyncService.getStatus()).toBe('synced');
     });
 
+    it('waits for Firebase to restore the session and writes nothing when no one is signed in', async () => {
+      vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
+      vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
+      const authStateReady = vi.fn(() => Promise.resolve());
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: null, authStateReady } as any);
+
+      await firestoreSyncService.pushWorkoutStateImmediate('user_abc', {
+        activeSessionId: 'upper_a',
+        workoutLogs: {},
+        completedWarmupDrills: {},
+        splitSidesExercises: {},
+      });
+
+      expect(authStateReady).toHaveBeenCalled();
+      expect(mockSetDoc).not.toHaveBeenCalled();
+    });
+
     it('handles error in pushWorkoutStateImmediate and transitions status to error', async () => {
       vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
       vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
-      vi.spyOn(firebaseAuth, 'getFirebaseAuth').mockReturnValue({ app: {} } as any);
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: { uid: 'u1' }, authStateReady: () => Promise.resolve() } as any);
       mockSetDoc.mockRejectedValueOnce(new Error('Network disconnected'));
 
       await firestoreSyncService.pushWorkoutStateImmediate('user_abc', {
@@ -161,7 +178,7 @@ describe('firestoreSyncService', () => {
     it('calls setDoc with merge: true when pushMobilityHistoryImmediate is executed', async () => {
       vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
       vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
-      vi.spyOn(firebaseAuth, 'getFirebaseAuth').mockReturnValue({ app: {} } as any);
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: { uid: 'u1' }, authStateReady: () => Promise.resolve() } as any);
 
       await firestoreSyncService.pushMobilityHistoryImmediate('user_abc', [
         { testId: 'knee-to-wall', value: 5.0, date: '2026-10-18T00:00:00.000Z' },
@@ -184,7 +201,7 @@ describe('firestoreSyncService', () => {
     it('handles error in pushMobilityHistoryImmediate and transitions status to error', async () => {
       vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
       vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
-      vi.spyOn(firebaseAuth, 'getFirebaseAuth').mockReturnValue({ app: {} } as any);
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: { uid: 'u1' }, authStateReady: () => Promise.resolve() } as any);
       mockSetDoc.mockRejectedValueOnce(new Error('Write quota exceeded'));
 
       await firestoreSyncService.pushMobilityHistoryImmediate('user_abc', []);
@@ -195,7 +212,7 @@ describe('firestoreSyncService', () => {
     it('subscribes to onSnapshot and triggers onRemoteUpdate only if remote updatedAt is newer than local', async () => {
       vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
       vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
-      vi.spyOn(firebaseAuth, 'getFirebaseAuth').mockReturnValue({ app: {} } as any);
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: { uid: 'u1' }, authStateReady: () => Promise.resolve() } as any);
 
       const remoteUpdateSpy = vi.fn();
       localStorage.setItem(STORAGE_KEY_LOCAL_STATE_TIMESTAMP, '1000');
@@ -233,7 +250,7 @@ describe('firestoreSyncService', () => {
     it('subscribes to onSnapshot for mobility history and updates when remote is newer', async () => {
       vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
       vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
-      vi.spyOn(firebaseAuth, 'getFirebaseAuth').mockReturnValue({ app: {} } as any);
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: { uid: 'u1' }, authStateReady: () => Promise.resolve() } as any);
 
       const remoteMobilitySpy = vi.fn();
       localStorage.setItem(STORAGE_KEY_LOCAL_MOBILITY_TIMESTAMP, '500');
@@ -263,7 +280,7 @@ describe('firestoreSyncService', () => {
       vi.useFakeTimers();
       vi.spyOn(firebaseAuth, 'isTestEnvironment').mockReturnValue(false);
       vi.spyOn(firebaseAuth, 'isFirebaseConfigured').mockReturnValue(true);
-      vi.spyOn(firebaseAuth, 'getFirebaseAuth').mockReturnValue({ app: {} } as any);
+      vi.spyOn(firebaseAuth, 'loadFirebaseAuth').mockResolvedValue({ app: {}, currentUser: { uid: 'u1' }, authStateReady: () => Promise.resolve() } as any);
 
       const pushWorkoutSpy = vi.spyOn(firestoreSyncService, 'pushWorkoutStateImmediate').mockResolvedValue(undefined);
       const pushMobilitySpy = vi.spyOn(firestoreSyncService, 'pushMobilityHistoryImmediate').mockResolvedValue(undefined);

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { WorkoutExercise, isUnilateralExercise, formatMMSS, extractTargetReps, getEffectiveExerciseTempo, BOWFLEX_840_KETTLEBELL_SETTINGS } from '../domain/programData';
-import { ExerciseDiagram } from './ExerciseDiagram';
+import { LazyExerciseDiagram as ExerciseDiagram } from './LazyExerciseDiagram';
 import { EXERCISE_VISUALS, ExerciseVisual } from '../domain/exerciseVisualsData';
 import { useCueCardLookup } from '../domain/cueCardStore';
 import {
@@ -980,7 +981,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     <article
       id={`exercise-card-${exercise.id}`}
       data-testid="exercise-card"
-      className={`rounded-xl sm:rounded-2xl ${
+      className={`cv-card rounded-xl sm:rounded-2xl ${
         isCollapsed ? 'p-3 sm:p-4' : 'p-2.5 sm:p-5 md:p-6'
       } shadow-xl mb-3 sm:mb-4 relative overflow-hidden transition-all duration-200 ${
         isSwappedToRegression
@@ -2935,19 +2936,22 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </>
       )}
 
+      {/* Dialogs render at the page level: the card skips rendering while off-screen (content-visibility),
+          which would otherwise trap a full-screen overlay inside it */}
       {/* Interactive Rating Scale Definitions Modal */}
-      {isRatingModalOpen && (
+      {isRatingModalOpen && createPortal(
       <Suspense fallback={null}>
       <RatingDefinitionsModal
         isOpen={isRatingModalOpen}
         onClose={() => setIsRatingModalOpen(false)}
         initialTab={initialRatingTab}
       />
-      </Suspense>
+      </Suspense>,
+      document.body
       )}
 
       {/* Skip Exercise Reason Modal */}
-      {isSkipModalOpen && (
+      {isSkipModalOpen && createPortal(
       <Suspense fallback={null}>
       <SkipExerciseReasonModal
         isOpen={isSkipModalOpen}
@@ -2960,11 +2964,12 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         onConfirmSkip={handleConfirmSkip}
         onUnskip={handleUnskipExercise}
       />
-      </Suspense>
+      </Suspense>,
+      document.body
       )}
 
       {/* Exercise Variation Selector Modal */}
-      {isVariationModalOpen && (
+      {isVariationModalOpen && createPortal(
         <ExerciseVariationModal
           isOpen={isVariationModalOpen}
           onClose={() => setIsVariationModalOpen(false)}
@@ -2973,7 +2978,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           activeVariationId={exercise.id}
           onSelectVariation={handleSelectVariation}
           currentCycle={currentCycle}
-        />
+        />,
+        document.body
       )}
     </article>
   );

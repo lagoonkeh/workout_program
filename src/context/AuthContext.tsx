@@ -11,6 +11,8 @@ import {
   getAllowedEmails,
   setLocalAllowedEmail,
   STORAGE_KEY_AUTH_GUEST_BYPASS,
+  loadLastKnownUser,
+  saveLastKnownUser,
 } from '../services/firebaseAuth';
 import { firestoreSyncService, type CloudSyncStatus } from '../services/firestoreSyncService';
 
@@ -33,9 +35,27 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const hasGuestBypass = (): boolean => {
+  try {
+    return localStorage.getItem(STORAGE_KEY_AUTH_GUEST_BYPASS) === 'true';
+  } catch {
+    return false;
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUserProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(() => !isTestEnvironment() && isFirebaseConfigured());
+  // Open straight to the app when this device's last sign-in was confirmed and allowed; Firebase restores the
+  // session in the background and a signed-out result still sends the user to the login screen.
+  const [user, setUser] = useState<AuthUserProfile | null>(() =>
+    !isTestEnvironment() && isFirebaseConfigured() ? loadLastKnownUser() : null
+  );
+  const [loading, setLoading] = useState<boolean>(
+    () =>
+      !isTestEnvironment() &&
+      isFirebaseConfigured() &&
+      !isEmailAuthorized(loadLastKnownUser()?.email) &&
+      !hasGuestBypass()
+  );
   const [error, setError] = useState<string | null>(null);
   const [isFirebaseReady, setIsFirebaseReady] = useState<boolean>(false);
   const [isGuestBypassed, setIsGuestBypassed] = useState<boolean>(() => {
@@ -67,14 +87,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const unsubscribe = subscribeToAuthState((firebaseUser) => {
       if (firebaseUser) {
-        setUser({
+        const profile = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
           photoURL: firebaseUser.photoURL,
-        });
+        };
+        setUser(profile);
+        saveLastKnownUser(profile);
       } else {
         setUser(null);
+        saveLastKnownUser(null);
       }
       setLoading(false);
     });

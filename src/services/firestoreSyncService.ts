@@ -2,7 +2,7 @@
 // The Firestore SDK (~560 KB with its deps) is loaded on demand via import() so it stays off the
 // initial page load; only type imports are static.
 import type { Firestore, Unsubscribe } from 'firebase/firestore';
-import { getFirebaseAuth, isFirebaseConfigured, isTestEnvironment } from './firebaseAuth';
+import { loadFirebaseAuth, isFirebaseConfigured, isTestEnvironment } from './firebaseAuth';
 import { SetLogRecord } from '../components/ExerciseCard';
 import { MobilityEntry } from '../domain/mobility';
 
@@ -42,8 +42,11 @@ export const loadFirestoreModule = (): Promise<FirestoreModule> => {
 export const getFirebaseDb = async (): Promise<Firestore | null> => {
   if (isTestEnvironment() || !isFirebaseConfigured()) return null;
   try {
-    const auth = getFirebaseAuth();
+    // The app can open before Firebase has restored the session: wait for it, or writes go out unauthenticated
+    const auth = await loadFirebaseAuth();
     if (!auth || !auth.app) return null;
+    await auth.authStateReady().catch(() => {});
+    if (!auth.currentUser) return null;
     if (!db) {
       const { getFirestore, enableIndexedDbPersistence } = await loadFirestoreModule();
       db = getFirestore(auth.app);

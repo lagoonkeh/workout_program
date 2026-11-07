@@ -50,7 +50,7 @@ import { Header, AppViewMode } from './components/Header';
 import { SessionNav, SessionProgressStats } from './components/SessionNav';
 import { ExerciseCard, SetLogRecord } from './components/ExerciseCard';
 import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget';
-import { ExerciseDiagram } from './components/ExerciseDiagram';
+import { LazyExerciseDiagram as ExerciseDiagram } from './components/LazyExerciseDiagram';
 import { WarmupPhaseSubCard } from './components/WarmupPhaseSubCard';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
 import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X, Layers } from 'lucide-react';
