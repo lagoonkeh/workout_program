@@ -2474,7 +2474,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
 
       {/* Interactive Set Logger */}
       <div className="mb-2.5 w-full max-w-full overflow-x-auto no-scrollbar">
-        <table className="w-full table-fixed text-center text-xs font-mono border-collapse min-w-[340px]">
+        <table className="w-full table-fixed text-center text-xs font-mono border-collapse min-w-[300px]">
           <thead>
             <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px] sm:text-xs">
               <th className="py-1 px-0.5 text-center w-8 sm:w-9 whitespace-nowrap">
@@ -2612,7 +2612,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                       <span
                         data-testid={`last-time-set-${exercise.id}-${set.setNumber}`}
                         title={`Last time: ${prev.weightLbs > 0 ? `${prev.weightLbs} lb × ` : ''}${prev.repsAchieved} reps`}
-                        className="block text-[9px] leading-tight text-slate-500 font-normal mt-0.5"
+                        className="block text-[10px] leading-tight text-slate-400 font-normal mt-0.5"
                       >
                         {prev.weightLbs > 0 ? `${prev.weightLbs}×${prev.repsAchieved}` : `×${prev.repsAchieved}`}
                       </span>

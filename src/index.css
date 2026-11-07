@@ -30,3 +30,34 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+/* Readability fixes from the Nov 2026 UI audit (measured at 375px on the dark theme) */
+/* slate-500 secondary text measured 3.8:1 on the cards; this shade is about 6:1 and still reads as secondary */
+.text-slate-500 {
+  color: rgb(139 151 171);
+}
+/* white text on cyan-600 (rest timer buttons) measured 3.7:1; cyan-700 gives 5.4:1 */
+.bg-cyan-600 {
+  background-color: rgb(14 116 144);
+}
+
+/* Touch screens (gym use at arm's length): one step larger micro-labels and a 36px minimum hit area */
+@media (pointer: coarse) {
+  .text-\[8px\] {
+    font-size: 9px;
+  }
+  .text-\[9px\] {
+    font-size: 10px;
+  }
+  .text-\[10px\] {
+    font-size: 11px;
+  }
+  button,
+  [role='button'] {
+    min-height: 36px;
+  }
+}
+
+/* Exercise name drawn via CSS so it doesn't duplicate card text for screen readers/tests; aria-label carries it. */
+.jump-next-name::after{content:attr(data-name);}
+

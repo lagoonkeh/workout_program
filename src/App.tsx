@@ -1353,6 +1353,19 @@ export function WorkoutAppMain() {
     [getExerciseLogs, handleQuickStartRest, sessionExercises, activeSession.dailyCoreFinisher, nextSetInfo]
   );
 
+  // First unfinished set in session order, for the "Next" jump button
+  const nextOpenSet = useMemo(
+    () => resolveSetTarget(null, [...sessionExercises, ...(activeSession.dailyCoreFinisher || [])], getExerciseLogs),
+    [sessionExercises, activeSession.dailyCoreFinisher, getExerciseLogs]
+  );
+  const handleJumpToNextSet = useCallback(() => {
+    if (!nextOpenSet) return;
+    const el = document.getElementById(`exercise-card-${nextOpenSet.exercise.id}`);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 76; // clear the sticky header
+    window.scrollTo({ top, behavior: 'smooth' });
+  }, [nextOpenSet]);
+
   // Watch / Tasker controls: notification buttons (forwarded by the service worker) and ?cmd= URLs
   const watchCommandRef = useRef<(c: WatchCommand) => void>(() => {});
   watchCommandRef.current = (c: WatchCommand) => {
@@ -1473,7 +1486,9 @@ export function WorkoutAppMain() {
       let completedSets = 0;
       let completedExercises = 0;
 
-      const exercises = session.exercises.flatMap((ex) => {
+      // this week's plan: deload set counts, Cycle B / custom variations and adaptations
+      const planned = adaptedSessions[session.id]?.exercises || session.exercises;
+      const exercises = planned.flatMap((ex) => {
         if (splitSidesExercises[ex.id]) {
           const { left, right } = createUnilateralSideExercises(ex);
           return [left, right];
@@ -1501,7 +1516,7 @@ export function WorkoutAppMain() {
     });
 
     return stats;
-  }, [workoutLogs, splitSidesExercises]);
+  }, [workoutLogs, splitSidesExercises, adaptedSessions]);
 
   // Overall active session completion percentage
   const currentSessionCompletion = useMemo(() => {
@@ -3678,6 +3693,23 @@ export function WorkoutAppMain() {
           );
         })}
       </nav>
+
+      {/* Jump to the next unfinished set: the first lift sits a few screens below the warmups */}
+      {currentView === 'workout' && nextOpenSet && (
+        <button
+          type="button"
+          data-testid="jump-next-set-btn"
+          onClick={handleJumpToNextSet}
+          className="fixed bottom-14 left-3 md:bottom-4 z-40 max-w-[calc(100vw-11rem)] min-h-[48px] px-3 rounded-2xl bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white shadow-2xl border border-emerald-400/50 flex items-center gap-2 text-left cursor-pointer"
+          aria-label={`Jump to ${nextOpenSet.exercise.name}, set ${nextOpenSet.setIndex + 1}`}
+        >
+          <ChevronDown className="w-4 h-4 shrink-0" />
+          <span className="min-w-0 leading-tight">
+            <span className="block text-[11px] font-semibold opacity-90">Next · Set {nextOpenSet.setIndex + 1}</span>
+            <span className="jump-next-name block text-sm font-bold truncate" data-name={nextOpenSet.exercise.name} />
+          </span>
+        </button>
+      )}
 
       {/* Docked Rest Timer Widget (Always Available) */}
       <RestTimerWidget

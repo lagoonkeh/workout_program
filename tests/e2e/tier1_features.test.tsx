@@ -786,7 +786,7 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
     it('F14.4: maintains scrollable set table container with minimum width on mobile', () => {
       render(<App />);
       const table = document.querySelector('table');
-      expect(table).toHaveClass('min-w-[340px]');
+      expect(table).toHaveClass('min-w-[300px]');
     });
 
     it('F14.5: renders modal dialogs with backdrop blur and responsive centering', () => {
