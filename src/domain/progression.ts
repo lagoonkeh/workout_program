@@ -6,6 +6,8 @@
  * - Next load (double progression): add weight once every planned set reaches the top of the rep
  *   range without an RPE 9.5+ grind; hold while reps are still climbing; back off after missing the
  *   bottom of the range on most sets or knee pain >= 4/10. Kettlebells move between Bowflex 840 notches.
+ *   Pain mentioned in a set note (back, hip, shoulder...) holds the load; so do poor recovery signals
+ *   (see trainingReadiness.ts), which turn an increase into a hold with the reason shown.
  * - Deload: after 4 building weeks (a week with 2+ workouts) the 5th week is a deload: about half
  *   the sets at ~85% load. A week with no training, or a finished deload, starts a new block.
  */
@@ -36,6 +38,8 @@ export interface LoadSuggestion {
   previousWeightLbs: number;
   change: LoadChange;
   reason: string;
+  /** an increase held back by recovery signals: the pre-fill still writes last time's weight */
+  readinessHold?: boolean;
   /** history record the suggestion was worked out from (one pre-fill per new record) */
   basisRecordId: string;
   basisDate: string;
@@ -89,12 +93,25 @@ export function repRange(targetReps: string): { min: number; max: number } | nul
   return n ? { min: Number(n[1]), max: Number(n[1]) } : null;
 }
 
-/** RPE and knee pain from quick-chip notes ("@RPE 8", "Knee Pain 2/10"). */
-export function readSetTags(notes: string): { rpe: number; kneePain: number } {
+const BODY_PART = '(lower back|low back|upper back|back|spine|hip|groin|shoulder|elbow|wrist|neck|knee|hamstring|achilles|ankle|pec|chest|si joint)';
+const PAIN_WORD = '(pain|hurts?|hurting|ache|aching|pinch|pinching|tweak(?:ed)?|strain(?:ed)?|sharp)';
+const NO_PAIN = /\b(no|zero|without)\s+(\w+\s+){0,2}pain\b|pain[- ]free|\b0\s*\/\s*10/i;
+
+/** RPE, knee pain (n/10) and any other pain written in quick-chip or free-text notes. */
+export function readSetTags(notes: string): { rpe: number; kneePain: number; painNote: string | null } {
   const text = notes || '';
   const rpe = /RPE\s*(\d+(?:\.\d+)?)/i.exec(text);
   const pains = Array.from(text.matchAll(/Pain(?:-Free)?\s*(\d+(?:\.\d+)?)\s*\/\s*10/gi), (m) => parseFloat(m[1]));
-  return { rpe: rpe ? parseFloat(rpe[1]) : 0, kneePain: pains.length ? Math.max(...pains) : 0 };
+  let painNote: string | null = null;
+  for (const part of text.split(/[·.;\n]/)) {
+    if (NO_PAIN.test(part) || /pain\s*\d/i.test(part)) continue;
+    const m = new RegExp(`\\b${BODY_PART}\\b[^·.;]{0,25}\\b${PAIN_WORD}\\b|\\b${PAIN_WORD}\\b[^·.;]{0,25}\\b${BODY_PART}\\b`, 'i').exec(part);
+    if (m) {
+      painNote = (m[1] || m[4] || '').toLowerCase();
+      break;
+    }
+  }
+  return { rpe: rpe ? parseFloat(rpe[1]) : 0, kneePain: pains.length ? Math.max(...pains) : 0, painNote };
 }
 
 const NOTCHES: readonly number[] = BOWFLEX_840_KETTLEBELL_SETTINGS;
@@ -131,7 +148,7 @@ export function loadCap(ex: WorkoutExercise): number | null {
 export function suggestNextLoad(
   ex: WorkoutExercise,
   last: LastPerformance | null,
-  opts: { deload?: boolean } = {}
+  opts: { deload?: boolean; holdIncreasesReason?: string | null } = {}
 ): LoadSuggestion | null {
   if (!last || ex.equipment === 'bodyweight') return null;
   const working = last.sets.filter((s) => s.weightLbs > 0);
@@ -143,6 +160,7 @@ export function suggestNextLoad(
   const tags = last.sets.map((s) => readSetTags(s.notes));
   const maxRpe = Math.max(0, ...tags.map((t) => t.rpe));
   const maxPain = Math.max(0, ...tags.map((t) => t.kneePain));
+  const painNote = tags.find((t) => t.painNote)?.painNote ?? null;
 
   if (opts.deload) {
     return { ...base, weightLbs: deloadLoad(top, ex), change: 'deload', reason: `Deload week: about 85% of ${top} lb with half the sets` };
@@ -163,8 +181,14 @@ export function suggestNextLoad(
     };
   }
   const everySetTopped = atTop.length >= ex.targetSets && atTop.every((s) => s.repsAchieved >= range.max);
+  if (everySetTopped && painNote) {
+    return { ...base, weightLbs: top, change: 'hold', readinessHold: true, reason: `You noted ${painNote} pain last time: repeat ${top} lb with clean form before adding weight` };
+  }
   if (everySetTopped && maxRpe < 9.5) {
     const next = capped(stepUp(top, ex));
+    if (next > top && opts.holdIncreasesReason) {
+      return { ...base, weightLbs: top, change: 'hold', readinessHold: true, reason: `${opts.holdIncreasesReason}. Repeat ${top} lb today` };
+    }
     if (next > top) {
       return {
         ...base,

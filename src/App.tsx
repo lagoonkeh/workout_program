@@ -18,6 +18,9 @@ import {
   GuideWidget,
 } from './lazyView';
 import { sessionToOpen } from './domain/nextSession';
+import { increaseGate, gateReason, type ReadinessCheckIn } from './domain/trainingReadiness';
+import { loadCachedHealth } from './domain/healthMetrics';
+import { HEALTH_UPDATED_EVENT, loadCachedWorkouts } from './domain/healthWorkouts';
 import { migrateMeadowsRowOnce, removeNov1PhantomsOnce, removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
 import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
 import {
@@ -936,6 +939,32 @@ export function WorkoutAppMain() {
 
   // "Last time" and the next-weight suggestion for every exercise in the open session. Today's own
   // workout is left out, so a finished session still compares against the one before.
+  // Recovery signals (sleep, resting HR, outside training, today's check-in) that hold back load increases.
+  // Re-read when Health Connect data refreshes or a check-in is saved.
+  const [recoveryTick, setRecoveryTick] = useState(0);
+  useEffect(() => {
+    const bump = () => setRecoveryTick((t) => t + 1);
+    window.addEventListener(HEALTH_UPDATED_EVENT, bump);
+    window.addEventListener('storage', bump);
+    window.addEventListener('focus', bump);
+    return () => {
+      window.removeEventListener(HEALTH_UPDATED_EVENT, bump);
+      window.removeEventListener('storage', bump);
+      window.removeEventListener('focus', bump);
+    };
+  }, []);
+  const holdIncreasesReason = useMemo(() => {
+    let checkIns: ReadinessCheckIn[] = [];
+    try {
+      const raw = JSON.parse(localStorage.getItem('workout_daily_readiness_logs_v1') || '[]');
+      if (Array.isArray(raw)) checkIns = raw;
+    } catch {
+      // no check-ins yet
+    }
+    return gateReason(increaseGate(new Date(), loadCachedHealth(), loadCachedWorkouts(), checkIns));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recoveryTick, currentView]);
+
   const progressionByExercise = useMemo(() => {
     const history = Object.values(completedWorkouts) as HistoryRecord[];
     const before = new Date(new Date().toDateString()).getTime();
@@ -946,11 +975,11 @@ export function WorkoutAppMain() {
       const basis = last && !last.deload ? last : findLastPerformance(ex.id, history, { before, skipDeload: true });
       map[ex.id] = {
         last,
-        suggestion: suggestNextLoad(ex, basis, { deload: isDeloadWeek && !finisherIds.has(ex.id) }),
+        suggestion: suggestNextLoad(ex, basis, { deload: isDeloadWeek && !finisherIds.has(ex.id), holdIncreasesReason }),
       };
     }
     return map;
-  }, [completedWorkouts, sessionExercises, activeSession.dailyCoreFinisher, isDeloadWeek]);
+  }, [completedWorkouts, sessionExercises, activeSession.dailyCoreFinisher, isDeloadWeek, holdIncreasesReason]);
 
   const handleToggleSplitSides = useCallback((exerciseId: string) => {
     const baseId = exerciseId.replace(/__side_(left|right)$/, '');
@@ -1136,7 +1165,7 @@ export function WorkoutAppMain() {
         if (prev?.key !== key) {
           const fromWeightLbs = logs[0]?.weightLbs || 0;
           // a "hold" leaves the weight alone, except to come back up after a deload
-          const write = s.change !== 'hold' || prev?.change === 'deload';
+          const write = s.change !== 'hold' || prev?.change === 'deload' || !!s.readinessHold;
           if (write && logs.some((l) => l.weightLbs !== s.weightLbs)) {
             logs = logs.map((l) => ({ ...l, weightLbs: s.weightLbs }));
           }

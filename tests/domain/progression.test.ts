@@ -92,8 +92,8 @@ describe('rep targets and tags', () => {
     expect(repRange('20-30s hold')).toBeNull();
   });
   it('reads RPE and the worst knee pain from notes', () => {
-    expect(readSetTags('@RPE 8 · Knee Pain 2/10 · Pain 3/10')).toEqual({ rpe: 8, kneePain: 3 });
-    expect(readSetTags('')).toEqual({ rpe: 0, kneePain: 0 });
+    expect(readSetTags('@RPE 8 · Knee Pain 2/10 · Pain 3/10')).toEqual({ rpe: 8, kneePain: 3, painNote: null });
+    expect(readSetTags('')).toEqual({ rpe: 0, kneePain: 0, painNote: null });
   });
 });
 

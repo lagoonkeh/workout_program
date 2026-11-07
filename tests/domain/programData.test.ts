@@ -102,7 +102,8 @@ describe('Workout Program Data & Biomechanical Architecture', () => {
           t1Exercises.forEach((t1) => {
             expect(t1.targetSets).toBe(5);
             expect(t1.targetReps).toBe('3');
-            expect(t1.isAmrapLastSet).toBe(true);
+            // RDLs stop short of failure (lower-back safety); the other T1 lifts end with an AMRAP set
+            expect(t1.isAmrapLastSet).toBe(t1.id !== 't1_bb_rdl');
             // Rest interval for heavy T1 powerbuilding must be 180s to 300s (3-5 minutes)
             expect(t1.restSeconds).toBeGreaterThanOrEqual(180);
             expect(t1.restSeconds).toBeLessThanOrEqual(300);
