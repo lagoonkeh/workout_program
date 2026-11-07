@@ -51,19 +51,20 @@ export interface ExerciseDiagramProps {
 const TRAIL_SAMPLES = 48;
 const FAR_OFFSET: Vec = [3.5, -2.5];
 
-function propCenter(p: PropDef, sk: Skeleton): Vec {
+function propCenter(p: PropDef, sk: Skeleton, progress = 0): Vec {
   if (p.kind === 'cable') return sk[p.at];
   if (p.kind === 'club') {
     const a = angleOf(sk[p.from], sk[p.at]);
     return polar(sk[p.at], a, p.len);
   }
   const d = 'd' in p && p.d ? p.d : [0, 0];
-  const j = sk[p.at];
+  const h = p.kind === 'kettlebell' ? p.handoff : undefined;
+  const j = h && progress > h.from && progress <= h.to ? sk[h.at] : sk[p.at];
   return [j[0] + d[0], j[1] + d[1]];
 }
 
-function trackPoint(m: MotionDef, sk: Skeleton): Vec {
-  return 'prop' in m.track ? propCenter(m.props[m.track.prop], sk) : sk[m.track.joint];
+function trackPoint(m: MotionDef, sk: Skeleton, progress = 0): Vec {
+  return 'prop' in m.track ? propCenter(m.props[m.track.prop], sk, progress) : sk[m.track.joint];
 }
 
 const pathFrom = (pts: Vec[]) =>
@@ -185,8 +186,8 @@ function Scenery({ s }: { s: SceneryDef }) {
   }
 }
 
-function Prop({ p, sk, ids }: { p: PropDef; sk: Skeleton; ids: string }) {
-  const c = propCenter(p, sk);
+function Prop({ p, sk, ids, progress = 0 }: { p: PropDef; sk: Skeleton; ids: string; progress?: number }) {
+  const c = propCenter(p, sk, progress);
   switch (p.kind) {
     case 'barbell':
       return (
@@ -337,12 +338,12 @@ export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, id
     const end = buildSkeleton(poseAt(motion.frames, motion.order === 'loop' ? 0.5 : 1));
     const pts: Vec[] = [];
     for (let i = 0; i <= TRAIL_SAMPLES; i++) {
-      pts.push(trackPoint(motion, buildSkeleton(poseAt(motion.frames, i / TRAIL_SAMPLES))));
+      pts.push(trackPoint(motion, buildSkeleton(poseAt(motion.frames, i / TRAIL_SAMPLES)), i / TRAIL_SAMPLES));
     }
     return { start, end, trail: pts };
   }, [motion]);
 
-  const tp = trackPoint(motion, sk);
+  const tp = trackPoint(motion, sk, progress);
   const trail = statics.trail;
   const arrowIdx = Math.floor(trail.length * 0.55);
   const arrowA = trail[Math.max(0, arrowIdx - 2)];
@@ -382,14 +383,14 @@ export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, id
       )}
 
       {farProps.map((p, i) => (
-        <Prop key={`f${i}`} p={p} sk={sk} ids={ids} />
+        <Prop key={`f${i}`} p={p} sk={sk} ids={ids} progress={progress} />
       ))}
       {behind.map((p, i) => (
-        <Prop key={`b${i}`} p={p} sk={sk} ids={ids} />
+        <Prop key={`b${i}`} p={p} sk={sk} ids={ids} progress={progress} />
       ))}
       <Body sk={sk} worked={worked} load={load} ids={ids} />
       {front.map((p, i) => (
-        <Prop key={`n${i}`} p={p} sk={sk} ids={ids} />
+        <Prop key={`n${i}`} p={p} sk={sk} ids={ids} progress={progress} />
       ))}
 
       {detailed && showTrail && (
@@ -467,7 +468,8 @@ function frontalPropAnchor(p: FrontalProp, fs: FrontalSkeleton): { pt: Vec; dept
     case 'kettlebell':
     case 'dumbbell':
     case 'club': {
-      const h = hand(p.side);
+      const ho = p.kind === 'kettlebell' ? p.handoff : undefined;
+      const h = hand(ho && fs.progress > ho.from && fs.progress <= ho.to ? ho.side : p.side);
       const d = 'd' in p && p.d ? p.d : [0, 0];
       return { pt: [h.p[0] + d[0], h.p[1] + d[1]], depth: h.depth + 0.5 };
     }

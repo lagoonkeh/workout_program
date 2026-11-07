@@ -30,7 +30,8 @@ export type DiagramType =
   | 'warmup_scapular'
   | 'warmup_elephant'
   | 'warmup_dead_hang'
-  | 'warmup_wall_slide';
+  | 'warmup_wall_slide'
+  | 'single_leg_atw';
 
 export interface ExerciseVisual {
   id: string;
@@ -712,7 +713,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   w_lower_b_4: {
     id: 'w_lower_b_4',
     exerciseName: 'Squat U Single-Leg Kettlebell Around-the-Worlds',
-    diagramType: 'carry',
+    diagramType: 'single_leg_atw',
     startPositionLabel: '1. Single-Leg Stance, Bell in Front',
     bottomPositionLabel: '2. Bell Passed Behind, Hips Level',
     caption: 'Dr. Aaron Horschig drill: light 8–12 lb kettlebell passed around the waist on one leg to train glute medius and foot-tripod stability against a moving rotational load.',

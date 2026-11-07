@@ -15,14 +15,15 @@ import { FLOOR_Y } from './motionLibrary';
 
 export const CX = 100;
 
-export type Lateral = number | [number, number];
+/** number = fixed; [a, b] = start -> end; 3+ values = evenly spaced keys over the rep (loops, hand-to-hand passes) */
+export type Lateral = number | [number, number] | number[];
 
 export type LatJoint = 'shoulder' | 'elbow' | 'hand' | 'hip' | 'knee' | 'ankle' | 'toe' | 'scap';
 
 export type FrontalProp =
   /** straight bar held in both hands (or racked: y taken from the neck) */
   | { kind: 'bar'; at: 'hands' | 'neck'; half: number; dy?: number }
-  | { kind: 'kettlebell' | 'dumbbell'; side: 'N' | 'F'; d?: Vec }
+  | { kind: 'kettlebell' | 'dumbbell'; side: 'N' | 'F'; d?: Vec; handoff?: { side: 'N' | 'F'; from: number; to: number } }
   | { kind: 'cable'; anchor: Vec; sides: ('N' | 'F')[] }
   | { kind: 'club'; side: 'N' | 'F'; len: number };
 
@@ -165,6 +166,19 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     guide: 'midline',
     track: { joint: 'neck', side: 'mid', label: 'Torso rises straight' },
     cue: 'Torso rises without twisting',
+  },
+  single_leg_atw: {
+    view: 'front', label: 'Front',
+    // keys at 0 / .25 / .5 / .75 / 1: hands meet in front, right hand takes it round, meet behind, left hand brings it back
+    lat: {
+      hand: { N: [3, 24, 3, 17, 3], F: [3, 17, 3, 24, 3] },
+      elbow: { N: [13, 23, 14, 17, 13], F: [13, 17, 14, 23, 13] },
+      knee: { N: 8, F: 11 }, ankle: { N: 8, F: 10 }, toe: { N: 9, F: 11 },
+    },
+    props: [{ kind: 'kettlebell', side: 'N', d: [0, 8], handoff: { side: 'F', from: 0.5, to: 1 } }],
+    scenery: [], guide: 'midline',
+    track: { joint: 'hip', side: 'mid', label: 'Hips stay level' },
+    cue: 'Hips level, stance knee over the toes',
   },
   carry: {
     view: 'front', label: 'Front',
@@ -319,13 +333,19 @@ export interface FrontalSkeleton {
   neck: FrontalPoint;
   pelvis: FrontalPoint;
   joints: Record<FrontalJoint, Record<Side, FrontalPoint>>;
+  /** rep progress this projection was taken at */
+  progress: number;
 }
 
 function latFor(cfg: FrontalConfig, j: LatJoint, side: Side, progress: number): number {
   const v = cfg.lat[j];
   let l: Lateral = DEFAULT_LAT[j];
   if (v !== undefined) l = typeof v === 'object' && !Array.isArray(v) ? v[side] : v;
-  return Array.isArray(l) ? l[0] + (l[1] - l[0]) * progress : l;
+  if (!Array.isArray(l)) return l;
+  if (l.length <= 2) return l[0] + ((l[1] ?? l[0]) - l[0]) * progress;
+  const x = Math.min(1, Math.max(0, progress)) * (l.length - 1);
+  const i = Math.min(l.length - 2, Math.floor(x));
+  return l[i] + (l[i + 1] - l[i]) * (x - i);
 }
 
 /** Screen x for a lateral offset: lifter's right is on the viewer's left from the front. */
@@ -363,6 +383,7 @@ export function projectFrontal(sk: Skeleton, cfg: FrontalConfig, progress: numbe
     neck: { p: [CX, sk.neck[1]], depth: sk.neck[0] },
     pelvis: { p: [CX, sk.hip[1]], depth: sk.hip[0] },
     joints,
+    progress,
   };
 }
 
