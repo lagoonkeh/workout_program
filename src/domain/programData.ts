@@ -235,6 +235,21 @@ export function getEffectiveExerciseTempo(tempo?: string, targetReps?: string): 
   return tempoTrimmed;
 }
 
+/**
+ * True when an exercise is prescribed by time (a hold, plank, hang, "45–60s", "25–30 min", a HOLD-n tempo):
+ * those get a countdown. Rep-based lifts (barbell squat, bench, RDL...) don't show tempo or set timers.
+ * A hold inside a rep ("10 reps (5s hold)") is a cue, not a timed set.
+ */
+export function isTimedPrescription(targetReps?: string, tempo?: string): boolean {
+  const t = (tempo || '').toLowerCase();
+  if (t.startsWith('hold-') || /\b(hold|isometric|hang)\b/.test(t)) return true;
+  const raw = (targetReps || '').toLowerCase();
+  // a time range in brackets is the set's duration ("8–10 pulses (30–45s)"); a single "(5s hold)" is a per-rep cue
+  if (/\(\s*\d+\s*(?:-|–|to)\s*\d+\s*(s|sec|secs|seconds|min|mins|minutes)\b/.test(raw)) return true;
+  const r = raw.replace(/\([^)]*\)/g, ' ');
+  return /\d\s*(s|sec|secs|seconds|min|mins|minutes)\b/.test(r) || /\bhold\b/.test(r);
+}
+
 export type SessionId = 'lower_a' | 'upper_a' | 'lower_b' | 'upper_b' | 'run_conditioning' | 'post_bjj_recovery' | 'daily_abs';
 
 export interface WorkoutSession {

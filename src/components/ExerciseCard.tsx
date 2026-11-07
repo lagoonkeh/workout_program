@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
 import { createPortal } from 'react-dom';
-import { WorkoutExercise, isUnilateralExercise, formatMMSS, extractTargetReps, getEffectiveExerciseTempo, BOWFLEX_840_KETTLEBELL_SETTINGS } from '../domain/programData';
+import { WorkoutExercise, isUnilateralExercise, isTimedPrescription, formatMMSS, extractTargetReps, getEffectiveExerciseTempo, BOWFLEX_840_KETTLEBELL_SETTINGS } from '../domain/programData';
 import { LazyExerciseDiagram as ExerciseDiagram } from './LazyExerciseDiagram';
 import { EXERCISE_VISUALS, ExerciseVisual } from '../domain/exerciseVisualsData';
 import { useCueCardLookup } from '../domain/cueCardStore';
@@ -234,8 +234,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     },
     [baseExerciseKey, onSelectVariation]
   );
-  const [isAmrapRunning, setIsAmrapRunning] = useState(false);
-  const [amrapSeconds, setAmrapSeconds] = useState(0);
   const [isSkipModalOpen, setIsSkipModalOpen] = useState(false);
 
   // Barbell Plate Loading Calculator Drawer state (strictly for barbell equipment)
@@ -557,6 +555,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     () => getEffectiveExerciseTempo(activeTempo, exercise.targetReps),
     [activeTempo, exercise.targetReps]
   );
+  // Tempo / hold timers only on exercises prescribed by time; rep-based lifts keep just the rest timer
+  const needsTimer = useMemo(() => isTimedPrescription(exercise.targetReps, effectiveTempo), [exercise.targetReps, effectiveTempo]);
 
   const handleStartInlineTempo = useCallback(
     (targetSetIdx?: number) => {
@@ -690,43 +690,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     handleStopInlineTempo();
   }, [exercise, logs, inlineTempoTargetSet, inlineTempoSnapshot, onUpdateSetLog, onQuickStartRest, handleStopInlineTempo]);
 
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-    if (isAmrapRunning) {
-      intervalId = setInterval(() => {
-        setAmrapSeconds((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [isAmrapRunning]);
-
-  const formatAmrapTime = useCallback((totalSeconds: number): string => {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  }, []);
-
-  const handleToggleAmrapTimer = useCallback(() => {
-    if (!isAmrapRunning) {
-      setAmrapSeconds(0);
-      setIsAmrapRunning(true);
-      voiceAnnouncer.announceAmrapPrompt(exercise.name);
-    } else {
-      setIsAmrapRunning(false);
-      const finalSetIndex = logs.length - 1;
-      if (finalSetIndex >= 0) {
-        const currentNotes = logs[finalSetIndex]?.notes || '';
-        const amrapTag = `AMRAP TUT: ${amrapSeconds}s`;
-        const updatedNotes = currentNotes
-          ? `${currentNotes.trim()} · ${amrapTag}`
-          : amrapTag;
-        onUpdateSetLog(exercise.id, finalSetIndex, { notes: updatedNotes });
-      }
-      onQuickStartRest(exercise.restSeconds);
-    }
-  }, [isAmrapRunning, amrapSeconds, exercise.name, exercise.id, exercise.restSeconds, logs, onUpdateSetLog, onQuickStartRest]);
 
   useEffect(() => {
     setIsManuallyCollapsed(null);
@@ -889,8 +852,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
 
   const handleReset = useCallback(() => {
     setIsManuallyCollapsed(false);
-    setIsAmrapRunning(false);
-    setAmrapSeconds(0);
     handleStopInlineTempo();
     if (onResetExercise) {
       onResetExercise(exercise.id);
@@ -1470,7 +1431,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               <ChevronUp className="w-3.5 h-3.5" />
             </button>
           </div>
-          {/* Quick-Launch Inline Tempo & Fullscreen Metronome */}
+          {/* Quick-Launch Inline Tempo / Hold Timer & Fullscreen Metronome (timed exercises only) */}
+          {needsTimer && (
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
@@ -1545,6 +1507,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               <span className="hidden sm:inline">Visualizer</span>
             </button>
           </div>
+          )}
 
           {/* Quick-Launch Rest Timer */}
           <button
@@ -1815,7 +1778,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </div>
       )}
 
-      {/* AMRAP Final Set Reminder Banner & Continuous Stopwatch */}
+      {/* AMRAP Final Set Reminder Banner */}
       {exercise.isAmrapLastSet && (
         <div
           data-testid="amrap-reminder-banner"
@@ -1853,37 +1816,9 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 <span>Voice Cue</span>
               </button>
 
-              <button
-                type="button"
-                onClick={handleToggleAmrapTimer}
-                aria-label={isAmrapRunning ? `Stop AMRAP Timer (${formatAmrapTime(amrapSeconds)})` : 'Start AMRAP Set Timer'}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono flex items-center gap-2 cursor-pointer transition-all active:scale-95 shadow-md ${
-                  isAmrapRunning
-                    ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse border border-rose-400'
-                    : 'bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 border border-rose-500/50'
-                }`}
-              >
-                {isAmrapRunning ? <Pause className="w-3.5 h-3.5 fill-white" /> : <Play className="w-3.5 h-3.5 fill-rose-200" />}
-                <span>
-                  {isAmrapRunning
-                    ? `Stop AMRAP (${formatAmrapTime(amrapSeconds)})`
-                    : 'Start AMRAP Timer'}
-                </span>
-              </button>
             </div>
           </div>
 
-          {isAmrapRunning && (
-            <div className="mt-2.5 pt-2 border-t border-rose-500/25 flex items-center justify-between text-xs text-rose-200">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
-                <span>Timer running until stopped. Complete your reps!</span>
-              </span>
-              <span className="font-mono font-bold text-white text-sm">
-                {formatAmrapTime(amrapSeconds)}
-              </span>
-            </div>
-          )}
         </div>
       )}
 
@@ -2566,6 +2501,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 {/* Set # */}
                 <td className="py-1 px-0.5 font-bold text-slate-300 text-center whitespace-nowrap text-[11px] sm:text-xs">
                   <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                    {needsTimer && (
                     <button
                       type="button"
                       data-testid={`start-tempo-set-${set.setNumber}`}
@@ -2584,6 +2520,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         <Play className="w-3.5 h-3.5 fill-current" />
                       )}
                     </button>
+                    )}
                     <span>{isMcGillBig3 || isDeadHangClubMills ? `R${set.setNumber}` : set.setNumber}</span>
                     {isAmrapRow && (
                       <span className="text-[10px] text-rose-400 ml-0.5 font-semibold">+</span>

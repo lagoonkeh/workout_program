@@ -32,6 +32,8 @@ import {
   createUnilateralSideExercises,
   isUnilateralExercise,
   extractTargetReps,
+  isTimedPrescription,
+  getEffectiveExerciseTempo,
 } from './domain/programData';
 import {
   WorkoutCycle,
@@ -2334,6 +2336,20 @@ export function WorkoutAppMain() {
     return null;
   }, [activeCueCardId, activeSession, CUE_CARD_MAP]);
 
+  // Whether the open cue card's exercise is prescribed by time (only those get the metronome / hold button)
+  const activeCueCardTimed = useMemo(() => {
+    if (!activeCueCard) return false;
+    const id = activeCueCard.exerciseId.replace(/__side_(left|right)$/, '');
+    const sessions = [activeSession, ...Object.values(WORKOUT_PROGRAM)];
+    for (const s of sessions) {
+      const ex = [...s.exercises, ...(s.dailyCoreFinisher || [])].find((e) => e.id === id || e.baseExerciseId === id);
+      if (ex) return isTimedPrescription(ex.targetReps, getEffectiveExerciseTempo(ex.tempo, ex.targetReps));
+      const drill = [...(s.warmupSequence || []), ...(s.warmup || [])].find((w) => w.id === id);
+      if (drill) return isTimedPrescription(drill.targetDurationOrReps, drill.tempo);
+    }
+    return isTimedPrescription('', activeCueCard.tempo);
+  }, [activeCueCard, activeSession]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950 w-full max-w-full overflow-x-hidden min-w-0">
       {/* Sticky Header */}
@@ -3142,6 +3158,9 @@ export function WorkoutAppMain() {
                                           }
 
                                           if (drillTempo) {
+                                            // Paced breathing and holds need a clock; a plain rep cadence on a rep-based drill doesn't
+                                            const pacedBreathing = drillTempo === '5083' || drillTempo === '4040' || drillTempo === '4083';
+                                            if (!pacedBreathing && !isTimedPrescription(drill.targetDurationOrReps, drillTempo)) return null;
                                             const targetReps = extractTargetReps(drill.targetDurationOrReps, 10);
                                             const tempoLabel = drillTempo.startsWith('HOLD-')
                                               ? `${drillTempo.replace('HOLD-', '')}s Hold`
@@ -3828,10 +3847,14 @@ export function WorkoutAppMain() {
         cueCard={activeCueCard}
         isOpen={!!activeCueCard}
         onClose={() => setActiveCueCardId(null)}
-        onLaunchTempo={(tempo) => {
-          setActiveTempo(tempo);
-          setActiveTempoExerciseId(activeCueCard?.exerciseId || null);
-        }}
+        onLaunchTempo={
+          activeCueCardTimed
+            ? (tempo) => {
+                setActiveTempo(tempo);
+                setActiveTempoExerciseId(activeCueCard?.exerciseId || null);
+              }
+            : undefined
+        }
         onPhaseTaskToggle={(phaseKey, isDone) => {
           setPhaseTasks((prev) => ({ ...prev, [phaseKey]: isDone }));
         }}

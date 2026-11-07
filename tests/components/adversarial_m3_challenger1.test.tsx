@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
+import { render, screen, fireEvent, within, cleanup, act } from '@testing-library/react';
 import App from '../../src/App';
 import { ExerciseCard, SetLogRecord } from '../../src/components/ExerciseCard';
 import { CueCardModal } from '../../src/components/CueCardModal';
@@ -307,15 +307,15 @@ describe('Adversarial M3 Challenger 1: Workout Logging & UI Component Layer', ()
     it('launches Tempo Metronome from inside CueCardModal and cleanly transitions modals', () => {
       render(<App />);
 
-      // Open CueCardModal for Barbell Back Squat
-      const cuesBtn = screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0];
-      fireEvent.click(cuesBtn);
+      // Open CueCardModal for a timed exercise (McGill Big 3 holds); rep-based lifts have no metronome button
+      const mcgill = document.getElementById('exercise-card-t3_mcgill_big_3')!;
+      fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByText(/Elite Creator Cues & Biomechanics/i)).toBeInTheDocument();
 
-      // Click "Launch Tempo Metronome (31X1)" inside the modal
-      const launchTempoBtn = screen.getByRole('button', { name: /Launch Tempo Metronome \(31X1\)/i });
+      // Click "Launch Tempo Metronome" inside the modal
+      const launchTempoBtn = screen.getByRole('button', { name: /Launch Tempo Metronome/i });
       fireEvent.click(launchTempoBtn);
 
       // CueCardModal should close and Tempo Metronome modal should open

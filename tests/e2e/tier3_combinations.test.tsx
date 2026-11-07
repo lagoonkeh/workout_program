@@ -212,8 +212,15 @@ describe('Tier 3: Cross-Feature Combinations', () => {
   it('Combo 9: Launching tempo metronome from Cue Card modal transitions properly', () => {
     render(<App />);
 
-    // Open Cue Card modal for exercise 1
+    // The barbell squat's cue card has no metronome button
     fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Launch Tempo Metronome/i })).not.toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    // A timed exercise's cue card does (McGill Big 3 holds)
+    const mcgill = document.getElementById('exercise-card-t3_mcgill_big_3')!;
+    fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     // Launch metronome from cue card footer

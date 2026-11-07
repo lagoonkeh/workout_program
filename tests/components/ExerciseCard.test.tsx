@@ -34,6 +34,9 @@ const mockLogs: SetLogRecord[] = [
   { setNumber: 3, targetReps: '3', weightLbs: 185, repsAchieved: 5, isCompleted: false, notes: '' },
 ];
 
+// Same lift prescribed by time: timed exercises keep the tempo / hold timers
+const timedExercise: WorkoutExercise = { ...mockExercise, targetReps: '45s' };
+
 describe('ExerciseCard Component', () => {
   it('renders exercise header, GZCL tier badge, equipment, AMRAP indicator, and muscles', () => {
     render(
@@ -85,13 +88,32 @@ describe('ExerciseCard Component', () => {
       />
     );
 
-    const tempoBtn = screen.getByTitle(/Launch Marcus Filly metronome for 31X1/i);
-    fireEvent.click(tempoBtn);
-    expect(onTempoMock).toHaveBeenCalledWith('31X1', 't1_bb_squat');
+    // A rep-based barbell lift has no tempo, hold or set timers, only the rest timer
+    expect(screen.queryByTitle(/Launch Marcus Filly metronome/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inline-tempo-header-btn')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('start-tempo-set-1')).not.toBeInTheDocument();
+    expect(onTempoMock).not.toHaveBeenCalled();
 
     const restBtn = screen.getByTitle(/Start 180s rest timer/i);
     fireEvent.click(restBtn);
     expect(onRestMock).toHaveBeenCalledWith(180);
+  });
+
+  it('keeps the tempo launcher on exercises prescribed by time', () => {
+    const onTempoMock = vi.fn();
+    render(
+      <ExerciseCard
+        exercise={timedExercise}
+        logs={mockLogs}
+        onUpdateSetLog={vi.fn()}
+        onOpenCueCard={vi.fn()}
+        onQuickStartRest={vi.fn()}
+        onQuickStartTempo={onTempoMock}
+      />
+    );
+    fireEvent.click(screen.getByTitle(/Launch Marcus Filly metronome for 31X1/i));
+    expect(onTempoMock).toHaveBeenCalledWith('31X1', 't1_bb_squat');
+    expect(screen.getByTestId('start-tempo-set-1')).toBeInTheDocument();
   });
 
   it('handles set completion checkbox toggle and starts rest timer', () => {
@@ -553,7 +575,7 @@ describe('ExerciseCard Component', () => {
   it('swaps to pain-free regression with 1 tap and updates active tempo cadence', () => {
     const tempoMock = vi.fn();
     const exerciseWithDistinctRegressionTempo: WorkoutExercise = {
-      ...mockExercise,
+      ...timedExercise,
       regression: {
         ...mockExercise.regression!,
         tempo: '3210',
@@ -616,7 +638,7 @@ describe('ExerciseCard Component', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Barbell Back Squat' })).toBeInTheDocument();
   });
 
-  it('renders AMRAP reminder banner and controls continuous AMRAP stopwatch', () => {
+  it('renders the AMRAP reminder banner without a stopwatch', () => {
     const updateLogMock = vi.fn();
     const restMock = vi.fn();
 
@@ -645,29 +667,17 @@ describe('ExerciseCard Component', () => {
     expect(voiceCueBtn).toBeInTheDocument();
     fireEvent.click(voiceCueBtn);
 
-    // Start AMRAP stopwatch
-    const startAmrapBtn = screen.getByRole('button', { name: /Start AMRAP Set Timer/i });
-    fireEvent.click(startAmrapBtn);
-
-    // Button label transforms to Stop AMRAP
-    expect(screen.getByRole('button', { name: /Stop AMRAP Timer/i })).toBeInTheDocument();
-
-    // Stop AMRAP stopwatch
-    const stopAmrapBtn = screen.getByRole('button', { name: /Stop AMRAP Timer/i });
-    fireEvent.click(stopAmrapBtn);
-
-    // Updates final set log notes and starts rest timer
-    expect(updateLogMock).toHaveBeenCalledWith('t1_bb_squat', 2, {
-      notes: expect.stringContaining('AMRAP TUT:'),
-    });
-    expect(restMock).toHaveBeenCalledWith(180);
+    // The AMRAP stopwatch was removed: the banner is a reminder only
+    expect(screen.queryByRole('button', { name: /AMRAP (Set )?Timer/i })).not.toBeInTheDocument();
+    expect(updateLogMock).not.toHaveBeenCalled();
+    expect(restMock).not.toHaveBeenCalled();
   });
 
   describe('Inline Card Tempo Metronome & Unilateral Side Workouts', () => {
     it('starts inline tempo metronome from the card header button and renders inline tempo panel', () => {
       render(
         <ExerciseCard
-          exercise={mockExercise}
+          exercise={timedExercise}
           logs={mockLogs}
           onUpdateSetLog={vi.fn()}
           onOpenCueCard={vi.fn()}
@@ -697,7 +707,7 @@ describe('ExerciseCard Component', () => {
 
       render(
         <ExerciseCard
-          exercise={mockExercise}
+          exercise={timedExercise}
           logs={mockLogs}
           onUpdateSetLog={updateLogMock}
           onOpenCueCard={vi.fn()}
@@ -1161,7 +1171,7 @@ describe('ExerciseCard Component', () => {
     it('displays "Time" instead of "TUT" in active tempo metronome banner', () => {
       render(
         <ExerciseCard
-          exercise={mockExercise}
+          exercise={timedExercise}
           logs={mockLogs}
           onUpdateSetLog={vi.fn()}
           onOpenCueCard={vi.fn()}

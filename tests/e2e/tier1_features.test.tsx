@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import App from '../../src/App';
+import { TempoMetronomeWidget } from '../../src/components/TempoMetronomeWidget';
 import { storageManager } from '../../src/storage/storageManager';
 import { restTimerSingleton } from '../../src/timer/restTimerSingleton';
 import { audioSynthesizer } from '../../src/audio/audioSynthesizer';
@@ -419,12 +420,13 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       fireEvent.click(tempoBtn);
 
       expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
-      expect(screen.getByText(/Functional Bodybuilding 4-Digit Cadence/i)).toBeInTheDocument();
+      // only timed exercises (holds, planks...) offer it; the barbell squat has no tempo launcher
+      expect(screen.queryByTitle(/Launch Marcus Filly metronome for 31X1/i)).not.toBeInTheDocument();
     });
 
     it('F8.2: visualizes 4-digit tempo cadence strip (Eccentric, Bottom, Concentric, Top)', () => {
-      render(<App />);
-      fireEvent.click(screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0]);
+      render(<TempoMetronomeWidget initialTempo="31X1" />);
+      expect(screen.getByText(/Functional Bodybuilding 4-Digit Cadence/i)).toBeInTheDocument();
 
       expect(screen.getByText(/^Eccentric$/i)).toBeInTheDocument();
       expect(screen.getByText(/^Bottom$/i)).toBeInTheDocument();

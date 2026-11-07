@@ -127,9 +127,8 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     const tempoBtn = screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0];
     fireEvent.click(tempoBtn);
 
-    // Modal with Tempo Metronome should appear
+    // Modal with Tempo Metronome should appear (the first timed exercise is a hold, so it shows the isometric clock)
     expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
-    expect(screen.getByText(/Marcus Filly Tempo Metronome/i)).toBeInTheDocument();
 
     // Close metronome
     const closeBtn = screen.getByRole('button', { name: /Close Metronome/i });
@@ -313,9 +312,12 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
   it('marks bodyweight sets as complete when using the tempo metronome', () => {
     render(<App />);
 
-    // In Lower A, Tibialis Wall Raises is a bodyweight T3 exercise (tempo 2011)
-    const tibialisTempoBtn = screen.getByTitle(/Launch Marcus Filly metronome for 2011/i);
-    fireEvent.click(tibialisTempoBtn);
+    // Rep-based bodyweight work (Tibialis Wall Raises, 15-20 reps) has no tempo timer
+    expect(screen.queryByTitle(/Launch Marcus Filly metronome for 2011/i)).not.toBeInTheDocument();
+
+    // In Lower A, the Serratus Plank finisher is a timed bodyweight hold (30-45s)
+    const plank = document.getElementById('exercise-card-t3_athlean_serratus_plank_lower_a')!;
+    fireEvent.click(within(plank).getByTitle(/Launch Marcus Filly metronome for HOLD-45/i));
 
     // Metronome modal opens
     expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
@@ -328,8 +330,12 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     const closeBtn = screen.getByRole('button', { name: /Close Metronome/i });
     fireEvent.click(closeBtn);
 
-    // Tibialis Set 1 is now marked as complete (button label changed from 'as completed' to 'as incomplete')
-    const completedSetBtn = screen.getByRole('button', { name: /Mark set 1 as incomplete/i });
+    // Plank Set 1 is now marked as complete (button label changed from 'as completed' to 'as incomplete')
+    // a one-set exercise collapses once done: expand it to see the set
+    const plankCard = within(document.getElementById('exercise-card-t3_athlean_serratus_plank_lower_a')!);
+    const expand = plankCard.queryAllByRole('button', { name: /^Expand /i })[0];
+    if (expand) fireEvent.click(expand);
+    const completedSetBtn = plankCard.getByRole('button', { name: /Mark set 1 as incomplete/i });
     expect(completedSetBtn).toBeInTheDocument();
   });
 

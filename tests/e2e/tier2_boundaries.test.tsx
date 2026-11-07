@@ -6,7 +6,7 @@
  * Minimum 5 boundary tests per feature (70 tests total).
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import App from '../../src/App';
 import { storageManager } from '../../src/storage/storageManager';
 import { restTimerSingleton } from '../../src/timer/restTimerSingleton';
@@ -210,7 +210,9 @@ describe('Tier 2: Boundary & Corner Cases (F1 to F14)', () => {
 
     it('F4-B5: launches tempo metronome directly from cue card footer and closes cue modal', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      // only timed exercises' cue cards have the metronome button (McGill Big 3 holds)
+      const mcgill = document.getElementById('exercise-card-t3_mcgill_big_3')!;
+      fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
 
       const launchTempoBtn = screen.getByRole('button', { name: /Launch Tempo Metronome/i });
       fireEvent.click(launchTempoBtn);
