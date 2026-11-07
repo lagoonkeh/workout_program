@@ -1,9 +1,9 @@
 import React from 'react';
-import { Volume2, VolumeX, Dumbbell, Activity, Cloud, Loader2, Check, Sparkles, TrendingUp, HeartPulse, LogOut, Trophy, History } from 'lucide-react';
+import { Volume2, VolumeX, Dumbbell, Activity, Cloud, Loader2, Check, Sparkles, TrendingUp, HeartPulse, LogOut, Trophy, History, BookOpen } from 'lucide-react';
 import { AppLogo } from './AppLogo';
 import { useAuth } from '../context/AuthContext';
 
-export type AppViewMode = 'workout' | 'readiness' | 'mobility' | 'stretching' | 'progress' | 'assessment';
+export type AppViewMode = 'workout' | 'readiness' | 'mobility' | 'stretching' | 'progress' | 'assessment' | 'guide';
 
 export interface HeaderProps {
   activeSessionTitle: string;
@@ -264,6 +264,21 @@ const HeaderComponent: React.FC<HeaderProps> = ({
             >
               <Trophy className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">Assess</span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={currentView === 'guide'}
+              onClick={() => onSelectView('guide')}
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 px-1 sm:px-2.5 py-1.5 min-h-[44px] rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap min-w-0 ${
+                currentView === 'guide'
+                  ? 'bg-emerald-500 text-slate-950 font-semibold shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Guide</span>
             </button>
           </nav>
 

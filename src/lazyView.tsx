@@ -50,6 +50,8 @@ export const AthleteProfileCard = lazyView(() =>
   import('./components/AthleteProfileCard').then((m) => m.AthleteProfileCard)
 );
 
+export const GuideWidget = lazyView(() => import('./components/GuideWidget').then((m) => m.GuideWidget));
+
 export const DailyReadinessWidget = lazyView(() =>
   import('./components/DailyReadinessWidget').then((m) => m.DailyReadinessWidget)
 );
@@ -94,6 +96,7 @@ const LAZY_VIEWS = [
   StrengthHeatmapWidget,
   AthleteProfileCard,
   DailyReadinessWidget,
+  GuideWidget,
   CueCardModal,
   WeeklyEvaluationModal,
   WorkoutCompletionModal,

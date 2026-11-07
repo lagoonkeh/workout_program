@@ -15,6 +15,7 @@ import {
   TempoMetronomeWidget,
   MuscleHeatmapWidget,
   AdaptiveBodyCoachWidget,
+  GuideWidget,
 } from './lazyView';
 import { sessionToOpen } from './domain/nextSession';
 import { migrateMeadowsRowOnce, removeNov1PhantomsOnce, removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
@@ -207,7 +208,8 @@ export function WorkoutAppMain() {
         fromQuery === 'mobility' ||
         fromQuery === 'stretching' ||
         fromQuery === 'progress' ||
-        fromQuery === 'assessment'
+        fromQuery === 'assessment' ||
+        fromQuery === 'guide'
       ) {
         return fromQuery;
       }
@@ -218,7 +220,8 @@ export function WorkoutAppMain() {
         fromStorage === 'mobility' ||
         fromStorage === 'stretching' ||
         fromStorage === 'progress' ||
-        fromStorage === 'assessment'
+        fromStorage === 'assessment' ||
+        fromStorage === 'guide'
       ) {
         return fromStorage;
       }
@@ -868,6 +871,11 @@ export function WorkoutAppMain() {
   }, [programAdaptations, sessionCycles, customVariations, isDeloadWeek]);
 
   const activeSession = adaptedSessions[activeSessionId] || adaptedSessions.lower_a;
+  // Guide tab: every session as currently programmed (variations, deload week)
+  const guideSessions = useMemo(
+    () => Object.keys(WORKOUT_PROGRAM).map((id) => adaptedSessions[id] || WORKOUT_PROGRAM[id]),
+    [adaptedSessions]
+  );
 
   const currentSessionCycle: WorkoutCycle = sessionCycles[activeSessionId] || 'A';
 
@@ -3656,12 +3664,21 @@ export function WorkoutAppMain() {
             </Suspense>
           </div>
         )}
+
+        {/* View 6: Guide (workout cue sheets + glossary) */}
+        {currentView === 'guide' && (
+          <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-3xl mx-auto">
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <GuideWidget sessions={guideSessions} initialSessionId={activeSessionId} onOpenCueCard={handleOpenCueCard} />
+            </Suspense>
+          </div>
+        )}
       </main>
 
       {/* Mobile Bottom Thumb-Zone Quick Navigation Bar (Optimized for Pixel 9 Pro XL 20:9 screen) */}
       <nav
         aria-label="Mobile Thumb-Zone Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 px-1 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] grid grid-cols-6 gap-0.5 shadow-2xl"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 px-1 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] grid grid-cols-7 gap-0.5 shadow-2xl"
       >
         {(
           [
@@ -3671,6 +3688,7 @@ export function WorkoutAppMain() {
             { id: 'stretching', label: 'Stretch', icon: Sparkles },
             { id: 'progress', label: 'Progress', icon: TrendingUp },
             { id: 'assessment', label: 'Assess', icon: Trophy },
+            { id: 'guide', label: 'Guide', icon: BookOpen },
           ] as const
         ).map(({ id, label, icon: Icon }) => {
           const isActive = currentView === id;
