@@ -70,6 +70,16 @@ describe('api/health payloads', () => {
       { date: '2026-11-06', sleepHours: 7.5, restingHr: 57, hrvMs: 45, weightLbs: 181.2, steps: null },
       { date: '2026-11-05', sleepHours: null, restingHr: null, hrvMs: null, weightLbs: null, steps: 10234 },
     ]);
+    // the same night from a watch and a phone counts once; a separate nap still adds
+    const twoApps = {
+      source: 'health_connect',
+      sleep: [
+        payload.sleep[0],
+        { session_end_time: '2026-11-06T14:20:00Z', duration_seconds: 27000, stages: [{ stage: 'sleeping', start_time: '2026-11-06T06:50:00Z', end_time: '2026-11-06T14:20:00Z', duration_seconds: 27000 }] },
+        { session_end_time: '2026-11-06T22:00:00Z', duration_seconds: 1800 },
+      ],
+    };
+    expect(daysFromLifeDashboard(twoApps)[0]).toMatchObject({ date: '2026-11-06', sleepHours: 8.5 });
     expect(daysFromLifeDashboard({ source: 'screen_time', apps: [] })).toBeNull();
     expect(daysFromLifeDashboard({ source: 'health_connect', timestamp: 'x' })).toEqual([]);
   });

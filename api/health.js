@@ -78,14 +78,36 @@ export function daysFromLifeDashboard(payload, timeZone = 'America/Los_Angeles')
     if (!days.has(date)) days.set(date, { date, sleepSec: 0, rhr: null, rhrAt: '', hrv: [], kg: null, kgAt: '', steps: null });
     return days.get(date);
   };
+  // Asleep time per wake-up day as a union of intervals, so the same night recorded by two apps
+  // (watch + phone) counts once while separate naps still add up
+  const sleepIntervals = new Map();
   for (const s of Array.isArray(payload.sleep) ? payload.sleep : []) {
-    const date = dayOf(s?.session_end_time || s?.end_time);
+    const endIso = s?.session_end_time || s?.end_time;
+    const date = dayOf(endIso);
     if (!date) continue;
-    const stages = Array.isArray(s.stages) ? s.stages : [];
-    const asleep = stages.length
-      ? stages.filter((st) => !AWAKE_STAGES.has(st?.stage)).reduce((t, st) => t + (Number(st.duration_seconds) || 0), 0)
-      : Number(s.duration_seconds) || 0;
-    get(date).sleepSec += asleep;
+    const list = sleepIntervals.get(date) || [];
+    const stages = (Array.isArray(s.stages) ? s.stages : []).filter((st) => !AWAKE_STAGES.has(st?.stage));
+    const timed = stages.map((st) => [Date.parse(st.start_time), Date.parse(st.end_time)]).filter(([a, b]) => b > a);
+    if (timed.length) list.push(...timed);
+    else if (!(Array.isArray(s.stages) && s.stages.length)) {
+      const end = Date.parse(endIso);
+      const dur = (Number(s.duration_seconds) || 0) * 1000;
+      if (dur > 0) list.push([end - dur, end]);
+    }
+    sleepIntervals.set(date, list);
+  }
+  for (const [date, list] of sleepIntervals) {
+    list.sort((a, b) => a[0] - b[0]);
+    let total = 0;
+    let [cs, ce] = [-Infinity, -Infinity];
+    for (const [a, b] of list) {
+      if (a > ce) {
+        if (ce > cs) total += ce - cs;
+        [cs, ce] = [a, b];
+      } else ce = Math.max(ce, b);
+    }
+    if (ce > cs) total += ce - cs;
+    if (total > 0) get(date).sleepSec += total / 1000;
   }
   for (const r of Array.isArray(payload.resting_heart_rate) ? payload.resting_heart_rate : []) {
     const date = dayOf(r?.time);
