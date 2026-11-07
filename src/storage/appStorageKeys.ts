@@ -13,3 +13,7 @@ export const STORAGE_KEY_MOBILITY_SNOOZE = 'workout_mobility_prompt_snooze_v1';
 export const STORAGE_KEY_PHASE_TASKS = 'workout_phase_tasks_v1';
 export const STORAGE_KEY_SESSION_START_TIMES = 'workout_session_start_times_v1';
 export const STORAGE_KEY_CALENDAR_LOGGED_EVENTS = 'workout_calendar_logged_events_v1';
+/** next-weight suggestions already pre-filled, per exercise (see domain/progression) */
+export const STORAGE_KEY_LOAD_SUGGESTIONS = 'workout_load_suggestions_v1';
+/** week (Monday date) whose planned deload was pushed back */
+export const STORAGE_KEY_DELOAD_POSTPONED = 'workout_deload_postponed_week_v1';

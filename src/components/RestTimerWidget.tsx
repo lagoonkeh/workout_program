@@ -25,6 +25,7 @@ import {
 import { audioSynthesizer } from '../audio/audioSynthesizer';
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { restNotificationService, type NotificationSupportStatus } from '../timer/restNotificationService';
+import type { NextSetInfo } from '../timer/watchCommands';
 
 export type RestTimerVariant = 'docked' | 'modal' | 'inline';
 export type TimerMode = 'countdown' | 'stopclock';
@@ -46,6 +47,8 @@ export interface RestTargetContext {
   nextExerciseName?: string;
   nextExerciseId?: string;
   isLastSet?: boolean;
+  /** next set's exercise, set index, weight and reps: the rest-complete notification's "Set done" button */
+  nextSet?: NextSetInfo | null;
 }
 
 export interface RestTimerWidgetProps {

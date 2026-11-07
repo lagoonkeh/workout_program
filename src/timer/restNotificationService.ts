@@ -1,5 +1,6 @@
 // src/timer/restNotificationService.ts
 import { formatMMSS } from '../domain/programData';
+import { nextSetLine, type NextSetInfo } from './watchCommands';
 
 export type NotificationSupportStatus = 'granted' | 'denied' | 'default' | 'unsupported';
 
@@ -10,6 +11,8 @@ export interface RestNotificationContext {
   nextSetNumber?: number;
   nextExerciseName?: string;
   isLastSet?: boolean;
+  /** the set that comes next, for the notification's "Set N done" button (mirrored to the watch) */
+  nextSet?: NextSetInfo | null;
 }
 
 class RestNotificationService {
@@ -58,7 +61,9 @@ class RestNotificationService {
 
     try {
       let body = 'Rest period is complete! Time to get ready.';
-      if (context) {
+      if (context?.nextSet) {
+        body = nextSetLine(context.nextSet);
+      } else if (context) {
         if (context.isLastSet && context.nextExerciseName) {
           body = `All sets complete for ${context.exerciseName || 'this exercise'}! Up next: ${context.nextExerciseName}.`;
         } else if (context.nextSetNumber && context.exerciseName) {
@@ -68,23 +73,54 @@ class RestNotificationService {
         }
       }
 
+      const title = 'Rest done: ready for your next set';
+      const nextSet = context?.nextSet || null;
       const options: any = {
         body,
-        icon: '/favicon.ico',
+        icon: '/icon-192.png',
+        badge: '/favicon-64.png',
         tag: 'workout-rest-timer',
         renotify: true,
         vibrate: [300, 100, 300, 100, 400],
+        data: { nextSet },
+        // Buttons show on the phone and, through Android's notification mirroring, on a Wear OS watch
+        actions: nextSet
+          ? [
+              { action: 'set-done', title: `✓ Set ${nextSet.setNumber} done` },
+              { action: 'rest-30', title: '+30s rest' },
+            ]
+          : [],
       };
-      const notification = new Notification("Rest Finished! ⏱️ Ready for Next Set", options);
-
-      notification.onclick = () => {
-        if (typeof window !== 'undefined' && window.focus) {
-          window.focus();
+      void this.showViaServiceWorker(title, options).then((shown) => {
+        if (shown) return;
+        // Desktop browsers without a service worker: plain notification, no buttons
+        try {
+          const plain = { ...options };
+          delete plain.actions;
+          const notification = new Notification(title, plain);
+          notification.onclick = () => {
+            if (typeof window !== 'undefined' && window.focus) window.focus();
+            notification.close();
+          };
+        } catch {
+          // Android Chrome only allows service-worker notifications
         }
-        notification.close();
-      };
+      });
     } catch {
       // Fallback if notification constructor throws in strict security sandbox
+    }
+  }
+
+  /** Android Chrome only shows notifications through the service worker, and only those can carry buttons. */
+  private async showViaServiceWorker(title: string, options: any): Promise<boolean> {
+    try {
+      if (typeof navigator === 'undefined' || !navigator.serviceWorker) return false;
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) return false;
+      await reg.showNotification(title, options);
+      return true;
+    } catch {
+      return false;
     }
   }
 

@@ -22,7 +22,7 @@ function getAllowedEmails() {
  * lookup endpoint (rejects invalid/expired tokens) and checks the email allowlist.
  * Returns null on success, or an error message.
  */
-async function verifyRequest(req) {
+export async function verifyRequest(req) {
   const header = req.headers?.authorization || '';
   const match = /^Bearer\s+(.+)$/i.exec(header);
   if (!match) return 'Missing Firebase ID token.';
@@ -46,6 +46,9 @@ async function verifyRequest(req) {
   return null;
 }
 
+export const spreadsheetIdFromEnv = () =>
+  process.env.GOOGLE_SPREADSHEET_ID || '18IDVdkxJnCLdC2hDYJQOcKc2OFrZCWK3bkc-N-p-3NA';
+
 // Prevents user-supplied text from being evaluated as a formula under USER_ENTERED
 function sanitizeCell(value) {
   const str = String(value ?? '');
@@ -61,7 +64,7 @@ const BODY_SHEET = 'Body Metrics';
 const ASSESSMENT_SHEET = 'Quarterly Assessments';
 const MAX_BACKUP_CHARS = 45000; // a Sheets cell holds 50,000 characters
 
-async function getAccessToken() {
+export async function getAccessToken() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
@@ -163,11 +166,11 @@ async function replaceWorkoutRows(accessToken, spreadsheetId, targets, logs, res
   return { removed: rows.length - keep.length, added: added.length, reset: resetNow };
 }
 
-function sheetsUrl(spreadsheetId, path) {
+export function sheetsUrl(spreadsheetId, path) {
   return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}${path}`;
 }
 
-async function sheetsFetch(accessToken, url, init = {}) {
+export async function sheetsFetch(accessToken, url, init = {}) {
   const res = await fetch(url, {
     ...init,
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json', ...(init.headers || {}) },
@@ -176,7 +179,7 @@ async function sheetsFetch(accessToken, url, init = {}) {
   return res.json();
 }
 
-async function ensureSheets(accessToken, spreadsheetId, titles) {
+export async function ensureSheets(accessToken, spreadsheetId, titles) {
   const meta = await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '?fields=sheets.properties.title'));
   const have = new Set((meta.sheets || []).map((s) => s.properties.title));
   const missing = titles.filter((t) => !have.has(t));

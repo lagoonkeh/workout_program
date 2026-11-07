@@ -1,0 +1,117 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+// @ts-expect-error plain JS serverless function
+import handler, { normalizeHealthDay, mergeHealthDays, tokenMatches, localToday } from '../../api/health.js';
+import { sleepScoreFromHours, restingHrTrend, healthForDate } from '../../src/domain/healthMetrics';
+import { DEMO_VIDEOS, demoVideoFor, youtubeUrl } from '../../src/domain/demoVideos';
+import { MOTIONS } from '../../src/domain/motionLibrary';
+
+const now = new Date('2026-11-06T15:00:00Z');
+
+describe('api/health payloads', () => {
+  it('normalizes units, names and ranges', () => {
+    expect(
+      normalizeHealthDay({ date: '2026-11-06', sleep_minutes: 444, resting_heart_rate: '56', hrv: 48.4, weightKg: 82.2, steps: 9120 }, now)
+    ).toEqual({ date: '2026-11-06', sleepHours: 7.4, restingHr: 56, hrvMs: 48, weightLbs: 181.2, steps: 9120 });
+  });
+  it('defaults the date to today in Pacific time and drops implausible values', () => {
+    expect(localToday(new Date('2026-11-07T05:00:00Z'))).toBe('2026-11-06');
+    expect(normalizeHealthDay({ sleepHours: 30, restingHr: 300, weightLbs: 180 }, now)).toEqual({
+      date: '2026-11-06',
+      sleepHours: null,
+      restingHr: null,
+      hrvMs: null,
+      weightLbs: 180,
+      steps: null,
+    });
+  });
+  it('rejects payloads with nothing usable', () => {
+    expect(normalizeHealthDay({ date: '2026-11-06', mood: 'great' }, now)).toBeNull();
+    expect(normalizeHealthDay(null, now)).toBeNull();
+  });
+  it('merges by date: new values win, missing ones keep what was stored', () => {
+    const merged = mergeHealthDays(
+      [{ date: '2026-11-05', sleepHours: 7, restingHr: 55, hrvMs: null, weightLbs: 181, steps: null }],
+      [
+        { date: '2026-11-05', sleepHours: null, restingHr: 57, hrvMs: null, weightLbs: null, steps: 8000 },
+        { date: '2026-11-04', sleepHours: 6.5, restingHr: null, hrvMs: null, weightLbs: null, steps: null },
+      ],
+      'T'
+    );
+    expect(merged.map((d: { date: string }) => d.date)).toEqual(['2026-11-04', '2026-11-05']);
+    expect(merged[1]).toMatchObject({ sleepHours: 7, restingHr: 57, weightLbs: 181, steps: 8000, updated: 'T' });
+  });
+  it('checks the token in constant time', () => {
+    expect(tokenMatches('abc', 'abc')).toBe(true);
+    expect(tokenMatches('abd', 'abc')).toBe(false);
+    expect(tokenMatches('', 'abc')).toBe(false);
+    expect(tokenMatches('abc', undefined)).toBe(false);
+  });
+});
+
+describe('api/health handler auth', () => {
+  const res = () => {
+    const r: any = {};
+    r.status = vi.fn(() => r);
+    r.json = vi.fn(() => r);
+    r.end = vi.fn(() => r);
+    return r;
+  };
+  afterEach(() => {
+    delete process.env.HEALTH_INGEST_TOKEN;
+  });
+  it('refuses posts when no token is configured, or the token is wrong', async () => {
+    const r1 = res();
+    await handler({ method: 'POST', headers: {}, body: {} }, r1);
+    expect(r1.status).toHaveBeenCalledWith(503);
+    process.env.HEALTH_INGEST_TOKEN = 'secret-token';
+    const r2 = res();
+    await handler({ method: 'POST', headers: { 'x-health-token': 'nope' }, body: { sleepHours: 7 } }, r2);
+    expect(r2.status).toHaveBeenCalledWith(401);
+  });
+  it('rejects a valid token with an empty payload before touching Google', async () => {
+    process.env.HEALTH_INGEST_TOKEN = 'secret-token';
+    const r = res();
+    await handler({ method: 'POST', headers: { 'x-health-token': 'secret-token' }, body: { mood: 'ok' } }, r);
+    expect(r.status).toHaveBeenCalledWith(400);
+  });
+  it('only allows GET and POST', async () => {
+    const r = res();
+    await handler({ method: 'DELETE', headers: {} }, r);
+    expect(r.status).toHaveBeenCalledWith(405);
+  });
+});
+
+describe('readiness from Health Connect', () => {
+  it('maps hours of sleep to the 1-10 score', () => {
+    expect(sleepScoreFromHours(9)).toBe(10);
+    expect(sleepScoreFromHours(8)).toBe(9);
+    expect(sleepScoreFromHours(7.2)).toBe(7);
+    expect(sleepScoreFromHours(6)).toBe(5);
+    expect(sleepScoreFromHours(3)).toBe(1);
+  });
+  it('flags resting HR 5+ bpm over the past week', () => {
+    const days = [
+      { date: '2026-11-01', restingHr: 55 },
+      { date: '2026-11-02', restingHr: 56 },
+      { date: '2026-11-03', restingHr: 54 },
+      { date: '2026-11-04', restingHr: 55 },
+      { date: '2026-11-05', restingHr: 61 },
+    ];
+    expect(restingHrTrend(days, '2026-11-05')).toEqual({ today: 61, baseline: 55, delta: 6, elevated: true });
+    expect(restingHrTrend(days.slice(0, 2), '2026-11-02')).toBeNull(); // not enough baseline
+    expect(healthForDate(days, '2026-11-09')).toBeNull();
+  });
+});
+
+describe('demo videos', () => {
+  it('every link points at a real motion pattern and a YouTube id', () => {
+    for (const [type, v] of Object.entries(DEMO_VIDEOS)) {
+      expect(MOTIONS).toHaveProperty(type);
+      expect(v!.youtubeId).toMatch(/^[\w-]{11}$/);
+      expect(youtubeUrl(v!)).toBe(`https://www.youtube.com/watch?v=${v!.youtubeId}`);
+    }
+    expect(demoVideoFor('squat')!.channel).toBe('Squat University');
+    expect(demoVideoFor('warmup_club')).toBeNull();
+    expect(demoVideoFor(undefined)).toBeNull();
+  });
+});

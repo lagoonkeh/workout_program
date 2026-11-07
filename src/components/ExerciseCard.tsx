@@ -26,7 +26,14 @@ import {
   FastForward,
   Copy,
   Layers,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Video,
+  Undo2,
 } from 'lucide-react';
+import type { LastPerformance, LoadSuggestion } from '../domain/progression';
+import { demoVideoFor, youtubeUrl } from '../domain/demoVideos';
 import { getExerciseVariations, ExerciseVariation, saveCustomVariation, WorkoutCycle } from '../domain/exerciseVariations';
 import { ExerciseVariationModal } from './ExerciseVariationModal';
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
@@ -169,7 +176,17 @@ export interface ExerciseCardProps {
   isSideSplitActive?: boolean;
   onSelectVariation?: (baseExerciseId: string, variation: ExerciseVariation) => void;
   currentCycle?: WorkoutCycle;
+  /** most recent finished workout's sets for this exercise ("last time" beside each set) */
+  lastTime?: LastPerformance | null;
+  /** next-weight suggestion that was pre-filled into this card's sets */
+  loadSuggestion?: (LoadSuggestion & { undone?: boolean; fromWeightLbs?: number }) | null;
+  onUndoSuggestion?: (exerciseId: string) => void;
 }
+
+const lastTimeDate = (iso: string) => {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+};
 
 const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   exercise,
@@ -187,6 +204,9 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   isSideSplitActive,
   onSelectVariation,
   currentCycle = 'A',
+  lastTime = null,
+  loadSuggestion = null,
+  onUndoSuggestion,
 }) => {
   const [showRationale, setShowRationale] = useState(false);
   const [showRegression, setShowRegression] = useState(false);
@@ -852,6 +872,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     return VISUAL_VALUES.find((v) => lowerName.includes(v.exerciseName.toLowerCase()) || baseExerciseName.toLowerCase().includes(v.exerciseName.toLowerCase()));
   }, [exercise.id, baseExerciseId, exercise.regression, isSwappedToRegression, activeExerciseName, baseExerciseName]);
 
+  const demoVideo = useMemo(() => demoVideoFor(visualData?.diagramType), [visualData]);
+
   const handleOpenDiagramZoom = useCallback(() => {
     onOpenCueCard(exercise.id);
   }, [onOpenCueCard, exercise.id]);
@@ -1230,6 +1252,19 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               </h2>
 
               <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                {demoVideo && (
+                  <a
+                    href={youtubeUrl(demoVideo)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid={`demo-video-link-${exercise.id}`}
+                    title={`${demoVideo.title} (${demoVideo.channel}, YouTube)`}
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-red-500/15 text-red-300 border border-red-500/40 hover:bg-red-500/25 min-h-[32px]"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Demo · {demoVideo.channel}</span>
+                  </a>
+                )}
                 {isSwappedToRegression && exercise.regression && (
                   <span
                     data-testid="active-regression-badge"
@@ -2338,6 +2373,64 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </div>
       )}
 
+      {/* Next-weight suggestion (pre-filled into the sets) and last time's date */}
+      {!isMcGillBig3 && !isDeadHangClubMills && (loadSuggestion || lastTime) && (
+        <div className="mb-2 space-y-1.5" data-testid={`progression-panel-${exercise.id}`}>
+          {loadSuggestion && !loadSuggestion.undone && (
+            <div
+              data-testid={`load-suggestion-${exercise.id}`}
+              className={`flex items-start gap-2 p-2 rounded-lg border text-xs ${
+                loadSuggestion.change === 'increase'
+                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100'
+                  : loadSuggestion.change === 'decrease'
+                  ? 'bg-amber-950/40 border-amber-500/40 text-amber-100'
+                  : loadSuggestion.change === 'deload'
+                  ? 'bg-sky-950/40 border-sky-500/40 text-sky-100'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-200'
+              }`}
+            >
+              {loadSuggestion.change === 'increase' ? (
+                <TrendingUp className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+              ) : loadSuggestion.change === 'hold' ? (
+                <Minus className="w-4 h-4 shrink-0 text-slate-400 mt-0.5" />
+              ) : (
+                <TrendingDown className={`w-4 h-4 shrink-0 mt-0.5 ${loadSuggestion.change === 'deload' ? 'text-sky-400' : 'text-amber-400'}`} />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="font-bold">
+                  {loadSuggestion.change === 'increase'
+                    ? `Up to ${loadSuggestion.weightLbs} lb (+${loadSuggestion.weightLbs - loadSuggestion.previousWeightLbs})`
+                    : loadSuggestion.change === 'decrease'
+                    ? `Back off to ${loadSuggestion.weightLbs} lb (−${loadSuggestion.previousWeightLbs - loadSuggestion.weightLbs})`
+                    : loadSuggestion.change === 'deload'
+                    ? `Deload: ${loadSuggestion.weightLbs} lb`
+                    : `Stay at ${loadSuggestion.weightLbs} lb`}
+                </div>
+                <div className="opacity-80">{loadSuggestion.reason}</div>
+              </div>
+              {onUndoSuggestion && loadSuggestion.change !== 'hold' && !logs.some((s) => s.isCompleted) && (
+                <button
+                  type="button"
+                  data-testid={`undo-load-suggestion-${exercise.id}`}
+                  onClick={() => onUndoSuggestion(exercise.id)}
+                  className="shrink-0 inline-flex items-center gap-1 px-2 min-h-[36px] rounded-lg border border-slate-600 bg-slate-900/80 text-slate-200 hover:bg-slate-800 cursor-pointer"
+                  title={`Go back to ${loadSuggestion.fromWeightLbs ?? loadSuggestion.previousWeightLbs} lb`}
+                >
+                  <Undo2 className="w-3.5 h-3.5" />
+                  <span>{loadSuggestion.fromWeightLbs ?? loadSuggestion.previousWeightLbs} lb</span>
+                </button>
+              )}
+            </div>
+          )}
+          {lastTime && (
+            <div className="text-[10px] font-mono text-slate-400 px-0.5" data-testid={`last-time-${exercise.id}`}>
+              Grey numbers under each goal = last time ({lastTimeDate(lastTime.date)}
+              {lastTime.deload ? ', a deload' : ''})
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Interactive Set Logger Header / Action Toolbar */}
       {logs.length > 1 && !isMcGillBig3 && !isDeadHangClubMills && (
         <div className="flex items-center justify-between pb-1.5 px-0.5">
@@ -2511,6 +2604,20 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   ) : (
                     set.targetReps
                   )}
+                  {(() => {
+                    if (isMcGillBig3 || isDeadHangClubMills || !lastTime) return null;
+                    const prev = lastTime.sets.find((s) => s.setNumber === set.setNumber);
+                    if (!prev) return null;
+                    return (
+                      <span
+                        data-testid={`last-time-set-${exercise.id}-${set.setNumber}`}
+                        title={`Last time: ${prev.weightLbs > 0 ? `${prev.weightLbs} lb × ` : ''}${prev.repsAchieved} reps`}
+                        className="block text-[9px] leading-tight text-slate-500 font-normal mt-0.5"
+                      >
+                        {prev.weightLbs > 0 ? `${prev.weightLbs}×${prev.repsAchieved}` : `×${prev.repsAchieved}`}
+                      </span>
+                    );
+                  })()}
                 </td>
 
                 {/* Weight Input */}
@@ -2882,5 +2989,8 @@ export const ExerciseCard = React.memo(
     prev.onUpdateSetLog === next.onUpdateSetLog &&
     prev.onResetExercise === next.onResetExercise &&
     prev.currentCycle === next.currentCycle &&
-    prev.onSelectVariation === next.onSelectVariation
+    prev.onSelectVariation === next.onSelectVariation &&
+    prev.lastTime === next.lastTime &&
+    prev.loadSuggestion === next.loadSuggestion &&
+    prev.onUndoSuggestion === next.onUndoSuggestion
 );

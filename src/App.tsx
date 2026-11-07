@@ -74,6 +74,23 @@ import {
   SkippedExerciseRecord,
 } from './domain/adaptiveAdjustments';
 import { evaluateWeeklyPerformance, WorkoutAdaptation } from './domain/weeklyEvaluator';
+import {
+  findLastPerformance,
+  suggestNextLoad,
+  deloadStatus,
+  deloadSets,
+  resizeSets,
+  type HistoryRecord,
+  type LastPerformance,
+  type LoadSuggestion,
+} from './domain/progression';
+import {
+  commandFromMessage,
+  parseWatchCommand,
+  resolveSetTarget,
+  type NextSetInfo,
+  type WatchCommand,
+} from './timer/watchCommands';
 import { MobilityEntry, getMobilityCheckInStatus } from './domain/mobility';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthGate } from './components/AuthGate';
@@ -89,6 +106,8 @@ import {
   STORAGE_KEY_MOBILITY_SNOOZE,
   STORAGE_KEY_PHASE_TASKS,
   STORAGE_KEY_SESSION_START_TIMES,
+  STORAGE_KEY_LOAD_SUGGESTIONS,
+  STORAGE_KEY_DELOAD_POSTPONED,
 } from './storage/appStorageKeys';
 
 function ViewLoadingFallback() {
@@ -770,6 +789,36 @@ export function WorkoutAppMain() {
     return evaluateWeeklyPerformance(workoutLogs, WORKOUT_SESSIONS, mobilityHistory, 1);
   }, [workoutLogs, mobilityHistory]);
 
+  // Planned deload: every 5th training week (4 building weeks), counted from history
+  const [deloadPostponedWeek, setDeloadPostponedWeek] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY_DELOAD_POSTPONED);
+    } catch {
+      return null;
+    }
+  });
+  const deloadInfo = useMemo(
+    () =>
+      deloadStatus(Object.values(completedWorkouts) as HistoryRecord[], new Date(), {
+        postponedWeekKey: deloadPostponedWeek,
+        isLifting: (id) => id in WORKOUT_PROGRAM,
+      }),
+    [completedWorkouts, deloadPostponedWeek]
+  );
+  const isDeloadWeek = deloadInfo.isDeloadWeek;
+  const deloadRef = useRef(isDeloadWeek);
+  deloadRef.current = isDeloadWeek;
+  const handleSetDeloadPostponed = useCallback((postpone: boolean) => {
+    const key = postpone ? deloadInfo.weekKey : null;
+    setDeloadPostponedWeek(key);
+    try {
+      if (key) localStorage.setItem(STORAGE_KEY_DELOAD_POSTPONED, key);
+      else localStorage.removeItem(STORAGE_KEY_DELOAD_POSTPONED);
+    } catch {
+      // safe fallback
+    }
+  }, [deloadInfo.weekKey]);
+
   // Apply adaptations and cycle/custom variations dynamically over WORKOUT_PROGRAM
   const adaptedSessions = useMemo(() => {
     const baseMap = { ...WORKOUT_PROGRAM };
@@ -794,9 +843,7 @@ export function WorkoutAppMain() {
         }
 
         const adaptation = programAdaptations[ex.id];
-        if (!adaptation) return currentEx;
-
-        return {
+        const adapted: WorkoutExercise = !adaptation ? currentEx : {
           ...currentEx,
           ...adaptation,
           targetSets: adaptation.targetSets ?? currentEx.targetSets,
@@ -806,6 +853,8 @@ export function WorkoutAppMain() {
           tempo: adaptation.tempo ?? currentEx.tempo,
           restSeconds: adaptation.restSeconds ?? currentEx.restSeconds,
         };
+        // Planned deload week: about half the sets and no AMRAP grind (lighter loads come from the suggestions)
+        return isDeloadWeek ? { ...adapted, targetSets: deloadSets(adapted.targetSets), isAmrapLastSet: false } : adapted;
       });
 
       result[sId] = {
@@ -816,7 +865,7 @@ export function WorkoutAppMain() {
     });
 
     return result;
-  }, [programAdaptations, sessionCycles, customVariations]);
+  }, [programAdaptations, sessionCycles, customVariations, isDeloadWeek]);
 
   const activeSession = adaptedSessions[activeSessionId] || adaptedSessions.lower_a;
 
@@ -876,6 +925,24 @@ export function WorkoutAppMain() {
       return [ex];
     });
   }, [activeSession, splitSidesExercises]);
+
+  // "Last time" and the next-weight suggestion for every exercise in the open session. Today's own
+  // workout is left out, so a finished session still compares against the one before.
+  const progressionByExercise = useMemo(() => {
+    const history = Object.values(completedWorkouts) as HistoryRecord[];
+    const before = new Date(new Date().toDateString()).getTime();
+    const finisherIds = new Set((activeSession.dailyCoreFinisher || []).map((e) => e.id));
+    const map: Record<string, { last: LastPerformance | null; suggestion: LoadSuggestion | null }> = {};
+    for (const ex of [...sessionExercises, ...(activeSession.dailyCoreFinisher || [])]) {
+      const last = findLastPerformance(ex.id, history, { before });
+      const basis = last && !last.deload ? last : findLastPerformance(ex.id, history, { before, skipDeload: true });
+      map[ex.id] = {
+        last,
+        suggestion: suggestNextLoad(ex, basis, { deload: isDeloadWeek && !finisherIds.has(ex.id) }),
+      };
+    }
+    return map;
+  }, [completedWorkouts, sessionExercises, activeSession.dailyCoreFinisher, isDeloadWeek]);
 
   const handleToggleSplitSides = useCallback((exerciseId: string) => {
     const baseId = exerciseId.replace(/__side_(left|right)$/, '');
@@ -1023,6 +1090,96 @@ export function WorkoutAppMain() {
     [workoutLogs, defaultLogsByExerciseId]
   );
 
+  // Next-weight suggestions are written into an exercise's sets once per new workout they're based on,
+  // and only before its first set is ticked. Set counts follow the plan (deload weeks have fewer sets).
+  type AppliedSuggestion = LoadSuggestion & { key: string; fromWeightLbs: number; undone?: boolean };
+  const [appliedSuggestions, setAppliedSuggestions] = useState<Record<string, AppliedSuggestion>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_LOAD_SUGGESTIONS) || '{}') || {};
+    } catch {
+      return {};
+    }
+  });
+  const appliedSuggestionsRef = useRef(appliedSuggestions);
+  appliedSuggestionsRef.current = appliedSuggestions;
+  const saveAppliedSuggestions = useCallback((next: Record<string, AppliedSuggestion>) => {
+    setAppliedSuggestions(next);
+    try {
+      localStorage.setItem(STORAGE_KEY_LOAD_SUGGESTIONS, JSON.stringify(next));
+    } catch {
+      // safe fallback
+    }
+  }, []);
+
+  useEffect(() => {
+    const exercises = [...sessionExercises, ...(activeSession.dailyCoreFinisher || [])];
+    const markers = { ...appliedSuggestionsRef.current };
+    const nextLogs: Record<string, SetLogRecord[]> = {};
+    let markersChanged = false;
+    for (const ex of exercises) {
+      const current = workoutLogs[ex.id];
+      if (current?.some((s) => s.isCompleted)) continue;
+      const base = current || defaultLogsByExerciseId[ex.id] || createDefaultExerciseLogs(ex);
+      let logs = resizeSets(base, ex.targetSets, ex.targetReps);
+      const s = progressionByExercise[ex.id]?.suggestion;
+      if (s) {
+        const key = `${s.basisRecordId}|${s.change}|${s.weightLbs}`;
+        const prev = markers[ex.id];
+        if (prev?.key !== key) {
+          const fromWeightLbs = logs[0]?.weightLbs || 0;
+          // a "hold" leaves the weight alone, except to come back up after a deload
+          const write = s.change !== 'hold' || prev?.change === 'deload';
+          if (write && logs.some((l) => l.weightLbs !== s.weightLbs)) {
+            logs = logs.map((l) => ({ ...l, weightLbs: s.weightLbs }));
+          }
+          markers[ex.id] = { ...s, key, fromWeightLbs };
+          markersChanged = true;
+        }
+      }
+      if (logs !== base) nextLogs[ex.id] = logs;
+    }
+    if (Object.keys(nextLogs).length) setWorkoutLogs((prev) => ({ ...prev, ...nextLogs }));
+    if (markersChanged) saveAppliedSuggestions(markers);
+    // runs when the plan or history changes, not on every logged rep
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progressionByExercise, sessionExercises]);
+
+  const handleUndoSuggestion = useCallback(
+    (exerciseId: string) => {
+      const marker = appliedSuggestionsRef.current[exerciseId];
+      if (!marker) return;
+      saveAppliedSuggestions({ ...appliedSuggestionsRef.current, [exerciseId]: { ...marker, undone: true } });
+      setWorkoutLogs((prev) => {
+        const cur = prev[exerciseId];
+        if (!cur) return prev;
+        return { ...prev, [exerciseId]: cur.map((s) => (s.isCompleted ? s : { ...s, weightLbs: marker.fromWeightLbs })) };
+      });
+    },
+    [saveAppliedSuggestions]
+  );
+
+  // The set that comes next (for the rest notification's "Set N done" button on the phone / watch)
+  const nextSetInfo = useCallback(
+    (exerciseId: string | undefined, setNumber: number | undefined): NextSetInfo | null => {
+      if (!exerciseId || !setNumber) return null;
+      const ex = [...sessionExercises, ...(activeSession.dailyCoreFinisher || [])].find((e) => e.id === exerciseId);
+      if (!ex) return null;
+      const logs = getExerciseLogs(ex);
+      const set = logs[setNumber - 1];
+      if (!set) return null;
+      return {
+        exerciseId: ex.id,
+        setIndex: setNumber - 1,
+        exerciseName: ex.name,
+        setNumber,
+        totalSets: logs.length,
+        weightLbs: set.weightLbs || 0,
+        targetReps: set.targetReps || ex.targetReps,
+      };
+    },
+    [sessionExercises, activeSession.dailyCoreFinisher, getExerciseLogs]
+  );
+
   // Update a single set log record (stable across workoutLogs updates so memoized ExerciseCards do not re-render)
   const handleUpdateSetLog = useCallback(
     (exerciseId: string, setIndex: number, updated: Partial<SetLogRecord>) => {
@@ -1075,6 +1232,7 @@ export function WorkoutAppMain() {
           nextExerciseName,
           nextExerciseId,
           isLastSet,
+          nextSet: nextSetInfo(nextExerciseId || exerciseId, nextSetNumber),
         };
       }
 
@@ -1117,7 +1275,7 @@ export function WorkoutAppMain() {
         return { ...prev, [exerciseId]: nextLogs };
       });
     },
-    [sessionExercises, activeSession.dailyCoreFinisher, defaultLogsByExerciseId, getExerciseLogs, recordTaskCompletionStartTime]
+    [sessionExercises, activeSession.dailyCoreFinisher, defaultLogsByExerciseId, getExerciseLogs, recordTaskCompletionStartTime, nextSetInfo]
   );
 
   // Stable callbacks for memoized ExerciseCard, Header, and widget components
@@ -1187,12 +1345,49 @@ export function WorkoutAppMain() {
         nextExerciseName,
         nextExerciseId,
         isLastSet: isAllDone,
+        nextSet: nextSetInfo(nextExerciseId || exercise.id, nextSetNumber),
       };
 
       handleQuickStartRest(sec, fallbackContext);
     },
-    [getExerciseLogs, handleQuickStartRest, sessionExercises, activeSession.dailyCoreFinisher]
+    [getExerciseLogs, handleQuickStartRest, sessionExercises, activeSession.dailyCoreFinisher, nextSetInfo]
   );
+
+  // Watch / Tasker controls: notification buttons (forwarded by the service worker) and ?cmd= URLs
+  const watchCommandRef = useRef<(c: WatchCommand) => void>(() => {});
+  watchCommandRef.current = (c: WatchCommand) => {
+    if (c.cmd === 'rest') {
+      handleQuickStartRest(c.sec);
+      return;
+    }
+    const exercises = [...sessionExercises, ...(activeSession.dailyCoreFinisher || [])];
+    const hit = resolveSetTarget(c.target, exercises, getExerciseLogs);
+    if (!hit) return;
+    handleUpdateSetLog(hit.exercise.id, hit.setIndex, { isCompleted: true });
+    if (hit.exercise.restSeconds > 0) handleQuickStartRestForExercise(hit.exercise.restSeconds, hit.exercise);
+  };
+  useEffect(() => {
+    const fromUrl = parseWatchCommand(window.location.search);
+    if (fromUrl) {
+      try {
+        const url = new URL(window.location.href);
+        ['cmd', 'sec', 'ex', 'set'].forEach((k) => url.searchParams.delete(k));
+        window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      } catch {
+        // leave the URL as is
+      }
+      // after the first render has the session's logs
+      setTimeout(() => watchCommandRef.current(fromUrl), 0);
+    }
+    const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : undefined;
+    if (!sw) return;
+    const onMessage = (e: MessageEvent) => {
+      const c = commandFromMessage(e.data);
+      if (c) watchCommandRef.current(c);
+    };
+    sw.addEventListener('message', onMessage);
+    return () => sw.removeEventListener('message', onMessage);
+  }, []);
 
   const handleQuickStartTempo = useCallback(
     (tempo: string, exId?: string, targetReps?: number) => {
@@ -1378,6 +1573,7 @@ export function WorkoutAppMain() {
         const totalDurationSeconds = Math.round(durationMs / 1000);
 
         const completedRecord: CompletedWorkoutSession = {
+          ...(deloadRef.current ? { deload: true } : {}),
           id: `completed_${completedId}_${Date.now()}`,
           date: completedAt,
           startedAt,
@@ -1645,7 +1841,7 @@ export function WorkoutAppMain() {
     const completedId = activeSession.id;
 
     // Audit active session for uncompleted or skipped exercises
-    const audit = auditSessionCompletion(activeSession, workoutLogs, programAdaptations);
+    const audit = auditSessionCompletion(activeSession, workoutLogs); // activeSession already carries adaptations (and deload set counts)
     if (audit.skippedExercises.length > 0 && !isCurrently100) {
       setSessionAuditResult(audit);
       setIsWorkoutCompletionModalOpen(true);
@@ -1689,6 +1885,7 @@ export function WorkoutAppMain() {
     // Update today's auto-saved record (made when the session hit 100%) instead of logging the workout twice
     const autoSaved = findAutoSavedToday(Object.values(storageManager.getCompletedWorkouts()), completedId);
     const completedRecord: CompletedWorkoutSession = {
+          ...(deloadRef.current ? { deload: true } : {}),
       id: autoSaved?.id || `completed_${completedId}_${Date.now()}`,
       autoSaved: false,
       date: completedAt,
@@ -1726,12 +1923,13 @@ export function WorkoutAppMain() {
     const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(startedAt).getTime());
     const totalDurationSeconds = Math.round(durationMs / 1000);
 
-    const audit = auditSessionCompletion(activeSession, workoutLogs, programAdaptations);
+    const audit = auditSessionCompletion(activeSession, workoutLogs); // activeSession already carries adaptations (and deload set counts)
     const adherence = audit.totalExercises > 0
       ? Math.round((audit.completedExercises.length / audit.totalExercises) * 100)
       : 100;
 
     const completedRecord: CompletedWorkoutSession = {
+          ...(deloadRef.current ? { deload: true } : {}),
       id: `completed_${activeSessionId}_${Date.now()}`,
       date: completedAt,
       startedAt,
@@ -1814,6 +2012,7 @@ export function WorkoutAppMain() {
       // Update today's auto-saved record (made when the session hit 100%) instead of logging the workout twice
       const autoSaved = findAutoSavedToday(Object.values(storageManager.getCompletedWorkouts()), completedId);
       const completedRecord: CompletedWorkoutSession = {
+          ...(deloadRef.current ? { deload: true } : {}),
         id: autoSaved?.id || `completed_${completedId}_${Date.now()}`,
         autoSaved: false,
         date: completedAt,
@@ -1902,6 +2101,7 @@ export function WorkoutAppMain() {
     // Update today's auto-saved record (made when the session hit 100%) instead of logging the workout twice
     const autoSaved = findAutoSavedToday(Object.values(storageManager.getCompletedWorkouts()), completedId);
     const completedRecord: CompletedWorkoutSession = {
+          ...(deloadRef.current ? { deload: true } : {}),
       id: autoSaved?.id || `completed_${completedId}_${Date.now()}`,
       autoSaved: false,
       date: completedAt,
@@ -2609,6 +2809,48 @@ export function WorkoutAppMain() {
                     </button>
                   </div>
 
+                  {/* Planned deload / training block position */}
+                  {activeSessionId in WORKOUT_PROGRAM && (
+                    <div
+                      data-testid="deload-banner"
+                      className={`mt-3.5 p-2.5 sm:p-3 rounded-xl border flex items-center justify-between gap-2 text-xs ${
+                        isDeloadWeek
+                          ? 'bg-sky-950/40 border-sky-500/40 text-sky-100'
+                          : 'bg-slate-900/60 border-slate-700/60 text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Activity className={`w-4 h-4 shrink-0 ${isDeloadWeek ? 'text-sky-400' : 'text-slate-400'}`} />
+                        <span>
+                          {isDeloadWeek ? (
+                            <>
+                              <strong>Deload week.</strong> About half the sets at ~85% weight, so you come back stronger next week.
+                            </>
+                          ) : deloadInfo.postponed ? (
+                            <>
+                              <strong>Deload pushed back</strong> to next week. Training as normal.
+                            </>
+                          ) : (
+                            <>
+                              <strong>Week {deloadInfo.blockWeek} of 5.</strong>{' '}
+                              {deloadInfo.weeksUntilDeload === 1 ? 'Deload next week.' : `Deload in ${deloadInfo.weeksUntilDeload} weeks.`}
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      {(isDeloadWeek || deloadInfo.postponed) && (
+                        <button
+                          type="button"
+                          data-testid="deload-postpone-btn"
+                          onClick={() => handleSetDeloadPostponed(isDeloadWeek)}
+                          className="text-xs underline font-semibold cursor-pointer whitespace-nowrap min-h-[36px] px-1 hover:opacity-80"
+                        >
+                          {isDeloadWeek ? 'Push back a week' : 'Deload this week'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   {/* Active Program Adaptations Banner */}
                   {Object.keys(programAdaptations).length > 0 && (
                     <div className="mt-3.5 p-2.5 sm:p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-200">
@@ -3042,6 +3284,9 @@ export function WorkoutAppMain() {
                                   isSideSplitActive={!!splitSidesExercises[exercise.baseExerciseId || exercise.id]}
                                   onSelectVariation={handleSelectExerciseVariation}
                                   currentCycle={currentSessionCycle}
+                                  lastTime={progressionByExercise[exercise.id]?.last ?? null}
+                                  loadSuggestion={appliedSuggestions[exercise.id] ?? null}
+                                  onUndoSuggestion={handleUndoSuggestion}
                                 />
                               );
                             })}
@@ -3146,6 +3391,9 @@ export function WorkoutAppMain() {
                               onSwitchToPairedSide={handleSwitchToPairedSide}
                               onSelectVariation={handleSelectExerciseVariation}
                               currentCycle={currentSessionCycle}
+                                  lastTime={progressionByExercise[exercise.id]?.last ?? null}
+                                  loadSuggestion={appliedSuggestions[exercise.id] ?? null}
+                                  onUndoSuggestion={handleUndoSuggestion}
                             />
                           );
                         })}
@@ -3189,6 +3437,9 @@ export function WorkoutAppMain() {
                         isSideSplitActive={!!splitSidesExercises[exercise.baseExerciseId || exercise.id]}
                         onSelectVariation={handleSelectExerciseVariation}
                         currentCycle={currentSessionCycle}
+                                  lastTime={progressionByExercise[exercise.id]?.last ?? null}
+                                  loadSuggestion={appliedSuggestions[exercise.id] ?? null}
+                                  onUndoSuggestion={handleUndoSuggestion}
                       />
                     );
                   })}

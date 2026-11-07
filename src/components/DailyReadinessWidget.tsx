@@ -6,6 +6,8 @@ import {
   ReadinessTier,
 } from '../domain/dailyReadiness';
 import { WorkoutSession } from '../domain/programData';
+import { healthForDate, loadCachedHealth, restingHrTrend, sleepScoreFromHours, type HealthDay } from '../domain/healthMetrics';
+import { refreshHealthMetrics } from '../services/healthService';
 import { WorkoutAdaptation } from '../domain/weeklyEvaluator';
 import type { RatingCategoryTab } from './RatingDefinitionsModal';
 import { RatingDefinitionsModal } from '../lazyView';
@@ -91,6 +93,30 @@ export const DailyReadinessWidget: React.FC<DailyReadinessWidgetProps> = ({
       setAppliedSuccess(false);
     }
   }, [selectedDate, history]);
+
+  // Health Connect (posted by Tasker to /api/health): pre-fill sleep for a day without a check-in yet
+  const [healthDays, setHealthDays] = useState<HealthDay[]>(() => loadCachedHealth());
+  useEffect(() => {
+    let alive = true;
+    void refreshHealthMetrics().then((days) => {
+      if (alive && days) setHealthDays(days);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const healthToday = useMemo(() => healthForDate(healthDays, selectedDate), [healthDays, selectedDate]);
+  const rhrTrend = useMemo(() => restingHrTrend(healthDays, selectedDate), [healthDays, selectedDate]);
+  const [healthSleepApplied, setHealthSleepApplied] = useState(false);
+  useEffect(() => {
+    const hasEntry = history.some((h) => h.date === selectedDate);
+    if (!hasEntry && typeof healthToday?.sleepHours === 'number') {
+      setSleepScore(sleepScoreFromHours(healthToday.sleepHours));
+      setHealthSleepApplied(true);
+    } else {
+      setHealthSleepApplied(false);
+    }
+  }, [healthToday, selectedDate, history]);
 
   const handleToggleTag = useCallback((tag: string) => {
     setSorenessTags((prev) =>
@@ -414,6 +440,30 @@ export const DailyReadinessWidget: React.FC<DailyReadinessWidgetProps> = ({
               <span>6 (Adequate)</span>
               <span>10 (8+ hrs Restored)</span>
             </div>
+            {healthToday && (
+              <div
+                data-testid="health-connect-summary"
+                className="mt-1 p-2 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-[11px] text-indigo-100 space-y-0.5"
+              >
+                <div className="font-semibold text-indigo-300">From Health Connect</div>
+                {typeof healthToday.sleepHours === 'number' && (
+                  <div>
+                    Slept {healthToday.sleepHours.toFixed(1)} h → sleep score {sleepScoreFromHours(healthToday.sleepHours)}/10
+                    {healthSleepApplied ? ' (filled in)' : ''}
+                  </div>
+                )}
+                {rhrTrend ? (
+                  <div className={rhrTrend.elevated ? 'text-amber-300 font-semibold' : ''}>
+                    Resting HR {rhrTrend.today} bpm ({rhrTrend.delta >= 0 ? '+' : ''}
+                    {rhrTrend.delta} vs 7-day avg){rhrTrend.elevated ? ': elevated, recovery may be incomplete' : ''}
+                  </div>
+                ) : typeof healthToday.restingHr === 'number' ? (
+                  <div>Resting HR {healthToday.restingHr} bpm</div>
+                ) : null}
+                {typeof healthToday.hrvMs === 'number' && <div>HRV {healthToday.hrvMs} ms</div>}
+                {typeof healthToday.weightLbs === 'number' && <div>Weight {healthToday.weightLbs} lb</div>}
+              </div>
+            )}
           </div>
         </div>
 

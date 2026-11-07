@@ -1,5 +1,5 @@
-// Service Worker for 4-Day Workout & Mobility System PWA (v5)
-const CACHE_NAME = 'workout-app-v5';
+// Service Worker for 4-Day Workout & Mobility System PWA (v6: notification buttons)
+const CACHE_NAME = 'workout-app-v6';
 
 const STATIC_PRECACHE = [
   '/',
@@ -107,4 +107,39 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// Notification buttons (also shown on a Wear OS watch through Android's notification mirroring).
+// "Set N done" / "+30s rest" are forwarded to the open app (src/timer/watchCommands.ts), or open the
+// app with ?cmd=... when it isn't running. Tapping the notification itself just brings the app up.
+self.addEventListener('notificationclick', (event) => {
+  const action = event.action;
+  const nextSet = (event.notification.data && event.notification.data.nextSet) || null;
+  event.notification.close();
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const cmd = action === 'set-done' ? 'set-done' : action === 'rest-30' ? 'rest' : null;
+      if (cmd) {
+        const target = cmd === 'set-done' && nextSet ? { exerciseId: nextSet.exerciseId, setIndex: nextSet.setIndex } : null;
+        if (windows.length) {
+          windows.forEach((w) => w.postMessage({ type: 'WORKOUT_WATCH_COMMAND', cmd, sec: 30, target }));
+          return;
+        }
+        const qs = new URLSearchParams({ cmd });
+        if (cmd === 'rest') qs.set('sec', '30');
+        if (target) {
+          qs.set('ex', target.exerciseId);
+          qs.set('set', String(target.setIndex));
+        }
+        await self.clients.openWindow('/?' + qs.toString());
+        return;
+      }
+      if (windows.length) {
+        await windows[0].focus();
+        return;
+      }
+      await self.clients.openWindow('/');
+    })()
+  );
 });

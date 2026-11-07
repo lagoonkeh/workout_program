@@ -37,6 +37,8 @@ export interface CompletedWorkoutSession {
   calendarLoggedAt?: string; // ISO 8601 string of when logged to calendar
   /** saved automatically when the session reached 100%; "Complete & Save" later updates this record */
   autoSaved?: boolean;
+  /** done during a planned deload week (next-weight suggestions skip it) */
+  deload?: boolean;
 }
 
 export interface StorageSettings {
