@@ -201,6 +201,9 @@ export default async function handler(req, res) {
   if (fromApp && !fromApp.length) return res.status(200).json({ success: true, saved: [] });
   const list = Array.isArray(body.days) ? body.days.slice(0, 60) : [body];
   const incoming = fromApp || list.map((d) => normalizeHealthDay(d, now)).filter(Boolean);
+  // Life Dashboard test pings and screen-time syncs carry a "source" but no health numbers: acknowledge
+  // them, or the app would keep retrying them from its outbox
+  if (!incoming.length && typeof body.source === 'string') return res.status(200).json({ success: true, saved: [] });
   if (!incoming.length) {
     return res.status(400).json({ error: 'No usable metrics. Send sleepHours, restingHr, hrvMs, weightLbs or steps.' });
   }

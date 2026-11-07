@@ -114,6 +114,11 @@ describe('api/health handler auth', () => {
     await handler({ method: 'POST', headers: { 'x-health-token': 'secret-token' }, body: { source: 'health_connect', timestamp: 'x' } }, r);
     expect(r.status).toHaveBeenCalledWith(200);
     expect(r.json).toHaveBeenCalledWith({ success: true, saved: [] });
+    for (const body of [{ source: 'screen_time', apps: [] }, { source: 'test', ping: true }]) {
+      const r2 = res();
+      await handler({ method: 'POST', headers: { 'x-health-token': 'secret-token' }, body }, r2);
+      expect(r2.status).toHaveBeenCalledWith(200);
+    }
   });
 
   it('only allows GET and POST', async () => {
