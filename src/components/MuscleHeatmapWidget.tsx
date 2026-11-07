@@ -1,11 +1,12 @@
 // src/components/MuscleHeatmapWidget.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Activity, Info } from 'lucide-react';
 import {
   type RecoveryStatus,
   calculateMuscleHeatmap,
 } from '../domain/muscleHeatmap';
 import { CompletedWorkoutSession } from '../storage/storageManager';
+import { HEALTH_UPDATED_EVENT, loadCachedWorkouts, type HealthWorkout } from '../domain/healthWorkouts';
 import { SetLogRecord } from './ExerciseCard';
 
 export interface MuscleHeatmapWidgetProps {
@@ -22,9 +23,17 @@ export const MuscleHeatmapWidget: React.FC<MuscleHeatmapWidgetProps> = ({
   const [activeView, setActiveView] = useState<'both' | 'front' | 'back'>('both');
   const [selectedMuscleId, setSelectedMuscleId] = useState<string>('chest');
 
+  // Workouts from Health Connect (cached by the readiness check-in's refresh)
+  const [outsideWorkouts, setOutsideWorkouts] = useState<HealthWorkout[]>(() => loadCachedWorkouts());
+  useEffect(() => {
+    const onUpdate = () => setOutsideWorkouts(loadCachedWorkouts());
+    window.addEventListener(HEALTH_UPDATED_EVENT, onUpdate);
+    return () => window.removeEventListener(HEALTH_UPDATED_EVENT, onUpdate);
+  }, []);
+
   const heatmap = useMemo(() => {
-    return calculateMuscleHeatmap(history, activeLogs);
-  }, [history, activeLogs]);
+    return calculateMuscleHeatmap(history, activeLogs, new Date(), outsideWorkouts);
+  }, [history, activeLogs, outsideWorkouts]);
 
   const selectedMuscle = heatmap[selectedMuscleId] || heatmap['chest'] || Object.values(heatmap)[0];
 

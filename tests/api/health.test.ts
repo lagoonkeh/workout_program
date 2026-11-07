@@ -131,6 +131,40 @@ describe('api/health handler auth', () => {
     }
   });
 
+  it('saves a Life Dashboard sync that carries only a workout to the Health Workouts tab', async () => {
+    process.env.HEALTH_INGEST_TOKEN = 'secret-token';
+    Object.assign(process.env, { GOOGLE_CLIENT_ID: 'c', GOOGLE_CLIENT_SECRET: 's', GOOGLE_REFRESH_TOKEN: 'r', GOOGLE_SPREADSHEET_ID: 'sheet' });
+    const calls: { url: string; body?: string }[] = [];
+    const fetchMock = vi.fn(async (url: string, init: any = {}) => {
+      calls.push({ url, body: init.body === undefined ? undefined : String(init.body) });
+      const json = (v: unknown) => ({ ok: true, json: async () => v, text: async () => '' });
+      if (url.includes('oauth2')) return json({ access_token: 'at' });
+      if (url.includes('fields=sheets')) return json({ sheets: [{ properties: { title: 'Health Metrics' } }] });
+      if (url.includes('/values/')) return { ok: false, json: async () => ({}), text: async () => '' };
+      return json({});
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const r = res();
+      const body = {
+        source: 'health_connect',
+        timezone: 'America/Los_Angeles',
+        exercise: [{ type: '31', name: 'martial_arts', start_time: '2026-11-07T02:00:00Z', end_time: '2026-11-07T03:30:00Z', duration_seconds: 5400, uuid: 'bjj-1' }],
+      };
+      await handler({ method: 'POST', headers: { 'x-health-token': 'secret-token' }, body }, r);
+      expect(r.status).toHaveBeenCalledWith(200);
+      expect(r.json.mock.calls[0][0]).toMatchObject({ success: true, saved: [], workouts: ['2026-11-06 martial_arts 90 min'] });
+      expect(calls.some((c) => c.body?.includes('"addSheet":{"properties":{"title":"Health Workouts"}}'))).toBe(true);
+      const write = calls.find((c) => c.url.includes('values:batchUpdate'));
+      expect(write?.body).toContain('Health Workouts');
+      expect(write?.body).toContain('bjj-1');
+      expect(calls.some((c) => c.body?.includes("'Health Metrics'"))).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+      for (const k of ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN', 'GOOGLE_SPREADSHEET_ID']) delete process.env[k];
+    }
+  });
+
   it('only allows GET and POST', async () => {
     const r = res();
     await handler({ method: 'DELETE', headers: {} }, r);

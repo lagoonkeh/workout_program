@@ -8,6 +8,12 @@ import {
 import { WorkoutSession } from '../domain/programData';
 import { healthForDate, loadCachedHealth, restingHrTrend, sleepScoreFromHours, type HealthDay } from '../domain/healthMetrics';
 import { refreshHealthMetrics } from '../services/healthService';
+import { HEALTH_UPDATED_EVENT, interpretWorkout, loadCachedWorkouts, type HealthWorkout } from '../domain/healthWorkouts';
+
+const MUSCLE_SHORT: Record<string, string> = {
+  chest: 'chest', shoulders: 'shoulders', biceps: 'grip/biceps', triceps: 'triceps', lats: 'lats', traps: 'traps/neck',
+  core: 'core', lower_back: 'lower back', quads: 'quads', hamstrings: 'hamstrings', glutes: 'glutes', calves: 'calves',
+};
 import { WorkoutAdaptation } from '../domain/weeklyEvaluator';
 import type { RatingCategoryTab } from './RatingDefinitionsModal';
 import { RatingDefinitionsModal } from '../lazyView';
@@ -105,6 +111,23 @@ export const DailyReadinessWidget: React.FC<DailyReadinessWidgetProps> = ({
       alive = false;
     };
   }, []);
+  const [outsideWorkouts, setOutsideWorkouts] = useState<HealthWorkout[]>(() => loadCachedWorkouts());
+  useEffect(() => {
+    const onUpdate = () => setOutsideWorkouts(loadCachedWorkouts());
+    window.addEventListener(HEALTH_UPDATED_EVENT, onUpdate);
+    return () => window.removeEventListener(HEALTH_UPDATED_EVENT, onUpdate);
+  }, []);
+  // Workouts done outside the app on the selected day and the day before
+  const recentOutside = useMemo(() => {
+    const prev = new Date(`${selectedDate}T12:00:00`);
+    prev.setDate(prev.getDate() - 1);
+    const prevKey = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
+    return outsideWorkouts
+      .filter((w) => w.date === selectedDate || w.date === prevKey)
+      .sort((a, b) => b.start.localeCompare(a.start))
+      .slice(0, 4)
+      .map((w) => ({ w, it: interpretWorkout(w), when: w.date === selectedDate ? 'Today' : 'Yesterday' }));
+  }, [outsideWorkouts, selectedDate]);
   const healthToday = useMemo(() => healthForDate(healthDays, selectedDate), [healthDays, selectedDate]);
   const rhrTrend = useMemo(() => restingHrTrend(healthDays, selectedDate), [healthDays, selectedDate]);
   const [healthSleepApplied, setHealthSleepApplied] = useState(false);
@@ -462,6 +485,26 @@ export const DailyReadinessWidget: React.FC<DailyReadinessWidgetProps> = ({
                 ) : null}
                 {typeof healthToday.hrvMs === 'number' && <div>HRV {healthToday.hrvMs} ms</div>}
                 {typeof healthToday.weightLbs === 'number' && <div>Weight {healthToday.weightLbs} lb</div>}
+              </div>
+            )}
+            {recentOutside.length > 0 && (
+              <div
+                data-testid="health-connect-workouts"
+                className="mt-1 p-2 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-[11px] text-indigo-100 space-y-1"
+              >
+                <div className="font-semibold text-indigo-300">Training outside the app</div>
+                {recentOutside.map(({ w, it, when }) => (
+                  <div key={w.uuid} data-testid={`health-workout-${w.uuid}`}>
+                    <span className="font-semibold">{when}:</span> {it.summary}
+                    {it.trained.length > 0 && (
+                      <span className="text-indigo-300">
+                        {' '}
+                        &rarr; counts toward {it.trained.slice(0, 5).map((m) => MUSCLE_SHORT[m] || m).join(', ')}
+                        {it.fromRecordedSets ? ' (from recorded sets)' : ''}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>

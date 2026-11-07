@@ -7,11 +7,15 @@
 //        (or {"days":[...]} for several days; sleepMinutes, weightKg and snake_case names are accepted)
 //        Life Dashboard Companion's webhook payload (source "health_connect") is also accepted as is:
 //        set its webhook URL to /api/health with the header X-Health-Token.
-//   GET  /api/health   header  Authorization: Bearer <Firebase ID token>  ->  {days:[...]} (last 30 days)
+//   GET  /api/health   header  Authorization: Bearer <Firebase ID token>  ->  {days:[...], workouts:[...]} (last 30 days)
 //
-// Stored in the "Health Metrics" tab of the workout spreadsheet, one row per date.
+// Stored in the "Health Metrics" tab of the workout spreadsheet, one row per date. Exercise sessions from
+// Life Dashboard (its "exercise" array) go to the "Health Workouts" tab, one row per session (see _healthWorkouts.js).
 import crypto from 'node:crypto';
 import { verifyRequest, getAccessToken, sheetsFetch, sheetsUrl, ensureSheets, spreadsheetIdFromEnv } from './sync.js';
+import {
+  WORKOUT_SHEET, WORKOUT_HEADER, MAX_WORKOUTS_KEPT, workoutsFromLifeDashboard, deletedWorkoutIds, mergeWorkouts, workoutToRow, rowToWorkout,
+} from './_healthWorkouts.js';
 
 const SHEET = 'Health Metrics';
 const HEADER = ['Date', 'Sleep (h)', 'Resting HR (bpm)', 'HRV (ms)', 'Weight (lb)', 'Steps', 'Updated'];
@@ -183,6 +187,26 @@ async function readDays(accessToken, spreadsheetId) {
   return (data.values || []).map(rowToDay).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d.date));
 }
 
+async function readWorkouts(accessToken, spreadsheetId) {
+  const res = await fetch(sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(`'${WORKOUT_SHEET}'!A2:L${MAX_WORKOUTS_KEPT + 50}`)}`), {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.values || []).map(rowToWorkout).filter((w) => w.uuid && /^\d{4}-\d{2}-\d{2}$/.test(w.date));
+}
+
+async function writeTab(accessToken, spreadsheetId, sheet, lastCol, rows) {
+  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
+    method: 'POST',
+    body: JSON.stringify({ ranges: [`'${sheet}'!A1:${lastCol}${rows.length + 200}`] }),
+  });
+  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
+    method: 'POST',
+    body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: `'${sheet}'!A1`, values: rows }] }),
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   const spreadsheetId = spreadsheetIdFromEnv();
@@ -196,9 +220,10 @@ export default async function handler(req, res) {
     }
     try {
       const accessToken = await getAccessToken();
-      if (!accessToken) return res.status(200).json({ days: [], message: 'Missing OAuth credentials.' });
-      const days = await readDays(accessToken, spreadsheetId);
-      return res.status(200).json({ days: days.slice(-30) });
+      if (!accessToken) return res.status(200).json({ days: [], workouts: [], message: 'Missing OAuth credentials.' });
+      const [days, workouts] = await Promise.all([readDays(accessToken, spreadsheetId), readWorkouts(accessToken, spreadsheetId)]);
+      const cutoff = localToday(new Date(Date.now() - 30 * 86400000));
+      return res.status(200).json({ days: days.slice(-30), workouts: workouts.filter((w) => w.date >= cutoff) });
     } catch (err) {
       return res.status(502).json({ error: `Error reading health metrics: ${err.message}` });
     }
@@ -219,31 +244,38 @@ export default async function handler(req, res) {
   }
   const now = new Date();
   const fromApp = daysFromLifeDashboard(body);
+  const workouts = workoutsFromLifeDashboard(body);
+  const deletedWorkouts = deletedWorkoutIds(body);
+  const hasWorkoutNews = workouts.length > 0 || deletedWorkouts.length > 0;
   // Life Dashboard sends a sync even when nothing we use changed (e.g. only screen time): accept quietly
-  if (fromApp && !fromApp.length) return res.status(200).json({ success: true, saved: [] });
+  if (fromApp && !fromApp.length && !hasWorkoutNews) return res.status(200).json({ success: true, saved: [] });
   const list = Array.isArray(body.days) ? body.days.slice(0, 60) : [body];
   const incoming = fromApp || list.map((d) => normalizeHealthDay(d, now)).filter(Boolean);
   // Life Dashboard test pings and screen-time syncs carry a "source" but no health numbers: acknowledge
   // them, or the app would keep retrying them from its outbox
-  if (!incoming.length && typeof body.source === 'string') return res.status(200).json({ success: true, saved: [] });
-  if (!incoming.length) {
+  if (!incoming.length && !hasWorkoutNews && typeof body.source === 'string') return res.status(200).json({ success: true, saved: [] });
+  if (!incoming.length && !hasWorkoutNews) {
     return res.status(400).json({ error: 'No usable metrics. Send sleepHours, restingHr, hrvMs, weightLbs or steps.' });
   }
 
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) return res.status(500).json({ error: 'Missing Google OAuth credentials.' });
-    await ensureSheets(accessToken, spreadsheetId, [SHEET]);
-    const merged = mergeHealthDays(await readDays(accessToken, spreadsheetId), incoming, now.toISOString());
-    await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
-      method: 'POST',
-      body: JSON.stringify({ ranges: [`'${SHEET}'!A1:G${MAX_DAYS_KEPT + 50}`] }),
+    await ensureSheets(accessToken, spreadsheetId, hasWorkoutNews ? [SHEET, WORKOUT_SHEET] : [SHEET]);
+    if (incoming.length) {
+      const merged = mergeHealthDays(await readDays(accessToken, spreadsheetId), incoming, now.toISOString());
+      await writeTab(accessToken, spreadsheetId, SHEET, 'G', [HEADER, ...merged.map(dayToRow)]);
+    }
+    if (hasWorkoutNews) {
+      const mergedW = mergeWorkouts(await readWorkouts(accessToken, spreadsheetId), workouts, deletedWorkouts, now.toISOString());
+      await writeTab(accessToken, spreadsheetId, WORKOUT_SHEET, 'L', [WORKOUT_HEADER, ...mergedW.map(workoutToRow)]);
+    }
+    return res.status(200).json({
+      success: true,
+      saved: incoming.map((d) => d.date),
+      workouts: workouts.map((w) => `${w.date} ${w.activity} ${w.minutes} min`),
+      ...(deletedWorkouts.length ? { deletedWorkouts: deletedWorkouts.length } : {}),
     });
-    await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
-      method: 'POST',
-      body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: `'${SHEET}'!A1`, values: [HEADER, ...merged.map(dayToRow)] }] }),
-    });
-    return res.status(200).json({ success: true, saved: incoming.map((d) => d.date) });
   } catch (err) {
     return res.status(502).json({ error: `Error saving health metrics: ${err.message}` });
   }

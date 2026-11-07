@@ -2,6 +2,7 @@
 import { CompletedWorkoutSession } from '../storage/storageManager';
 import { WorkoutExercise, ALL_APP_SESSIONS } from './programData';
 import { SetLogRecord } from '../components/ExerciseCard';
+import { type HealthWorkout, interpretWorkout, withoutAppDuplicates } from './healthWorkouts';
 
 export type RecoveryStatus = 'fresh' | 'recovering' | 'fatigued';
 
@@ -140,11 +141,13 @@ export function resolveExerciseMuscleGroups(exerciseId: string, exercise?: Worko
  * 1. Historical completed workout sessions (storageManager.getHistory())
  * 2. Active in-progress workout set logs
  * 3. Reference now date (for deterministic testing & accurate time deltas)
+ * 4. Workouts recorded outside the app (Health Connect), interpreted as set-equivalents per muscle
  */
 export function calculateMuscleHeatmap(
   history: CompletedWorkoutSession[] = [],
   activeLogs: Record<string, SetLogRecord[]> = {},
-  now: Date = new Date()
+  now: Date = new Date(),
+  externalWorkouts: HealthWorkout[] = []
 ): Record<string, MuscleStatus> {
   const nowMs = now.getTime();
   const sevenDaysAgoMs = nowMs - 7 * 24 * 60 * 60 * 1000;
@@ -236,6 +239,22 @@ export function calculateMuscleHeatmap(
         }
       });
     }
+  });
+
+  // 2b. Workouts from Health Connect (BJJ, runs, a watch-tracked lift...), minus copies of workouts logged here
+  const appTimes = history.map((s) => new Date(s.date).getTime()).filter((t) => !isNaN(t));
+  withoutAppDuplicates(externalWorkouts, appTimes).forEach((w) => {
+    const it = interpretWorkout(w);
+    if (isNaN(it.endMs) || it.endMs > nowMs + 60 * 60 * 1000) return;
+    const isWithin7Days = it.endMs >= sevenDaysAgoMs;
+    Object.entries(it.sets).forEach(([mId, sets]) => {
+      const d = muscleData[mId];
+      if (!d) return;
+      if (isWithin7Days) d.sets7Days += Math.round(sets);
+      if (!it.trained.includes(mId)) return;
+      if (d.latestTimestampMs === null || it.endMs > d.latestTimestampMs) d.latestTimestampMs = it.endMs;
+      d.recentExercises.add(`${it.label} (Health Connect)`);
+    });
   });
 
   // 3. Classify recovery status for each muscle group
