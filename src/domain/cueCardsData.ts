@@ -1286,6 +1286,41 @@ export const CUE_CARDS: CueCard[] = [
     ]
   },
   {
+    id: 'cue_wu_lower_b_4',
+    exerciseId: 'w_lower_b_4',
+    exerciseName: 'Squat U Single-Leg Kettlebell Around-the-Worlds',
+    title: 'Squat U Single-Leg Kettlebell Around-the-Worlds',
+    tier: 'Warmup',
+    tempo: '2020',
+    prescribedTempo: 'Slow continuous passes (~2s per lap)',
+    primaryMuscles: ['Gluteus Medius', 'Deep Hip Rotators', 'Foot Intrinsics', 'Obliques'],
+    equipment: 'Bowflex SelectTech 840 Kettlebell (8 or 12 lb)',
+    setup: 'Stand on one leg, foot tripod rooted, light kettlebell held by the horn in front of the hips.',
+    setupInstructions: [
+      'Phase 1 — Single-Leg Stance: Soft stance knee, big toe / pinky toe / heel pressed into the floor.',
+      'Phase 2 — Brace: Ribs down, pelvis level, free foot hovering just off the floor.',
+      'Phase 3 — Pass the Bell: Hand the bell around the waist in a slow circle without letting the torso rotate.',
+      'Phase 4 — Hold Alignment: Stance knee stays over the 2nd/3rd toe as the bell passes behind you.',
+      'Phase 5 — Reverse & Switch: 5 passes each direction, switch legs, 2 sets per leg.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Dr. Aaron Horschig (Squat University)',
+        quote: 'Around-the-worlds feel easy with a light weight on two legs. Do them on a single leg and the hip has to work to keep you from rotating and the knee from collapsing.',
+        biomechanicalRationale: 'The moving load creates a changing rotational moment that the stance-side glute medius and hip rotators must resist, training frontal- and transverse-plane knee control.'
+      }
+    ],
+    commonFaults: [
+      'Free-leg hip dropping (Trendelenburg) as the bell passes behind.',
+      'Stance knee caving inward toward the big toe.',
+      'Twisting the torso to chase the bell instead of moving only the arms.',
+      'Going too heavy too soon.'
+    ],
+    rehabRegressions: [
+      'Do it with the free toes lightly touching the floor (kickstand) or near a rack upright for balance.'
+    ]
+  },
+  {
     id: 'cue_wu_upper_b_1',
     exerciseId: 'w_upper_b_1',
     exerciseName: 'Athlean-X Active Scapular Dead Hang Pulls',

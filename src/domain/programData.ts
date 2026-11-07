@@ -800,6 +800,22 @@ const LOWER_B_WARMUP: WarmupExercise[] = [
       'Phase 3 — Smooth Posterior Drive: Push evenly through legs, uncoiling knees and opening hips smoothly.',
       'Phase 4 — Synovial Fluid Flush: Maintain relaxed 18–20 SPM stroke cadence for 3–4 minutes to lubricate hip and lumbar facets.'
     ]
+  },
+  {
+    id: 'w_lower_b_4',
+    name: 'Squat U Single-Leg Kettlebell Around-the-Worlds',
+    targetDurationOrReps: '2 sets x 5 passes each direction / leg',
+    creatorAttribution: 'Dr. Aaron Horschig (Squat University)',
+    equipment: 'kettlebell',
+    biomechanicalPurpose: 'Passing a light kettlebell around the body while balancing on one leg forces the stance-side glute medius, deep hip rotators and foot tripod to resist a constantly moving rotational load. Primes single-leg hip and knee control for step-downs and suitcase carries.',
+    coachingNotes: 'Use the 8 or 12 lb Bowflex setting; it is far harder on one leg than it looks. Keep hips level and knee over 2nd/3rd toe. Touch the free foot down if you lose balance rather than twisting.',
+    setupInstructions: [
+      'Phase 1 — Stance Setup: Stand on one leg with a soft knee, foot tripod rooted (big toe, pinky toe, heel). Hold an 8–12 lb kettlebell by the horn in front of the hips.',
+      'Phase 2 — Brace & Level Hips: Light 360° brace, ribs down, pelvis level — do not let the free-leg hip drop.',
+      'Phase 3 — Slow Pass Around: Pass the bell from hand to hand around the waist in a slow, controlled circle without letting the torso rotate or sway.',
+      'Phase 4 — Knee Tracking: Keep the stance knee tracking over the 2nd/3rd toe the whole time; no inward collapse as the bell travels behind you.',
+      'Phase 5 — Reverse & Switch: 5 passes clockwise, 5 counter-clockwise, then switch legs. 2 sets per leg.'
+    ]
   }
 ];
 

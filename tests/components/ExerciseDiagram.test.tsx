@@ -204,7 +204,7 @@ describe('ExerciseDiagram Component', () => {
     const warmupDrillIds = [
       'w_lower_a_1', 'w_lower_a_2', 'w_lower_a_3', 'w_lower_a_4', 'w_lower_a_5',
       'w_upper_a_1', 'w_upper_a_2', 'w_upper_a_3',
-      'w_lower_b_1', 'w_lower_b_2', 'w_lower_b_3',
+      'w_lower_b_1', 'w_lower_b_2', 'w_lower_b_3', 'w_lower_b_4',
       'w_upper_b_1', 'w_upper_b_2', 'w_upper_b_3',
     ];
 

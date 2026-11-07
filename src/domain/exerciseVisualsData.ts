@@ -709,6 +709,27 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     safetyNote: 'Pumps blood into lumbar discs without spinal loading.'
   },
 
+  w_lower_b_4: {
+    id: 'w_lower_b_4',
+    exerciseName: 'Squat U Single-Leg Kettlebell Around-the-Worlds',
+    diagramType: 'carry',
+    startPositionLabel: '1. Single-Leg Stance, Bell in Front',
+    bottomPositionLabel: '2. Bell Passed Behind, Hips Level',
+    caption: 'Dr. Aaron Horschig drill: light 8–12 lb kettlebell passed around the waist on one leg to train glute medius and foot-tripod stability against a moving rotational load.',
+    keyCues: [
+      'Root the foot tripod and keep a soft stance knee',
+      'Hips stay level — free-leg hip must not drop',
+      'Torso stays still; only the arms move the bell',
+      '5 slow passes each direction, then switch legs'
+    ],
+    jointAngleCues: {
+      start: 'Single-leg stance, ~10° knee flexion',
+      bottom: 'Same stance held while bell travels behind the hips'
+    },
+    trajectoryNote: 'Horizontal circular bell path around the waist; body stays static.',
+    safetyNote: 'Start at 8 lb. Touch the free foot down rather than twisting to save balance.'
+  },
+
   // Upper B:
   w_upper_b_1: {
     id: 'w_upper_b_1',
