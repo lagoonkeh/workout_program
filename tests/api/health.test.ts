@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 // @ts-expect-error plain JS serverless function
-import handler, { normalizeHealthDay, mergeHealthDays, tokenMatches, localToday } from '../../api/health.js';
+import handler, { normalizeHealthDay, mergeHealthDays, tokenMatches, localToday, daysFromLifeDashboard } from '../../api/health.js';
 import { sleepScoreFromHours, restingHrTrend, healthForDate } from '../../src/domain/healthMetrics';
 import { DEMO_VIDEOS, demoVideoFor, youtubeUrl } from '../../src/domain/demoVideos';
 import { MOTIONS } from '../../src/domain/motionLibrary';
@@ -40,6 +40,40 @@ describe('api/health payloads', () => {
     expect(merged.map((d: { date: string }) => d.date)).toEqual(['2026-11-04', '2026-11-05']);
     expect(merged[1]).toMatchObject({ sleepHours: 7, restingHr: 57, weightLbs: 181, steps: 8000, updated: 'T' });
   });
+  it('reads Life Dashboard Companion webhook payloads', () => {
+    const payload = {
+      timestamp: '2026-11-06T15:10:00Z',
+      app_version: '1.0',
+      source: 'health_connect',
+      sleep: [
+        {
+          session_end_time: '2026-11-06T14:30:00Z', // 6:30 am Pacific: credited to Nov 6
+          duration_seconds: 28800,
+          stages: [
+            { stage: 'light', start_time: '2026-11-06T06:30:00Z', end_time: '2026-11-06T10:30:00Z', duration_seconds: 14400 },
+            { stage: 'awake', start_time: '2026-11-06T10:30:00Z', end_time: '2026-11-06T11:00:00Z', duration_seconds: 1800 },
+            { stage: 'deep', start_time: '2026-11-06T11:00:00Z', end_time: '2026-11-06T14:30:00Z', duration_seconds: 12600 },
+          ],
+        },
+      ],
+      resting_heart_rate: [
+        { bpm: 60, time: '2026-11-06T08:00:00Z' },
+        { bpm: 57, time: '2026-11-06T15:00:00Z' },
+      ],
+      heart_rate_variability: [{ heart_rate_variability_millis: 40, time: '2026-11-06T13:00:00Z' }, { heart_rate_variability_millis: 50, time: '2026-11-06T14:00:00Z' }],
+      weight: [{ kilograms: 82.2, time: '2026-11-06T15:05:00Z' }],
+      daily_totals: [{ date: '2026-11-05', steps: 10234, distance_meters: 7000 }],
+      heart_rate: [{ bpm: 72, time: '2026-11-06T10:30:00Z' }],
+    };
+    const days = daysFromLifeDashboard(payload);
+    expect(days).toEqual([
+      { date: '2026-11-06', sleepHours: 7.5, restingHr: 57, hrvMs: 45, weightLbs: 181.2, steps: null },
+      { date: '2026-11-05', sleepHours: null, restingHr: null, hrvMs: null, weightLbs: null, steps: 10234 },
+    ]);
+    expect(daysFromLifeDashboard({ source: 'screen_time', apps: [] })).toBeNull();
+    expect(daysFromLifeDashboard({ source: 'health_connect', timestamp: 'x' })).toEqual([]);
+  });
+
   it('checks the token in constant time', () => {
     expect(tokenMatches('abc', 'abc')).toBe(true);
     expect(tokenMatches('abd', 'abc')).toBe(false);
@@ -74,6 +108,14 @@ describe('api/health handler auth', () => {
     await handler({ method: 'POST', headers: { 'x-health-token': 'secret-token' }, body: { mood: 'ok' } }, r);
     expect(r.status).toHaveBeenCalledWith(400);
   });
+  it('acknowledges Life Dashboard syncs that carry nothing it stores, without touching Google', async () => {
+    process.env.HEALTH_INGEST_TOKEN = 'secret-token';
+    const r = res();
+    await handler({ method: 'POST', headers: { 'x-health-token': 'secret-token' }, body: { source: 'health_connect', timestamp: 'x' } }, r);
+    expect(r.status).toHaveBeenCalledWith(200);
+    expect(r.json).toHaveBeenCalledWith({ success: true, saved: [] });
+  });
+
   it('only allows GET and POST', async () => {
     const r = res();
     await handler({ method: 'DELETE', headers: {} }, r);

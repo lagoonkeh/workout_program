@@ -5,6 +5,8 @@
 //   POST /api/health   header  X-Health-Token: <HEALTH_INGEST_TOKEN>
 //        body  {"date":"2026-11-06","sleepHours":7.4,"restingHr":56,"hrvMs":48,"weightLbs":181.2,"steps":9120}
 //        (or {"days":[...]} for several days; sleepMinutes, weightKg and snake_case names are accepted)
+//        Life Dashboard Companion's webhook payload (source "health_connect") is also accepted as is:
+//        set its webhook URL to /api/health with the header X-Health-Token.
 //   GET  /api/health   header  Authorization: Bearer <Firebase ID token>  ->  {days:[...]} (last 30 days)
 //
 // Stored in the "Health Metrics" tab of the workout spreadsheet, one row per date.
@@ -55,6 +57,68 @@ export function normalizeHealthDay(raw, now = new Date()) {
     steps: round(inRange(num(pick('steps')), 0, 150000), 0),
   };
   return FIELDS.some((f) => day[f] !== null) ? day : null;
+}
+
+const AWAKE_STAGES = new Set(['awake', 'out_of_bed', 'awake_in_bed']);
+const LBS_PER_KG = 2.20462;
+
+/**
+ * Life Dashboard Companion webhook (source: "health_connect"): raw records grouped by type
+ * (sleep, resting_heart_rate, heart_rate_variability, weight) plus daily_totals for steps.
+ * Folded into one row per local day; sleep counts asleep stages only, credited to the wake-up day.
+ */
+export function daysFromLifeDashboard(payload, timeZone = 'America/Los_Angeles') {
+  if (!payload || payload.source !== 'health_connect') return null;
+  const dayOf = (iso) => {
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : localToday(d, timeZone);
+  };
+  const days = new Map();
+  const get = (date) => {
+    if (!days.has(date)) days.set(date, { date, sleepSec: 0, rhr: null, rhrAt: '', hrv: [], kg: null, kgAt: '', steps: null });
+    return days.get(date);
+  };
+  for (const s of Array.isArray(payload.sleep) ? payload.sleep : []) {
+    const date = dayOf(s?.session_end_time || s?.end_time);
+    if (!date) continue;
+    const stages = Array.isArray(s.stages) ? s.stages : [];
+    const asleep = stages.length
+      ? stages.filter((st) => !AWAKE_STAGES.has(st?.stage)).reduce((t, st) => t + (Number(st.duration_seconds) || 0), 0)
+      : Number(s.duration_seconds) || 0;
+    get(date).sleepSec += asleep;
+  }
+  for (const r of Array.isArray(payload.resting_heart_rate) ? payload.resting_heart_rate : []) {
+    const date = dayOf(r?.time);
+    if (!date || !Number.isFinite(Number(r.bpm))) continue;
+    const d = get(date);
+    if (!d.rhrAt || r.time > d.rhrAt) Object.assign(d, { rhr: Number(r.bpm), rhrAt: r.time });
+  }
+  for (const r of Array.isArray(payload.heart_rate_variability) ? payload.heart_rate_variability : []) {
+    const date = dayOf(r?.time);
+    const v = Number(r?.heart_rate_variability_millis);
+    if (date && Number.isFinite(v)) get(date).hrv.push(v);
+  }
+  for (const r of Array.isArray(payload.weight) ? payload.weight : []) {
+    const date = dayOf(r?.time);
+    if (!date || !Number.isFinite(Number(r.kilograms))) continue;
+    const d = get(date);
+    if (!d.kgAt || r.time > d.kgAt) Object.assign(d, { kg: Number(r.kilograms), kgAt: r.time });
+  }
+  for (const t of Array.isArray(payload.daily_totals) ? payload.daily_totals : []) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(t?.date || '') && Number.isFinite(Number(t.steps))) get(t.date).steps = Number(t.steps);
+  }
+  return [...days.values()]
+    .map((d) =>
+      normalizeHealthDay({
+        date: d.date,
+        sleepHours: d.sleepSec > 0 ? d.sleepSec / 3600 : undefined,
+        restingHr: d.rhr ?? undefined,
+        hrvMs: d.hrv.length ? d.hrv.reduce((a, b) => a + b, 0) / d.hrv.length : undefined,
+        weightLbs: d.kg !== null ? d.kg * LBS_PER_KG : undefined,
+        steps: d.steps ?? undefined,
+      })
+    )
+    .filter(Boolean);
 }
 
 /** Merge new days into existing rows (a new value wins, a missing one keeps what was there). */
@@ -131,9 +195,12 @@ export default async function handler(req, res) {
   } catch {
     return res.status(400).json({ error: 'Body must be JSON.' });
   }
-  const list = Array.isArray(body.days) ? body.days.slice(0, 60) : [body];
   const now = new Date();
-  const incoming = list.map((d) => normalizeHealthDay(d, now)).filter(Boolean);
+  const fromApp = daysFromLifeDashboard(body);
+  // Life Dashboard sends a sync even when nothing we use changed (e.g. only screen time): accept quietly
+  if (fromApp && !fromApp.length) return res.status(200).json({ success: true, saved: [] });
+  const list = Array.isArray(body.days) ? body.days.slice(0, 60) : [body];
+  const incoming = fromApp || list.map((d) => normalizeHealthDay(d, now)).filter(Boolean);
   if (!incoming.length) {
     return res.status(400).json({ error: 'No usable metrics. Send sleepHours, restingHr, hrvMs, weightLbs or steps.' });
   }
