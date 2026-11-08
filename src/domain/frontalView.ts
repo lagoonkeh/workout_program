@@ -171,8 +171,9 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     view: 'front', label: 'Front',
     // keys at 0 / .25 / .5 / .75 / 1: hands meet in front, right hand takes it round, meet behind, left hand brings it back
     lat: {
-      hand: { N: [3, 24, 3, 17, 3], F: [3, 17, 3, 24, 3] },
-      elbow: { N: [13, 23, 14, 17, 13], F: [13, 17, 14, 23, 13] },
+      // eighth-rep keys follow the same rounded loop as the side-view keyframes
+      hand: { N: [3, 18, 24, 18, 3, 13, 17, 13, 3], F: [3, 13, 17, 13, 3, 18, 24, 18, 3] },
+      elbow: { N: [13, 20, 23, 20, 14, 16, 17, 16, 13], F: [13, 16, 17, 16, 14, 20, 23, 20, 13] },
       knee: { N: 8, F: 11 }, ankle: { N: 8, F: 10 }, toe: { N: 9, F: 11 },
     },
     props: [{ kind: 'kettlebell', side: 'N', d: [0, 8], handoff: { side: 'F', from: 0.5, to: 1 } }],
@@ -337,7 +338,8 @@ export interface FrontalSkeleton {
   progress: number;
 }
 
-function latFor(cfg: FrontalConfig, j: LatJoint, side: Side, progress: number): number {
+/** Lateral half-width of a joint at rep progress (also used by the 3-D oblique and top views). */
+export function latFor(cfg: FrontalConfig, j: LatJoint, side: Side, progress: number): number {
   const v = cfg.lat[j];
   let l: Lateral = DEFAULT_LAT[j];
   if (v !== undefined) l = typeof v === 'object' && !Array.isArray(v) ? v[side] : v;

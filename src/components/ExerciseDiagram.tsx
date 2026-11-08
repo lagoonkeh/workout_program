@@ -33,6 +33,8 @@ import {
   type FrontalSkeleton,
   type Side,
 } from '../domain/frontalView';
+import { CAMERA_LABEL, OBLIQUE_CAMERAS, cameraCue, defaultCamera, type ObliqueCamera } from '../domain/obliqueView';
+import { ObliqueFigure } from './ObliqueFigure';
 
 export interface ExerciseDiagramProps {
   diagramType: DiagramType;
@@ -748,7 +750,9 @@ function Defs({ ids }: { ids: string }) {
 const TICK_MS = 1000 / 60;
 const TWEEN_SECONDS = 0.35;
 
-type ViewMode = 'side' | 'frontal' | 'both';
+type ViewMode = 'side' | 'frontal' | 'both' | ObliqueCamera;
+const isOblique = (v: ViewMode): v is ObliqueCamera => (OBLIQUE_CAMERAS as string[]).includes(v);
+const spokenLabel = (cam: ObliqueCamera) => CAMERA_LABEL[cam].replace('¾', 'three-quarter').toLowerCase();
 
 function prefersReducedMotion(): boolean {
   try {
@@ -789,7 +793,11 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
   const [showTrail, setShowTrail] = useState(true);
   const [showGhosts, setShowGhosts] = useState(true);
   const frontalCfg = useMemo(() => getFrontal(diagramType), [diagramType]);
-  const [viewMode, setViewMode] = useState<ViewMode>('both');
+  // each exercise opens in the angle that shows it best: front 3/4, rear 3/4 for pulls and hinges, top for rotation
+  const [viewMode, setViewMode] = useState<ViewMode>(() => defaultCamera(diagramType, exerciseName));
+  useEffect(() => {
+    setViewMode(defaultCamera(diagramType, exerciseName));
+  }, [diagramType, exerciseName]);
   const [clock, setClock] = useState(0); // seconds into the loop
   // manual / forced target: 0 start, 1 end; animated toward with a short tween
   const [target, setTarget] = useState<0 | 1>(forcedPhase === 'bottom' ? 1 : 0);
@@ -966,11 +974,12 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
       </div>
 
       {/* View selector */}
-      <div className="flex items-center gap-1.5 px-3 pt-2.5" role="radiogroup" aria-label="Camera view">
+      <div className="flex items-center gap-1 sm:gap-1.5 px-3 pt-2.5 flex-wrap" role="radiogroup" aria-label="Camera view">
         {(
           [
             { id: 'side', label: 'Side' },
             { id: 'frontal', label: frontalCfg.label },
+            ...OBLIQUE_CAMERAS.map((cam) => ({ id: cam, label: CAMERA_LABEL[cam] })),
             { id: 'both', label: 'Both' },
           ] as { id: ViewMode; label: string }[]
         ).map((v) => (
@@ -981,7 +990,7 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
             aria-checked={viewMode === v.id}
             data-testid={`diagram-view-${v.id}`}
             onClick={() => setViewMode(v.id)}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border transition-colors cursor-pointer ${
+            className={`px-2 sm:px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border whitespace-nowrap transition-colors cursor-pointer ${
               viewMode === v.id ? 'bg-sky-500/20 border-sky-500/50 text-sky-200' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
             }`}
           >
@@ -996,7 +1005,7 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
           viewMode === 'both' ? 'h-[30rem] grid-rows-2 grid-cols-1 sm:h-72 sm:grid-rows-1 sm:grid-cols-2' : 'h-64 sm:h-72 grid-cols-1'
         }`}
       >
-        {viewMode !== 'frontal' && (
+        {(viewMode === 'side' || viewMode === 'both') && (
           <div className="relative min-w-0 min-h-0 h-full">
             <svg
               viewBox="0 -24 200 216"
@@ -1026,7 +1035,39 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
             )}
           </div>
         )}
-        {viewMode !== 'side' && (
+        {isOblique(viewMode) && (
+          <div className="relative min-w-0 min-h-0 h-full">
+            <svg
+              viewBox="0 -24 200 216"
+              className="absolute inset-0 w-full h-full"
+              role="img"
+              aria-label={`${exerciseName || motion.title} motion demonstration, ${spokenLabel(viewMode)} view`}
+            >
+              <Defs ids={`${ids}o`} />
+              <rect x={-200} y={-100} width={600} height={400} fill={`url(#${ids}o-bg)`} />
+              <rect x={-200} y={-100} width={600} height={400} fill={`url(#${ids}o-grid)`} />
+              <ObliqueFigure
+                motion={motion}
+                type={diagramType}
+                cfg={frontalCfg}
+                cam={viewMode}
+                progress={progress}
+                load={load}
+                ids={`${ids}o`}
+                showTrail={showTrail}
+                showGhosts={showGhosts}
+              />
+            </svg>
+            <span className="absolute top-2.5 left-3 text-[10px] font-mono font-bold uppercase text-slate-400">{CAMERA_LABEL[viewMode]}</span>
+            {showTrail && (
+              <div className="absolute top-2.5 right-3 text-[10px] font-mono text-sky-300 bg-slate-900/80 border border-sky-500/30 rounded-lg px-2 py-0.5 backdrop-blur-sm flex items-center gap-1 max-w-[70%] truncate">
+                <span className="w-3 border-t border-dashed border-sky-400 shrink-0" />
+                {motion.trackLabel}
+              </div>
+            )}
+          </div>
+        )}
+        {(viewMode === 'frontal' || viewMode === 'both') && (
           <div className={`relative min-w-0 min-h-0 h-full ${viewMode === 'both' ? 'border-t sm:border-t-0 sm:border-l border-slate-800' : ''}`}>
             <svg
               viewBox="0 -24 200 216"
@@ -1076,7 +1117,12 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
           <span className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${atEnd ? 'bg-emerald-400' : 'bg-cyan-400'}`} />
           <span>{atEnd ? motion.endCue : motion.startCue}</span>
         </p>
-        {viewMode !== 'side' && (
+        {isOblique(viewMode) && (
+          <p data-testid="diagram-oblique-cue" className="text-[11px] text-sky-200/90 -mt-1 mb-2 pl-3">
+            {CAMERA_LABEL[viewMode]} view: {cameraCue(viewMode, diagramType, frontalCfg)}
+          </p>
+        )}
+        {(viewMode === 'frontal' || viewMode === 'both') && (
           <p data-testid="diagram-frontal-cue" className="text-[11px] text-sky-200/90 -mt-1 mb-2 pl-3">
             {frontalCfg.label} view: {frontalCfg.cue}
           </p>

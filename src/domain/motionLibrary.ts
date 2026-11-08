@@ -327,13 +327,22 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     order: 'loop',
     // Bell circles the waist: front (0) -> lifter's right (0.25) -> behind (0.5) -> left (0.75) -> front.
     // Near side drawn slightly lower and far side slightly higher so the horizontal circle reads as an ellipse.
-    frames: [
-      kf(0, { hip: [100, 100], torso: -90, head: -90, armN: to(112, 99, -1), armF: to(112, 99, -1), legN: to(100, 176), legF: to(94, 150), footF: 25 }),
-      kf(0.25, { hip: [100, 100], torso: -90, head: -90, armN: to(100, 101.5, -1), armF: to(99, 101.5, -1), legN: to(100, 176), legF: to(94, 150), footF: 25 }),
-      kf(0.5, { hip: [100, 100], torso: -90, head: -90, armN: to(88, 99, -1), armF: to(88, 99, -1), legN: to(100, 176), legF: to(94, 150), footF: 25 }),
-      kf(0.75, { hip: [100, 100], torso: -90, head: -90, armN: to(99, 101.5, -1), armF: to(100, 96, -1), legN: to(100, 176), legF: to(94, 150), footF: 25 }),
-      kf(1, { hip: [100, 100], torso: -90, head: -90, armN: to(112, 99, -1), armF: to(112, 99, -1), legN: to(100, 176), legF: to(94, 150), footF: 25 }),
-    ],
+    // In-between keys at every eighth keep the bell on a rounded loop (seen from above) instead of a diamond.
+    frames: (
+      [
+        [0, [112, 99], [112, 99]],
+        [0.125, [108.5, 100.6], [108, 100.6]],
+        [0.25, [100, 101.5], [99, 101.5]],
+        [0.375, [91.5, 100.6], [91, 100.6]],
+        [0.5, [88, 99], [88, 99]],
+        [0.625, [91, 100.6], [91.5, 97.5]],
+        [0.75, [99, 101.5], [100, 96]],
+        [0.875, [108, 100.6], [108.5, 97.5]],
+        [1, [112, 99], [112, 99]],
+      ] as [number, Vec, Vec][]
+    ).map(([at, n, f]) =>
+      kf(at, { hip: [100, 100], torso: -90, head: -90, armN: to(n[0], n[1], -1), armF: to(f[0], f[1], -1), legN: to(100, 176), legF: to(94, 150), footF: 25 })
+    ),
     props: [{ kind: 'kettlebell', at: 'handN', d: [0, 8], handoff: { at: 'handF', from: 0.5, to: 1 } }],
     scenery: [],
     worked: ['thN', 'torso'],
