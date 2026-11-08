@@ -22,6 +22,8 @@ export interface ExerciseVariation {
   cycleAffiliation: 'A' | 'B' | 'Both';
   regression?: ExerciseRegression;
   isUnilateral?: boolean;
+  llpEligible?: boolean;
+  llpProtocolNotes?: string;
 }
 
 /**
@@ -1188,6 +1190,8 @@ export function variationToWorkoutExercise(
     progressionRule: variation.progressionRule,
     regression: variation.regression ?? baseExercise.regression,
     isUnilateral: variation.isUnilateral ?? baseExercise.isUnilateral,
+    llpEligible: variation.llpEligible ?? baseExercise.llpEligible,
+    llpProtocolNotes: variation.llpProtocolNotes ?? baseExercise.llpProtocolNotes,
   };
 }
 

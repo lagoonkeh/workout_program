@@ -7,7 +7,11 @@ export type MobilityTestId =
   | 'biering-sorensen' 
   | 'dead-hang'
   | 'pancake-split'
-  | 'jefferson-curl';
+  | 'jefferson-curl'
+  | 'german-hang'
+  | 'head-to-toe'
+  | 'side-split'
+  | 'back-bridge';
 
 export interface MobilityProtocol {
   id: MobilityTestId;
@@ -241,6 +245,108 @@ export const PROTOCOL_JEFFERSON_CURL: MobilityProtocol = {
   ]
 };
 
+export const PROTOCOL_GERMAN_HANG: MobilityProtocol = {
+  id: 'german-hang',
+  testId: 'german-hang',
+  name: 'Lucas Hardie German Hang (Active Shoulder Extension)',
+  creator: 'Lucas Hardie (Range of Strength)',
+  targetTissue: 'Long Head of Biceps, Pectoralis Minor & Anterior Capsule',
+  primaryMetric: 'Active Isometric Hold Time',
+  unit: 'seconds',
+  improvementDirection: 'higher',
+  direction: 'higher_is_better',
+  targetBenchmark: '≥ 30–60 seconds',
+  benchmarkNumeric: 30,
+  instructions: [
+    'Using gymnastics rings or pull-up bar, lower backward through a skin-the-cat into full shoulder hyperextension.',
+    'Keep shoulder blades actively depressed and elbows straight; breathe steadily.',
+    'Hold under control without dumping passively into joint capsule. Exit safely under control.'
+  ],
+  scoringTiers: [
+    { scoreOrValue: '< 10', label: '< 10 seconds', interpretation: 'Restricted shoulder extension; use toe support on floor to unload tension.' },
+    { scoreOrValue: '10–29', label: '10–29 seconds', interpretation: 'Developing functional shoulder extension and bicep tendon resilience.' },
+    { scoreOrValue: '30–59', label: '30–59 seconds', interpretation: 'Proficient ring turnover tolerance and dynamic shoulder durability.' },
+    { scoreOrValue: '≥ 60', label: '≥ 60 seconds', interpretation: 'Feat of Range Mastery; complete bicep tendon resilience and end-range shoulder control.' }
+  ]
+};
+
+export const PROTOCOL_HEAD_TO_TOE: MobilityProtocol = {
+  id: 'head-to-toe',
+  testId: 'head-to-toe',
+  name: 'Lucas Hardie Head-to-Toe Fold (Active Compression)',
+  creator: 'Lucas Hardie (Range of Strength)',
+  targetTissue: 'Hamstrings, Sciatic Nerve Bed & Thoracolumbar Fascia',
+  primaryMetric: 'Forehead-to-Toes Distance',
+  unit: 'inches',
+  improvementDirection: 'lower',
+  direction: 'lower_is_better',
+  targetBenchmark: '0 inches (Forehead Touching Toes)',
+  benchmarkNumeric: 0,
+  instructions: [
+    'Sit on floor with legs straight out front, knees completely locked and toes pulled back.',
+    'Actively compress torso toward legs using hip flexor and abdominal pull.',
+    'Perform rhythmic ballistic pulses at 40–60 BPM, then measure gap from forehead to big toes.'
+  ],
+  scoringTiers: [
+    { scoreOrValue: '> 6.0', label: '> 6.0 inches (> 15 cm)', interpretation: 'Severe posterior chain restriction; prioritize loaded Jefferson curls.' },
+    { scoreOrValue: '3.0–6.0', label: '3.0–6.0 inches (7.5–15 cm)', interpretation: 'Developing compression mobility.' },
+    { scoreOrValue: '0.1–2.9', label: '0.1–2.9 inches (1–7 cm)', interpretation: 'Advanced range; forehead approaching toes.' },
+    { scoreOrValue: '0', label: '0 inches (Forehead to Toes)', interpretation: 'Feat of Range Mastery; complete posterior chain length and dynamic closure.' }
+  ]
+};
+
+export const PROTOCOL_SIDE_SPLIT: MobilityProtocol = {
+  id: 'side-split',
+  testId: 'side-split',
+  name: 'Lucas Hardie Side Split (Pancake Abduction)',
+  creator: 'Lucas Hardie (Range of Strength)',
+  targetTissue: 'Adductor Brevis/Longus, Pectineus, Gracilis & Hip Capsule',
+  primaryMetric: 'Crotch-to-Floor Distance',
+  unit: 'inches',
+  improvementDirection: 'lower',
+  direction: 'lower_is_better',
+  targetBenchmark: '0 inches (Full Floor Contact)',
+  benchmarkNumeric: 0,
+  instructions: [
+    'Slide feet out wide sideways on a smooth surface or wearing socks.',
+    'Tilt pelvis anteriorly (Thomas Kurz method) to clear the femoral neck from the acetabulum rim.',
+    'Keep kneecaps facing forward/up; measure vertical distance from pelvic floor/crotch to the floor.'
+  ],
+  scoringTiers: [
+    { scoreOrValue: '> 10.0', label: '> 10.0 inches (> 25 cm)', interpretation: 'Severe adductor restriction; train loaded horse stance first.' },
+    { scoreOrValue: '4.0–10.0', label: '4.0–10.0 inches (10–25 cm)', interpretation: 'Functional straddle range for squatting and lunging.' },
+    { scoreOrValue: '0.1–3.9', label: '0.1–3.9 inches (1–9 cm)', interpretation: 'Advanced side split range.' },
+    { scoreOrValue: '0', label: '0 inches (Full Side Split)', interpretation: 'Feat of Range Mastery; complete pelvic floor clearance and hip abduction.' }
+  ]
+};
+
+export const PROTOCOL_BACK_BRIDGE: MobilityProtocol = {
+  id: 'back-bridge',
+  testId: 'back-bridge',
+  name: 'Lucas Hardie Full Back Bridge Arc',
+  creator: 'Lucas Hardie (Range of Strength)',
+  targetTissue: 'Thoracic Spine, Hip Flexors, Abdominal Wall & Shoulders',
+  primaryMetric: 'Hold Duration with Stacked Shoulders',
+  unit: 'seconds',
+  improvementDirection: 'higher',
+  direction: 'higher_is_better',
+  targetBenchmark: '≥ 30 seconds',
+  benchmarkNumeric: 30,
+  instructions: [
+    'Lie supine with hands planted beside ears, fingers pointing towards shoulders.',
+    'Press through palms and feet into full spinal bridge arc.',
+    'Push chest forward through shoulders so wrists stack under shoulders. Hold for time.'
+  ],
+  scoringTiers: [
+    { scoreOrValue: '< 10', label: '< 10 seconds', interpretation: 'Restricted thoracic spine or wrist extension; elevate feet on box.' },
+    { scoreOrValue: '10–29', label: '10–29 seconds', interpretation: 'Developing spinal extension endurance.' },
+    { scoreOrValue: '≥ 30', label: '≥ 30 seconds', interpretation: 'Feat of Range Mastery; smooth spinal arc distribution across entire spine.' }
+  ]
+};
+
+/**
+ * Standard 7 core mobility protocols (preserved for backward compatibility with baseline suites)
+ */
 export const MOBILITY_PROTOCOLS: MobilityProtocol[] = [
   PROTOCOL_ELEPHANT_WALK,
   PROTOCOL_KNEE_TO_WALL,
@@ -251,6 +357,29 @@ export const MOBILITY_PROTOCOLS: MobilityProtocol[] = [
   PROTOCOL_JEFFERSON_CURL,
 ];
 
+/**
+ * Lucas Hardie (Range of Strength) Feats of Range benchmarks
+ */
+export const RANGE_OF_STRENGTH_FEATS: MobilityProtocol[] = [
+  PROTOCOL_PANCAKE_SPLIT,
+  PROTOCOL_SIDE_SPLIT,
+  PROTOCOL_HEAD_TO_TOE,
+  PROTOCOL_GERMAN_HANG,
+  PROTOCOL_BACK_BRIDGE,
+  PROTOCOL_JEFFERSON_CURL,
+];
+
+/**
+ * All 11 comprehensive science-backed mobility protocols
+ */
+export const ALL_MOBILITY_PROTOCOLS: MobilityProtocol[] = [
+  ...MOBILITY_PROTOCOLS,
+  PROTOCOL_GERMAN_HANG,
+  PROTOCOL_HEAD_TO_TOE,
+  PROTOCOL_SIDE_SPLIT,
+  PROTOCOL_BACK_BRIDGE,
+];
+
 export const MOBILITY_PROTOCOLS_MAP: Record<MobilityTestId, MobilityProtocol> = {
   'elephant-walk': PROTOCOL_ELEPHANT_WALK,
   'knee-to-wall': PROTOCOL_KNEE_TO_WALL,
@@ -259,6 +388,10 @@ export const MOBILITY_PROTOCOLS_MAP: Record<MobilityTestId, MobilityProtocol> = 
   'dead-hang': PROTOCOL_DEAD_HANG,
   'pancake-split': PROTOCOL_PANCAKE_SPLIT,
   'jefferson-curl': PROTOCOL_JEFFERSON_CURL,
+  'german-hang': PROTOCOL_GERMAN_HANG,
+  'head-to-toe': PROTOCOL_HEAD_TO_TOE,
+  'side-split': PROTOCOL_SIDE_SPLIT,
+  'back-bridge': PROTOCOL_BACK_BRIDGE,
 };
 
 /**
@@ -273,6 +406,10 @@ export function validateMobilityEntry(entry: { testId: MobilityTestId; value: nu
     'dead-hang',
     'pancake-split',
     'jefferson-curl',
+    'german-hang',
+    'head-to-toe',
+    'side-split',
+    'back-bridge',
   ];
   
   if (!entry.testId || !validTestIds.includes(entry.testId)) {
@@ -402,6 +539,29 @@ export function getMobilityBenchmarkStatus(
       if (value < 1.0) return { status: 'baseline', isTargetMet: false };
       if (value < 2.5) return { status: 'functional', isTargetMet: false };
       if (value < 4.0) return { status: 'advanced', isTargetMet: false };
+      return { status: 'optimal', isTargetMet: true };
+
+    case 'german-hang':
+      if (value < 10) return { status: 'restricted', isTargetMet: false };
+      if (value < 30) return { status: 'developing', isTargetMet: false };
+      if (value < 60) return { status: 'proficient', isTargetMet: true };
+      return { status: 'optimal', isTargetMet: true };
+
+    case 'head-to-toe':
+      if (value > 6.0) return { status: 'severe_restriction', isTargetMet: false };
+      if (value > 3.0) return { status: 'developing', isTargetMet: false };
+      if (value > 0) return { status: 'proficient', isTargetMet: false };
+      return { status: 'optimal', isTargetMet: true };
+
+    case 'side-split':
+      if (value > 10.0) return { status: 'severe_restriction', isTargetMet: false };
+      if (value > 4.0) return { status: 'developing', isTargetMet: false };
+      if (value > 0) return { status: 'proficient', isTargetMet: false };
+      return { status: 'optimal', isTargetMet: true };
+
+    case 'back-bridge':
+      if (value < 10) return { status: 'restricted', isTargetMet: false };
+      if (value < 30) return { status: 'developing', isTargetMet: false };
       return { status: 'optimal', isTargetMet: true };
   }
 }

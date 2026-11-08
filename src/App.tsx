@@ -6,6 +6,7 @@ import {
   QuarterlyAssessmentWidget,
   StrengthHeatmapWidget,
   AthleteProfileCard,
+  AdaptationClocksWidget,
   preloadLazyViews,
   CueCardModal,
   WeeklyEvaluationModal,
@@ -3707,6 +3708,7 @@ export function WorkoutAppMain() {
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
             <Suspense fallback={<ViewLoadingFallback />}>
               <AthleteProfileCard />
+              <AdaptationClocksWidget />
               <StrengthHeatmapWidget history={Object.values(completedWorkouts)} />
               <QuarterlyAssessmentWidget />
             </Suspense>

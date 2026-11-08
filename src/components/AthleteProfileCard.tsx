@@ -1,6 +1,6 @@
 // src/components/AthleteProfileCard.tsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { Scale, Trash2, UserRound } from 'lucide-react';
+import { Scale, Trash2, UserRound, Zap } from 'lucide-react';
 import {
   ATHLETE_PROFILE_EVENT,
   MAX_BODYWEIGHT_LBS,
@@ -190,6 +190,19 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
           })}
         </ul>
       )}
+
+      {/* Yellow Dude 5 Clocks of Adaptation Tendon Advisory */}
+      <div data-testid="profile-tendon-clock-advisory" className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 text-xs text-purple-200 flex items-start gap-2.5">
+        <Zap className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+        <div>
+          <span className="font-bold text-purple-300 block">
+            Tendon Adaptation Clock (Yellow Dude Science)
+          </span>
+          <p className="text-purple-200/90 text-[11px] leading-relaxed mt-0.5">
+            Muscles and motor units adapt in 1–3 weeks, but tendon collagen realignment takes 6 weeks to 6 months. Never increase loads faster than your connective tissues can recover.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

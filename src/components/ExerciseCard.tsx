@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
 import { createPortal } from 'react-dom';
-import { WorkoutExercise, isUnilateralExercise, isTimedPrescription, formatMMSS, extractTargetReps, getEffectiveExerciseTempo, BOWFLEX_840_KETTLEBELL_SETTINGS } from '../domain/programData';
+import { WorkoutExercise, isUnilateralExercise, isTimedPrescription, formatMMSS, extractTargetReps, getEffectiveExerciseTempo, BOWFLEX_840_KETTLEBELL_SETTINGS, isLLPEligible } from '../domain/programData';
 import { LazyExerciseDiagram as ExerciseDiagram } from './LazyExerciseDiagram';
 import { EXERCISE_VISUALS, ExerciseVisual } from '../domain/exerciseVisualsData';
 import { useCueCardLookup } from '../domain/cueCardStore';
@@ -159,6 +159,8 @@ export interface SetLogRecord {
   notes: string;
   /** ISO timestamp of when the set was first logged */
   loggedAt?: string;
+  /** Whether lengthened partials (LLPs) were performed on this set */
+  llpPerformed?: boolean;
 }
 
 export interface ExerciseCardProps {
@@ -704,6 +706,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   );
 
   const currentTier = TIER_CONFIG[exercise.tier] || TIER_CONFIG.T3;
+  const isLLP = isLLPEligible(exercise);
+  const [showLLPGuide, setShowLLPGuide] = useState(false);
   const isKneeSensitive =
     exercise.id.includes('squat') ||
     exercise.id.includes('step_down') ||
@@ -996,6 +1000,14 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     <span>⚡ Priority</span>
                   </span>
                 )}
+                {logs.some((l) => l.llpPerformed) && (
+                  <span
+                    data-testid="collapsed-llp-badge"
+                    className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-purple-500/25 text-purple-300 border border-purple-500/50 flex items-center gap-1"
+                  >
+                    <span>🔥 +LLPs</span>
+                  </span>
+                )}
                 {exercise.side && (
                   <span
                     data-testid={`side-badge-${exercise.side}`}
@@ -1182,6 +1194,17 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
               >
                 <span>⚡ High Priority</span>
+              </span>
+            )}
+
+            {/* Jeff Nippard LLP Protocol Badge */}
+            {isLLP && (
+              <span
+                data-testid="expanded-llp-badge"
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
+              >
+                <Flame className="w-3.5 h-3.5 text-purple-400" />
+                <span>LLP Protocol</span>
               </span>
             )}
 
@@ -1540,6 +1563,42 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               This exercise was marked not done in your previous session. Volume has been auto-regulated to {exercise.targetSets} sets to restore consistency safely.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Jeff Nippard Long-Length Partials (LLP) Protocol Banner */}
+      {isLLP && (
+        <div
+          data-testid="llp-protocol-banner"
+          className="mb-3.5 p-3 sm:p-3.5 rounded-xl bg-purple-950/40 border border-purple-500/40 text-purple-200 flex flex-col gap-2 text-xs sm:text-sm"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-bold text-purple-300">
+              <Flame className="w-4 h-4 text-purple-400 shrink-0" />
+              <span>Jeff Nippard Lengthened Partials (LLP Protocol)</span>
+            </div>
+            <button
+              type="button"
+              data-testid="toggle-llp-guide-btn"
+              onClick={() => setShowLLPGuide((prev) => !prev)}
+              className="text-[11px] font-mono text-purple-300 hover:text-white underline cursor-pointer shrink-0"
+            >
+              {showLLPGuide ? 'Hide Science Cue' : '🔬 Science Cue & Protocol'}
+            </button>
+          </div>
+          <p className="text-purple-200/90 text-xs leading-relaxed">
+            {exercise.llpProtocolNotes || 'After reaching target reps at 1–2 RIR, pump 3–5 controlled partials in the lengthened stretched position to trigger sarcomerogenesis and maximum passive mechanical tension.'}
+          </p>
+          {showLLPGuide && (
+            <div className="pt-2 border-t border-purple-800/40 text-[11px] text-purple-200 space-y-1.5 animate-in fade-in duration-150">
+              <p>
+                <strong>Scientific Basis (Nippard 2024–2026):</strong> Longitudinal muscle growth (sarcomerogenesis) and titin-mediated mechanotransduction occur predominantly when high mechanical tension is applied in the fully stretched muscle length.
+              </p>
+              <p>
+                <strong>Execution Rule:</strong> Do not bounce. Pause 0.5s in the deepest stretched position, power through only the bottom 50% of the ROM, and control the reversal. Log LLPs using the <span className="font-mono bg-purple-900/60 px-1 py-0.5 rounded border border-purple-400/50">+LLPs</span> button on your sets.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -2674,18 +2733,49 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   </button>
                 </td>
 
-                {/* Notes Input */}
+                {/* Notes Input & Optional LLP Quick-Log */}
                 <td className="py-1 px-1 text-center">
-                  <input
-                    type="text"
-                    aria-label={`Set ${set.setNumber} Notes`}
-                    placeholder={isMcGillBig3 ? 'Tri-Set Notes...' : isDeadHangClubMills ? 'Drill Notes...' : 'Notes...'}
-                    value={set.notes || ''}
-                    onChange={(e) =>
-                      onUpdateSetLog(exercise.id, idx, { notes: e.target.value })
-                    }
-                    className="w-full min-h-[36px] bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-300 text-[11px] sm:text-xs focus:outline-none focus:border-emerald-500 text-center placeholder:text-center"
-                  />
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      aria-label={`Set ${set.setNumber} Notes`}
+                      placeholder={isMcGillBig3 ? 'Tri-Set Notes...' : isDeadHangClubMills ? 'Drill Notes...' : 'Notes...'}
+                      value={set.notes || ''}
+                      onChange={(e) =>
+                        onUpdateSetLog(exercise.id, idx, { notes: e.target.value })
+                      }
+                      className="w-full min-h-[36px] bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-300 text-[11px] sm:text-xs focus:outline-none focus:border-emerald-500 text-center placeholder:text-center"
+                    />
+                    {isLLP && (
+                      <button
+                        type="button"
+                        data-testid={`llp-toggle-btn-${idx}`}
+                        onClick={() => {
+                          const nextState = !set.llpPerformed;
+                          const currentNotes = set.notes || '';
+                          let updatedNotes = currentNotes;
+                          if (nextState && !currentNotes.includes('LLP')) {
+                            updatedNotes = currentNotes ? `${currentNotes} · +3–5 LLPs` : '+3–5 LLPs (Nippard)';
+                          } else if (!nextState && currentNotes.includes('+3–5 LLPs')) {
+                            updatedNotes = currentNotes.replace(/(\s*·\s*)?\+3–5 LLPs(\s*\(Nippard\))?/, '').trim();
+                          }
+                          onUpdateSetLog(exercise.id, idx, {
+                            llpPerformed: nextState,
+                            notes: updatedNotes,
+                          });
+                        }}
+                        title={set.llpPerformed ? 'Lengthened partials logged on this set' : 'Mark 3–5 lengthened partials performed (Nippard stretch protocol)'}
+                        aria-label={`Toggle lengthened partials for set ${set.setNumber}`}
+                        className={`px-1.5 py-1 rounded min-h-[36px] text-[10px] font-mono font-bold whitespace-nowrap border transition-all cursor-pointer ${
+                          set.llpPerformed
+                            ? 'bg-purple-900/70 border-purple-400 text-purple-200 shadow-sm ring-1 ring-purple-400/50'
+                            : 'bg-slate-950/80 border-slate-700 text-slate-400 hover:text-purple-300 hover:border-purple-600'
+                        }`}
+                      >
+                        {set.llpPerformed ? '🔥 +LLPs' : '+LLPs'}
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             );

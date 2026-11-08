@@ -178,6 +178,38 @@ export function calculateMobilityTrajectory(
       const calc1y = Math.max(target, +(currentValue + 3.5).toFixed(1));
       return { '1m': calc1m, '3m': calc3m, '6m': calc6m, '1y': calc1y };
     }
+    case 'german-hang': {
+      // Active shoulder extension hang in seconds: higher is better towards 60s
+      const calc1m = Math.round(currentValue + 8);
+      const calc3m = Math.round(currentValue + 18);
+      const calc6m = Math.round(currentValue + 35);
+      const calc1y = Math.max(60, Math.round(currentValue + 50));
+      return { '1m': calc1m, '3m': calc3m, '6m': calc6m, '1y': calc1y };
+    }
+    case 'head-to-toe': {
+      // Forehead-to-toes distance in inches: lower is better down to 0"
+      const calc1m = Math.max(0, +(currentValue - 0.8).toFixed(1));
+      const calc3m = Math.max(0, +(currentValue - 2.0).toFixed(1));
+      const calc6m = Math.max(0, +(currentValue - 3.8).toFixed(1));
+      const calc1y = 0;
+      return { '1m': calc1m, '3m': calc3m, '6m': calc6m, '1y': calc1y };
+    }
+    case 'side-split': {
+      // Crotch to floor distance in inches: lower is better down to 0"
+      const calc1m = Math.max(0, +(currentValue - 1.2).toFixed(1));
+      const calc3m = Math.max(0, +(currentValue - 3.0).toFixed(1));
+      const calc6m = Math.max(0, +(currentValue - 5.5).toFixed(1));
+      const calc1y = 0;
+      return { '1m': calc1m, '3m': calc3m, '6m': calc6m, '1y': calc1y };
+    }
+    case 'back-bridge': {
+      // Back bridge hold duration in seconds: higher is better towards 30s
+      const calc1m = Math.round(currentValue + 6);
+      const calc3m = Math.round(currentValue + 15);
+      const calc6m = Math.round(currentValue + 25);
+      const calc1y = Math.max(30, Math.round(currentValue + 30));
+      return { '1m': calc1m, '3m': calc3m, '6m': calc6m, '1y': calc1y };
+    }
     default:
       return {
         '1m': currentValue,

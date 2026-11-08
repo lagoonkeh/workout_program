@@ -1,7 +1,9 @@
 // src/components/MobilityTrackerWidget.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   MOBILITY_PROTOCOLS,
+  ALL_MOBILITY_PROTOCOLS,
+  RANGE_OF_STRENGTH_FEATS,
   MOBILITY_PROTOCOLS_MAP,
   MobilityTestId,
   MobilityEntry,
@@ -247,6 +249,126 @@ export function getBenchmarkBadge(testId: MobilityTestId, value: number): Benchm
         description: '< 0.5 in (Restricted Posterior Chain; Flat Ground Advised)',
       };
 
+    case 'german-hang':
+      if (value >= 60) {
+        return {
+          tier: 'Exceptional',
+          badgeClass: 'bg-emerald-950/60 border-emerald-600 text-emerald-300',
+          dotClass: 'bg-emerald-400',
+          description: '≥ 60s (Feat of Range Mastery; Resilient Bicep Tendons)',
+        };
+      }
+      if (value >= 30) {
+        return {
+          tier: 'Proficient',
+          badgeClass: 'bg-blue-950/60 border-blue-600 text-blue-300',
+          dotClass: 'bg-blue-400',
+          description: '30–59s (Ring Turnover Tolerance & Dynamic Durability)',
+        };
+      }
+      if (value >= 10) {
+        return {
+          tier: 'Developing',
+          badgeClass: 'bg-amber-950/60 border-amber-600 text-amber-300',
+          dotClass: 'bg-amber-400',
+          description: '10–29s (Developing Functional Shoulder Extension)',
+        };
+      }
+      return {
+        tier: 'Restricted',
+        badgeClass: 'bg-rose-950/60 border-rose-600 text-rose-300',
+        dotClass: 'bg-rose-400',
+        description: '< 10s (High Bicep Tendon Sensitivity; Use Toe Support)',
+      };
+
+    case 'head-to-toe':
+      if (value <= 0) {
+        return {
+          tier: 'Exceptional',
+          badgeClass: 'bg-emerald-950/60 border-emerald-600 text-emerald-300',
+          dotClass: 'bg-emerald-400',
+          description: '0 in (Forehead to Toes; Feat of Range Mastery)',
+        };
+      }
+      if (value <= 2.9) {
+        return {
+          tier: 'Proficient',
+          badgeClass: 'bg-blue-950/60 border-blue-600 text-blue-300',
+          dotClass: 'bg-blue-400',
+          description: '0.1–2.9 in (Advanced Active Compression)',
+        };
+      }
+      if (value <= 6.0) {
+        return {
+          tier: 'Developing',
+          badgeClass: 'bg-amber-950/60 border-amber-600 text-amber-300',
+          dotClass: 'bg-amber-400',
+          description: '3.0–6.0 in (Developing Forward Fold Compression)',
+        };
+      }
+      return {
+        tier: 'Restricted',
+        badgeClass: 'bg-rose-950/60 border-rose-600 text-rose-300',
+        dotClass: 'bg-rose-400',
+        description: '> 6.0 in (Severe Posterior Chain Restriction; Jefferson Curls Advised)',
+      };
+
+    case 'side-split':
+      if (value <= 0) {
+        return {
+          tier: 'Exceptional',
+          badgeClass: 'bg-emerald-950/60 border-emerald-600 text-emerald-300',
+          dotClass: 'bg-emerald-400',
+          description: '0 in (Full Side Split Floor Contact; Feat of Range Mastery)',
+        };
+      }
+      if (value <= 3.9) {
+        return {
+          tier: 'Proficient',
+          badgeClass: 'bg-blue-950/60 border-blue-600 text-blue-300',
+          dotClass: 'bg-blue-400',
+          description: '0.1–3.9 in (Advanced Straddle Range)',
+        };
+      }
+      if (value <= 10.0) {
+        return {
+          tier: 'Developing',
+          badgeClass: 'bg-amber-950/60 border-amber-600 text-amber-300',
+          dotClass: 'bg-amber-400',
+          description: '4.0–10.0 in (Functional Straddle Range for Squats)',
+        };
+      }
+      return {
+        tier: 'Restricted',
+        badgeClass: 'bg-rose-950/60 border-rose-600 text-rose-300',
+        dotClass: 'bg-rose-400',
+        description: '> 10.0 in (Severe Adductor Restriction; Train Horse Stance First)',
+      };
+
+    case 'back-bridge':
+      if (value >= 30) {
+        return {
+          tier: 'Exceptional',
+          badgeClass: 'bg-emerald-950/60 border-emerald-600 text-emerald-300',
+          dotClass: 'bg-emerald-400',
+          description: '≥ 30s (Stacked Shoulders; Feat of Range Mastery)',
+        };
+      }
+      if (value >= 10) {
+        return {
+          tier: 'Developing',
+          badgeClass: 'bg-amber-950/60 border-amber-600 text-amber-300',
+          dotClass: 'bg-amber-400',
+          description: '10–29s (Developing Spinal Extension Stamina)',
+        };
+      }
+      return {
+        tier: 'Restricted',
+        badgeClass: 'bg-rose-950/60 border-rose-600 text-rose-300',
+        dotClass: 'bg-rose-400',
+        description: '< 10s (Restricted Thoracic Spine / Wrists; Elevate Feet)',
+      };
+
     default:
       return {
         tier: 'Developing',
@@ -259,6 +381,7 @@ export function getBenchmarkBadge(testId: MobilityTestId, value: number): Benchm
 
 export const MobilityTrackerWidget: React.FC = () => {
   const [selectedTestId, setSelectedTestId] = useState<MobilityTestId>('elephant-walk');
+  const [protocolCategory, setProtocolCategory] = useState<'all' | 'foundational' | 'range_of_strength'>('all');
   const [history, setHistory] = useState<MobilityEntry[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [inputDate, setInputDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
@@ -278,6 +401,12 @@ export const MobilityTrackerWidget: React.FC = () => {
     });
     return unsubscribe;
   }, []);
+
+  const displayedProtocols = useMemo(() => {
+    if (protocolCategory === 'foundational') return MOBILITY_PROTOCOLS;
+    if (protocolCategory === 'range_of_strength') return RANGE_OF_STRENGTH_FEATS;
+    return ALL_MOBILITY_PROTOCOLS;
+  }, [protocolCategory]);
 
   const activeProtocol = MOBILITY_PROTOCOLS_MAP[selectedTestId];
   const testHistory = history
@@ -445,9 +574,46 @@ export const MobilityTrackerWidget: React.FC = () => {
 
       {!isMainCollapsed && (
         <>
+      {/* Category Filter Pills */}
+      <div className="flex flex-wrap items-center gap-2 pb-1" data-testid="mobility-category-filters">
+        <button
+          type="button"
+          onClick={() => setProtocolCategory('all')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+            protocolCategory === 'all'
+              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
+              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+          }`}
+        >
+          All Science Protocols ({ALL_MOBILITY_PROTOCOLS.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setProtocolCategory('foundational')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+            protocolCategory === 'foundational'
+              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
+              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+          }`}
+        >
+          Foundational 7 (McGill & Patrick)
+        </button>
+        <button
+          type="button"
+          onClick={() => setProtocolCategory('range_of_strength')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+            protocolCategory === 'range_of_strength'
+              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
+              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+          }`}
+        >
+          Lucas Hardie Feats of Range ({RANGE_OF_STRENGTH_FEATS.length})
+        </button>
+      </div>
+
       {/* Protocol Selector Pills */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2" role="tablist">
-        {MOBILITY_PROTOCOLS.map((protocol) => {
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2" role="tablist">
+        {displayedProtocols.map((protocol) => {
           const isSelected = protocol.id === selectedTestId;
           const count = history.filter((e) => e.testId === protocol.id).length;
           return (
