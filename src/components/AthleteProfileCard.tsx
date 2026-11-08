@@ -196,10 +196,10 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
         <Zap className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
         <div>
           <span className="font-bold text-purple-300 block">
-            Tendon Adaptation Clock (Yellow Dude Science)
+            Tendon Adaptation Clock (Yellow Dude)
           </span>
           <p className="text-purple-200/90 text-[11px] leading-relaxed mt-0.5">
-            Muscles and motor units adapt in 1–3 weeks, but tendon collagen realignment takes 6 weeks to 6 months. Never increase loads faster than your connective tissues can recover.
+            Strength rises within weeks, mostly from the nervous system, but tendons take months to stiffen. Add load gradually so they can keep up.
           </p>
         </div>
       </div>

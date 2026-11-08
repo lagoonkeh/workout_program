@@ -42,7 +42,7 @@ describe('ExerciseCard - Jeff Nippard Long-Length Partials (LLP) Protocol', () =
 
     expect(screen.getByTestId('expanded-llp-badge')).toBeInTheDocument();
     expect(screen.getByTestId('llp-protocol-banner')).toBeInTheDocument();
-    expect(screen.getByText(/Jeff Nippard Lengthened Partials/i)).toBeInTheDocument();
+    expect(screen.getByText(/Lengthened Partials \(LLPs, Jeff Nippard\)/i)).toBeInTheDocument();
   });
 
   it('toggles the scientific rationale explanation when clicking science cue button', () => {
@@ -60,13 +60,13 @@ describe('ExerciseCard - Jeff Nippard Long-Length Partials (LLP) Protocol', () =
     );
 
     const toggleBtn = screen.getByTestId('toggle-llp-guide-btn');
-    expect(screen.queryByText(/titin-mediated mechanotransduction/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/What the research shows/i)).not.toBeInTheDocument();
 
     fireEvent.click(toggleBtn);
-    expect(screen.getByText(/titin-mediated mechanotransduction/i)).toBeInTheDocument();
+    expect(screen.getByText(/What the research shows/i)).toBeInTheDocument();
 
     fireEvent.click(toggleBtn);
-    expect(screen.queryByText(/titin-mediated mechanotransduction/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/What the research shows/i)).not.toBeInTheDocument();
   });
 
   it('allows logging +LLPs on a set and updates notes and llpPerformed flag', () => {
@@ -112,5 +112,22 @@ describe('ExerciseCard - Jeff Nippard Long-Length Partials (LLP) Protocol', () =
     );
 
     expect(screen.getByTestId('collapsed-llp-badge')).toBeInTheDocument();
+  });
+
+  it('offers the +LLPs toggle on the final set only', () => {
+    render(
+      <ExerciseCard
+        exercise={MOCK_LLP_EXERCISE}
+        logs={[1, 2, 3].map((n) => ({ setNumber: n, targetReps: '8', weightLbs: 35, repsAchieved: 0, isCompleted: false, notes: '' }))}
+        onUpdateSetLog={vi.fn()}
+        onOpenCueCard={vi.fn()}
+        onQuickStartRest={vi.fn()}
+        onQuickStartTempo={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('llp-toggle-btn-0')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('llp-toggle-btn-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('llp-toggle-btn-2')).toBeInTheDocument();
   });
 });

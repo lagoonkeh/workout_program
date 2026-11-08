@@ -33,18 +33,21 @@ describe('Comprehensive End-to-End Test: Workout Studies & Complete Flow', () =>
     // Toggle science explanation
     const guideToggle = within(banner).getByTestId('toggle-llp-guide-btn');
     fireEvent.click(guideToggle);
-    expect(within(banner).getByText(/titin-mediated mechanotransduction/i)).toBeInTheDocument();
+    expect(within(banner).getByText(/What the research shows/i)).toBeInTheDocument();
 
-    // Click +LLPs button on set 1
-    const llpSetBtn = within(saCard).getByTestId('llp-toggle-btn-0');
+    // +LLPs is offered on the final set only
+    expect(within(saCard).queryByTestId('llp-toggle-btn-0')).not.toBeInTheDocument();
+    const toggleCount = within(saCard).getAllByRole('button', { name: /Toggle lengthened partials for set/i }).length;
+    expect(toggleCount).toBe(1);
+    const llpSetBtn = within(saCard).getByRole('button', { name: /Toggle lengthened partials for set 3/i });
     fireEvent.click(llpSetBtn);
 
     // Verify button updates to show LLPs logged
     expect(within(saCard).getByText('🔥 +LLPs')).toBeInTheDocument();
 
-    // Mark set 1 complete
-    const set1Check = within(saCard).getByRole('button', { name: /Mark set 1 as completed/i });
-    fireEvent.click(set1Check);
+    // Mark set 3 complete
+    const set3Check = within(saCard).getByRole('button', { name: /Mark set 3 as completed/i });
+    fireEvent.click(set3Check);
 
     // Verify storage received the updated log with llpPerformed
     await waitFor(() => {
@@ -52,8 +55,8 @@ describe('Comprehensive End-to-End Test: Workout Studies & Complete Flow', () =>
       const logs = JSON.parse(rawLogs);
       const exerciseLogs = logs[exerciseId];
       expect(exerciseLogs).toBeDefined();
-      expect(exerciseLogs[0].llpPerformed).toBe(true);
-      expect(exerciseLogs[0].notes).toContain('+3–5 LLPs');
+      expect(exerciseLogs[2].llpPerformed).toBe(true);
+      expect(exerciseLogs[2].notes).toContain('+3–5 LLPs');
     });
   });
 
@@ -105,9 +108,9 @@ describe('Comprehensive End-to-End Test: Workout Studies & Complete Flow', () =>
     const clocksWidget = await screen.findByTestId('adaptation-clocks-widget');
     expect(clocksWidget).toBeInTheDocument();
 
-    // Switch to 5-Rung Gate Ladders tab
+    // Switch to progression ladders tab
     const ladderTab = screen.getByTestId('tab-ladders');
     fireEvent.click(ladderTab);
-    expect(screen.getByText(/The "Rung 2 Trap"/i)).toBeInTheDocument();
+    expect(screen.getByText(/Go in order/i)).toBeInTheDocument();
   });
 });

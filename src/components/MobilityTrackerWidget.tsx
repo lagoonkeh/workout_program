@@ -255,7 +255,7 @@ export function getBenchmarkBadge(testId: MobilityTestId, value: number): Benchm
           tier: 'Exceptional',
           badgeClass: 'bg-emerald-950/60 border-emerald-600 text-emerald-300',
           dotClass: 'bg-emerald-400',
-          description: '≥ 60s (Feat of Range Mastery; Resilient Bicep Tendons)',
+          description: '≥ 60s (Feat of Range; coaching benchmark)',
         };
       }
       if (value >= 30) {
@@ -263,7 +263,7 @@ export function getBenchmarkBadge(testId: MobilityTestId, value: number): Benchm
           tier: 'Proficient',
           badgeClass: 'bg-blue-950/60 border-blue-600 text-blue-300',
           dotClass: 'bg-blue-400',
-          description: '30–59s (Ring Turnover Tolerance & Dynamic Durability)',
+          description: '30–59s (Proficient)',
         };
       }
       if (value >= 10) {
@@ -278,7 +278,7 @@ export function getBenchmarkBadge(testId: MobilityTestId, value: number): Benchm
         tier: 'Restricted',
         badgeClass: 'bg-rose-950/60 border-rose-600 text-rose-300',
         dotClass: 'bg-rose-400',
-        description: '< 10s (High Bicep Tendon Sensitivity; Use Toe Support)',
+        description: '< 10s (Restricted; Use Toe Support)',
       };
 
     case 'head-to-toe':

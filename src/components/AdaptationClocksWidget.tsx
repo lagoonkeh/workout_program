@@ -111,11 +111,11 @@ export const AdaptationClocksWidget: React.FC<AdaptationClocksWidgetProps> = ({
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <span>Exercise Science &amp; Creator Studies</span>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300">
-                2024–2026 Evidence
+                Research-checked
               </span>
             </h3>
             <p className="text-xs text-slate-400">
-              Biological timelines, tendon remodeling gates, lengthened partials (LLPs), and loaded feats of range.
+              Adaptation timelines, progression ladders, lengthened partials (LLPs), and loaded feats of range.
             </p>
           </div>
         </div>
@@ -165,7 +165,7 @@ export const AdaptationClocksWidget: React.FC<AdaptationClocksWidgetProps> = ({
               }`}
             >
               <Layers className="w-4 h-4" />
-              <span>5-Rung Gate Ladders</span>
+              <span>5-Rung Progression Ladders</span>
             </button>
 
             <button
@@ -206,10 +206,10 @@ export const AdaptationClocksWidget: React.FC<AdaptationClocksWidgetProps> = ({
             <div data-testid="clocks-content" className="space-y-3.5">
               <div className="p-3 sm:p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-xs text-purple-200">
                 <span className="font-bold text-purple-300 block mb-1">
-                  Yellow Dude Principle: &quot;Your fastest clock writes the check your slowest one has to cover.&quot;
+                  Yellow Dude&apos;s idea: your body doesn&apos;t adapt at one speed.
                 </span>
                 <p className="leading-relaxed">
-                  Trainees routinely fail or injure themselves around weeks 2–4 because the body operates 5 distinct physiological clocks. Muscular and neural strength adapt in days, but tendons require months of collagen turnover to catch up.
+                  Your nervous system adapts first, muscle size takes weeks to months, and tendons take the longest. Strength can outrun your tendons, so add load gradually.
                 </p>
               </div>
 
@@ -243,7 +243,7 @@ export const AdaptationClocksWidget: React.FC<AdaptationClocksWidgetProps> = ({
                         <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
                         <span>{clock.athleteWarning}</span>
                       </div>
-                      <p className="text-[10px] italic text-slate-500">&quot;{clock.quote}&quot;</p>
+                      <p className="text-[10px] text-slate-500">Evidence: {clock.evidence}</p>
                     </div>
                   </div>
                 ))}
@@ -271,12 +271,12 @@ export const AdaptationClocksWidget: React.FC<AdaptationClocksWidgetProps> = ({
                 ))}
               </div>
 
-              {/* Rung 2 Trap Callout */}
+              {/* Why the rungs go in order */}
               <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold text-amber-300 block mb-0.5">The &quot;Rung 2 Trap&quot;</span>
-                  <p>{activeLadder.theRung2Trap}</p>
+                  <span className="font-bold text-amber-300 block mb-0.5">Go in order</span>
+                  <p>{activeLadder.progressionNote}</p>
                 </div>
               </div>
 
@@ -344,7 +344,7 @@ export const AdaptationClocksWidget: React.FC<AdaptationClocksWidgetProps> = ({
                   <span>{NIPPARD_LLP_STUDY_SYNTHESIS.title}</span>
                 </div>
                 <span className="text-xs font-mono text-purple-400/90 block">
-                  Core Biological Mechanism: {NIPPARD_LLP_STUDY_SYNTHESIS.coreMechanism}
+                  Mechanism: {NIPPARD_LLP_STUDY_SYNTHESIS.coreMechanism}
                 </span>
                 <p className="text-xs text-purple-200/90 leading-relaxed">
                   {NIPPARD_LLP_STUDY_SYNTHESIS.summary}

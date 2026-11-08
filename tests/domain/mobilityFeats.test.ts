@@ -78,17 +78,16 @@ describe('Range of Strength (Lucas Hardie) Feats of Range Protocols', () => {
     expect(progress.isTargetMet).toBe(true); // target is 30s
   });
 
-  it('projects progressive timelines for the new protocols in progressForecaster', () => {
-    const hang = calculateMobilityTrajectory('german-hang', 20);
-    expect(hang['1m']).toBeGreaterThan(20);
-    expect(hang['1y']).toBeGreaterThanOrEqual(60);
+  it('does not invent improvement rates for the new protocols (flat projection)', () => {
+    expect(calculateMobilityTrajectory('german-hang', 20)).toEqual({ '1m': 20, '3m': 20, '6m': 20, '1y': 20 });
+    expect(calculateMobilityTrajectory('head-to-toe', 5)).toEqual({ '1m': 5, '3m': 5, '6m': 5, '1y': 5 });
+    expect(calculateMobilityTrajectory('side-split', 8)).toEqual({ '1m': 8, '3m': 8, '6m': 8, '1y': 8 });
+    expect(calculateMobilityTrajectory('back-bridge', 15)).toEqual({ '1m': 15, '3m': 15, '6m': 15, '1y': 15 });
+  });
 
-    const headToToe = calculateMobilityTrajectory('head-to-toe', 5.0);
-    expect(headToToe['1m']).toBeLessThan(5.0);
-    expect(headToToe['1y']).toBe(0);
-
-    const bridge = calculateMobilityTrajectory('back-bridge', 15);
-    expect(bridge['1m']).toBeGreaterThan(15);
-    expect(bridge['1y']).toBeGreaterThanOrEqual(30);
+  it('labels the side split as a middle split', () => {
+    const side = ALL_MOBILITY_PROTOCOLS.find((p) => p.id === 'side-split')!;
+    expect(side.name).toContain('Middle Split');
+    expect(side.name).not.toContain('Pancake');
   });
 });

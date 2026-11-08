@@ -1,7 +1,9 @@
 // src/domain/adaptationClocks.ts
 /**
- * Exercise Science & Creator Study Syntheses
- * Directly derived from verified documents for Yellow Dude, Jeff Nippard, Lucas Hardie, and Dr. Stuart McGill.
+ * Training-adaptation summaries.
+ * The "clocks" framing comes from Yellow Dude (YouTube @yellowdude_co: your body doesn't build strength,
+ * muscle and tendons at the same speed). Only details backed by published research are kept here;
+ * each clock lists the evidence it rests on. No creator quotes are reproduced.
  */
 
 export interface AdaptationClock {
@@ -13,7 +15,8 @@ export interface AdaptationClock {
   biologicalMechanism: string;
   athleteWarning: string;
   creatorAttribution: string;
-  quote: string;
+  /** Short pointer to the research the clock rests on */
+  evidence: string;
 }
 
 export interface GateRung {
@@ -28,7 +31,8 @@ export interface GateLadder {
   movementName: string;
   pattern: string;
   rungs: GateRung[];
-  theRung2Trap: string;
+  /** Why the rungs go in order (coaching rationale, not a research finding) */
+  progressionNote: string;
 }
 
 export const FIVE_CLOCKS_OF_ADAPTATION: AdaptationClock[] = [
@@ -36,66 +40,66 @@ export const FIVE_CLOCKS_OF_ADAPTATION: AdaptationClock[] = [
     id: 'neural',
     name: '1. Nervous System Adaptation',
     speed: 'Fastest',
-    timelineLabel: 'Weeks 1 to 3',
-    estimatedWeeks: '1–3 weeks',
+    timelineLabel: 'First weeks (dominant early)',
+    estimatedWeeks: 'Weeks 1–4+',
     biologicalMechanism:
-      'Early strength gains are driven by neuromuscular coordination: recruiting more dormant motor units simultaneously, increasing motoneuron firing rates, and reciprocal inhibition of antagonists.',
+      'Most early strength gains come from the nervous system: better motor-unit recruitment and firing, better coordination, and less antagonist co-activation.',
     athleteWarning:
-      'Rapid strength jumps in your first 3 weeks do not indicate new muscle mass; they reflect neuromuscular optimization. Do not spike training weight too fast.',
+      'Fast early strength jumps are mostly skill and coordination, not new muscle. Your joints and tendons have not caught up yet.',
     creatorAttribution: 'Yellow Dude (@yellowdude_co)',
-    quote: 'The spinal cord adapts weeks before muscle cross-sectional area changes.',
+    evidence: 'Kubo et al. 2010: strength and neural activation rose by month 2, before muscle size or tendon stiffness changed.',
   },
   {
     id: 'soreness',
     name: '2. Muscle Soreness & The Repeated Bout Effect',
     speed: 'Fast',
-    timelineLabel: 'Weeks 1 to 2',
+    timelineLabel: 'After the first session or two',
     estimatedWeeks: '1–2 weeks',
     biologicalMechanism:
-      'Delayed-Onset Muscle Soreness (DOMS) stems from microscopic z-disc disruption and localized inflammatory repair, not lactic acid. Subsequent exposures activate the Repeated Bout Effect, shielding fibers from soreness.',
+      'Delayed-onset muscle soreness follows unaccustomed (especially eccentric) work and is linked to muscle damage and inflammation, not lactic acid. After one bout, the same exercise causes much less soreness (the repeated bout effect).',
     athleteWarning:
-      'Chasing severe soreness is an invalid marker of workout quality. Once your body adapts to a pattern, absence of soreness indicates structural resilience, not wasted effort.',
+      'Soreness is a poor measure of a good workout. Less soreness on a familiar movement is normal adaptation, not wasted effort.',
     creatorAttribution: 'Yellow Dude (@yellowdude_co)',
-    quote: 'Repeating the exact same movement produces significantly less soreness. No pain no gain is dead science.',
+    evidence: 'Repeated bout effect: a well-replicated finding in eccentric-exercise research.',
   },
   {
     id: 'cardiovascular',
     name: '3. Cardiovascular & Blood Volume Clock',
     speed: 'Split',
-    timelineLabel: 'Weeks 1 to 8 (Split)',
-    estimatedWeeks: '1–2 wks (plasma) / 4–8 wks (VO2)',
+    timelineLabel: 'Days (plasma) / weeks–months (VO2max)',
+    estimatedWeeks: '1–2 wks (plasma) / weeks–months (VO2max)',
     biologicalMechanism:
-      'Blood plasma volume expands rapidly within 7–14 days, reducing heart rate at submaximal efforts. Measurable capillarization, mitochondrial biogenesis, and VO2 max expansion stabilize between weeks 4 and 8.',
+      'Blood plasma volume expands within days to about two weeks of endurance training, lowering heart rate at the same effort. VO2max, capillary and mitochondrial gains build more gradually over weeks to months.',
     athleteWarning:
-      'Workouts will feel subjectively easier after 10 days due to plasma expansion before true stroke volume and mitochondrial density have matured.',
+      'Cardio feels easier quickly, partly from the plasma increase. Keep progressing gradually; the deeper aerobic changes take longer.',
     creatorAttribution: 'Yellow Dude (@yellowdude_co)',
-    quote: 'Plasma expansion makes early cardio feel easy, but true cardiac remodeling takes 8 full weeks.',
+    evidence: 'Endurance-training physiology: rapid plasma volume expansion is a classic, well-replicated finding.',
   },
   {
     id: 'hypertrophy',
     name: '4. Skeletal Muscle Hypertrophy',
     speed: 'Slow',
-    timelineLabel: 'Weeks 5 to 6+',
-    estimatedWeeks: '5–6+ weeks',
+    timelineLabel: 'Roughly 6–8+ weeks to measure',
+    estimatedWeeks: '6–8+ weeks',
     biologicalMechanism:
-      'Measurable myofibrillar protein accretion and cross-sectional muscle area increase only after neuromuscular recruitment stabilizes around week 5.',
+      'Muscle size increases take weeks of training to measure reliably. Some apparent early growth is temporary swelling from muscle damage rather than new tissue.',
     athleteWarning:
-      'Most trainees quit in weeks 2–3 because the mirror does not reflect their effort yet. Muscular hypertrophy is the fourth clock—be patient.',
-    creatorAttribution: 'Yellow Dude & Jeff Nippard',
-    quote: 'Beginners quit when the mirror runs on Clock 4 while their effort started on Clock 1.',
+      'The mirror lags behind the work. Judge the first couple of months by performance and consistency, not looks.',
+    creatorAttribution: 'Yellow Dude (@yellowdude_co)',
+    evidence: 'Kubo et al. 2010: muscle cross-sectional area did not change until after 2 months of training.',
   },
   {
     id: 'tendons',
     name: '5. Tendons & Connective Tissue Remodeling',
     speed: 'Slowest',
-    timelineLabel: 'Weeks 6 to 24 (Months)',
-    estimatedWeeks: '6 wks – 6 months',
+    timelineLabel: 'Months',
+    estimatedWeeks: '2–3+ months',
     biologicalMechanism:
-      'Tendons consist of densely packed parallel collagen cables with minimal vascularization. Collagen synthesis and fiber realignment occur on a timescale 4–10x slower than muscular hypertrophy.',
+      'Tendons are collagen-dense and adapt slowly: measurable stiffness changes take a couple of months or more, and tendon size changes little even after years of training.',
     athleteWarning:
-      'Because your muscles and nervous system gain strength much faster than tendons adapt, jumping loads prematurely creates micro-tears that cause patellar, elbow, or rotator cuff tendinopathy.',
+      'Strength can outpace your tendons. Raising load faster than they adapt increases the risk of overload tendon pain (e.g. patellar, elbow, shoulder).',
     creatorAttribution: 'Yellow Dude (@yellowdude_co)',
-    quote: 'Your fastest clock writes the check your slowest one has to cover.',
+    evidence: 'Kubo et al. 2010 (tendon stiffness changed only after 2 months); Massey et al. 2018 (no tendon hypertrophy after 4 years of training).',
   },
 ];
 
@@ -111,7 +115,7 @@ export const FIVE_RUNG_GATE_LADDERS: GateLadder[] = [
       { rung: 4, name: 'Assisted One-Arm Push-Up', gateCriteria: '5 reps / side', techniqueRule: 'Free hand on floor strictly for light fingertip balance.' },
       { rung: 5, name: 'Full One-Arm Push-Up', gateCriteria: '5 clean reps', techniqueRule: 'Free hand behind back; zero torso twisting.' },
     ],
-    theRung2Trap: 'Trainees routinely skip Rung 2 because it feels like a modest, boring step. Skipping intermediate rungs breaks shoulder integrity before connective tissue adapts.',
+    progressionNote: 'Move up one rung at a time. Each step adds load gradually, giving the slower-adapting tissues time to catch up. The rep gates are coaching targets, not research cutoffs.',
   },
   {
     id: 'pull',
@@ -119,12 +123,12 @@ export const FIVE_RUNG_GATE_LADDERS: GateLadder[] = [
     pattern: 'Pull',
     rungs: [
       { rung: 1, name: 'Australian Body Row (Bar/Table)', gateCriteria: '15 clean chest-to-bar reps', techniqueRule: 'Straight body line; pull elbows into pocket.' },
-      { rung: 2, name: 'Dead Hang Decompression', gateCriteria: '30-second continuous hold', techniqueRule: 'Overhand grip, relax spine, depress shoulder girdle.' },
+      { rung: 2, name: 'Dead Hang', gateCriteria: '30-second continuous hold', techniqueRule: 'Overhand grip, shoulders active, steady breathing.' },
       { rung: 3, name: 'Scapular Pulls from Bar', gateCriteria: '10 strict reps', techniqueRule: 'Locked elbows; pull shoulder blades down and back.' },
       { rung: 4, name: 'Eccentric Pull-Up Negatives', gateCriteria: '5 reps with 5-second lowering', techniqueRule: 'Smooth continuous descent through full ROM.' },
       { rung: 5, name: 'Full Strict Pull-Up', gateCriteria: '5 full ROM reps', techniqueRule: 'Chin cleanly clearing bar; zero kipping or swinging.' },
     ],
-    theRung2Trap: 'Jumping straight from Australian rows to weighted pull-ups overloads the bicep tendon and subacromial space. Clear all 5 gates in order.',
+    progressionNote: 'Build grip, shoulder-blade control and lowering strength before full pull-ups. The rep and time gates are coaching targets, not research cutoffs.',
   },
   {
     id: 'squat',
@@ -137,21 +141,21 @@ export const FIVE_RUNG_GATE_LADDERS: GateLadder[] = [
       { rung: 4, name: 'Assisted Single-Leg Pistol Squat', gateCriteria: '5 reps / leg', techniqueRule: 'Fingertip touch on rack/doorframe for balance only.' },
       { rung: 5, name: 'Full Unassisted Pistol Squat', gateCriteria: '5 reps / leg', techniqueRule: 'Hamstring covering calf at bottom; non-working leg straight.' },
     ],
-    theRung2Trap: 'Attempting pistol squats before mastering split squats drives extreme patellar tendon shear. Use progressive elevations to remodel tendon collagen safely.',
+    progressionNote: 'Build up through split squats before single-leg depth, which loads the knee more. Stop at the rung where the knee stays pain-free. The rep gates are coaching targets, not research cutoffs.',
   },
 ];
 
 export const NIPPARD_LLP_STUDY_SYNTHESIS = {
-  title: 'Stretch-Mediated Hypertrophy & Lengthened Partials (Jeff Nippard 2024–2026)',
-  leadResearcher: 'Jeff Nippard (BSc Biochemistry) & Exercise Science Peer-Reviewed Literature',
-  coreMechanism: 'Titin Kinase Phosphorylation & Longitudinal Sarcomerogenesis',
+  title: 'Lengthened Partials (LLPs), as popularized by Jeff Nippard',
+  leadResearcher: 'Jeff Nippard (co-author, Wolf et al. 2025) & peer-reviewed literature',
+  coreMechanism: 'Not settled: thought to relate to high tension at long muscle lengths',
   summary:
-    'Recent hypertrophy trials (Maeo et al. 2021/2023, Kassiano et al. 2023, Pedrosa et al. 2022) prove that training muscles in their lengthened/stretched position stimulates superior muscle growth compared to shortened-position training. This occurs because mechanical tension in the lengthened state recruits both active actin-myosin bridges and passive titin elastic filaments.',
+    'Training a muscle at long lengths tends to grow it more than training at short lengths (e.g. Maeo et al. 2021 and 2023, Pedrosa et al. 2022, Kassiano et al. 2023). But compared with full range of motion, lengthened partials gave similar growth in trained lifters (Wolf et al. 2025, co-authored by Nippard; Gschneidner et al. 2025). Use LLPs to extend a set, not as something that beats full reps. Calves are where the studies favor them most.',
   protocolRules: [
-    'Complete full-range repetitions to 1–2 Reps in Reserve (RIR).',
-    'On the final set of eligible accessories, immediately perform 3–5 lengthened partial repetitions in the bottom 50% stretched range.',
-    'Pause 0.5s in the deep stretch without bouncing or using rebound inertia.',
-    'Best applied to exercises with peak tension in stretch: Romanian Deadlifts, Incline Dumbbell/KB Curls, Preacher Curls, Bulgarian Split Squats, Single-Arm Rows, and Lateral Raises.',
+    'Do full-range reps first, taken close to failure.',
+    'On the final set only, when full reps run out, add a few partial reps in the stretched half of the range.',
+    'Stay controlled: no bouncing out of the bottom.',
+    'Best on exercises that are hard in the stretch and safe to push close to failure: curls, overhead or cable triceps work, pulldowns, supported single-arm rows, leg curls and calf raises. Skip them on heavy barbell hinges and on rehab exercises.',
   ],
 };
 
@@ -160,9 +164,9 @@ export const LUCAS_HARDIE_RANGE_OF_STRENGTH_SYNTHESIS = {
   creator: 'Lucas Hardie (Range of Strength)',
   corePrinciple: 'Flexibility is an active feat of strength, not a passive relaxation drill.',
   guidelines: [
-    'Loaded Stretching: External loads (kettlebells, plates, barbells) assist joints into deep ranges while requiring intense eccentric and isometric contractions.',
-    'Quasi-Isometrics & End-Range Pulsing: Small, rhythmic contractions at end-range override the stretch reflex and develop motor unit control at tissue boundaries.',
-    'Ballistic Pulses (Martial Arts Model): Metronome-paced ballistic pulses (40–60 BPM) develop dynamic elasticity without injury when built on a solid foundation.',
-    'Low Frequency Rule: Maximal loaded flexibility work places heavy stress on connective tissue. Train each pattern once per week with 5–7 days for collagen remodeling.',
+    'Loaded stretching: external load (kettlebells, plates) helps you into deep ranges while you control the position. Full-range strength training improves flexibility about as much as stretching does (Afonso et al. 2021 meta-analysis).',
+    'End-range work: contracting the muscles in the deep position builds control there. Ease in and progress load gradually.',
+    'Recovery: heavy loaded flexibility work is demanding. Space hard sessions for the same pattern and keep easier mobility work on other days.',
+    'Benchmarks: the feats of range are coaching targets from Range of Strength, not research standards.',
   ],
 };

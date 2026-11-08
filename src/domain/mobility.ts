@@ -216,7 +216,7 @@ export const PROTOCOL_PANCAKE_SPLIT: MobilityProtocol = {
     { scoreOrValue: '> 8.0', label: '> 8.0 inches (> 20 cm)', interpretation: 'Severe restriction; elevate pelvis on 2–4" block and train active compression.' },
     { scoreOrValue: '4.0–8.0', label: '4.0–8.0 inches (10–20 cm)', interpretation: 'Moderate restriction; functional adductor length for standard squats.' },
     { scoreOrValue: '0.1–3.9', label: '0.1–3.9 inches (1–9 cm)', interpretation: 'Advanced range; near full pancake compression.' },
-    { scoreOrValue: '0', label: '0 inches (Chest to Floor)', interpretation: 'Feat of Range Mastery; complete active antagonist compression and adductor freedom.' }
+    { scoreOrValue: '0', label: '0 inches (Chest to Floor)', interpretation: 'Feat of Range (coaching benchmark).' }
   ]
 };
 
@@ -241,7 +241,7 @@ export const PROTOCOL_JEFFERSON_CURL: MobilityProtocol = {
     { scoreOrValue: '< 0', label: '< 0 inches (Above Toes)', interpretation: 'Restricted posterior chain; do not load heavily until toes reached on flat ground.' },
     { scoreOrValue: '0–1.9', label: '0–1.9 inches (Toes to Knuckles)', interpretation: 'Baseline mobility; knuckles reaching platform edge.' },
     { scoreOrValue: '2.0–3.9', label: '2.0–3.9 inches (Knuckles Below Toes)', interpretation: 'Functional athletic resilience; progressive spinal flexion capacity.' },
-    { scoreOrValue: '≥ 4.0', label: '≥ 4.0 inches (Wrists Below Toes)', interpretation: 'Feat of Range Mastery; complete posterior chain length and loaded spinal resilience.' }
+    { scoreOrValue: '≥ 4.0', label: '≥ 4.0 inches (Wrists Below Toes)', interpretation: 'Feat of Range (coaching benchmark).' }
   ]
 };
 
@@ -263,10 +263,10 @@ export const PROTOCOL_GERMAN_HANG: MobilityProtocol = {
     'Hold under control without dumping passively into joint capsule. Exit safely under control.'
   ],
   scoringTiers: [
-    { scoreOrValue: '< 10', label: '< 10 seconds', interpretation: 'Restricted shoulder extension; use toe support on floor to unload tension.' },
-    { scoreOrValue: '10–29', label: '10–29 seconds', interpretation: 'Developing functional shoulder extension and bicep tendon resilience.' },
-    { scoreOrValue: '30–59', label: '30–59 seconds', interpretation: 'Proficient ring turnover tolerance and dynamic shoulder durability.' },
-    { scoreOrValue: '≥ 60', label: '≥ 60 seconds', interpretation: 'Feat of Range Mastery; complete bicep tendon resilience and end-range shoulder control.' }
+    { scoreOrValue: '< 10', label: '< 10 seconds', interpretation: 'Restricted shoulder extension; keep toes on the floor to take weight off.' },
+    { scoreOrValue: '10–29', label: '10–29 seconds', interpretation: 'Developing shoulder extension.' },
+    { scoreOrValue: '30–59', label: '30–59 seconds', interpretation: 'Proficient (Range of Strength target).' },
+    { scoreOrValue: '≥ 60', label: '≥ 60 seconds', interpretation: 'Feat of Range (coaching benchmark).' }
   ]
 };
 
@@ -285,20 +285,20 @@ export const PROTOCOL_HEAD_TO_TOE: MobilityProtocol = {
   instructions: [
     'Sit on floor with legs straight out front, knees completely locked and toes pulled back.',
     'Actively compress torso toward legs using hip flexor and abdominal pull.',
-    'Perform rhythmic ballistic pulses at 40–60 BPM, then measure gap from forehead to big toes.'
+    'Warm up with a few easy folds first, then hold your deepest controlled position and measure the gap from forehead to big toes.'
   ],
   scoringTiers: [
     { scoreOrValue: '> 6.0', label: '> 6.0 inches (> 15 cm)', interpretation: 'Severe posterior chain restriction; prioritize loaded Jefferson curls.' },
     { scoreOrValue: '3.0–6.0', label: '3.0–6.0 inches (7.5–15 cm)', interpretation: 'Developing compression mobility.' },
     { scoreOrValue: '0.1–2.9', label: '0.1–2.9 inches (1–7 cm)', interpretation: 'Advanced range; forehead approaching toes.' },
-    { scoreOrValue: '0', label: '0 inches (Forehead to Toes)', interpretation: 'Feat of Range Mastery; complete posterior chain length and dynamic closure.' }
+    { scoreOrValue: '0', label: '0 inches (Forehead to Toes)', interpretation: 'Feat of Range (coaching benchmark).' }
   ]
 };
 
 export const PROTOCOL_SIDE_SPLIT: MobilityProtocol = {
   id: 'side-split',
   testId: 'side-split',
-  name: 'Lucas Hardie Side Split (Pancake Abduction)',
+  name: 'Lucas Hardie Side Split (Middle Split)',
   creator: 'Lucas Hardie (Range of Strength)',
   targetTissue: 'Adductor Brevis/Longus, Pectineus, Gracilis & Hip Capsule',
   primaryMetric: 'Crotch-to-Floor Distance',
@@ -309,14 +309,14 @@ export const PROTOCOL_SIDE_SPLIT: MobilityProtocol = {
   benchmarkNumeric: 0,
   instructions: [
     'Slide feet out wide sideways on a smooth surface or wearing socks.',
-    'Tilt pelvis anteriorly (Thomas Kurz method) to clear the femoral neck from the acetabulum rim.',
+    'Tilt the pelvis forward (Thomas Kurz style) and lower slowly; stop at a stretch, not pain.',
     'Keep kneecaps facing forward/up; measure vertical distance from pelvic floor/crotch to the floor.'
   ],
   scoringTiers: [
     { scoreOrValue: '> 10.0', label: '> 10.0 inches (> 25 cm)', interpretation: 'Severe adductor restriction; train loaded horse stance first.' },
     { scoreOrValue: '4.0–10.0', label: '4.0–10.0 inches (10–25 cm)', interpretation: 'Functional straddle range for squatting and lunging.' },
     { scoreOrValue: '0.1–3.9', label: '0.1–3.9 inches (1–9 cm)', interpretation: 'Advanced side split range.' },
-    { scoreOrValue: '0', label: '0 inches (Full Side Split)', interpretation: 'Feat of Range Mastery; complete pelvic floor clearance and hip abduction.' }
+    { scoreOrValue: '0', label: '0 inches (Full Side Split)', interpretation: 'Feat of Range (coaching benchmark).' }
   ]
 };
 
@@ -340,7 +340,7 @@ export const PROTOCOL_BACK_BRIDGE: MobilityProtocol = {
   scoringTiers: [
     { scoreOrValue: '< 10', label: '< 10 seconds', interpretation: 'Restricted thoracic spine or wrist extension; elevate feet on box.' },
     { scoreOrValue: '10–29', label: '10–29 seconds', interpretation: 'Developing spinal extension endurance.' },
-    { scoreOrValue: '≥ 30', label: '≥ 30 seconds', interpretation: 'Feat of Range Mastery; smooth spinal arc distribution across entire spine.' }
+    { scoreOrValue: '≥ 30', label: '≥ 30 seconds', interpretation: 'Feat of Range (coaching benchmark).' }
   ]
 };
 

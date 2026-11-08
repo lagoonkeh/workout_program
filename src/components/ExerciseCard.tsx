@@ -1575,7 +1575,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 font-bold text-purple-300">
               <Flame className="w-4 h-4 text-purple-400 shrink-0" />
-              <span>Jeff Nippard Lengthened Partials (LLP Protocol)</span>
+              <span>Lengthened Partials (LLPs, Jeff Nippard)</span>
             </div>
             <button
               type="button"
@@ -1587,15 +1587,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             </button>
           </div>
           <p className="text-purple-200/90 text-xs leading-relaxed">
-            {exercise.llpProtocolNotes || 'After reaching target reps at 1–2 RIR, pump 3–5 controlled partials in the lengthened stretched position to trigger sarcomerogenesis and maximum passive mechanical tension.'}
+            {exercise.llpProtocolNotes || 'On the final set, when full reps run out, add a few controlled partials in the stretched half of the range.'}
           </p>
           {showLLPGuide && (
             <div className="pt-2 border-t border-purple-800/40 text-[11px] text-purple-200 space-y-1.5 animate-in fade-in duration-150">
               <p>
-                <strong>Scientific Basis (Nippard 2024–2026):</strong> Longitudinal muscle growth (sarcomerogenesis) and titin-mediated mechanotransduction occur predominantly when high mechanical tension is applied in the fully stretched muscle length.
+                <strong>What the research shows:</strong> Training at long muscle lengths tends to beat training at short lengths. Compared with full reps, lengthened partials give similar growth in trained lifters (Wolf et al. 2025, co-authored by Nippard). They extend a set; they don&apos;t beat full reps.
               </p>
               <p>
-                <strong>Execution Rule:</strong> Do not bounce. Pause 0.5s in the deepest stretched position, power through only the bottom 50% of the ROM, and control the reversal. Log LLPs using the <span className="font-mono bg-purple-900/60 px-1 py-0.5 rounded border border-purple-400/50">+LLPs</span> button on your sets.
+                <strong>How:</strong> No bouncing; control the bottom. Log them with the <span className="font-mono bg-purple-900/60 px-1 py-0.5 rounded border border-purple-400/50">+LLPs</span> button on your last set.
               </p>
             </div>
           )}
@@ -2746,7 +2746,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                       }
                       className="w-full min-h-[36px] bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-300 text-[11px] sm:text-xs focus:outline-none focus:border-emerald-500 text-center placeholder:text-center"
                     />
-                    {isLLP && (
+                    {isLLP && (idx === logs.length - 1 || set.llpPerformed) && (
                       <button
                         type="button"
                         data-testid={`llp-toggle-btn-${idx}`}

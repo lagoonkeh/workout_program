@@ -72,31 +72,24 @@ export interface WorkoutExercise {
 }
 
 /**
- * Determines whether an exercise is suited for Jeff Nippard's Long-Length Partials (LLPs) protocol.
- * Stretch-mediated hypertrophy research demonstrates high efficacy when peak resistance occurs in the lengthened muscle position.
+ * Whether an exercise gets the lengthened-partials (LLP) option.
+ * LLPs suit exercises that are hard in the stretched position and safe to push near failure.
+ * Heavy barbell lifts, spinal hinges and rehab drills are left out; an explicit llpEligible wins.
  */
 export function isLLPEligible(exercise: WorkoutExercise): boolean {
   if (exercise.llpEligible !== undefined) return exercise.llpEligible;
+  if (exercise.equipment === 'barbell') return false;
   const name = exercise.name.toLowerCase();
-  const id = exercise.id.toLowerCase();
+  if (/(jefferson|nordic|good morning|deadlift|rdl|upright row)/.test(name)) return false;
   return (
-    name.includes('curl') ||
-    name.includes('rdl') ||
-    name.includes('romanian deadlift') ||
-    name.includes('split squat') ||
-    name.includes('hack squat') ||
-    name.includes('good morning') ||
-    name.includes('row') ||
-    name.includes('lat pulldown') ||
+    /\bcurl/.test(name) ||
+    /\brows?\b/.test(name) ||
     name.includes('pulldown') ||
     name.includes('flye') ||
     name.includes('lateral raise') ||
     name.includes('triceps') ||
     name.includes('skull crusher') ||
-    id.includes('curl') ||
-    id.includes('rdl') ||
-    id.includes('split-squat') ||
-    id.includes('row')
+    name.includes('calf raise')
   );
 }
 
@@ -575,8 +568,7 @@ export const SESSION_LOWER_A: WorkoutSession = {
       muscleGroups: ['Quadriceps (VMO focus)', 'Psoas / Hip Flexors', 'Glutes', 'Calves'],
       biomechanicalRationale: 'Ben Patrick tendinopathy rehabilitation cornerstone. Promotes full hamstring-to-calf coverage under slow, controlled loading to remodel patellar collagen and elongate the rear-leg psoas.',
       progressionRule: 'Double progression: achieve 10 reps/leg across all 3 sets with 0/10 pain before increasing kettlebell load by 5 lbs.',
-      llpEligible: true,
-      llpProtocolNotes: 'Jeff Nippard / ATG LLP: On final set, perform 3–5 lengthened partials in the deep knee-over-toes stretch to trigger sarcomerogenesis in the distal quad & VMO.',
+      llpEligible: false,
       regression: {
         condition: 'Patellar tendon pain ache or inability to reach full depth without heel lift',
         exerciseId: 't2_atg_split_squat_elevated',
@@ -747,7 +739,7 @@ export const SESSION_UPPER_A: WorkoutSession = {
       biomechanicalRationale: 'Bench-supported horizontal pull that balances the bench press. Driving the elbow back toward the hip pocket (not up to the chest) lines the pull up with the lat fibers, and the braced hand and knee unload the lower back.',
       progressionRule: 'Double progression: build to 10 strict reps/arm across all 3 sets, then advance to the next Bowflex kettlebell notch (25 → 35 → 40 lbs max). At 40 lbs, add a 2-second squeeze at the top and a 4-second lowering.',
       llpEligible: true,
-      llpProtocolNotes: 'Jeff Nippard LLP: After completing target reps, pump 3–5 partials in the deep bottom lat stretch at 0–1 RIR without bouncing.',
+      llpProtocolNotes: 'Final set only: when full reps run out, add 3–5 controlled partials in the bottom (stretched) half of the row. No bouncing.',
       regression: {
         condition: 'Lower back fatigue or difficulty bracing on the bench',
         exerciseId: 't2_inverted_row',
@@ -897,8 +889,7 @@ export const SESSION_LOWER_B: WorkoutSession = {
       muscleGroups: ['Hamstrings (Biceps Femoris/Semitendinosus)', 'Gluteus Maximus', 'Erector Spinae', 'Lats'],
       biomechanicalRationale: 'Maximum stretch-mediated hypertrophy of the posterior chain. Controlled 3s hip hinge with bar kept in continuous contact with thighs minimizes the lumbar moment arm while maximally stressing hamstrings.',
       progressionRule: 'Add 10 lbs once all 5 sets of 3 are clean at RPE 8 or below. No all-out last set on RDLs: stop every set with a flat back and about 2 reps in reserve.',
-      llpEligible: true,
-      llpProtocolNotes: 'Jeff Nippard Stretch Protocol: On final set, pause 0.5s in the deep hamstring stretch and pulse 3 partials below the knee to drive longitudinal sarcomerogenesis.',
+      llpEligible: false,
       regression: {
         condition: 'Lower back shear, disc fatigue, or hamstring cramping',
         exerciseId: 't1_kb_rdl',
@@ -922,8 +913,7 @@ export const SESSION_LOWER_B: WorkoutSession = {
       muscleGroups: ['Hamstrings', 'Glutes', 'Thoracic/Lumbar Erectors'],
       biomechanicalRationale: 'Reinforces hip hinge mechanics and strengthens the spinal extensor endurance ratio without requiring heavy axial spine compression.',
       progressionRule: 'Double progression: achieve 3x10 clean reps before stepping kettlebell weight up by 5 lbs.',
-      llpEligible: true,
-      llpProtocolNotes: 'Jeff Nippard LLP: Focus on deepest safe hip flexion stretch; perform 3 controlled lengthened partials before re-extending.',
+      llpEligible: false,
       regression: {
         condition: 'Hamstring over-tightness or adductor stiffness',
         exerciseId: 't2_goblet_cossack_squat',
