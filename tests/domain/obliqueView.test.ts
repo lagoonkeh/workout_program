@@ -74,7 +74,7 @@ describe('domain/obliqueView', () => {
     (['rdl', 'good_morning', 'kb_row', 'pullup', 'face_pull', 'dead_hang'] as Id[]).forEach((id) => expect(defaultCamera(id)).toBe('rear45'));
     expect(defaultCamera('single_leg_atw')).toBe('top');
     expect(defaultCamera('carry')).toBe('top');
-    expect(defaultCamera('pullup', 'Athlean-X Hanging Knee Raise with Pelvic Curl')).toBe('front45');
+    expect(defaultCamera('hanging_knee_raise')).toBe('front45');
     IDS.forEach((id) => expect(OBLIQUE_CAMERAS).toContain(defaultCamera(id)));
   });
 

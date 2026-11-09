@@ -134,12 +134,12 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     frames: two(
       {
         hip: [72, 136], torso: -10, head: 4,
-        armN: to(124, 177, 1), armF: to(128, 177, 1),
+        armN: to(124, 177, -1), armF: to(128, 177, -1),
         legN: ang(90, 180), legF: ang(90, 180), footN: 180, footF: 180,
       },
       {
         hip: [72, 136], torso: -10, head: -4,
-        armN: to(124, 177, 1), armF: ang(-10, -10),
+        armN: to(124, 177, -1), armF: ang(-10, -10),
         legN: ang(178, 178), legF: ang(90, 180), footN: 90, footF: 180,
       }
     ),
@@ -176,11 +176,11 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     order: 'concentric-first',
     frames: two(
       {
-        hip: [80, 100], torso: -6, head: 8, armN: to(130, 146.4, -1), armF: to(134, 139, 1),
+        hip: [80, 100], torso: -6, head: 8, armN: to(130, 146.4, -1), armF: to(134, 139, -1),
         legN: to(92, 176), legF: ang(92, 180), footF: 180,
       },
       {
-        hip: [80, 100], torso: -6, head: 8, armN: to(108, 104, -1), armF: to(134, 139, 1),
+        hip: [80, 100], torso: -6, head: 8, armN: to(108, 104, -1), armF: to(134, 139, -1),
         legN: to(92, 176), legF: ang(92, 180), footF: 180,
       }
     ),
@@ -235,8 +235,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Dead hang',
     order: 'hold',
     frames: two(
-      { hip: [100, 108], torso: -90, head: -90, armN: to(100, 2, 1), legN: ang(92, 152), footN: 118, shrug: 4 },
-      { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, 1), legN: ang(93, 152), footN: 118 }
+      { hip: [100, 108], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(92, 140), footN: 150, shrug: 4 },
+      { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(93, 140), footN: 150 }
     ),
     props: [],
     scenery: [{ kind: 'bar', y: 0, x1: 50, x2: 150 }],
@@ -271,8 +271,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Kettlebell good morning',
     order: 'eccentric-first',
     frames: two(
-      { hip: [92, 99], torso: -90, head: -88, armN: rel('neck', 6, 12, 1), legN: to(94, 176), legF: to(91, 176) },
-      { hip: [67, 106], torso: -38, head: -30, armN: rel('neck', 6, 12, 1), legN: to(94, 176), legF: to(91, 176) }
+      { hip: [92, 99], torso: -90, head: -88, armN: ang(78, -80), legN: to(94, 176), legF: to(91, 176) },
+      { hip: [67, 106], torso: -38, head: -30, armN: ang(130, -28), legN: to(94, 176), legF: to(91, 176) }
     ),
     props: [{ kind: 'kettlebell', at: 'handN', d: [3, 0] }],
     scenery: [],
@@ -288,8 +288,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Biering-SÃ¸rensen hold',
     order: 'hold',
     frames: two(
-      { hip: [104, 97], torso: 35, head: 45, armN: rel('neck', -12, 3, 1), legN: ang(180, 180), footN: -90 },
-      { hip: [104, 97], torso: 0, head: 0, armN: rel('neck', -12, 3, 1), legN: ang(180, 180), footN: -90 }
+      { hip: [104, 97], torso: 35, head: 45, armN: ang(203, 45), legN: ang(180, 180), footN: -90 },
+      { hip: [104, 97], torso: 0, head: 0, armN: ang(168, 10), legN: ang(180, 180), footN: -90 }
     ),
     props: [],
     scenery: [
@@ -376,10 +376,13 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
   pullup: {
     title: 'Pull-up',
     order: 'concentric-first',
-    frames: two(
-      { hip: [100, 104], torso: -88, head: -90, armN: to(100, 2, 1), legN: ang(94, 152), footN: 118 },
-      { hip: [104, 50], torso: -80, head: -84, armN: to(100, 2, 1), legN: ang(98, 154), footN: 118 }
-    ),
+    // Lifter faces +x: the body stays behind the bar, leaning back on the way up so the head clears it,
+    // and finishes with the chin over the bar and the elbows driven down and forward.
+    frames: [
+      kf(0, { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(92, 138), footN: 150 }),
+      kf(0.7, { hip: [92, 66], torso: -100, head: -86, armN: to(100, 2, -1), legN: ang(86, 132), footN: 145 }),
+      kf(1, { hip: [94, 52], torso: -96, head: -84, armN: to(100, 2, -1), legN: ang(88, 132), footN: 145 }),
+    ],
     props: [],
     scenery: [{ kind: 'bar', y: 0, x1: 50, x2: 150 }],
     worked: ['uaN', 'uaF', 'torso'],
@@ -394,8 +397,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Kettlebell Z-press',
     order: 'concentric-first',
     frames: two(
-      { hip: [70, 170], torso: -90, head: -88, armN: to(82, 112, -1), armF: ang(70, 100), legN: ang(0, 0), footN: -80 },
-      { hip: [70, 170], torso: -90, head: -86, armN: to(72, 68.5, -1), armF: ang(70, 100), legN: ang(0, 0), footN: -80 }
+      { hip: [70, 170], torso: -90, head: -88, armN: to(82, 112, -1), armF: ang(80, 20), legN: ang(0, 0), footN: -80 },
+      { hip: [70, 170], torso: -90, head: -86, armN: to(72, 68.5, -1), armF: ang(80, 20), legN: ang(0, 0), footN: -80 }
     ),
     props: [{ kind: 'kettlebell', at: 'handN', d: [2, -8] }],
     scenery: [],
@@ -453,8 +456,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Backward sled drag',
     order: 'cycle',
     frames: two(
-      { hip: [94, 104], torso: -100, head: -92, armN: to(113, 97, 1), legN: to(116, 176), legF: to(72, 172), footF: 28 },
-      { hip: [92, 104], torso: -100, head: -92, armN: to(111, 97, 1), legN: to(72, 172), legF: to(114, 176), footN: 28, footF: 0 }
+      { hip: [94, 104], torso: -100, head: -92, armN: to(113, 97, -1), legN: to(116, 176), legF: to(72, 172), footF: 28 },
+      { hip: [92, 104], torso: -100, head: -92, armN: to(111, 97, -1), legN: to(72, 172), legF: to(114, 176), footN: 28, footF: 0 }
     ),
     props: [{ kind: 'cable', anchor: [170, 160], at: 'handN' }],
     scenery: [{ kind: 'rect', x: 164, y: 156, w: 28, h: 24, r: 3, tone: 'steel' }],
@@ -470,8 +473,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: '90/90 hip reset',
     order: 'hold',
     frames: two(
-      { hip: [96, 168], torso: -90, head: -88, armN: ang(80, 80), legN: ang(8, 170), legF: ang(172, 10), footN: 180, footF: 0 },
-      { hip: [96, 168], torso: -45, head: -30, armN: ang(25, 25), legN: ang(8, 170), legF: ang(172, 10), footN: 180, footF: 0 }
+      { hip: [96, 168], torso: -90, head: -88, armN: ang(80, 80), legN: ang(8, 170), legF: ang(172, 186), footN: 180, footF: 180 },
+      { hip: [96, 168], torso: -45, head: -30, armN: ang(25, 25), legN: ang(8, 170), legF: ang(172, 186), footN: 180, footF: 180 }
     ),
     props: [],
     scenery: [],
@@ -509,9 +512,10 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
   warmup_90_90: {
     title: '90/90 breathing + bridge',
     order: 'hold',
+    // knees point at the ceiling: thigh vertical over the hip, shin flat to the heels on the box (90/90)
     frames: two(
-      { hip: [100, 170], torso: 180, head: 181, armN: ang(2, 2), legN: to(138, 128, -1), footN: -80 },
-      { hip: [100, 150], torso: 157, head: 172, armN: ang(22, 0), legN: to(138, 128, -1), footN: -80 }
+      { hip: [100, 170], torso: 180, head: 181, armN: ang(2, 2), legN: to(138, 128, 1), footN: -80 },
+      { hip: [100, 150], torso: 157, head: 172, armN: ang(22, 0), legN: to(138, 128, 1), footN: -80 }
     ),
     props: [],
     scenery: [{ kind: 'rect', x: 132, y: 131, w: 34, h: 49, r: 3, tone: 'plate' }],
@@ -598,8 +602,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Elephant walk',
     order: 'cycle',
     frames: two(
-      { hip: [90, 100], torso: 46, head: 70, armN: to(140, 176, 1), legN: to(90, 176), legF: to(86, 168), footF: 32 },
-      { hip: [90, 100], torso: 46, head: 70, armN: to(140, 176, 1), legN: to(94, 168), legF: to(86, 176), footN: 32, footF: 0 }
+      { hip: [90, 100], torso: 46, head: 70, armN: to(140, 176, -1), legN: to(90, 176), legF: to(86, 168), footF: 32 },
+      { hip: [90, 100], torso: 46, head: 70, armN: to(140, 176, -1), legN: to(94, 168), legF: to(86, 176), footN: 32, footF: 0 }
     ),
     props: [],
     scenery: [],
@@ -615,8 +619,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     title: 'Scapular hang pulls',
     order: 'concentric-first',
     frames: two(
-      { hip: [100, 109], torso: -90, head: -90, armN: to(100, 2, 1), legN: ang(92, 152), footN: 118, shrug: 5 },
-      { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, 1), legN: ang(93, 152), footN: 118 }
+      { hip: [100, 109], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(92, 144), footN: 154, shrug: 5 },
+      { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(93, 140), footN: 150 }
     ),
     props: [],
     scenery: [{ kind: 'bar', y: 0, x1: 50, x2: 150 }],
@@ -642,6 +646,103 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     angle: { joints: ['hip', 'neck', 'elbowN'], label: 'Shoulder' },
     startCue: '"W": forearms on the wall',
     endCue: '"Y": reach up, ribs down',
+  },
+
+  // --- hanging core work -------------------------------------------------------------------------
+  hanging_knee_raise: {
+    title: 'Hanging knee raise + pelvic curl',
+    order: 'concentric-first',
+    // arms stay straight from the bar; the pelvis curls up (tailbone forward) as the knees come to the chest
+    frames: [
+      kf(0, { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(92, 138), footN: 150 }),
+      kf(0.4, { hip: [103.5, 103.6], torso: -94, head: -88, armN: to(100, 2, -1), legN: ang(50, 120), footN: 150 }),
+      kf(1, { hip: [108.7, 103.2], torso: -100, head: -86, armN: to(100, 2, -1), legN: ang(-20, 85), footN: 60 }),
+    ],
+    props: [],
+    scenery: [{ kind: 'bar', y: 0, x1: 50, x2: 150 }],
+    worked: ['torso', 'thN', 'thF'],
+    track: { joint: 'kneeN' },
+    trackLabel: 'Knees curl to the chest',
+    angle: { joints: ['neck', 'hip', 'kneeN'], label: 'Hip' },
+    startCue: 'Active hang, shoulders packed down',
+    endCue: 'Curl the pelvis up, knees to chest, no swing',
+  },
+
+  hanging_corkscrew: {
+    title: 'Hanging corkscrew',
+    order: 'loop',
+    // hang -> knees up and across to one side -> hang -> the other side (the front views show the side-to-side)
+    frames: (() => {
+      const hang: PoseSpec = { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(92, 138), footN: 150 };
+      const mid: PoseSpec = { hip: [102.6, 103.85], torso: -93, head: -89, armN: to(100, 2, -1), legN: ang(50, 120), footN: 150 };
+      const up: PoseSpec = { hip: [105.2, 103.7], torso: -96, head: -88, armN: to(100, 2, -1), legN: ang(5, 92), footN: 70 };
+      return [hang, mid, up, mid, hang, mid, up, mid, hang].map((p, i) => kf(i / 8, p));
+    })(),
+    props: [],
+    scenery: [{ kind: 'bar', y: 0, x1: 50, x2: 150 }],
+    worked: ['torso', 'thN'],
+    track: { joint: 'kneeN' },
+    trackLabel: 'Knees corkscrew side to side',
+    angle: { joints: ['neck', 'hip', 'kneeN'], label: 'Hip' },
+    startCue: 'Active hang, hips square',
+    endCue: 'Twist and drive the knees to one armpit, then the other',
+  },
+
+  // --- floor core work ---------------------------------------------------------------------------
+  curl_up: {
+    title: 'Curl-up (McGill)',
+    order: 'concentric-first',
+    // supine, head to the left: one knee up, other leg long, hands under the low back; head and shoulders lift as one
+    frames: two(
+      { hip: [112, 170], torso: 180, head: 182, armN: to(112, 175, -1), legN: to(140, 176, 1), legF: ang(0, 0), footN: 0, footF: -80 },
+      { hip: [112, 170], torso: 190, head: 196, armN: to(112, 175, -1), legN: to(140, 176, 1), legF: ang(0, 0), footN: 0, footF: -80 }
+    ),
+    props: [],
+    scenery: [],
+    worked: ['torso'],
+    track: { joint: 'head' },
+    trackLabel: 'Head & shoulders lift',
+    startCue: 'Flat back, one knee up, hands under the low back',
+    endCue: 'Lift head and shoulders as one, squeeze 2 s',
+  },
+
+  plank_knee: {
+    title: 'Forearm plank, elbow to knee',
+    order: 'concentric-first',
+    // prone, head to the right: elbows under the shoulders; the near knee drives forward to the elbow, hips lift a touch
+    // the hips lift as the knee passes under the body, so the knee clears the floor
+    frames: [
+      kf(0, { hip: [88, 148], torso: -5, head: -2, armN: to(162, 175, -1), legN: to(12, 165, 1), footN: 115 }),
+      kf(0.5, { hip: [89, 128], torso: 18, head: 18, armN: to(162, 175, -1), legN: ang(90, 175), legF: to(18, 158, 1), footN: 196, footF: 125 }),
+      kf(1, { hip: [89, 140], torso: 6, head: 10, armN: to(162, 175, -1), legN: ang(18, 178), legF: to(16, 166, 1), footN: 180, footF: 115 }),
+    ],
+    props: [],
+    scenery: [],
+    worked: ['torso', 'uaN'],
+    track: { joint: 'kneeN' },
+    trackLabel: 'Knee drives to the elbow',
+    angle: { joints: ['neck', 'hip', 'kneeN'], label: 'Hip' },
+    startCue: 'Forearm plank, push the floor away',
+    endCue: 'Drive the knee to the elbow, hips stay level',
+  },
+
+  mountain_climber: {
+    title: 'Cross-body mountain climber',
+    order: 'cycle',
+    // high plank, head to the right; knees alternate driving forward and across (the front views show the cross)
+    // mid-switch the hips pop up so both knees pass under the body without touching the floor
+    frames: [
+      kf(0, { hip: [88, 139], torso: -15, head: -10, armN: to(137, 177, -1), legN: ang(25, 170), legF: to(14, 164, 1), footN: 175, footF: 126 }),
+      kf(0.5, { hip: [88, 125], torso: 2, head: 2, armN: to(137, 177, -1), legN: ang(90, 168), legF: ang(90, 168), footN: 192, footF: 192 }),
+      kf(1, { hip: [88, 139], torso: -15, head: -10, armN: to(137, 177, -1), legN: to(14, 164, 1), legF: ang(25, 170), footN: 126, footF: 175 }),
+    ],
+    props: [],
+    scenery: [],
+    worked: ['torso', 'thN', 'thF'],
+    track: { joint: 'kneeN' },
+    trackLabel: 'Knee drives across',
+    startCue: 'Hands under shoulders, hips level',
+    endCue: 'Knee drives across to the opposite elbow',
   },
 };
 

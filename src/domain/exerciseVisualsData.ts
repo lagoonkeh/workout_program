@@ -31,7 +31,12 @@ export type DiagramType =
   | 'warmup_elephant'
   | 'warmup_dead_hang'
   | 'warmup_wall_slide'
-  | 'single_leg_atw';
+  | 'single_leg_atw'
+  | 'hanging_knee_raise'
+  | 'hanging_corkscrew'
+  | 'curl_up'
+  | 'plank_knee'
+  | 'mountain_climber';
 
 export interface ExerciseVisual {
   id: string;
@@ -842,7 +847,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_hanging_knee_raise: {
     id: 't3_athlean_hanging_knee_raise',
     exerciseName: 'Athlean-X Hanging Knee Raise with Pelvic Curl',
-    diagramType: 'pullup',
+    diagramType: 'hanging_knee_raise',
     startPositionLabel: '1. Active Dead Hang (Depressed Scapulae)',
     bottomPositionLabel: '2. Top Pelvic Curl (Show Tailbone)',
     caption: 'Jeff Cavaliere kinetic sequence step 1: curl pelvis upward toward chest, not just lifting thighs with hip flexors.',
@@ -863,7 +868,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_hanging_corkscrew: {
     id: 't3_athlean_hanging_corkscrew',
     exerciseName: 'Athlean-X Hanging Corkscrews',
-    diagramType: 'pullup',
+    diagramType: 'hanging_corkscrew',
     startPositionLabel: '1. Active Hang Centerline',
     bottomPositionLabel: '2. Diagonal Knee Drive to Armpit',
     caption: 'Bottom-up rotational oblique drive: lift knees diagonally toward opposite armpit, twisting pelvis with strict control.',
@@ -905,7 +910,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_cross_mountain_climber: {
     id: 't3_athlean_cross_mountain_climber',
     exerciseName: 'Athlean-X Cross-Body Mountain Climbers',
-    diagramType: 'core_mcgill',
+    diagramType: 'mountain_climber',
     startPositionLabel: '1. High Push-Up Plank Base',
     bottomPositionLabel: '2. Cross-Body Knee Drive to Opposite Elbow',
     caption: 'Top-down rotational drive: slow, deliberate cross-body knee drive with 1s oblique squeeze.',
@@ -926,7 +931,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_iso_crunch: {
     id: 't3_athlean_iso_crunch',
     exerciseName: 'Athlean-X 2-Second Peak Squeeze Floor Curl-Up',
-    diagramType: 'core_mcgill',
+    diagramType: 'curl_up',
     startPositionLabel: '1. Supine 90° Bent-Knee Setup',
     bottomPositionLabel: '2. 30° Thoracic Curl with 2s Squeeze',
     caption: 'Top-down flexion: curl only shoulder blades off floor (30°), exhale all air, squeeze upper rectus abdominis for 2 full seconds.',
@@ -947,7 +952,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_serratus_plank: {
     id: 't3_athlean_serratus_plank',
     exerciseName: 'Athlean-X Serratus Elbow-to-Knee Plank',
-    diagramType: 'core_mcgill',
+    diagramType: 'plank_knee',
     startPositionLabel: '1. Forearm Plank Alignment',
     bottomPositionLabel: '2. Active Serratus & Elbow-Toe Drag',
     caption: 'Jeff Cavaliere & Stuart McGill core cylinder finisher: protract shoulder blades, isometrically pull elbows toward toes.',
@@ -1011,7 +1016,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_hanging_knee_raise: {
     id: 't3_bjj_hanging_knee_raise',
     exerciseName: 'Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression',
-    diagramType: 'pullup',
+    diagramType: 'hanging_knee_raise',
     startPositionLabel: '1. Active Dead Hang (Depressed Scapulae)',
     bottomPositionLabel: '2. Posterior Pelvic Tilt Curl',
     caption: 'Post-grappling spinal decompression & lower core: curl pelvis upward to expand compressed lumbar discs without psoas hyperextension.',
@@ -1053,7 +1058,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_cross_mountain_climber: {
     id: 't3_bjj_cross_mountain_climber',
     exerciseName: 'Athlean-X Cross-Body Oblique Climbers & Serratus Punch',
-    diagramType: 'core_mcgill',
+    diagramType: 'mountain_climber',
     startPositionLabel: '1. High Push-Up Plank Base',
     bottomPositionLabel: '2. Cross-Body Knee-to-Elbow Squeeze',
     caption: 'Post-grappling rotational reset: drive knee across torso to opposite elbow to balance asymmetric rotation from guard passing.',
@@ -1074,7 +1079,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_mcgill_curl_up: {
     id: 't3_bjj_mcgill_curl_up',
     exerciseName: 'Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace',
-    diagramType: 'core_mcgill',
+    diagramType: 'curl_up',
     startPositionLabel: '1. Supine Neutral Spine with Hands Under Lumbar',
     bottomPositionLabel: '2. Unitized Head & Shoulder Elevation',
     caption: 'Dr. Stuart McGill spinal-sparing core curl-up: preserve neutral lumbar curve with hands while elevating head and shoulders 1 inch.',

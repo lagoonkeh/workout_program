@@ -239,7 +239,7 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
   },
   warmup_hip: {
     view: 'front', label: 'Front',
-    lat: { hand: [20, 14], elbow: 18, hip: 9, knee: { N: 30, F: 30 }, ankle: { N: 6, F: 6 }, toe: { N: 2, F: 2 } },
+    lat: { hand: [20, 14], elbow: 18, hip: 9, knee: { N: 30, F: 14 }, ankle: { N: 6, F: 6 }, toe: { N: 2, F: 2 } },
     props: [], scenery: [], guide: 'midline',
     track: { joint: 'neck', side: 'mid', label: 'Chest over shin' },
     cue: 'Square the chest over the front shin',
@@ -309,6 +309,47 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     props: [], scenery: [{ kind: 'rect', x: 30, y: -20, w: 140, h: 200, tone: 'wall' }], guide: 'midline',
     track: { joint: 'hand', side: 'N', label: '"W" to "Y"' },
     cue: '"W" to "Y" — forearms stay on the wall',
+  },
+  hanging_knee_raise: {
+    view: 'front', label: 'Front',
+    lat: { hand: 24, elbow: 24, scap: 9, knee: 6, ankle: 5, toe: 6 },
+    props: [], scenery: pullBar, guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knees rise on the midline' },
+    cue: 'Knees rise together; pelvis curls, no swing',
+  },
+  hanging_corkscrew: {
+    view: 'front', label: 'Front',
+    // keys at 0 / .25 / .5 / .75 / 1: centre, knees to the lifter's right, centre, to the left, centre
+    lat: {
+      hand: 24, elbow: 24, scap: 9,
+      knee: { N: [6, 24, 6, -12, 6], F: [6, -12, 6, 24, 6] },
+      ankle: { N: [5, 28, 5, -18, 5], F: [5, -18, 5, 28, 5] },
+      toe: { N: [6, 30, 6, -16, 6], F: [6, -16, 6, 30, 6] },
+    },
+    props: [], scenery: pullBar, guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knees swing side to side' },
+    cue: 'Pelvis twists to each side; shoulders stay square',
+  },
+  curl_up: {
+    view: 'front', label: 'Feet-end',
+    lat: { hand: 14, elbow: 15, knee: { N: 10, F: 9 }, ankle: { N: 10, F: 9 }, toe: { N: 11, F: 10 } },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'neck', side: 'mid', label: 'Shoulders lift evenly' },
+    cue: 'Head and shoulders lift as one block; neck stays long',
+  },
+  plank_knee: {
+    view: 'front', label: 'Head-end',
+    lat: { hand: 9, elbow: 13, scap: [9, 12], knee: { N: [9, 12], F: 9 }, ankle: { N: [9, 11], F: 9 }, toe: 9 },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knee path' },
+    cue: 'Hips stay level; blades spread as you push the floor away',
+  },
+  mountain_climber: {
+    view: 'front', label: 'Head-end',
+    lat: { hand: 15, elbow: 16, knee: { N: [-6, 9], F: [9, -6] }, ankle: { N: [2, 10], F: [10, 2] }, toe: { N: [2, 11], F: [11, 2] } },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knee crosses the midline' },
+    cue: 'Hips stay level and square as the knee crosses',
   },
 };
 

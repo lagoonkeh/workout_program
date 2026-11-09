@@ -120,7 +120,7 @@ describe('ExerciseDiagram Component', () => {
       ['face_pull', 'Athlean-X Face Pull', 'rear45'],
       ['single_leg_atw', 'Single-Leg Kettlebell Around-the-Worlds', 'top'],
       ['carry', 'Heavy Kettlebell Suitcase Carry', 'top'],
-      ['pullup', 'Athlean-X Hanging Knee Raise with Pelvic Curl', 'front45'],
+      ['hanging_knee_raise', 'Athlean-X Hanging Knee Raise with Pelvic Curl', 'front45'],
     ];
     cases.forEach(([type, name, cam]) => {
       const { unmount } = render(<ExerciseDiagram diagramType={type as never} exerciseName={name} />);
@@ -229,6 +229,11 @@ describe('ExerciseDiagram Component', () => {
       'warmup_wall_slide',
       'warmup_walk',
       'warmup_hip',
+      'hanging_knee_raise',
+      'hanging_corkscrew',
+      'curl_up',
+      'plank_knee',
+      'mountain_climber',
     ] as const;
 
     allDiagramTypes.forEach((type) => {

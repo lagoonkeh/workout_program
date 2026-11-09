@@ -292,6 +292,13 @@ function Body({ sk, worked, load, ghost = false, ids }: { sk: Skeleton; worked: 
       )}
       {seg('neck')}
       <circle cx={sk.head[0]} cy={sk.head[1]} r={BONES.headRadius} fill={ghost ? '#94a3b8' : COLORS.head} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
+      {!ghost &&
+        (() => {
+          // nose: shows which way the lifter faces (the face looks a quarter turn from neck->head)
+          const a = angleOf(sk.neck, sk.head) + 90;
+          const n = polar(sk.head, a, BONES.headRadius * 0.8);
+          return <circle cx={n[0]} cy={n[1]} r={1.9} fill="#64748b" data-testid="diagram-face" />;
+        })()}
       {nearArm.map(seg)}
       {!ghost &&
         (['kneeN', 'elbowN', 'hip', 'ankleN'] as JointId[]).map((j) => (

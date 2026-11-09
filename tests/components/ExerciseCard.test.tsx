@@ -1365,6 +1365,65 @@ describe('ExerciseCard Component', () => {
       expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { weightLbs: 185 });
       expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 185 });
     });
+
+    it('copies Set 1 reps down to the sets not done yet, from the Set 1 button and the header', () => {
+      const exercise = { ...mockExercise, targetSets: 4 };
+      const updateLogMock = vi.fn();
+      const mockLogs: SetLogRecord[] = [
+        { setNumber: 1, targetReps: '8', isCompleted: true, repsAchieved: 7, weightLbs: 135, notes: '' },
+        { setNumber: 2, targetReps: '8', isCompleted: true, repsAchieved: 6, weightLbs: 135, notes: '' },
+        { setNumber: 3, targetReps: '8', isCompleted: false, repsAchieved: 0, weightLbs: 135, notes: '' },
+        { setNumber: 4, targetReps: '8', isCompleted: false, repsAchieved: 0, weightLbs: 135, notes: '' },
+      ];
+
+      render(
+        <ExerciseCard
+          exercise={exercise}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId(`copy-set1-reps-btn-${exercise.id}`));
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 2, { repsAchieved: 7 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { repsAchieved: 7 });
+      // a finished set keeps the reps it was logged with
+      expect(updateLogMock).not.toHaveBeenCalledWith(exercise.id, 1, expect.objectContaining({ repsAchieved: expect.any(Number) }));
+      expect(updateLogMock).not.toHaveBeenCalledWith(exercise.id, 0, expect.objectContaining({ repsAchieved: expect.any(Number) }));
+
+      updateLogMock.mockClear();
+      fireEvent.click(screen.getByTestId(`copy-set1-reps-th-${exercise.id}`));
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { repsAchieved: 7 });
+    });
+
+    it('uses Set 1 goal reps when Set 1 has no reps logged yet', () => {
+      const exercise = { ...mockExercise, targetSets: 3 };
+      const updateLogMock = vi.fn();
+      const mockLogs: SetLogRecord[] = [
+        { setNumber: 1, targetReps: '10', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 2, targetReps: '10', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+        { setNumber: 3, targetReps: '10', isCompleted: false, repsAchieved: 0, weightLbs: 0, notes: '' },
+      ];
+
+      render(
+        <ExerciseCard
+          exercise={exercise}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId(`copy-set1-reps-btn-${exercise.id}`));
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 0, { repsAchieved: 10 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 1, { repsAchieved: 10 });
+      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 2, { repsAchieved: 10 });
+    });
   });
 
   describe('Bowflex SelectTech 840 Quick Dial Selector', () => {

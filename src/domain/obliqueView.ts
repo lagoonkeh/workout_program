@@ -187,10 +187,13 @@ export function projector(cam: ObliqueCamera, x0: number, zoom = 1): Projector {
       const u = (p[0] - x0) * c + p[2] * s;
       const h = (p[0] - x0) * s - p[2] * c; // horizontal distance toward the camera
       const y = p[1] - TOP_V0;
-      return { p: [CX + u, TOP_V0 + y * ce + h * se], d: h * ce - y * se };
+      // lifted a few units so long bodies lying on the floor stay in frame
+      return { p: [CX + u, TOP_V0 - LIFT + y * ce + h * se], d: h * ce - y * se };
     },
   };
 }
+
+const LIFT = 3;
 
 /** How far the 3/4 cameras look down (radians). */
 export const ELEVATION = (16 * Math.PI) / 180;
@@ -412,6 +415,8 @@ export const SCENE3D: Partial<Record<DiagramType, Scene3[]>> = {
   dead_hang: pullBar,
   warmup_dead_hang: pullBar,
   pullup: pullBar,
+  hanging_knee_raise: pullBar,
+  hanging_corkscrew: pullBar,
   biering_sorensen: [
     ...[40, 96].flatMap((x): Scene3[] => [-10, 10].map((zz) => ({ kind: 'rod', a: [x, 110, zz], b: [x, FLOOR_Y, zz], w: 3.5, tone: 'steel' }))),
     { kind: 'box', min: [24, 102, -15], max: [106, 111, 15], tone: 'pad' },
@@ -458,10 +463,7 @@ const REAR_FIRST: DiagramType[] = [
 /** rotation and foot placement read best from above */
 const TOP_FIRST: DiagramType[] = ['single_leg_atw', 'carry'];
 
-export function defaultCamera(type: DiagramType | string, exerciseName = ''): ObliqueCamera {
-  const n = exerciseName.toLowerCase();
-  // hanging knee raises and corkscrews borrow the pull-up rig, but the knees and pelvis are the point
-  if (/knee raise|corkscrew/.test(n)) return 'front45';
+export function defaultCamera(type: DiagramType | string, _exerciseName = ''): ObliqueCamera {
   if ((TOP_FIRST as string[]).includes(type)) return 'top';
   if ((REAR_FIRST as string[]).includes(type)) return 'rear45';
   return 'front45';
@@ -474,6 +476,8 @@ const TOP_CUE: Partial<Record<DiagramType, string>> = {
   warmup_walk: 'Feet stay hip-width, straps pull straight',
   step_down: 'Stance foot centred on the step',
   core_mcgill: 'Reaching arm and leg stay in line with the spine',
+  hanging_corkscrew: 'Knees swing to each side under a still torso',
+  mountain_climber: 'Knee crosses under the body; hips stay level',
 };
 
 export function cameraCue(cam: ObliqueCamera, type: DiagramType | string, frontal: FrontalConfig): string {

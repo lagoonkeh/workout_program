@@ -2,13 +2,14 @@
 // Guide tab: a step-by-step cue sheet for each workout (what to do, what to feel, what to avoid) and a
 // searchable glossary of the program's terms.
 import React, { Suspense, useMemo, useState } from 'react';
-import { BookOpen, ListChecks, Search, ChevronDown, ChevronUp, AlertTriangle, LifeBuoy, Quote, Clock, Repeat, ExternalLink, Info } from 'lucide-react';
+import { BookOpen, ListChecks, Search, ChevronDown, ChevronUp, AlertTriangle, LifeBuoy, Quote, Clock, Repeat, ExternalLink, Info, PlayCircle } from 'lucide-react';
 import type { WorkoutExercise, WarmupExercise, WorkoutSession } from '../domain/programData';
 import { getEffectiveExerciseTempo } from '../domain/programData';
 import { EXERCISE_VISUALS } from '../domain/exerciseVisualsData';
 import { useCueCardLookup } from '../domain/cueCardStore';
 import type { CueCard } from '../domain/cueCardTypes';
-import { GLOSSARY_CATEGORIES, explainTempo, searchGlossary, type GlossaryCategory } from '../domain/glossary';
+import { GLOSSARY_CATEGORIES, GLOSSARY_DEMOS, explainTempo, searchExerciseDemos, searchGlossary, type GlossaryCategory } from '../domain/glossary';
+import { LazyExerciseDiagram } from './LazyExerciseDiagram';
 import { RatingDefinitionsModal } from '../lazyView';
 
 export interface GuideWidgetProps {
@@ -197,6 +198,26 @@ const GuideCard: React.FC<{ item: GuideItem; index: number; open: boolean; onTog
   </li>
 );
 
+const DEMOS = 'Exercise demos' as const;
+
+function DemoToggle({ testId, open, onToggle, label, wide = false }: { testId: string; open: boolean; onToggle: () => void; label: string; wide?: boolean }) {
+  return (
+    <button
+      type="button"
+      data-testid={testId}
+      aria-expanded={open}
+      onClick={onToggle}
+      className={`${wide ? 'w-full justify-between text-left text-[13px] text-white' : 'text-[11px] text-sky-200'} min-h-[34px] inline-flex items-center gap-1.5 px-2.5 rounded-lg border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 font-semibold cursor-pointer`}
+    >
+      <span className="inline-flex items-center gap-1.5 min-w-0">
+        <PlayCircle className="w-3.5 h-3.5 text-sky-300 shrink-0" />
+        <span className={wide ? 'truncate' : ''}>{label}</span>
+      </span>
+      {open ? <ChevronUp className="w-3.5 h-3.5 shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 shrink-0" />}
+    </button>
+  );
+}
+
 export const GuideWidget: React.FC<GuideWidgetProps> = ({ sessions, initialSessionId, onOpenCueCard }) => {
   const lookup = useCueCardLookup();
   const [tab, setTab] = useState<'cues' | 'glossary'>('cues');
@@ -205,7 +226,10 @@ export const GuideWidget: React.FC<GuideWidgetProps> = ({ sessions, initialSessi
   );
   const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<GlossaryCategory | 'All'>('All');
+  const [category, setCategory] = useState<GlossaryCategory | 'All' | typeof DEMOS>('All');
+  /** which demo is open inline: 'term:<term>' or 'demo:<exercise name>' */
+  const [openDemo, setOpenDemo] = useState<string | null>(null);
+  const toggleDemo = (k: string) => setOpenDemo((cur) => (cur === k ? null : k));
   const [ratingsOpen, setRatingsOpen] = useState(false);
 
   const session = sessions.find((s) => s.id === sessionId) || sessions[0];
@@ -244,7 +268,12 @@ export const GuideWidget: React.FC<GuideWidgetProps> = ({ sessions, initialSessi
     setQuery(term);
   };
 
-  const results = useMemo(() => searchGlossary(query, category), [query, category]);
+  const results = useMemo(() => (category === DEMOS ? [] : searchGlossary(query, category)), [query, category]);
+  // every exercise's movement demo: the whole list on its own chip, matches under the terms when searching
+  const demos = useMemo(
+    () => (category === DEMOS || (category === 'All' && query.trim()) ? searchExerciseDemos(query) : []),
+    [query, category]
+  );
 
   return (
     <section data-testid="guide-view" className="space-y-3 sm:space-y-4">
@@ -361,7 +390,7 @@ export const GuideWidget: React.FC<GuideWidgetProps> = ({ sessions, initialSessi
               />
             </label>
             <div className="flex gap-1.5 overflow-x-auto pb-0.5 -mx-1 px-1">
-              {(['All', ...GLOSSARY_CATEGORIES] as const).map((c) => (
+              {(['All', ...GLOSSARY_CATEGORIES, DEMOS] as const).map((c) => (
                 <button
                   key={c}
                   type="button"
@@ -385,7 +414,9 @@ export const GuideWidget: React.FC<GuideWidgetProps> = ({ sessions, initialSessi
           </div>
 
           <p className="text-[11px] text-slate-500 px-1" data-testid="glossary-count">
-            {results.length} {results.length === 1 ? 'term' : 'terms'}
+            {category === DEMOS
+              ? `${demos.length} exercise ${demos.length === 1 ? 'demo' : 'demos'}`
+              : `${results.length} ${results.length === 1 ? 'term' : 'terms'}${demos.length ? ` · ${demos.length} exercise ${demos.length === 1 ? 'demo' : 'demos'}` : ''}`}
           </p>
           <dl className="space-y-1.5">
             {results.map((g) => (
@@ -402,10 +433,48 @@ export const GuideWidget: React.FC<GuideWidgetProps> = ({ sessions, initialSessi
                     {g.inApp}
                   </dd>
                 )}
+                {GLOSSARY_DEMOS[g.term] && (
+                  <dd className="mt-2">
+                    <DemoToggle
+                      testId={`glossary-watch-${slug(g.term)}`}
+                      open={openDemo === `term:${g.term}`}
+                      onToggle={() => toggleDemo(`term:${g.term}`)}
+                      label="Watch the demo"
+                    />
+                    {openDemo === `term:${g.term}` && (
+                      <div className="mt-2" data-testid={`glossary-demo-player-${slug(g.term)}`}>
+                        <LazyExerciseDiagram diagramType={GLOSSARY_DEMOS[g.term]} exerciseName={g.term} />
+                      </div>
+                    )}
+                  </dd>
+                )}
               </div>
             ))}
           </dl>
-          {results.length === 0 && <p className="text-sm text-slate-400 px-1">No match. Try a shorter word.</p>}
+          {demos.length > 0 && (
+            <div data-testid="glossary-demos" className="space-y-1.5">
+              {category !== DEMOS && <h3 className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 px-1 pt-1">Exercise demos</h3>}
+              <ul className="space-y-1.5">
+                {demos.map((d) => (
+                  <li key={d.name} className="rounded-xl border border-slate-800 bg-slate-900/60 p-2.5">
+                    <DemoToggle
+                      testId={`glossary-demo-${slug(d.name)}`}
+                      open={openDemo === `demo:${d.name}`}
+                      onToggle={() => toggleDemo(`demo:${d.name}`)}
+                      label={d.name}
+                      wide
+                    />
+                    {openDemo === `demo:${d.name}` && (
+                      <div className="mt-2">
+                        <LazyExerciseDiagram diagramType={d.type} exerciseName={d.name} />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {results.length === 0 && demos.length === 0 && <p className="text-sm text-slate-400 px-1">No match. Try a shorter word.</p>}
         </div>
       )}
 

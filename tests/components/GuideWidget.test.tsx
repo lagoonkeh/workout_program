@@ -67,4 +67,46 @@ describe('Guide tab', () => {
     await waitFor(() => expect(screen.getByTestId('glossary-entry-deload')).toBeInTheDocument());
     expect(screen.getByTestId('glossary-entry-deload')).toHaveTextContent('85%');
   });
+
+  it('plays a movement demo from a glossary term', async () => {
+    render(<GuideWidget sessions={sessions} initialSessionId="lower_a" />);
+    fireEvent.click(screen.getByTestId('guide-tab-glossary'));
+    fireEvent.change(screen.getByTestId('glossary-search'), { target: { value: 'hip hinge' } });
+    const watch = await screen.findByTestId('glossary-watch-hip-hinge');
+    fireEvent.click(watch);
+    expect(watch).toHaveAttribute('aria-expanded', 'true');
+    const player = screen.getByTestId('glossary-demo-player-hip-hinge');
+    await waitFor(() => expect(within(player).getByTestId('exercise-diagram')).toBeInTheDocument());
+    fireEvent.click(watch);
+    expect(screen.queryByTestId('glossary-demo-player-hip-hinge')).not.toBeInTheDocument();
+  });
+
+  it('lists every exercise demo on its own chip and finds demos when searching', async () => {
+    render(<GuideWidget sessions={sessions} initialSessionId="lower_a" />);
+    fireEvent.click(screen.getByTestId('guide-tab-glossary'));
+    fireEvent.click(screen.getByRole('button', { name: 'Exercise demos' }));
+    expect(screen.getByTestId('glossary-count')).toHaveTextContent(/\d+ exercise demos/);
+    const curl = screen.getByTestId('glossary-demo-athlean-x-2-second-peak-squeeze-floor-curl-up');
+    fireEvent.click(curl);
+    await waitFor(() => expect(screen.getAllByTestId('exercise-diagram').length).toBe(1));
+
+    fireEvent.click(screen.getByRole('button', { name: 'All' }));
+    fireEvent.change(screen.getByTestId('glossary-search'), { target: { value: 'corkscrew' } });
+    expect(await screen.findByTestId('glossary-demo-athlean-x-hanging-corkscrews')).toBeInTheDocument();
+  });
+});
+
+describe('glossary demos', () => {
+  it('only links terms that exist, to animations that exist', async () => {
+    const { GLOSSARY_DEMOS, searchExerciseDemos } = await import('../../src/domain/glossary');
+    const { MOTIONS } = await import('../../src/domain/motionLibrary');
+    Object.entries(GLOSSARY_DEMOS).forEach(([term, type]) => {
+      expect(GLOSSARY.some((g) => g.term === term), term).toBe(true);
+      expect(MOTIONS[type], type).toBeDefined();
+    });
+    const all = searchExerciseDemos('');
+    expect(new Set(all.map((d) => d.name.toLowerCase())).size).toBe(all.length);
+    expect(all.find((d) => /Serratus Elbow-to-Knee Plank/.test(d.name))?.type).toBe('plank_knee');
+    expect(all.find((d) => /Vacuum Brace/.test(d.name))?.type).toBe('curl_up');
+  });
 });
