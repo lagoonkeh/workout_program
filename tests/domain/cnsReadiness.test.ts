@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
+  buildCnsContext,
   baselineOf,
   deleteCnsCheck,
   evaluateCns,
@@ -92,5 +93,52 @@ describe('cnsReadiness', () => {
     expect(gate.hold).toBe(true);
     expect(gateReason(gate)).toMatch(/CNS check is Low/);
     expect(increaseGate(now, [], [], [], [{ date: '2026-11-08', tier: 'low' }]).hold).toBe(false);
+  });
+
+  describe('sleep, rest and activity', () => {
+    const NOW = new Date('2026-11-09T08:00:00');
+    const iso = (s: string) => new Date(s).toISOString();
+    const nights = (h: number[]): HealthDay[] => h.map((hours, i) => ({ date: `2026-11-0${2 + i}`, sleepHours: hours, steps: 8000 }));
+
+    it('flags short sleep and a big drop against your usual', () => {
+      const ctxShort = buildCnsContext(NOW, [...nights([7.5, 7.5, 7.5, 7.5]), { date: TODAY, sleepHours: 4.5 }], [], []);
+      const ev = evaluateCns({ taps: null, reactionMs: null, ...neutral }, [], [], TODAY, ctxShort);
+      expect(ev.metrics.find((m) => m.key === 'sleep')!.flag).toBe('poor');
+      const ctxDrop = buildCnsContext(NOW, [...nights([8.5, 8.5, 8.5]), { date: TODAY, sleepHours: 6.5 }], [], []);
+      expect(evaluateCns({ taps: null, reactionMs: null, ...neutral }, [], [], TODAY, ctxDrop).metrics.find((m) => m.key === 'sleep')!.flag).toBe('watch');
+    });
+
+    it('lets a hand-entered sleep override Health Connect', () => {
+      expect(buildCnsContext(NOW, [{ date: TODAY, sleepHours: 4 }], [], [], 8).sleepHours).toBe(8);
+    });
+
+    it('counts rest since the last session and days in a row', () => {
+      const lifts = ['2026-11-06T18:00:00', '2026-11-07T18:00:00', '2026-11-08T18:00:00'].map((d) => ({ date: iso(d) }));
+      const ctx = buildCnsContext(NOW, [], [], lifts);
+      expect(ctx.restHours).toBe(14);
+      expect(ctx.daysInARow).toBe(3);
+      const rest = evaluateCns({ taps: null, reactionMs: null, ...neutral }, [], [], TODAY, ctx).metrics.find((m) => m.key === 'rest')!;
+      expect(rest.flag).toBe('watch');
+
+      const rested = buildCnsContext(NOW, [], [], [{ date: iso('2026-11-07T10:00:00') }]);
+      expect(evaluateCns({ taps: null, reactionMs: null, ...neutral }, [], [], TODAY, rested).metrics.find((m) => m.key === 'rest')!.flag).toBe('good');
+    });
+
+    it('flags a hard outside workout last night and drops you to Moderate', () => {
+      const bjj = { uuid: 'w1', date: '2026-11-08', start: iso('2026-11-08T19:00:00'), end: iso('2026-11-08T20:30:00'), minutes: 90, activity: 'martial_arts', avgHr: 152 };
+      const ctx = buildCnsContext(NOW, [], [bjj], []);
+      expect(ctx.outside48h[0]).toMatchObject({ minutes: 90, intensity: 'very hard' });
+      const ev = evaluateCns({ taps: 61, reactionMs: 250, ...neutral }, HISTORY, [], TODAY, ctx);
+      expect(ev.metrics.find((m) => m.key === 'activity')!.flag).toBe('poor');
+      expect(ev.metrics.find((m) => m.key === 'rest')!.flag).toBe('watch'); // ~12 h after it ended
+      expect(ev.tier).toBe('moderate');
+    });
+
+    it('notices an unusually big step day', () => {
+      const days: HealthDay[] = [...nights([7, 7, 7, 7]), { date: '2026-11-08', steps: 22000 }];
+      const ctx = buildCnsContext(NOW, days, [], []);
+      expect(ctx.stepsYesterday).toBe(22000);
+      expect(evaluateCns({ taps: null, reactionMs: null, ...neutral }, [], [], TODAY, ctx).metrics.find((m) => m.key === 'activity')!.flag).toBe('watch');
+    });
   });
 });

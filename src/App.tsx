@@ -3667,7 +3667,7 @@ export function WorkoutAppMain() {
         {currentView === 'cns' && (
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-3xl mx-auto">
             <Suspense fallback={<ViewLoadingFallback />}>
-              <CnsReadinessWidget onNavigateToWorkout={() => setCurrentView('workout')} />
+              <CnsReadinessWidget onNavigateToWorkout={() => setCurrentView('workout')} history={Object.values(completedWorkouts)} />
             </Suspense>
           </div>
         )}

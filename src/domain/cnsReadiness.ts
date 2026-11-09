@@ -6,11 +6,14 @@
  * - simple reaction time (median of 5 trials)
  * - Health Connect HRV and resting HR, when available
  * - three quick self-ratings (drive to train, focus, stress)
+ * - recovery context: last night's sleep, rest since the last hard session (lifting here or outside),
+ *   days trained in a row, outside workouts in the last 48 h and yesterday's steps
  *
  * Day-to-day test scores are noisy, so a measure is only flagged when it moves more than its typical
  * day-to-day spread (and by a minimum percentage). This is a trend signal, not a diagnosis.
  */
 import { healthForDate, restingHrTrend, type HealthDay } from './healthMetrics';
+import { interpretWorkout, type HealthWorkout } from './healthWorkouts';
 import { touchAppData } from '../storage/appDataClock';
 
 export const STORAGE_KEY_CNS_CHECKS = 'workout_cns_readiness_checks_v1';
@@ -39,12 +42,14 @@ export interface CnsCheck {
   stress: number; // 1-5, 5 = very stressed
   hrvMs?: number | null;
   restingHr?: number | null;
+  sleepHours?: number | null;
+  restHours?: number | null; // since the last hard session
   score: number; // 0-100
   tier: CnsTier;
 }
 
 export interface MetricResult {
-  key: 'taps' | 'reaction' | 'hrv' | 'rhr' | 'drive' | 'focus' | 'stress';
+  key: 'sleep' | 'rest' | 'activity' | 'taps' | 'reaction' | 'hrv' | 'rhr' | 'drive' | 'focus' | 'stress';
   label: string;
   value: string;
   comparison: string | null; // e.g. '-8% vs baseline 62'
@@ -133,8 +138,178 @@ export function hrvTrend(days: HealthDay[], date: string): { today: number; base
   return { today, baseline: round1(mean(prior)), sd: round1(sd(prior)), n: prior.length };
 }
 
-export function evaluateCns(inputs: CnsInputs, history: CnsCheck[], healthDays: HealthDay[], date: string): CnsEvaluation {
-  const metrics: MetricResult[] = [];
+
+/* ---------------- Recovery context: sleep, rest, activity ---------------- */
+
+export interface HardSession {
+  label: string;
+  endMs: number;
+  minutes: number;
+  intensity: string;
+  source: 'app' | 'outside';
+}
+
+export interface CnsContext {
+  /** last night, hours (Health Connect, or entered by hand) */
+  sleepHours: number | null;
+  /** average of up to 7 earlier nights */
+  sleepBaseline: number | null;
+  /** most recent hard session: a workout logged here, or a moderate-or-harder outside workout */
+  lastHard: HardSession | null;
+  /** hours since lastHard ended */
+  restHours: number | null;
+  /** consecutive calendar days with a hard session, counting back from yesterday (or today if trained already) */
+  daysInARow: number;
+  /** hard sessions over the past 7 days */
+  sessions7d: number;
+  /** outside workouts that ended in the last 48 h */
+  outside48h: { label: string; minutes: number; intensity: string; hoursAgo: number }[];
+  stepsYesterday: number | null;
+  stepsBaseline: number | null;
+}
+
+export interface AppSessionRef {
+  date: string; // ISO
+  completedAt?: string;
+  sessionTitle?: string;
+}
+
+const H = 60 * 60 * 1000;
+const dayKey = (ms: number) => {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+export function buildCnsContext(
+  now: Date,
+  healthDays: HealthDay[],
+  outsideWorkouts: HealthWorkout[],
+  appSessions: AppSessionRef[],
+  sleepOverride: number | null = null
+): CnsContext {
+  const nowMs = now.getTime();
+  const today = dayKey(nowMs);
+  const yesterday = dayKey(nowMs - 24 * H);
+
+  const hcSleep = healthForDate(healthDays, today)?.sleepHours;
+  const sleepHours = sleepOverride ?? (typeof hcSleep === 'number' && hcSleep > 0 ? hcSleep : null);
+  const priorSleep = healthDays
+    .filter((d) => d.date < today && typeof d.sleepHours === 'number' && (d.sleepHours as number) > 0)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 7)
+    .map((d) => d.sleepHours as number);
+  const sleepBaseline = priorSleep.length >= 3 ? round1(mean(priorSleep)) : null;
+
+  const hard: HardSession[] = [];
+  for (const s of appSessions) {
+    const endMs = Date.parse(s.completedAt || s.date);
+    if (Number.isFinite(endMs) && endMs <= nowMs) hard.push({ label: s.sessionTitle || 'Lifting session', endMs, minutes: 60, intensity: 'hard', source: 'app' });
+  }
+  const outside48h: CnsContext['outside48h'] = [];
+  for (const w of outsideWorkouts) {
+    const it = interpretWorkout(w);
+    if (!Number.isFinite(it.endMs) || it.endMs > nowMs) continue;
+    if (it.endMs >= nowMs - 48 * H) outside48h.push({ label: it.label, minutes: it.minutes, intensity: it.intensity, hoursAgo: Math.round((nowMs - it.endMs) / H) });
+    const counts = it.trained.length > 0 && (it.intensity === 'moderate' || it.intensity === 'hard' || it.intensity === 'very hard' || (it.intensity === 'unknown' && it.minutes >= 45));
+    if (counts) hard.push({ label: it.label, endMs: it.endMs, minutes: it.minutes, intensity: it.intensity, source: 'outside' });
+  }
+  hard.sort((a, b) => b.endMs - a.endMs);
+  const lastHard = hard[0] || null;
+  const restHours = lastHard ? Math.round((nowMs - lastHard.endMs) / H) : null;
+
+  const trainedDays = new Set(hard.map((h) => dayKey(h.endMs)));
+  let daysInARow = 0;
+  let cursor = trainedDays.has(today) ? nowMs : nowMs - 24 * H;
+  while (trainedDays.has(dayKey(cursor))) {
+    daysInARow += 1;
+    cursor -= 24 * H;
+  }
+  const sessions7d = hard.filter((h) => h.endMs >= nowMs - 7 * 24 * H).length;
+
+  const ySteps = healthForDate(healthDays, yesterday)?.steps;
+  const priorSteps = healthDays
+    .filter((d) => d.date < yesterday && typeof d.steps === 'number' && (d.steps as number) > 0)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 7)
+    .map((d) => d.steps as number);
+
+  return {
+    sleepHours,
+    sleepBaseline,
+    lastHard,
+    restHours,
+    daysInARow,
+    sessions7d,
+    outside48h: outside48h.sort((a, b) => a.hoursAgo - b.hoursAgo),
+    stepsYesterday: typeof ySteps === 'number' && ySteps > 0 ? ySteps : null,
+    stepsBaseline: priorSteps.length >= 3 ? Math.round(mean(priorSteps)) : null,
+  };
+}
+
+export const EMPTY_CONTEXT: CnsContext = {
+  sleepHours: null, sleepBaseline: null, lastHard: null, restHours: null, daysInARow: 0, sessions7d: 0, outside48h: [], stepsYesterday: null, stepsBaseline: null,
+};
+
+function contextMetrics(ctx: CnsContext): MetricResult[] {
+  const out: MetricResult[] = [];
+  const pen = (f: Flag) => (f === 'poor' ? 25 : f === 'watch' ? 12 : 0);
+
+  // Sleep: absolute hours first, then a big drop against your usual
+  if (ctx.sleepHours !== null) {
+    const h = ctx.sleepHours;
+    let flag: Flag = h < 5 ? 'poor' : h < 6 ? 'watch' : h >= 7.5 ? 'good' : 'ok';
+    if (flag !== 'poor' && ctx.sleepBaseline !== null && h <= ctx.sleepBaseline - 1.5) flag = flag === 'watch' ? 'poor' : 'watch';
+    const cmp = ctx.sleepBaseline !== null ? `${h - ctx.sleepBaseline >= 0 ? '+' : ''}${round1(h - ctx.sleepBaseline)} h vs your 7-night avg ${ctx.sleepBaseline} h` : null;
+    out.push({ key: 'sleep', label: 'Sleep last night', value: `${round1(h)} h`, comparison: cmp, flag, penalty: pen(flag) });
+  }
+
+  // Rest: time since the last hard session and how many days in a row
+  {
+    const r = ctx.restHours;
+    let flag: Flag = 'ok';
+    if (r !== null && r < 12) flag = 'poor';
+    else if (r !== null && r < 20) flag = 'watch';
+    if (ctx.daysInARow >= 4) flag = 'poor';
+    else if (ctx.daysInARow >= 3 && flag === 'ok') flag = 'watch';
+    if (flag === 'ok' && r !== null && r >= 44 && r <= 96) flag = 'good';
+    const value = r === null ? 'No recent sessions' : r < 48 ? `${r} h since last session` : `${Math.round(r / 24)} days since last session`;
+    const parts: string[] = [];
+    if (ctx.lastHard) parts.push(`last: ${ctx.lastHard.label}`);
+    if (ctx.daysInARow >= 2) parts.push(`${ctx.daysInARow} days in a row`);
+    parts.push(`${ctx.sessions7d} hard sessions this week`);
+    out.push({ key: 'rest', label: 'Rest', value, comparison: parts.join(' · '), flag, penalty: flag === 'poor' ? 20 : flag === 'watch' ? 10 : 0 });
+  }
+
+  // Activity: outside training in the last 48 h and yesterday's steps
+  {
+    let flag: Flag = 'ok';
+    const recent24 = ctx.outside48h.filter((w) => w.hoursAgo <= 24);
+    const heavy = (w: CnsContext['outside48h'][number]) => w.intensity === 'very hard' || (w.intensity === 'hard' && w.minutes >= 60);
+    const solid = (w: CnsContext['outside48h'][number]) => w.intensity === 'hard' || (w.minutes >= 45 && w.intensity !== 'light');
+    if (recent24.some(heavy)) flag = 'poor';
+    else if (recent24.some(solid) || ctx.outside48h.some(heavy)) flag = 'watch';
+    let stepsNote: string | null = null;
+    if (ctx.stepsYesterday !== null) {
+      stepsNote = `${ctx.stepsYesterday.toLocaleString('en-US')} steps yesterday${ctx.stepsBaseline ? ` (usual ${ctx.stepsBaseline.toLocaleString('en-US')})` : ''}`;
+      if (flag === 'ok' && ctx.stepsBaseline && ctx.stepsYesterday >= 15000 && ctx.stepsYesterday >= ctx.stepsBaseline * 1.5) flag = 'watch';
+    }
+    const top = ctx.outside48h[0];
+    const value = top ? `${top.label} ${top.minutes} min, ${top.hoursAgo} h ago` : 'No outside workouts in 48 h';
+    const extra = ctx.outside48h.length > 1 ? `+${ctx.outside48h.length - 1} more in 48 h` : null;
+    const comparison = [top && top.intensity !== 'unknown' ? top.intensity : null, extra, stepsNote].filter(Boolean).join(' · ') || null;
+    out.push({ key: 'activity', label: 'Activity', value, comparison, flag, penalty: pen(flag) });
+  }
+  return out;
+}
+
+export function evaluateCns(
+  inputs: CnsInputs,
+  history: CnsCheck[],
+  healthDays: HealthDay[],
+  date: string,
+  context: CnsContext = EMPTY_CONTEXT
+): CnsEvaluation {
+  const metrics: MetricResult[] = contextMetrics(context);
   const PEN = { watch: 12, poor: 25 } as const;
   const pen = (f: Flag) => (f === 'poor' ? PEN.poor : f === 'watch' ? PEN.watch : 0);
 
@@ -186,13 +361,14 @@ export function evaluateCns(inputs: CnsInputs, history: CnsCheck[], healthDays: 
   }
 
   const score = Math.max(0, Math.min(100, 100 - metrics.reduce((a, m) => a + m.penalty, 0)));
-  const objective = metrics.filter((m) => m.key === 'taps' || m.key === 'reaction' || m.key === 'hrv' || m.key === 'rhr');
+  // everything except the three self-ratings
+  const objective = metrics.filter((m) => m.key !== 'drive' && m.key !== 'focus' && m.key !== 'stress');
   const objPoor = objective.filter((m) => m.flag === 'poor').length;
   const objFlagged = objective.filter((m) => m.flag === 'poor' || m.flag === 'watch').length;
 
   const allPoor = metrics.filter((m) => m.flag === 'poor').length;
   let tier: CnsTier = score >= 80 ? 'ready' : score >= 60 ? 'moderate' : 'low';
-  // two clearly-down objective measures outweigh feeling fine; 3+ poor measures drop to low
+  // two clearly-down measures outweigh feeling fine; 3+ poor measures drop to low
   if (objPoor >= 2 || allPoor >= 3) tier = 'low';
   else if (tier === 'ready' && (objPoor >= 1 || objFlagged >= 2)) tier = 'moderate';
 

@@ -1,12 +1,13 @@
 // src/components/CnsReadinessWidget.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Brain, Hand, Zap, RotateCcw, Trash2, ChevronRight, Info, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { Brain, Hand, Zap, RotateCcw, Trash2, ChevronRight, Info, CheckCircle2, AlertTriangle, XCircle, Moon, Minus, Plus } from 'lucide-react';
 import {
   CNS_CHECKS_EVENT,
   MIN_BASELINE_CHECKS,
   REACTION_TRIALS,
   TAP_TEST_SECONDS,
   TIER_LABEL,
+  buildCnsContext,
   deleteCnsCheck,
   evaluateCns,
   loadCnsChecks,
@@ -15,15 +16,19 @@ import {
   type CnsCheck,
   type CnsEvaluation,
   type CnsTier,
+  type AppSessionRef,
   type Flag,
 } from '../domain/cnsReadiness';
 import { healthForDate, loadCachedHealth } from '../domain/healthMetrics';
 import { localDateKey } from '../domain/trainingReadiness';
+import { loadCachedWorkouts } from '../domain/healthWorkouts';
 
 export interface CnsReadinessWidgetProps {
   className?: string;
   now?: Date;
   onNavigateToWorkout?: () => void;
+  /** workouts completed in this app (for rest days and days in a row) */
+  history?: AppSessionRef[];
 }
 
 type Step = 'intro' | 'tap' | 'reaction' | 'self' | 'result';
@@ -236,7 +241,7 @@ const Rating: React.FC<{ label: string; low: string; high: string; value: number
 
 /* ---------------- Widget ---------------- */
 
-export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ className = '', now, onNavigateToWorkout }) => {
+export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ className = '', now, onNavigateToWorkout, history = [] }) => {
   const today = localDateKey(now ?? new Date());
   const [checks, setChecks] = useState<CnsCheck[]>(() => loadCnsChecks());
   const todays = checks.find((c) => c.date === today) || null;
@@ -248,6 +253,15 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
   const [stress, setStress] = useState(todays?.stress ?? 3);
   const [showHow, setShowHow] = useState(false);
   const healthDays = useMemo(() => loadCachedHealth(), []);
+  const outsideWorkouts = useMemo(() => loadCachedWorkouts(), []);
+  const hcSleep = healthForDate(healthDays, today)?.sleepHours ?? null;
+  const [sleepHours, setSleepHours] = useState<number | null>(todays?.sleepHours ?? (hcSleep && hcSleep > 0 ? Math.round(hcSleep * 2) / 2 : null));
+  const nowMs = (now ?? new Date()).getTime();
+  const context = useMemo(
+    () => buildCnsContext(new Date(nowMs), healthDays, outsideWorkouts, history, sleepHours),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [healthDays, outsideWorkouts, history.length, sleepHours, today]
+  );
 
   useEffect(() => {
     const refresh = () => setChecks(loadCnsChecks());
@@ -261,11 +275,11 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
 
   const evaluation: CnsEvaluation | null = useMemo(() => {
     if (step !== 'result') return null;
-    return evaluateCns({ taps, reactionMs, drive, focus, stress }, checks, healthDays, today);
-  }, [step, taps, reactionMs, drive, focus, stress, checks, healthDays, today]);
+    return evaluateCns({ taps, reactionMs, drive, focus, stress }, checks, healthDays, today, context);
+  }, [step, taps, reactionMs, drive, focus, stress, checks, healthDays, today, context]);
 
   const finish = () => {
-    const ev = evaluateCns({ taps, reactionMs, drive, focus, stress }, checks, healthDays, today);
+    const ev = evaluateCns({ taps, reactionMs, drive, focus, stress }, checks, healthDays, today, context);
     const h = healthForDate(healthDays, today);
     const check: CnsCheck = {
       id: `cns_${today}`,
@@ -278,6 +292,8 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
       stress,
       hrvMs: h?.hrvMs ?? null,
       restingHr: h?.restingHr ?? null,
+      sleepHours: context.sleepHours,
+      restHours: context.restHours,
       score: ev.score,
       tier: ev.tier,
     };
@@ -315,6 +331,7 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
       {showHow && (
         <div className="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-xs text-slate-300 space-y-1.5">
           <p><b>What it measures:</b> finger-tap speed and simple reaction time (quick reads of how sharp your motor output is today), plus HRV and resting HR from Health Connect when they’ve synced, and three self-ratings.</p>
+          <p><b>Recovery context:</b> last night’s sleep (under 6 h, or 1.5 h below your usual, counts against you), rest since your last hard session here or outside (under 20 h, or 3+ days in a row), and outside workouts in the last 48 h plus yesterday’s steps.</p>
           <p><b>How it judges:</b> each test is compared with your last {MIN_BASELINE_CHECKS}–10 checks. A result only counts as down when it drops more than your normal day-to-day spread, so one slightly slow run won’t flag you.</p>
           <p><b>For good data:</b> test at the same point every time (before your warm-up), same hand, same posture, phone on a table.</p>
           <p className="text-slate-500">These are trend signals, not a medical test — tap and reaction scores are noisy and only loosely track lifting performance, so pair them with how your warm-up sets move.</p>
@@ -326,7 +343,8 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
           <ol className="text-sm text-slate-300 space-y-2">
             <li className="flex items-center gap-2"><Hand className="w-4 h-4 text-cyan-400" /> {TAP_TEST_SECONDS}-second tap test</li>
             <li className="flex items-center gap-2"><Zap className="w-4 h-4 text-cyan-400" /> Reaction test ({REACTION_TRIALS} taps)</li>
-            <li className="flex items-center gap-2"><Brain className="w-4 h-4 text-cyan-400" /> 3 quick ratings</li>
+            <li className="flex items-center gap-2"><Brain className="w-4 h-4 text-cyan-400" /> Sleep + 3 quick ratings</li>
+            <li className="flex items-center gap-2 text-slate-400"><Moon className="w-4 h-4 text-slate-500" /> Rest and activity are read from your logged workouts and Health Connect</li>
           </ol>
           {priorCount < MIN_BASELINE_CHECKS && (
             <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5">
@@ -344,6 +362,15 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
 
       {step === 'self' && (
         <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="text-sm font-semibold text-white flex items-center gap-1.5"><Moon className="w-4 h-4 text-cyan-400" /> Sleep last night</div>
+            <div className="flex items-center gap-2">
+              <button type="button" aria-label="Less sleep" onClick={() => setSleepHours((v) => Math.max(0, (v ?? 7) - 0.5))} className="min-h-[44px] min-w-[44px] rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center"><Minus className="w-4 h-4" /></button>
+              <span data-testid="cns-sleep-hours" className="text-xl font-black tabular-nums w-20 text-center">{sleepHours === null ? '—' : `${sleepHours} h`}</span>
+              <button type="button" aria-label="More sleep" onClick={() => setSleepHours((v) => Math.min(14, (v ?? 6.5) + 0.5))} className="min-h-[44px] min-w-[44px] rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center"><Plus className="w-4 h-4" /></button>
+              <span className="text-[11px] text-slate-500">{hcSleep ? 'from Health Connect — adjust if wrong' : 'not synced — set it by hand'}</span>
+            </div>
+          </div>
           <Rating label="Drive to train" low="None" high="Fired up" value={drive} onChange={setDrive} testId="cns-drive" />
           <Rating label="Mental focus" low="Foggy" high="Sharp" value={focus} onChange={setFocus} testId="cns-focus" />
           <Rating label="Stress (life / work)" low="Calm" high="Very high" value={stress} onChange={setStress} testId="cns-stress" />
@@ -368,6 +395,10 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
               <div className="min-w-0">
                 <div className={`flex items-center gap-1.5 font-bold ${s.text}`}><s.Icon className="w-4 h-4" /> <span data-testid="cns-tier">{TIER_LABEL[evaluation.tier]}</span></div>
                 <div className="text-sm font-semibold text-white mt-0.5">{evaluation.headline}</div>
+                {(() => {
+                  const drivers = evaluation.metrics.filter((m) => m.flag === 'poor' || m.flag === 'watch').map((m) => m.label);
+                  return drivers.length > 0 ? <div className="text-xs text-slate-300 mt-1" data-testid="cns-drivers">Main factors: {drivers.join(', ')}</div> : null;
+                })()}
               </div>
             </div>
 
