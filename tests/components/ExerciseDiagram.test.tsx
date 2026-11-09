@@ -234,6 +234,10 @@ describe('ExerciseDiagram Component', () => {
       'curl_up',
       'plank_knee',
       'mountain_climber',
+      'cossack_squat',
+      'hollow_body',
+      'cat_camel',
+      'pelvic_drop',
     ] as const;
 
     allDiagramTypes.forEach((type) => {

@@ -744,6 +744,80 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     startCue: 'Hands under shoulders, hips level',
     endCue: 'Knee drives across to the opposite elbow',
   },
+
+  // --- frontal-plane and spine drills --------------------------------------------------------------
+  cossack_squat: {
+    title: 'Goblet Cossack squat',
+    order: 'eccentric-first',
+    // Seen from the lifter's right. The hips slide over the right foot (the front views show the slide) and sink;
+    // the left leg reaches out to the side, so from the side it looks short (scaleF) and its toes point up.
+    frames: two(
+      { hip: [96, 109], torso: -86, head: -84, armN: ang(78, -80), legN: to(97, 176), legF: to(95, 176), footN: 0, footF: 0, scaleN: 0.862, scaleF: 0.862 },
+      { hip: [82, 148], torso: -58, head: -60, armN: ang(106, -52), legN: to(97, 176), legF: to(95, 176), footN: 0, footF: -90, scaleN: 1, scaleF: 0.4 }
+    ),
+    props: [{ kind: 'kettlebell', at: 'handN', d: [3, 4] }],
+    scenery: [],
+    worked: ['thN', 'thF'],
+    track: { joint: 'hip' },
+    trackLabel: 'Hips sink over one foot',
+    angle: { joints: ['hip', 'kneeN', 'ankleN'], label: 'Knee' },
+    startCue: 'Wide stance, bell at the chest',
+    endCue: 'Sit into one hip, other leg straight, toes up',
+  },
+
+  hollow_body: {
+    title: 'Hollow body hold',
+    order: 'hold',
+    // supine, head to the left: low back pressed down, shoulders and straight legs lift a few inches
+    frames: two(
+      { hip: [106, 168], torso: 180, head: 182, armN: ang(186, 186), legN: ang(0, 0), footN: -80 },
+      { hip: [106, 168], torso: 192, head: 198, armN: ang(196, 196), legN: ang(-10, -10), footN: -10 }
+    ),
+    props: [],
+    scenery: [],
+    worked: ['torso', 'thN', 'thF'],
+    track: { joint: 'ankleN' },
+    trackLabel: 'Legs lift, low back stays down',
+    angle: { joints: ['neck', 'hip', 'kneeN'], label: 'Hip' },
+    startCue: 'Lie long, arms overhead',
+    endCue: 'Ribs down, shoulders and legs off the floor, hold',
+  },
+
+  cat_camel: {
+    title: 'Cat-camel',
+    order: 'loop',
+    // hands and knees: the spine rounds up (cat, head down) then gently sags (camel, head up), slowly
+    frames: [
+      kf(0, { hip: [72, 136], torso: -12, head: 45, armN: to(124, 177, -1), armF: to(128, 177, -1), legN: ang(90, 180), footN: 180, spine: 7 }),
+      kf(0.5, { hip: [72, 136], torso: -8, head: -30, armN: to(124, 177, -1), armF: to(128, 177, -1), legN: ang(90, 180), footN: 180, spine: -6 }),
+      kf(1, { hip: [72, 136], torso: -12, head: 45, armN: to(124, 177, -1), armF: to(128, 177, -1), legN: ang(90, 180), footN: 180, spine: 7 }),
+    ],
+    props: [],
+    scenery: [],
+    worked: ['torso'],
+    track: { joint: 'head' },
+    trackLabel: 'Spine wave',
+    startCue: 'Round up: chin to chest, back to the ceiling',
+    endCue: 'Sag gently: chest and head lift, no forcing',
+  },
+
+  pelvic_drop: {
+    title: 'Glute medius pelvic leveling',
+    order: 'hold',
+    // single-leg stance on the right leg: the free (left) hip starts dropped, then lifts level and holds
+    frames: two(
+      { hip: [96, 101], torso: -84, head: -86, armN: ang(92, 86), legN: to(98, 176), legF: to(84, 166, 1), footF: 30 },
+      { hip: [96, 101], torso: -84, head: -86, armN: ang(92, 86), legN: to(98, 176), legF: to(84, 158, 1), footF: 30 }
+    ),
+    props: [],
+    scenery: [],
+    worked: ['thN'],
+    track: { joint: 'ankleF' },
+    trackLabel: 'Free hip lifts level',
+    angle: { joints: ['hip', 'kneeN', 'ankleN'], label: 'Stance knee' },
+    startCue: 'Stand on one leg, soft knee, free hip dropped',
+    endCue: 'Lift the free hip level and squeeze, hold 2 s',
+  },
 };
 
 /** Fallback for any future DiagramType without its own motion */

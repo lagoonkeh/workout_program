@@ -118,7 +118,8 @@ function bodyItems(s3: Skeleton3, pr: Projector, worked: Set<SegmentId>, load: n
   });
 
   // torso: hull of three elliptical rings (hips, chest, shoulders) around the spine
-  const halfW = (a: Vec3, b: Vec3) => (Math.abs(a[2]) + Math.abs(b[2])) / 2;
+  // N is on the -z side, F on the +z side (the body may be shifted sideways)
+  const halfW = (n: Vec3, f: Vec3) => (f[2] - n[2]) / 2;
   const shoulderW = halfW(s3.j.shoulderN, s3.j.shoulderF);
   const hipW = halfW(s3.j.hipN, s3.j.hipF) * 1.45;
   const spine = sub3(s3.j.neck, s3.j.pelvis);

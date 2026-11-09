@@ -44,6 +44,10 @@ export interface FrontalConfig {
   guide: 'toes' | 'midline' | 'none';
   track: { joint: 'hand' | 'knee' | 'elbow' | 'neck' | 'hip' | 'ankle'; side: 'N' | 'F' | 'mid'; label: string };
   cue: string;
+  /** lateral slide of everything above the feet (+ toward the lifter's left), e.g. a Cossack squat */
+  shift?: Lateral;
+  /** how far the free (left) hip drops below level; negative lifts it (pelvic leveling) */
+  hipDrop?: Lateral;
 }
 
 const DEFAULT_LAT: Record<LatJoint, number> = {
@@ -351,6 +355,38 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     track: { joint: 'knee', side: 'N', label: 'Knee crosses the midline' },
     cue: 'Hips stay level and square as the knee crosses',
   },
+  cossack_squat: {
+    view: 'front', label: 'Front',
+    // feet planted wide; the body slides 30 toward the lifter's right (N) foot and sinks
+    lat: { hand: 9, elbow: 15, knee: { N: [30, 36], F: [36, 52] }, ankle: 48, toe: 51 },
+    shift: [0, -30],
+    props: [{ kind: 'kettlebell', side: 'N', d: [9, 0] }],
+    scenery: [], guide: 'toes',
+    track: { joint: 'hip', side: 'mid', label: 'Hips slide over one foot' },
+    cue: 'Working knee tracks over the toes; trail leg long, toes up',
+  },
+  hollow_body: {
+    view: 'front', label: 'Feet-end',
+    lat: { hand: 8, elbow: 10, knee: 4, ankle: 3, toe: 3 },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'ankle', side: 'N', label: 'Legs together' },
+    cue: 'Legs squeezed together, low back glued to the floor',
+  },
+  cat_camel: {
+    view: 'back', label: 'Back',
+    lat: { hand: 14, elbow: 15, knee: 9, ankle: 9, toe: 9, scap: [8, 11, 8] },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'neck', side: 'mid', label: 'Spine stays centred' },
+    cue: 'Move one segment at a time; hips do not sway',
+  },
+  pelvic_drop: {
+    view: 'back', label: 'Back',
+    lat: { hand: 18, elbow: 17, knee: { N: 9, F: 10 }, ankle: { N: 9, F: 11 }, toe: { N: 10, F: 12 } },
+    hipDrop: [7, -1],
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'hip', side: 'F', label: 'Free hip rises level' },
+    cue: 'Free-side hip lifts level; standing-side glute squeezes',
+  },
 };
 
 export function getFrontal(type: DiagramType | string): FrontalConfig {
@@ -378,6 +414,18 @@ export interface FrontalSkeleton {
   /** rep progress this projection was taken at */
   progress: number;
 }
+
+/** A fixed, start -> end, or evenly keyed value at rep progress. */
+export function valueAt(l: Lateral, progress: number): number {
+  if (!Array.isArray(l)) return l;
+  if (l.length <= 2) return l[0] + ((l[1] ?? l[0]) - l[0]) * progress;
+  const x = Math.min(1, Math.max(0, progress)) * (l.length - 1);
+  const i = Math.min(l.length - 2, Math.floor(x));
+  return l[i] + (l[i + 1] - l[i]) * (x - i);
+}
+
+export const shiftAt = (cfg: FrontalConfig, progress: number) => (cfg.shift === undefined ? 0 : valueAt(cfg.shift, progress));
+export const hipDropAt = (cfg: FrontalConfig, progress: number) => (cfg.hipDrop === undefined ? 0 : valueAt(cfg.hipDrop, progress));
 
 /** Lateral half-width of a joint at rep progress (also used by the 3-D oblique and top views). */
 export function latFor(cfg: FrontalConfig, j: LatJoint, side: Side, progress: number): number {
@@ -407,14 +455,19 @@ const SIDE_JOINT: Record<Exclude<FrontalJoint, 'shoulder' | 'scap'>, [keyof Skel
 };
 
 export function projectFrontal(sk: Skeleton, cfg: FrontalConfig, progress: number): FrontalSkeleton {
+  // the body slides sideways over planted feet; on screen that is +x from the front, -x from behind
+  const sx = (cfg.view === 'front' ? 1 : -1) * shiftAt(cfg, progress);
+  const drop = hipDropAt(cfg, progress);
   const pt = (side: Side, j: FrontalJoint): FrontalPoint => {
     const lat = latFor(cfg, j, side, progress);
     if (j === 'shoulder' || j === 'scap') {
       const y = sk.neck[1] + (j === 'scap' ? 9 : 3);
-      return { p: [lateralX(cfg.view, side, lat), y], depth: sk.neck[0] };
+      return { p: [lateralX(cfg.view, side, lat) + sx, y], depth: sk.neck[0] };
     }
     const src = sk[SIDE_JOINT[j][side === 'N' ? 0 : 1]];
-    return { p: [lateralX(cfg.view, side, lat), src[1]], depth: src[0] };
+    const planted = j === 'ankle' || j === 'toe';
+    const y = src[1] + (j === 'hip' && side === 'F' ? drop : 0);
+    return { p: [lateralX(cfg.view, side, lat) + (planted ? 0 : sx), y], depth: src[0] };
   };
   const joints = {} as FrontalSkeleton['joints'];
   (['shoulder', 'elbow', 'hand', 'hip', 'knee', 'ankle', 'toe', 'scap'] as FrontalJoint[]).forEach((j) => {
@@ -422,9 +475,9 @@ export function projectFrontal(sk: Skeleton, cfg: FrontalConfig, progress: numbe
   });
   return {
     view: cfg.view,
-    head: { p: [CX, sk.head[1]], depth: sk.head[0] },
-    neck: { p: [CX, sk.neck[1]], depth: sk.neck[0] },
-    pelvis: { p: [CX, sk.hip[1]], depth: sk.hip[0] },
+    head: { p: [CX + sx, sk.head[1]], depth: sk.head[0] },
+    neck: { p: [CX + sx, sk.neck[1]], depth: sk.neck[0] },
+    pelvis: { p: [CX + sx, sk.hip[1] + drop / 2], depth: sk.hip[0] },
     joints,
     progress,
   };

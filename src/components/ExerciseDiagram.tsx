@@ -130,12 +130,13 @@ function Limb({ a, b, w, color, outline = true }: { a: Vec; b: Vec; w: number; c
 }
 
 /** Tapered torso: wider at the chest than the hips */
-function torsoPath(hip: Vec, neck: Vec): string {
+function torsoPath(hip: Vec, neck: Vec, spine = 0): string {
   const a = angleOf(hip, neck);
   const n = a + 90;
   const h1 = polar(hip, n, 6.5);
   const h2 = polar(hip, n + 180, 6.5);
-  const chest = polar(hip, a, BONES.torso * 0.72);
+  // + rounds the back (the chest section bows toward the back), - arches it
+  const chest = polar(polar(hip, a, BONES.torso * 0.55), n + 180, spine);
   const c1 = polar(chest, n, 9);
   const c2 = polar(chest, n + 180, 9);
   const s1 = polar(neck, n, 6);
@@ -240,7 +241,7 @@ function Prop({ p, sk, ids, progress = 0 }: { p: PropDef; sk: Skeleton; ids: str
   }
 }
 
-function Body({ sk, worked, load, ghost = false, ids }: { sk: Skeleton; worked: Set<SegmentId>; load: number; ghost?: boolean; ids: string }) {
+function Body({ sk, worked, load, ghost = false, ids, spine = 0 }: { sk: Skeleton; worked: Set<SegmentId>; load: number; ghost?: boolean; ids: string; spine?: number }) {
   const off = (j: JointId): Vec => {
     const p = sk[j];
     return /F$/.test(j) ? [p[0] + FAR_OFFSET[0], p[1] + FAR_OFFSET[1]] : p;
@@ -279,7 +280,7 @@ function Body({ sk, worked, load, ghost = false, ids }: { sk: Skeleton; worked: 
   const farSegs: SegmentId[] = ['thF', 'shF', 'ftF', 'uaF', 'faF'];
   const nearLegs: SegmentId[] = ['thN', 'shN', 'ftN'];
   const nearArm: SegmentId[] = ['uaN', 'faN'];
-  const torsoD = torsoPath(sk.hip, sk.neck);
+  const torsoD = torsoPath(sk.hip, sk.neck, spine);
 
   return (
     <g opacity={ghost ? 0.16 : 1}>
@@ -339,17 +340,22 @@ function AngleArc({ a, b, c, label }: { a: Vec; b: Vec; c: Vec; label: string })
 }
 
 export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, ids, detailed, showTrail, showGhosts }) => {
-  const sk = useMemo(() => buildSkeleton(poseAt(motion.frames, progress)), [motion, progress]);
+  const pose = useMemo(() => poseAt(motion.frames, progress), [motion, progress]);
+  const sk = useMemo(() => buildSkeleton(pose), [pose]);
   const worked = useMemo(() => new Set(motion.worked), [motion]);
 
   const statics = useMemo(() => {
-    const start = buildSkeleton(poseAt(motion.frames, 0));
-    const end = buildSkeleton(poseAt(motion.frames, motion.order === 'loop' ? 0.5 : 1));
+    const startPose = poseAt(motion.frames, 0);
+    const endPose = poseAt(motion.frames, motion.order === 'loop' ? 0.5 : 1);
+    const start = buildSkeleton(startPose);
+    const end = buildSkeleton(endPose);
+    const startSpine = startPose.spine ?? 0;
+    const endSpine = endPose.spine ?? 0;
     const pts: Vec[] = [];
     for (let i = 0; i <= TRAIL_SAMPLES; i++) {
       pts.push(trackPoint(motion, buildSkeleton(poseAt(motion.frames, i / TRAIL_SAMPLES)), i / TRAIL_SAMPLES));
     }
-    return { start, end, trail: pts };
+    return { start, end, startSpine, endSpine, trail: pts };
   }, [motion]);
 
   const tp = trackPoint(motion, sk, progress);
@@ -386,8 +392,8 @@ export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, id
 
       {detailed && showGhosts && (
         <g data-testid="diagram-ghosts">
-          <Body sk={statics.start} worked={worked} load={0} ghost ids={ids} />
-          <Body sk={statics.end} worked={worked} load={0} ghost ids={ids} />
+          <Body sk={statics.start} worked={worked} load={0} ghost ids={ids} spine={statics.startSpine} />
+          <Body sk={statics.end} worked={worked} load={0} ghost ids={ids} spine={statics.endSpine} />
         </g>
       )}
 
@@ -397,7 +403,7 @@ export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, id
       {behind.map((p, i) => (
         <Prop key={`b${i}`} p={p} sk={sk} ids={ids} progress={progress} />
       ))}
-      <Body sk={sk} worked={worked} load={load} ids={ids} />
+      <Body sk={sk} worked={worked} load={load} ids={ids} spine={pose.spine ?? 0} />
       {front.map((p, i) => (
         <Prop key={`n${i}`} p={p} sk={sk} ids={ids} progress={progress} />
       ))}
@@ -594,12 +600,13 @@ function FrontalBody({ fs, worked, load, ghost = false, ids }: { fs: FrontalSkel
     const cy = (fs.neck.p[1] + fs.pelvis.p[1]) / 2;
     torsoNode = (
       <g key="torso">
-        <ellipse cx={CX} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2 + 3} ry={9} fill={fill} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
-        {isWorked('torso') && <ellipse cx={CX} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2} ry={7} fill={COLORS.worked} opacity={glow * 0.85} filter={`url(#${ids}-glow)`} data-worked="torso" />}
+        <ellipse cx={fs.pelvis.p[0]} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2 + 3} ry={9} fill={fill} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
+        {isWorked('torso') && <ellipse cx={fs.pelvis.p[0]} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2} ry={7} fill={COLORS.worked} opacity={glow * 0.85} filter={`url(#${ids}-glow)`} data-worked="torso" />}
       </g>
     );
   } else {
-    const hw = (p: Vec, k: number): Vec => [CX + (p[0] - CX) * k, p[1]];
+    const mx = fs.pelvis.p[0];
+    const hw = (p: Vec, k: number): Vec => [mx + (p[0] - mx) * k, p[1]];
     const h1 = hw(hN, 1.45);
     const h2 = hw(hF, 1.45);
     const d = `M${sN[0]},${sN[1]} L${sF[0]},${sF[1]} L${h2[0]},${h2[1]} L${h1[0]},${h1[1]} Z`;
@@ -612,14 +619,14 @@ function FrontalBody({ fs, worked, load, ghost = false, ids }: { fs: FrontalSkel
         {isWorked('torso') && <path d={d} fill={COLORS.worked} opacity={glow * 0.8} filter={`url(#${ids}-glow)`} data-worked="torso" />}
         {showBack && (
           <g data-testid="frontal-scapulae">
-            <line x1={CX} y1={fs.neck.p[1] + 2} x2={CX} y2={fs.pelvis.p[1] - 2} stroke="#475569" strokeWidth={1.2} strokeDasharray="1.5 2" />
+            <line x1={fs.neck.p[0]} y1={fs.neck.p[1] + 2} x2={fs.pelvis.p[0]} y2={fs.pelvis.p[1] - 2} stroke="#475569" strokeWidth={1.2} strokeDasharray="1.5 2" />
             {[scapN, scapF].map((sc, i) => (
-              <path key={i} d={`M${sc[0]},${sc[1] - 4} L${sc[0] + (sc[0] < CX ? -6 : 6)},${sc[1] - 2} L${sc[0]},${sc[1] + 9} Z`} fill="#94a3b8" stroke="#475569" strokeWidth={0.8} opacity={0.9} />
+              <path key={i} d={`M${sc[0]},${sc[1] - 4} L${sc[0] + (sc[0] < fs.neck.p[0] ? -6 : 6)},${sc[1] - 2} L${sc[0]},${sc[1] + 9} Z`} fill="#94a3b8" stroke="#475569" strokeWidth={0.8} opacity={0.9} />
             ))}
           </g>
         )}
         {!showBack && !ghost && (
-          <line x1={CX} y1={fs.neck.p[1] + 4} x2={CX} y2={fs.pelvis.p[1] - 4} stroke="#94a3b8" strokeWidth={0.8} opacity={0.6} />
+          <line x1={fs.neck.p[0]} y1={fs.neck.p[1] + 4} x2={fs.pelvis.p[0]} y2={fs.pelvis.p[1] - 4} stroke="#94a3b8" strokeWidth={0.8} opacity={0.6} />
         )}
       </g>
     );
@@ -632,9 +639,9 @@ function FrontalBody({ fs, worked, load, ghost = false, ids }: { fs: FrontalSkel
     order: 4,
     node: (
       <g key="head">
-        <line x1={CX} y1={fs.neck.p[1]} x2={CX} y2={head.p[1]} stroke={ghost ? '#94a3b8' : COLORS.near} strokeWidth={6} strokeLinecap="round" />
-        <circle cx={CX} cy={head.p[1]} r={BONES.headRadius} fill={ghost ? '#94a3b8' : fs.view === 'back' ? '#cbd5e1' : COLORS.head} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
-        {!ghost && fs.view === 'back' && <path d={`M${CX - 7},${head.p[1] - 4} Q${CX},${head.p[1] - 12} ${CX + 7},${head.p[1] - 4}`} fill="none" stroke="#64748b" strokeWidth={2} />}
+        <line x1={fs.neck.p[0]} y1={fs.neck.p[1]} x2={head.p[0]} y2={head.p[1]} stroke={ghost ? '#94a3b8' : COLORS.near} strokeWidth={6} strokeLinecap="round" />
+        <circle cx={head.p[0]} cy={head.p[1]} r={BONES.headRadius} fill={ghost ? '#94a3b8' : fs.view === 'back' ? '#cbd5e1' : COLORS.head} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
+        {!ghost && fs.view === 'back' && <path d={`M${head.p[0] - 7},${head.p[1] - 4} Q${head.p[0]},${head.p[1] - 12} ${head.p[0] + 7},${head.p[1] - 4}`} fill="none" stroke="#64748b" strokeWidth={2} />}
       </g>
     ),
   });

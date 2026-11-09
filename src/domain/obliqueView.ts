@@ -16,7 +16,7 @@
 import type { DiagramType } from './exerciseVisualsData';
 import { BONES, buildSkeleton, poseAt, type JointId, type SegmentId, type Skeleton, type Vec } from './motionRig';
 import { FLOOR_Y, type MotionDef, type PropDef } from './motionLibrary';
-import { CX, latFor, type FrontalConfig, type LatJoint, type Side } from './frontalView';
+import { CX, hipDropAt, latFor, shiftAt, type FrontalConfig, type LatJoint, type Side } from './frontalView';
 
 export type Vec3 = [number, number, number];
 export type ObliqueCamera = 'front45' | 'rear45' | 'top';
@@ -108,10 +108,13 @@ export const LIMBS3: { seg: SegmentId; a: Joint3; b: Joint3; len: number }[] = (
 export function build3D(sk: Skeleton, cfg: FrontalConfig, progress: number): Skeleton3 {
   const z = (jt: LatJoint, s: Side) => (s === 'N' ? -1 : 1) * latFor(cfg, jt, s, progress);
   const at = (v: Vec, zz: number): Vec3 => [v[0], v[1], zz];
+  // the body can slide sideways over planted feet (Cossack squat) and the free hip can drop (pelvic leveling)
+  const sh = shiftAt(cfg, progress);
+  const drop = hipDropAt(cfg, progress);
   const j = {} as Record<Joint3, Vec3>;
-  j.pelvis = at(sk.hip, 0);
-  j.neck = at(sk.neck, 0);
-  j.head = at(sk.head, 0);
+  j.pelvis = at(sk.hip, sh);
+  j.neck = at(sk.neck, sh);
+  j.head = at(sk.head, sh);
   const up = norm3(sub3(j.neck, j.pelvis));
   // chest faces "up" rotated a quarter turn toward the lifter's front (cross of +z and up)
   const forward: Vec3 = [-up[1], up[0], 0];
@@ -119,14 +122,15 @@ export function build3D(sk: Skeleton, cfg: FrontalConfig, progress: number): Ske
   const face: Vec3 = [-hv[1], hv[0], 0];
 
   (['N', 'F'] as Side[]).forEach((s) => {
-    const hand = at(sk[`hand${s}`], z('hand', s));
-    const arm = solveTwoBone3(at(sk.neck, z('shoulder', s)), hand, BONES.upperArm, BONES.forearm, at(sk[`elbow${s}`], z('elbow', s)));
+    const hand = at(sk[`hand${s}`], z('hand', s) + sh);
+    const arm = solveTwoBone3(at(sk.neck, z('shoulder', s) + sh), hand, BONES.upperArm, BONES.forearm, at(sk[`elbow${s}`], z('elbow', s) + sh));
     j[`shoulder${s}`] = arm.root;
     j[`elbow${s}`] = arm.mid;
     j[`hand${s}`] = hand;
 
     const ankle = at(sk[`ankle${s}`], z('ankle', s));
-    const leg = solveTwoBone3(at(sk.hip, z('hip', s)), ankle, BONES.thigh, BONES.shin, at(sk[`knee${s}`], z('knee', s)));
+    const socket = add3(at(sk.hip, z('hip', s) + sh), [0, s === 'F' ? drop : 0, 0]);
+    const leg = solveTwoBone3(socket, ankle, BONES.thigh, BONES.shin, at(sk[`knee${s}`], z('knee', s) + sh));
     j[`hip${s}`] = leg.root;
     j[`knee${s}`] = leg.mid;
     j[`ankle${s}`] = ankle;
@@ -459,11 +463,15 @@ const REAR_FIRST: DiagramType[] = [
   'warmup_dead_hang',
   'warmup_scapular',
   'biering_sorensen',
+  'pelvic_drop',
 ];
 /** rotation and foot placement read best from above */
-const TOP_FIRST: DiagramType[] = ['single_leg_atw', 'carry'];
+const TOP_FIRST: DiagramType[] = ['single_leg_atw', 'carry', 'cossack_squat'];
+/** a flexing and extending spine reads best straight from the side */
+const SIDE_FIRST: DiagramType[] = ['cat_camel'];
 
-export function defaultCamera(type: DiagramType | string, _exerciseName = ''): ObliqueCamera {
+export function defaultCamera(type: DiagramType | string, _exerciseName = ''): ObliqueCamera | 'side' {
+  if ((SIDE_FIRST as string[]).includes(type)) return 'side';
   if ((TOP_FIRST as string[]).includes(type)) return 'top';
   if ((REAR_FIRST as string[]).includes(type)) return 'rear45';
   return 'front45';
@@ -477,6 +485,8 @@ const TOP_CUE: Partial<Record<DiagramType, string>> = {
   step_down: 'Stance foot centred on the step',
   core_mcgill: 'Reaching arm and leg stay in line with the spine',
   hanging_corkscrew: 'Knees swing to each side under a still torso',
+  cossack_squat: 'Feet stay planted wide; hips slide over one foot',
+  pelvic_drop: 'Pelvis level, stance foot centred under the hip',
   mountain_climber: 'Knee crosses under the body; hips stay level',
 };
 

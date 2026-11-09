@@ -16,7 +16,7 @@ import {
   type ObliqueCamera,
   type Vec3,
 } from '../../src/domain/obliqueView';
-import { FRONTAL, latFor } from '../../src/domain/frontalView';
+import { FRONTAL, hipDropAt, latFor, shiftAt, projectFrontal } from '../../src/domain/frontalView';
 import { MOTIONS } from '../../src/domain/motionLibrary';
 import { BONES, buildSkeleton, poseAt } from '../../src/domain/motionRig';
 
@@ -75,7 +75,11 @@ describe('domain/obliqueView', () => {
     expect(defaultCamera('single_leg_atw')).toBe('top');
     expect(defaultCamera('carry')).toBe('top');
     expect(defaultCamera('hanging_knee_raise')).toBe('front45');
-    IDS.forEach((id) => expect(OBLIQUE_CAMERAS).toContain(defaultCamera(id)));
+    expect(defaultCamera('cossack_squat')).toBe('top');
+    expect(defaultCamera('pelvic_drop')).toBe('rear45');
+    // a flexing spine reads best straight from the side
+    expect(defaultCamera('cat_camel')).toBe('side');
+    IDS.forEach((id) => expect([...OBLIQUE_CAMERAS, 'side']).toContain(defaultCamera(id)));
   });
 
   it('gives benches, bars, walls and machines real width wherever the side view has scenery', () => {
@@ -102,6 +106,32 @@ describe('domain/obliqueView', () => {
     expect(Math.abs(sweep)).toBeGreaterThan(1.8 * Math.PI);
   });
 
+  it('Cossack squat: feet stay planted wide while the hips slide over the right foot and sink', () => {
+    const a = frameAt('cossack_squat', 0).s3.j;
+    const b = frameAt('cossack_squat', 1).s3.j;
+    [0, 1, 2].forEach((k) => {
+      expect(b.ankleN[k]).toBeCloseTo(a.ankleN[k], 9);
+      expect(b.ankleF[k]).toBeCloseTo(a.ankleF[k], 9);
+    });
+    expect(b.ankleF[2] - b.ankleN[2]).toBeGreaterThan(90); // wide stance
+    expect(b.pelvis[2]).toBeLessThan(a.pelvis[2] - 25); // slid toward the right (N) foot
+    expect(b.pelvis[1]).toBeGreaterThan(a.pelvis[1] + 30); // and sank
+    // trail leg nearly straight in 3-D even though the side view draws it short
+    const trail = dist3(b.hipF, b.kneeF) + dist3(b.kneeF, b.ankleF);
+    expect(dist3(b.hipF, b.ankleF)).toBeGreaterThan(trail * 0.95);
+    const fs = projectFrontal(buildSkeleton(poseAt(MOTIONS.cossack_squat.frames, 1)), FRONTAL.cossack_squat, 1);
+    expect(fs.joints.ankle.N.p[0]).toBeCloseTo(projectFrontal(buildSkeleton(poseAt(MOTIONS.cossack_squat.frames, 0)), FRONTAL.cossack_squat, 0).joints.ankle.N.p[0], 9);
+  });
+
+  it('pelvic leveling: the free hip starts dropped and finishes level', () => {
+    const tilt = (p: number) => {
+      const j = frameAt('pelvic_drop', p).s3.j;
+      return j.hipF[1] - j.hipN[1];
+    };
+    expect(tilt(0)).toBeGreaterThan(5);
+    expect(Math.abs(tilt(1))).toBeLessThan(2);
+  });
+
   describe.each(IDS)('%s', (id) => {
     const m = MOTIONS[id];
 
@@ -122,7 +152,11 @@ describe('domain/obliqueView', () => {
           expect(a[0], label).toBeCloseTo(b[0], 9);
           expect(a[1], label).toBeCloseTo(b[1], 9);
         };
+        // the body can slide sideways over planted feet, and the free hip can drop
+        const sh = shiftAt(FRONTAL[id], p);
+        const drop = hipDropAt(FRONTAL[id], p);
         same(s3.j.pelvis, sk.hip, 'pelvis');
+        expect(s3.j.pelvis[2]).toBeCloseTo(sh, 9);
         same(s3.j.neck, sk.neck, 'neck');
         same(s3.j.head, sk.head, 'head');
         (['N', 'F'] as const).forEach((s) => {
@@ -130,16 +164,16 @@ describe('domain/obliqueView', () => {
           same(s3.j[`hand${s}`], sk[`hand${s}`], `hand${s}`);
           same(s3.j[`ankle${s}`], sk[`ankle${s}`], `ankle${s}`);
           const sign = s === 'N' ? -1 : 1;
-          expect(s3.j[`hand${s}`][2]).toBeCloseTo(sign * latFor(FRONTAL[id], 'hand', s, p), 9);
+          expect(s3.j[`hand${s}`][2]).toBeCloseTo(sign * latFor(FRONTAL[id], 'hand', s, p) + sh, 9);
           expect(s3.j[`ankle${s}`][2]).toBeCloseTo(sign * latFor(FRONTAL[id], 'ankle', s, p), 9);
           // elbows and knees are re-solved in 3-D but stay close to both 2-D views
           const near = (j3: Vec3, j2: [number, number], lat: number, label: string) =>
-            expect(Math.hypot(j3[0] - j2[0], j3[1] - j2[1], j3[2] - sign * lat), `${label} at ${p}`).toBeLessThan(ELBOW_KNEE_TOL);
+            expect(Math.hypot(j3[0] - j2[0], j3[1] - j2[1], j3[2] - sign * lat - sh), `${label} at ${p}`).toBeLessThan(ELBOW_KNEE_TOL);
           near(s3.j[`elbow${s}`], sk[`elbow${s}`], latFor(FRONTAL[id], 'elbow', s, p), `elbow${s}`);
           near(s3.j[`knee${s}`], sk[`knee${s}`], latFor(FRONTAL[id], 'knee', s, p), `knee${s}`);
           // the shoulder girdle only slides a little to keep a wide grip on the bar
-          expect(dist3(s3.j[`shoulder${s}`], [sk.neck[0], sk.neck[1], sign * latFor(FRONTAL[id], 'shoulder', s, p)])).toBeLessThan(4);
-          expect(dist3(s3.j[`hip${s}`], [sk.hip[0], sk.hip[1], sign * latFor(FRONTAL[id], 'hip', s, p)])).toBeLessThan(2);
+          expect(dist3(s3.j[`shoulder${s}`], [sk.neck[0], sk.neck[1], sign * latFor(FRONTAL[id], 'shoulder', s, p) + sh])).toBeLessThan(4);
+          expect(dist3(s3.j[`hip${s}`], [sk.hip[0], sk.hip[1] + (s === 'F' ? drop : 0), sign * latFor(FRONTAL[id], 'hip', s, p) + sh])).toBeLessThan(2);
         });
       });
       // the 3/4 views are a rigid camera turn of the same points: distances along the spine survive projection

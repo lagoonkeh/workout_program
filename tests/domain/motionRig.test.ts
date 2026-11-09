@@ -64,8 +64,8 @@ describe('domain/motionRig', () => {
   describe('motion library', () => {
     const entries = Object.entries(MOTIONS);
 
-    it('covers all 36 diagram types', () => {
-      expect(entries.length).toBe(36);
+    it('covers all 40 diagram types', () => {
+      expect(entries.length).toBe(40);
       expect(getMotion('not-a-type')).toBe(MOTIONS.squat);
     });
 
@@ -77,8 +77,9 @@ describe('domain/motionRig', () => {
         expect(dist(sk.hip, sk.neck)).toBeCloseTo(BONES.torso + (pose.shrug ?? 0), 3);
         expect(dist(sk.neck, sk.elbowN)).toBeCloseTo(BONES.upperArm, 3);
         expect(dist(sk.elbowN, sk.handN)).toBeCloseTo(BONES.forearm, 3);
-        expect(dist(sk.hip, sk.kneeN)).toBeCloseTo(BONES.thigh, 3);
-        expect(dist(sk.kneeN, sk.ankleN)).toBeCloseTo(BONES.shin, 3);
+        // a leg reaching sideways is drawn shorter in the side view (its 3-D length is checked in obliqueView)
+        expect(dist(sk.hip, sk.kneeN)).toBeCloseTo(BONES.thigh * (pose.scaleN ?? 1), 3);
+        expect(dist(sk.kneeN, sk.ankleN)).toBeCloseTo(BONES.shin * (pose.scaleN ?? 1), 3);
         Object.values(sk).forEach(([x, y]) => {
           expect(Number.isFinite(x) && Number.isFinite(y)).toBe(true);
           expect(x).toBeGreaterThan(-10);

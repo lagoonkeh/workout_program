@@ -36,7 +36,11 @@ export type DiagramType =
   | 'hanging_corkscrew'
   | 'curl_up'
   | 'plank_knee'
-  | 'mountain_climber';
+  | 'mountain_climber'
+  | 'cossack_squat'
+  | 'hollow_body'
+  | 'cat_camel'
+  | 'pelvic_drop';
 
 export interface ExerciseVisual {
   id: string;
@@ -55,6 +59,48 @@ export interface ExerciseVisual {
 }
 
 export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
+
+  t2_goblet_cossack_squat: {
+    id: 't2_goblet_cossack_squat',
+    exerciseName: 'Bowflex Kettlebell Goblet Cossack Squat',
+    diagramType: 'cossack_squat',
+    startPositionLabel: '1. Wide Stance, Bell at the Chest',
+    bottomPositionLabel: '2. Deep Side Squat, Trail Leg Straight',
+    caption: 'Shift the hips over one foot and sit deep into that hip while the other leg stays long with the toes pointing up. Trains the adductors, hip mobility and single-leg knee control in the frontal plane.',
+    keyCues: [
+      'Feet about twice shoulder-width, toes slightly out, bell hugged at the chest',
+      'Sit back and down into one hip; that knee tracks over the toes',
+      'Trail leg straight, heel down, toes pointing up',
+      'Chest proud; push the floor away to come back to the middle'
+    ],
+    jointAngleCues: {
+      start: 'Tall wide stance, both knees soft',
+      bottom: 'Working knee deeply bent, trail leg straight, hips low'
+    },
+    trajectoryNote: 'Hips travel sideways and down over the working foot, then back to the middle.',
+    safetyNote: 'Only go as deep as the working heel stays down and the trail knee stays straight without pain.'
+  },
+
+  t3_kb_cossack_squat: {
+    id: 't3_kb_cossack_squat',
+    exerciseName: 'Bowflex Kettlebell Goblet Cossack Squats',
+    diagramType: 'cossack_squat',
+    startPositionLabel: '1. Wide Stance, Bell at the Chest',
+    bottomPositionLabel: '2. Deep Side Squat, Trail Leg Straight',
+    caption: 'Shift the hips over one foot and sit deep into that hip while the other leg stays long with the toes pointing up. Trains the adductors, hip mobility and single-leg knee control in the frontal plane.',
+    keyCues: [
+      'Feet about twice shoulder-width, toes slightly out, bell hugged at the chest',
+      'Sit back and down into one hip; that knee tracks over the toes',
+      'Trail leg straight, heel down, toes pointing up',
+      'Chest proud; push the floor away to come back to the middle'
+    ],
+    jointAngleCues: {
+      start: 'Tall wide stance, both knees soft',
+      bottom: 'Working knee deeply bent, trail leg straight, hips low'
+    },
+    trajectoryNote: 'Hips travel sideways and down over the working foot, then back to the middle.',
+    safetyNote: 'Only go as deep as the working heel stays down and the trail knee stays straight without pain.'
+  },
   // --- SESSION 1: LOWER A ---
   t1_bb_squat: {
     id: 't1_bb_squat',
@@ -889,7 +935,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_hollow_body_hold: {
     id: 't3_athlean_hollow_body_hold',
     exerciseName: 'Athlean-X Hollow Body Core Compression',
-    diagramType: 'lsit',
+    diagramType: 'hollow_body',
     startPositionLabel: '1. Supine Floor Setup (Zero Gap)',
     bottomPositionLabel: '2. Banana Curved Compression Hold',
     caption: 'Yellow Dude & Athlean-X anti-extension gate: press lumbar spine flush against floor, elevate extremities 4–6 inches.',
@@ -973,7 +1019,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   w_abs_1: {
     id: 'w_abs_1',
     exerciseName: 'Dr. Stuart McGill Cat-Camel Spinal Wave',
-    diagramType: 'warmup_hip',
+    diagramType: 'cat_camel',
     startPositionLabel: '1. Gentle Camel Sag (Extension)',
     bottomPositionLabel: '2. Gentle Cat Arch (Flexion)',
     caption: 'Stuart McGill motion cycle: 4s gentle arch up, 4s smooth sag down. Lubricates intervertebral discs without loading.',
@@ -1037,7 +1083,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_hollow_body_hold: {
     id: 't3_bjj_hollow_body_hold',
     exerciseName: 'Athlean-X Grappler Hollow Body Core Compression Hold',
-    diagramType: 'lsit',
+    diagramType: 'hollow_body',
     startPositionLabel: '1. Supine Floor Setup (Zero Gap)',
     bottomPositionLabel: '2. Hollow Body Tension Arch',
     caption: 'Grappler core compression: press lumbar spine flush against floor with zero air gap, restoring cylindrical intra-abdominal pressure.',
@@ -1142,7 +1188,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   w_run_3: {
     id: 'w_run_3',
     exerciseName: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
-    diagramType: 'split_squat',
+    diagramType: 'pelvic_drop',
     startPositionLabel: '1. Single-Leg Athletic Stance',
     bottomPositionLabel: '2. Horizontal Pelvic Hold & Glute Squeeze',
     caption: 'Dr. Alyssa Lu pre-run primer: stabilizes the pelvis in single-leg stance, eliminating Trendelenburg hip drop and IT band friction during running.',
