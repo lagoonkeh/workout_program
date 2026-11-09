@@ -17,6 +17,7 @@ import {
   loadQuarterlyAssessments,
   type QuarterlyAssessmentRecord,
 } from '../domain/fitnessAssessment';
+import { loadCnsChecks, replaceCnsChecks, MAX_STORED_CHECKS, type CnsCheck } from '../domain/cnsReadiness';
 import { APP_DATA_MODIFIED_EVENT, getAppDataModifiedAt, setAppDataModifiedAt } from '../storage/appDataClock';
 import { getIdToken } from './firebaseAuth';
 
@@ -28,15 +29,26 @@ export interface AppBackup {
   savedAt: string;
   profile: AthleteProfile;
   assessments: QuarterlyAssessmentRecord[];
+  /** CNS readiness checks (added later; older backups don't have it) */
+  cnsChecks?: CnsCheck[];
 }
 
+/** The backup lives in one Sheets cell (the server rejects over 45,000 characters), so stay well under */
+export const BACKUP_SOFT_LIMIT_CHARS = 40000;
+
 export function collectAppBackup(now: Date = new Date()): AppBackup {
-  return {
+  const backup: AppBackup = {
     version: APP_BACKUP_VERSION,
     savedAt: getAppDataModifiedAt() || now.toISOString(),
     profile: loadProfile(),
     assessments: loadQuarterlyAssessments(),
+    cnsChecks: loadCnsChecks().slice(-MAX_STORED_CHECKS),
   };
+  // oldest CNS checks go first if the cell would overflow
+  while (backup.cnsChecks && backup.cnsChecks.length > 0 && JSON.stringify(backup).length > BACKUP_SOFT_LIMIT_CHARS) {
+    backup.cnsChecks = backup.cnsChecks.slice(Math.ceil(backup.cnsChecks.length / 10));
+  }
+  return backup;
 }
 
 /** True when this device holds nothing the user entered (fresh install or cleared data). */
@@ -45,7 +57,7 @@ export function isLocalDataPristine(): boolean {
   const profile = loadProfile();
   const assessments = loadQuarterlyAssessments();
   const onlyBaseline = assessments.every((a) => a.id === DEFAULT_BASELINE_ASSESSMENT.id);
-  return profile.weighIns.length === 0 && onlyBaseline;
+  return profile.weighIns.length === 0 && onlyBaseline && loadCnsChecks().length === 0;
 }
 
 function isBackup(x: unknown): x is AppBackup {
@@ -63,6 +75,7 @@ export function applyAppBackup(backup: AppBackup): void {
   } catch {
     return;
   }
+  if (Array.isArray(backup.cnsChecks)) replaceCnsChecks(backup.cnsChecks);
   setAppDataModifiedAt(backup.savedAt);
   try {
     window.dispatchEvent(new Event(ATHLETE_PROFILE_EVENT));

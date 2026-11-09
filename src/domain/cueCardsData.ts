@@ -2329,5 +2329,75 @@ export const CUE_CARDS: CueCard[] = [
     rehabRegressions: [
       'Marcus Filly Single-Arm Kettlebell Z-Press on floor.'
     ]
+  },
+  {
+    id: 'cue_rp_loaded_muscle_stretch',
+    exerciseId: 't3_bjj_rp_sfr_loaded_stretch',
+    exerciseName: 'Dr. Mike Israetel (RP) High-SFR Loaded Stretched-Position Hang',
+    title: 'Dr. Mike Israetel (RP) High-SFR Loaded Stretched-Position Hang',
+    tier: 'T3',
+    tempo: '0060',
+    prescribedTempo: 'HOLD-60 (60s Controlled Lengthened Hold / Continuous Nasal Breathing)',
+    primaryMuscles: ['Pectoralis Major', 'Latissimus Dorsi', 'Hamstrings', 'Deep Fascial Sheaths'],
+    equipment: 'Pull-Up Bar or Bodyweight Mat',
+    setup: 'Grip pull-up bar for overhead lat hang, or use floor/bench for deep chest fly stretch. Relax into maximum pain-free lengthened range.',
+    setupInstructions: [
+      'Phase 1 — Setup & Grip: Take a shoulder-width overhand or neutral grip on pull-up bar, or lie supine on bench/mat with light load.',
+      'Phase 2 — Slow Lengthening Descent: Sink under control into the deep lengthened position for 5–10 seconds.',
+      'Phase 3 — High-SFR Stretched Hold: Hold the lengthened position under active muscular tension without bottoming out violently on joint ligaments.',
+      'Phase 4 — Controlled Resensitization: Breathe diaphragmatically for 45–60 seconds, flushing target muscle tissues with oxygenated blood.',
+      'Phase 5 — Gentle Exit: Slowly step down or bring weights to chest before standing.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Dr. Mike Israetel (Renaissance Periodization)',
+        quote: 'Loaded stretching at long muscle lengths provides massive localized hypertrophic stimulus with virtually zero systemic axial or CNS fatigue. It is the pinnacle of high Stimulus-to-Fatigue Ratio (SFR) training.',
+        biomechanicalRationale: 'Mechanical tension in the lengthened position stimulates intracellular signaling cascades for sarcomere addition in series (sarcomerogenesis) without compressive joint damage.'
+      },
+      {
+        creator: 'House of Hypertrophy',
+        quote: 'Meta-analytic research shows that mechanical tension experienced in stretched muscle positions accounts for disproportionate hypertrophy gains compared to contractions at shortened muscle lengths.',
+        biomechanicalRationale: 'Stretch-mediated hypertrophy triggers both passive and active mechanical tension, promoting connective tissue remodeling and myofibrillar hypertrophy.'
+      }
+    ],
+    commonFaults: [
+      'Relaxing completely and letting bone impingement absorb the stretch instead of muscle fibers.',
+      'Holding breath and spiking blood pressure.'
+    ],
+    rehabRegressions: [
+      'Assisted foot-supported lat hang or doorway chest stretch.'
+    ]
+  },
+  {
+    id: 'cue_sbs_autoreg_recovery_check',
+    exerciseId: 't3_bjj_sbs_autoreg_recovery_check',
+    exerciseName: 'Stronger By Science (SBS) Autoregulated Velocity & Reactive Recovery Check',
+    title: 'Stronger By Science (SBS) Autoregulated Velocity & Reactive Recovery Check',
+    tier: 'T3',
+    tempo: '2020',
+    prescribedTempo: 'Positional Reset (2-3 min Active Joint & Velocity Mobility Flow)',
+    primaryMuscles: ['Central Nervous System', 'High-Threshold Motor Units', 'Full Body Kinetic Chain'],
+    equipment: 'Bodyweight Mat',
+    setup: 'Clear floor space; stand tall and move through unweighted rhythmic hip hinges and deep squats to gauge bar speed readiness.',
+    setupInstructions: [
+      'Phase 1 — Velocity Baseline Assessment: Perform 5 unweighted explosive hip hinges and 5 deep bodyweight squats.',
+      'Phase 2 — RPE / RIR Calibrator: Assess perceived effort and movement speed compared to normal baseline.',
+      'Phase 3 — Reactive Deload Decision: If movement is sluggish or joints feel guarded, note fatigue for automatic set reduction.',
+      'Phase 4 — Parasympathetic Transition: Finish with 1 minute of nasal breathing to reset resting heart rate.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)',
+        quote: 'Do not let arbitrary calendar schedules dictate your intensity. Autoregulate daily training loads and reactive deloads based on objective bar speed and true Reps in Reserve.',
+        biomechanicalRationale: 'Mitigates non-linear systemic fatigue variance caused by life stressors, poor sleep, or training accumulation, preserving long-term progress.'
+      }
+    ],
+    commonFaults: [
+      'Ignoring sluggish bar speed and forcing heavy loads into severe fatigue.',
+      'Turning an assessment check into an intense metabolic burner.'
+    ],
+    rehabRegressions: [
+      'Supine 90/90 breathing with legs supported on couch or bench.'
+    ]
   }
 ];

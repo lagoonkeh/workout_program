@@ -13,6 +13,7 @@ import {
   WorkoutCompletionModal,
   WorkoutHistoryModal,
   DailyReadinessWidget,
+  CnsReadinessWidget,
   TempoMetronomeWidget,
   MuscleHeatmapWidget,
   AdaptiveBodyCoachWidget,
@@ -21,6 +22,7 @@ import {
 import { sessionToOpen } from './domain/nextSession';
 import { increaseGate, gateReason, type ReadinessCheckIn } from './domain/trainingReadiness';
 import { loadCachedHealth } from './domain/healthMetrics';
+import { loadCnsChecks } from './domain/cnsReadiness';
 import { HEALTH_UPDATED_EVENT, loadCachedWorkouts } from './domain/healthWorkouts';
 import { migrateMeadowsRowOnce, removeNov1PhantomsOnce, removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
 import { clearSessionMarks, findAutoSavedToday, finishedToday, isLeftoverFromEarlierDay, pickSessionLogs, sessionLogKeys } from './domain/sessionReset';
@@ -59,7 +61,7 @@ import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget
 import { LazyExerciseDiagram as ExerciseDiagram } from './components/LazyExerciseDiagram';
 import { WarmupPhaseSubCard } from './components/WarmupPhaseSubCard';
 import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
-import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X, Layers } from 'lucide-react';
+import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, Brain, ArrowLeftRight, Play, Timer, X, Layers } from 'lucide-react';
 import {
   scanLastWorkout,
   LastWorkoutScanResult,
@@ -211,6 +213,7 @@ export function WorkoutAppMain() {
       if (
         fromQuery === 'workout' ||
         fromQuery === 'readiness' ||
+        fromQuery === 'cns' ||
         fromQuery === 'mobility' ||
         fromQuery === 'stretching' ||
         fromQuery === 'progress' ||
@@ -223,6 +226,7 @@ export function WorkoutAppMain() {
       if (
         fromStorage === 'workout' ||
         fromStorage === 'readiness' ||
+        fromStorage === 'cns' ||
         fromStorage === 'mobility' ||
         fromStorage === 'stretching' ||
         fromStorage === 'progress' ||
@@ -964,7 +968,7 @@ export function WorkoutAppMain() {
     } catch {
       // no check-ins yet
     }
-    return gateReason(increaseGate(new Date(), loadCachedHealth(), loadCachedWorkouts(), checkIns));
+    return gateReason(increaseGate(new Date(), loadCachedHealth(), loadCachedWorkouts(), checkIns, loadCnsChecks()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recoveryTick, currentView]);
 
@@ -3659,6 +3663,15 @@ export function WorkoutAppMain() {
           </div>
         )}
 
+        {/* View: CNS readiness (tap test, reaction time, HRV / resting HR) */}
+        {currentView === 'cns' && (
+          <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-3xl mx-auto">
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <CnsReadinessWidget onNavigateToWorkout={() => setCurrentView('workout')} />
+            </Suspense>
+          </div>
+        )}
+
         {/* View 2: Mobility & Flexibility Tracker */}
         {currentView === 'mobility' && (
           <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-7xl mx-auto">
@@ -3728,12 +3741,13 @@ export function WorkoutAppMain() {
       {/* Mobile Bottom Thumb-Zone Quick Navigation Bar (Optimized for Pixel 9 Pro XL 20:9 screen) */}
       <nav
         aria-label="Mobile Thumb-Zone Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 px-1 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] grid grid-cols-7 gap-0.5 shadow-2xl"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 px-1 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] grid grid-cols-8 gap-0.5 shadow-2xl"
       >
         {(
           [
             { id: 'workout', label: 'Routine', icon: Dumbbell },
             { id: 'readiness', label: 'Check-In', icon: HeartPulse },
+            { id: 'cns', label: 'CNS', icon: Brain },
             { id: 'mobility', label: 'Mobility', icon: Activity },
             { id: 'stretching', label: 'Stretch', icon: Sparkles },
             { id: 'progress', label: 'Progress', icon: TrendingUp },

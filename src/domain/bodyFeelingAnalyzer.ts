@@ -505,6 +505,13 @@ export function analyzeBodyFeelingAndHistory(
       rationale: 'Dynamically flushes the hamstrings through active reciprocal knee flexion without passive micro-tearing.',
       creatorInfluence: 'Ben Patrick (ATG)',
     });
+    injectedWarmups.push({
+      id: 'prehab_hoh_long_length_activation',
+      name: 'House of Hypertrophy Stretched-Position Hamstring Activation',
+      rationale:
+        'Applies peer-reviewed stretch-mediated hypertrophy and tension principles to lengthen guarded muscle fibers safely under controlled passive/active tension.',
+      creatorInfluence: 'House of Hypertrophy',
+    });
   }
 
   // --- 4b. HIP / GROIN / ADDUCTOR RESTRICTION ---
@@ -574,6 +581,20 @@ export function analyzeBodyFeelingAndHistory(
         'Shifts autonomic nervous system from sympathetic fight-or-flight to parasympathetic recovery; verify 500-1000mg sodium/potassium electrolyte replenishment and adhere to an 8-10hr caffeine curfew before bedtime.',
       creatorInfluence: 'Derek (More Plates More Dates)',
     });
+    injectedWarmups.push({
+      id: 'prehab_rp_sfr_volume_check',
+      name: 'Dr. Mike Israetel (RP) Volume Landmark & SFR Recovery Check',
+      rationale:
+        'Assesses proximity to MRV (Maximum Recoverable Volume) and shifts working accessory volume toward high Stimulus-to-Fatigue Ratio (SFR) movements while capping weekly hard sets within MEV/MAV thresholds.',
+      creatorInfluence: 'Dr. Mike Israetel (Renaissance Periodization)',
+    });
+    injectedWarmups.push({
+      id: 'prehab_sbs_velocity_check',
+      name: 'Stronger By Science (SBS) Autoregulated Velocity Loss Check',
+      rationale:
+        'Monitors movement velocity drop-offs on primary lifts; if two consecutive sessions display marked velocity loss, initiates proactive autoregulated deload.',
+      creatorInfluence: 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)',
+    });
   }
 
   // --- 6. PEAK READINESS / CLEAR SIGNAL ---
@@ -597,7 +618,7 @@ export function analyzeBodyFeelingAndHistory(
       'All physiological lights are green! Full joint compliance, high systemic CNS energy, and zero residual tendon fatigue across past 2 weeks. You are fully primed for Tier 1 progressive overload and AMRAP personal records.';
   } else {
     const categoriesDiagnosed = diagnosedSymptoms.map((s) => s.label).join(', ');
-    biomechanicalSummary = `Biomechanical assessment identified: ${categoriesDiagnosed}. Adjustments have been constructed using ATG tendon remodeling, McGill spinal sparing, Range of Strength loaded mobility, and Derek (MPMD) physiological recovery principles to deliver full functional training stimulus with zero joint wear.`;
+    biomechanicalSummary = `Biomechanical assessment identified: ${categoriesDiagnosed}. Adjustments have been constructed using ATG tendon remodeling, McGill spinal sparing, Range of Strength loaded mobility, Derek (MPMD) physiological recovery, and Dr. Mike Israetel (RP) SFR volume landmarks to deliver full functional training stimulus with zero joint wear.`;
   }
 
   return {

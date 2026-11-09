@@ -269,6 +269,81 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
     ],
     recommendedTempo: '4s Inhale / 4s Hold / 4s Exhale / 4s Hold',
     tags: ['recovery', 'sleep', 'cns', 'fatigue', 'parasympathetic', 'breathing', 'caffeine', 'electrolytes']
+  },
+  {
+    id: 'stretch_rp_loaded_sfr_stretch',
+    name: 'Dr. Mike Israetel (Renaissance Periodization) High-SFR Loaded Stretched-Position Hang',
+    creator: 'Dr. Mike Israetel (Renaissance Periodization)',
+    targetArea: 'Pectorals, Lats & Stretched Connective Tissue',
+    targetMuscles: ['Pectoralis Major', 'Latissimus Dorsi', 'Anterior Deltoids', 'Thoracolumbar Fascia'],
+    durationSeconds: 60,
+    isBilateral: false,
+    priorityScore: 78,
+    triggerSource: 'preventive_maintenance',
+    triggerReason: 'Stretch-Mediated Cellular Remodeling: Maximizes target muscle hypertrophic signalling at deep muscle lengths with high stimulus-to-fatigue ratio (SFR) and zero spinal shear.',
+    coachingQuote: 'Loaded stretching at long muscle lengths provides potent hypertrophic stimulus without the high axial fatigue of extra heavy sets. Let the muscle hang into the deep stretch under active control.',
+    instructions: [
+      'Grip the pull-up bar with an overhand or neutral grip, or support hands on dumbbells/bench.',
+      'Lower slowly into a controlled active hang with feet touching the floor for assistance if needed.',
+      'Allow the lats and pectorals to elongate fully into the deepest comfortable stretch position.',
+      'Hold for 30–45 seconds with relaxed abdominal breathing, feeling tension purely in muscle bellies, not joints.',
+      'Step gently onto the floor and shake out the arms.'
+    ],
+    commonFaults: [
+      'Completely disengaging shoulders into passive painful bone impingement.',
+      'Holding breath during the lengthened hold.'
+    ],
+    recommendedTempo: 'HOLD-45',
+    tags: ['chest', 'lats', 'shoulders', 'stretch', 'hypertrophy', 'sfr', 'lengthened']
+  },
+  {
+    id: 'stretch_sbs_reactive_velocity_flush',
+    name: 'Stronger By Science (Greg Nuckols & Dr. Eric Trexler) Reactive Deload & Joint Flush',
+    creator: 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)',
+    targetArea: 'Systemic Kinetic Chain & Neuromuscular Recovery',
+    targetMuscles: ['Erector Spinae', 'Quadriceps', 'Hamstrings', 'Glenohumeral Joint'],
+    durationSeconds: 90,
+    isBilateral: false,
+    priorityScore: 77,
+    triggerSource: 'preventive_maintenance',
+    triggerReason: 'Neuromuscular Recovery & Velocity Restoration: Dissipates acute fatigue accumulation across heavy compound sessions, restoring high-threshold motor unit recruitment capacity.',
+    coachingQuote: 'Fatigue is systemic and non-linear. Flushing joints with non-fatiguing active mobility restores bar velocity faster than passive sitting.',
+    instructions: [
+      'Perform slow, rhythmic bodyweight hinges and deep knee bend transitions with zero external load.',
+      'Focus on fluid, continuous movement through full comfortable range of motion.',
+      'Cycle through 10 deep hip hinges followed by 10 slow goblet-depth air squats with arms reaching forward.',
+      'Breathe rhythmically in through the nose and out through the mouth.'
+    ],
+    commonFaults: [
+      'Turning recovery flush into an intense cardiovascular circuit.'
+    ],
+    recommendedTempo: 'Rhythmic Flow',
+    tags: ['cns', 'recovery', 'velocity', 'joint', 'fatigue', 'mobility']
+  },
+  {
+    id: 'stretch_hoh_long_length_decompression',
+    name: 'House of Hypertrophy Lengthened-Position Posterior Chain Decompression',
+    creator: 'House of Hypertrophy',
+    targetArea: 'Hamstrings, Posterior Knee Capsule & Gluteals',
+    targetMuscles: ['Biceps Femoris', 'Semitendinosus', 'Semimembranosus', 'Gluteus Maximus'],
+    durationSeconds: 60,
+    isBilateral: false,
+    priorityScore: 76,
+    triggerSource: 'preventive_maintenance',
+    triggerReason: 'Long-Length Partials & Stretched Muscle Remodeling: Meta-analytic research demonstrates superior hypertrophy and passive tension adaptation when tissues are held under tension in lengthened ranges.',
+    coachingQuote: 'Peer-reviewed meta-analyses show that tension in lengthened muscle positions triggers distinct structural and fascicle length adaptations. Prioritize the deep stretch.',
+    instructions: [
+      'Place one heel on an elevated 12–18" surface with knee slightly unlocked (10–15° bend).',
+      'Hinge forward from the hips with a flat spine until a deep stretch is felt in the hamstring belly.',
+      'Gently pulse 1–2 inches in the deep lengthened position for 30 seconds per leg.',
+      'Repeat on contralateral side.'
+    ],
+    commonFaults: [
+      'Rounding the lumbar spine to reach the toes.',
+      'Hyperextending the knee joint during the stretch.'
+    ],
+    recommendedTempo: '30s Lengthened Micro-Pulse',
+    tags: ['hamstring', 'posterior_chain', 'stretch', 'long_length', 'hypertrophy']
   }
 ];
 
