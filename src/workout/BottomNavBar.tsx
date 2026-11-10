@@ -1,5 +1,5 @@
 // Extracted from src/App.tsx (WorkoutAppMain). Presentation only: state and handlers come in as props.
-import { Activity, BookOpen, ChevronDown, Dumbbell, HeartPulse, Sparkles, TrendingUp, Trophy } from 'lucide-react';
+import { Activity, BookOpen, Brain, ChevronDown, Dumbbell, HeartPulse, Sparkles, TrendingUp, Trophy } from 'lucide-react';
 import { type Dispatch, type SetStateAction } from 'react';
 import { type AppViewMode } from '../components/Header';
 import { type WorkoutExercise } from '../domain/programData';
@@ -17,12 +17,13 @@ export function BottomNavBar({ currentView, handleJumpToNextSet, nextOpenSet, se
       {/* Mobile Bottom Thumb-Zone Quick Navigation Bar (Optimized for Pixel 9 Pro XL 20:9 screen) */}
       <nav
         aria-label="Mobile Thumb-Zone Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 px-1 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] grid grid-cols-7 gap-0.5 shadow-2xl"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 px-1 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] grid grid-cols-8 gap-0.5 shadow-2xl"
       >
         {(
           [
             { id: 'workout', label: 'Routine', icon: Dumbbell },
             { id: 'readiness', label: 'Check-In', icon: HeartPulse },
+            { id: 'cns', label: 'CNS', icon: Brain },
             { id: 'mobility', label: 'Mobility', icon: Activity },
             { id: 'stretching', label: 'Stretch', icon: Sparkles },
             { id: 'progress', label: 'Progress', icon: TrendingUp },

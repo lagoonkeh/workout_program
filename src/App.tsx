@@ -5,6 +5,7 @@ import {
 import { sessionToOpen } from './domain/nextSession';
 import { increaseGate, gateReason, type ReadinessCheckIn } from './domain/trainingReadiness';
 import { loadCachedHealth } from './domain/healthMetrics';
+import { loadCnsChecks } from './domain/cnsReadiness';
 import { HEALTH_UPDATED_EVENT, loadCachedWorkouts } from './domain/healthWorkouts';
 import { migrateMeadowsRowOnce, removeNov1PhantomsOnce, removeSheetCopiesOnce, repairSheetHistory } from './services/historyRepair';
 import {
@@ -152,6 +153,7 @@ export function WorkoutAppMain() {
       if (
         fromQuery === 'workout' ||
         fromQuery === 'readiness' ||
+        fromQuery === 'cns' ||
         fromQuery === 'mobility' ||
         fromQuery === 'stretching' ||
         fromQuery === 'progress' ||
@@ -164,6 +166,7 @@ export function WorkoutAppMain() {
       if (
         fromStorage === 'workout' ||
         fromStorage === 'readiness' ||
+        fromStorage === 'cns' ||
         fromStorage === 'mobility' ||
         fromStorage === 'stretching' ||
         fromStorage === 'progress' ||
@@ -691,7 +694,7 @@ export function WorkoutAppMain() {
     } catch {
       // no check-ins yet
     }
-    return gateReason(increaseGate(new Date(), loadCachedHealth(), loadCachedWorkouts(), checkIns));
+    return gateReason(increaseGate(new Date(), loadCachedHealth(), loadCachedWorkouts(), checkIns, loadCnsChecks()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recoveryTick, currentView]);
 

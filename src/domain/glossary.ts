@@ -3,6 +3,8 @@
  * Plain-English glossary of the training terms, abbreviations and app features used across the program,
  * plus a tempo decoder ("31X1" -> what to actually do on each phase of the rep).
  */
+import { EXERCISE_VISUALS, type DiagramType } from './exerciseVisualsData';
+
 export type GlossaryCategory = 'Programming' | 'Reps & tempo' | 'Technique & anatomy' | 'Recovery & readiness' | 'Methods & drills' | 'In this app';
 
 export interface GlossaryEntry {
@@ -99,6 +101,51 @@ export const GLOSSARY: GlossaryEntry[] = [
 ];
 
 /** Case-insensitive search over term, aliases, definition and in-app note. */
+/** Terms you can watch: the movement demo that shows the idea best. */
+export const GLOSSARY_DEMOS: Record<string, DiagramType> = {
+  Bracing: 'squat',
+  'Foot tripod': 'squat',
+  'Knee valgus': 'squat',
+  'Hip hinge': 'rdl',
+  'Neutral spine': 'good_morning',
+  'Posterior pelvic tilt': 'hanging_knee_raise',
+  Dorsiflexion: 'warmup_ankle',
+  'Lat pack': 'dead_hang',
+  'Scapular retraction': 'face_pull',
+  VMO: 'step_down',
+  Tibialis: 'tibialis',
+  'Glute medius': 'step_down',
+  'Posterior chain': 'rdl',
+  ATG: 'split_squat',
+  'McGill Big 3': 'core_mcgill',
+  'Biering-Sorensen hold': 'biering_sorensen',
+  'Elephant walk': 'warmup_elephant',
+  'Patrick step-down': 'step_down',
+  'Around-the-world': 'single_leg_atw',
+  'Dead hang': 'dead_hang',
+  '90/90 breathing': 'warmup_90_90',
+  'Indian clubs': 'warmup_club',
+};
+
+export interface ExerciseDemo {
+  name: string;
+  type: DiagramType;
+}
+
+/** Every exercise with a movement demo (one row per exercise name), filtered by a search query. */
+export function searchExerciseDemos(query: string): ExerciseDemo[] {
+  const q = query.trim().toLowerCase();
+  const seen = new Set<string>();
+  const out: ExerciseDemo[] = [];
+  Object.values(EXERCISE_VISUALS).forEach((v) => {
+    const key = v.exerciseName.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    if (!q || key.includes(q) || v.diagramType.replace(/_/g, ' ').includes(q)) out.push({ name: v.exerciseName, type: v.diagramType });
+  });
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export function searchGlossary(query: string, category?: GlossaryCategory | 'All'): GlossaryEntry[] {
   const q = query.trim().toLowerCase();
   return GLOSSARY.filter((g) => (!category || category === 'All' || g.category === category))

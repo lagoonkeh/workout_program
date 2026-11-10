@@ -31,7 +31,16 @@ export type DiagramType =
   | 'warmup_elephant'
   | 'warmup_dead_hang'
   | 'warmup_wall_slide'
-  | 'single_leg_atw';
+  | 'single_leg_atw'
+  | 'hanging_knee_raise'
+  | 'hanging_corkscrew'
+  | 'curl_up'
+  | 'plank_knee'
+  | 'mountain_climber'
+  | 'cossack_squat'
+  | 'hollow_body'
+  | 'cat_camel'
+  | 'pelvic_drop';
 
 export interface ExerciseVisual {
   id: string;
@@ -50,6 +59,48 @@ export interface ExerciseVisual {
 }
 
 export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
+
+  t2_goblet_cossack_squat: {
+    id: 't2_goblet_cossack_squat',
+    exerciseName: 'Bowflex Kettlebell Goblet Cossack Squat',
+    diagramType: 'cossack_squat',
+    startPositionLabel: '1. Wide Stance, Bell at the Chest',
+    bottomPositionLabel: '2. Deep Side Squat, Trail Leg Straight',
+    caption: 'Shift the hips over one foot and sit deep into that hip while the other leg stays long with the toes pointing up. Trains the adductors, hip mobility and single-leg knee control in the frontal plane.',
+    keyCues: [
+      'Feet about twice shoulder-width, toes slightly out, bell hugged at the chest',
+      'Sit back and down into one hip; that knee tracks over the toes',
+      'Trail leg straight, heel down, toes pointing up',
+      'Chest proud; push the floor away to come back to the middle'
+    ],
+    jointAngleCues: {
+      start: 'Tall wide stance, both knees soft',
+      bottom: 'Working knee deeply bent, trail leg straight, hips low'
+    },
+    trajectoryNote: 'Hips travel sideways and down over the working foot, then back to the middle.',
+    safetyNote: 'Only go as deep as the working heel stays down and the trail knee stays straight without pain.'
+  },
+
+  t3_kb_cossack_squat: {
+    id: 't3_kb_cossack_squat',
+    exerciseName: 'Bowflex Kettlebell Goblet Cossack Squats',
+    diagramType: 'cossack_squat',
+    startPositionLabel: '1. Wide Stance, Bell at the Chest',
+    bottomPositionLabel: '2. Deep Side Squat, Trail Leg Straight',
+    caption: 'Shift the hips over one foot and sit deep into that hip while the other leg stays long with the toes pointing up. Trains the adductors, hip mobility and single-leg knee control in the frontal plane.',
+    keyCues: [
+      'Feet about twice shoulder-width, toes slightly out, bell hugged at the chest',
+      'Sit back and down into one hip; that knee tracks over the toes',
+      'Trail leg straight, heel down, toes pointing up',
+      'Chest proud; push the floor away to come back to the middle'
+    ],
+    jointAngleCues: {
+      start: 'Tall wide stance, both knees soft',
+      bottom: 'Working knee deeply bent, trail leg straight, hips low'
+    },
+    trajectoryNote: 'Hips travel sideways and down over the working foot, then back to the middle.',
+    safetyNote: 'Only go as deep as the working heel stays down and the trail knee stays straight without pain.'
+  },
   // --- SESSION 1: LOWER A ---
   t1_bb_squat: {
     id: 't1_bb_squat',
@@ -842,7 +893,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_hanging_knee_raise: {
     id: 't3_athlean_hanging_knee_raise',
     exerciseName: 'Athlean-X Hanging Knee Raise with Pelvic Curl',
-    diagramType: 'pullup',
+    diagramType: 'hanging_knee_raise',
     startPositionLabel: '1. Active Dead Hang (Depressed Scapulae)',
     bottomPositionLabel: '2. Top Pelvic Curl (Show Tailbone)',
     caption: 'Jeff Cavaliere kinetic sequence step 1: curl pelvis upward toward chest, not just lifting thighs with hip flexors.',
@@ -863,7 +914,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_hanging_corkscrew: {
     id: 't3_athlean_hanging_corkscrew',
     exerciseName: 'Athlean-X Hanging Corkscrews',
-    diagramType: 'pullup',
+    diagramType: 'hanging_corkscrew',
     startPositionLabel: '1. Active Hang Centerline',
     bottomPositionLabel: '2. Diagonal Knee Drive to Armpit',
     caption: 'Bottom-up rotational oblique drive: lift knees diagonally toward opposite armpit, twisting pelvis with strict control.',
@@ -884,7 +935,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_hollow_body_hold: {
     id: 't3_athlean_hollow_body_hold',
     exerciseName: 'Athlean-X Hollow Body Core Compression',
-    diagramType: 'lsit',
+    diagramType: 'hollow_body',
     startPositionLabel: '1. Supine Floor Setup (Zero Gap)',
     bottomPositionLabel: '2. Banana Curved Compression Hold',
     caption: 'Yellow Dude & Athlean-X anti-extension gate: press lumbar spine flush against floor, elevate extremities 4–6 inches.',
@@ -905,7 +956,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_cross_mountain_climber: {
     id: 't3_athlean_cross_mountain_climber',
     exerciseName: 'Athlean-X Cross-Body Mountain Climbers',
-    diagramType: 'core_mcgill',
+    diagramType: 'mountain_climber',
     startPositionLabel: '1. High Push-Up Plank Base',
     bottomPositionLabel: '2. Cross-Body Knee Drive to Opposite Elbow',
     caption: 'Top-down rotational drive: slow, deliberate cross-body knee drive with 1s oblique squeeze.',
@@ -926,7 +977,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_iso_crunch: {
     id: 't3_athlean_iso_crunch',
     exerciseName: 'Athlean-X 2-Second Peak Squeeze Floor Curl-Up',
-    diagramType: 'core_mcgill',
+    diagramType: 'curl_up',
     startPositionLabel: '1. Supine 90° Bent-Knee Setup',
     bottomPositionLabel: '2. 30° Thoracic Curl with 2s Squeeze',
     caption: 'Top-down flexion: curl only shoulder blades off floor (30°), exhale all air, squeeze upper rectus abdominis for 2 full seconds.',
@@ -947,7 +998,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_athlean_serratus_plank: {
     id: 't3_athlean_serratus_plank',
     exerciseName: 'Athlean-X Serratus Elbow-to-Knee Plank',
-    diagramType: 'core_mcgill',
+    diagramType: 'plank_knee',
     startPositionLabel: '1. Forearm Plank Alignment',
     bottomPositionLabel: '2. Active Serratus & Elbow-Toe Drag',
     caption: 'Jeff Cavaliere & Stuart McGill core cylinder finisher: protract shoulder blades, isometrically pull elbows toward toes.',
@@ -968,7 +1019,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   w_abs_1: {
     id: 'w_abs_1',
     exerciseName: 'Dr. Stuart McGill Cat-Camel Spinal Wave',
-    diagramType: 'warmup_hip',
+    diagramType: 'cat_camel',
     startPositionLabel: '1. Gentle Camel Sag (Extension)',
     bottomPositionLabel: '2. Gentle Cat Arch (Flexion)',
     caption: 'Stuart McGill motion cycle: 4s gentle arch up, 4s smooth sag down. Lubricates intervertebral discs without loading.',
@@ -1011,7 +1062,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_hanging_knee_raise: {
     id: 't3_bjj_hanging_knee_raise',
     exerciseName: 'Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression',
-    diagramType: 'pullup',
+    diagramType: 'hanging_knee_raise',
     startPositionLabel: '1. Active Dead Hang (Depressed Scapulae)',
     bottomPositionLabel: '2. Posterior Pelvic Tilt Curl',
     caption: 'Post-grappling spinal decompression & lower core: curl pelvis upward to expand compressed lumbar discs without psoas hyperextension.',
@@ -1032,7 +1083,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_hollow_body_hold: {
     id: 't3_bjj_hollow_body_hold',
     exerciseName: 'Athlean-X Grappler Hollow Body Core Compression Hold',
-    diagramType: 'lsit',
+    diagramType: 'hollow_body',
     startPositionLabel: '1. Supine Floor Setup (Zero Gap)',
     bottomPositionLabel: '2. Hollow Body Tension Arch',
     caption: 'Grappler core compression: press lumbar spine flush against floor with zero air gap, restoring cylindrical intra-abdominal pressure.',
@@ -1053,7 +1104,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_cross_mountain_climber: {
     id: 't3_bjj_cross_mountain_climber',
     exerciseName: 'Athlean-X Cross-Body Oblique Climbers & Serratus Punch',
-    diagramType: 'core_mcgill',
+    diagramType: 'mountain_climber',
     startPositionLabel: '1. High Push-Up Plank Base',
     bottomPositionLabel: '2. Cross-Body Knee-to-Elbow Squeeze',
     caption: 'Post-grappling rotational reset: drive knee across torso to opposite elbow to balance asymmetric rotation from guard passing.',
@@ -1074,7 +1125,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   t3_bjj_mcgill_curl_up: {
     id: 't3_bjj_mcgill_curl_up',
     exerciseName: 'Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace',
-    diagramType: 'core_mcgill',
+    diagramType: 'curl_up',
     startPositionLabel: '1. Supine Neutral Spine with Hands Under Lumbar',
     bottomPositionLabel: '2. Unitized Head & Shoulder Elevation',
     caption: 'Dr. Stuart McGill spinal-sparing core curl-up: preserve neutral lumbar curve with hands while elevating head and shoulders 1 inch.',
@@ -1137,7 +1188,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   w_run_3: {
     id: 'w_run_3',
     exerciseName: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
-    diagramType: 'split_squat',
+    diagramType: 'pelvic_drop',
     startPositionLabel: '1. Single-Leg Athletic Stance',
     bottomPositionLabel: '2. Horizontal Pelvic Hold & Glute Squeeze',
     caption: 'Dr. Alyssa Lu pre-run primer: stabilizes the pelvis in single-leg stance, eliminating Trendelenburg hip drop and IT band friction during running.',

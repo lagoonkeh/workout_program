@@ -1,9 +1,9 @@
 import React from 'react';
-import { Volume2, VolumeX, Dumbbell, Activity, Cloud, Loader2, Check, Sparkles, TrendingUp, HeartPulse, LogOut, Trophy, History, BookOpen } from 'lucide-react';
+import { Volume2, VolumeX, Dumbbell, Activity, Cloud, Loader2, Check, Sparkles, TrendingUp, HeartPulse, LogOut, Trophy, History, BookOpen, Brain } from 'lucide-react';
 import { AppLogo } from './AppLogo';
 import { useAuth } from '../context/AuthContext';
 
-export type AppViewMode = 'workout' | 'readiness' | 'mobility' | 'stretching' | 'progress' | 'assessment' | 'guide';
+export type AppViewMode = 'workout' | 'readiness' | 'cns' | 'mobility' | 'stretching' | 'progress' | 'assessment' | 'guide';
 
 export interface HeaderProps {
   activeSessionTitle: string;
@@ -204,6 +204,21 @@ const HeaderComponent: React.FC<HeaderProps> = ({
             >
               <HeartPulse className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">Check-In</span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={currentView === 'cns'}
+              onClick={() => onSelectView('cns')}
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 px-1 sm:px-2.5 py-1.5 min-h-[44px] rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap min-w-0 ${
+                currentView === 'cns'
+                  ? 'bg-emerald-500 text-slate-950 font-semibold shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">CNS</span>
             </button>
 
             <button

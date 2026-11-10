@@ -6,7 +6,7 @@ import { type AppViewMode } from '../components/Header';
 import { type MobilityEntry } from '../domain/mobility';
 import { type WorkoutExercise, type WorkoutSession } from '../domain/programData';
 import { type WorkoutAdaptation } from '../domain/weeklyEvaluator';
-import { AdaptationClocksWidget, AdaptiveBodyCoachWidget, AthleteProfileCard, DailyReadinessWidget, GuideWidget, MobilityTrackerWidget, MuscleHeatmapWidget, ProgressChartWidget, QuarterlyAssessmentWidget, StrengthHeatmapWidget, StretchingRoutineWidget } from '../lazyView';
+import { AdaptationClocksWidget, AdaptiveBodyCoachWidget, AthleteProfileCard, CnsReadinessWidget, DailyReadinessWidget, GuideWidget, MobilityTrackerWidget, MuscleHeatmapWidget, ProgressChartWidget, QuarterlyAssessmentWidget, StrengthHeatmapWidget, StretchingRoutineWidget } from '../lazyView';
 import { type CompletedWorkoutSession } from '../storage/storageManager';
 import { ViewLoadingFallback } from './shared';
 
@@ -48,6 +48,15 @@ export function SecondaryViews({ activeSession, activeSessionId, completedWorkou
               onApplyAdaptations={handleApplyWeeklyAdaptations}
               onNavigateToWorkout={() => setCurrentView('workout')}
             />
+          </Suspense>
+        </div>
+      )}
+
+      {/* View: CNS readiness (tap test, reaction time, HRV / resting HR) */}
+      {currentView === 'cns' && (
+        <div className="px-1 sm:px-3 md:px-6 py-2.5 sm:py-6 w-full max-w-3xl mx-auto">
+          <Suspense fallback={<ViewLoadingFallback />}>
+            <CnsReadinessWidget onNavigateToWorkout={() => setCurrentView('workout')} history={Object.values(completedWorkouts)} />
           </Suspense>
         </div>
       )}

@@ -60,6 +60,10 @@ export const DailyReadinessWidget = lazyView(() =>
   import('./components/DailyReadinessWidget').then((m) => m.DailyReadinessWidget)
 );
 
+export const CnsReadinessWidget = lazyView(() =>
+  import('./components/CnsReadinessWidget').then((m) => m.CnsReadinessWidget)
+);
+
 // Pieces only shown after a tap (tabs, dialogs, the tempo player, the bar-view loader)
 export const AdaptiveBodyCoachWidget = lazyView(() =>
   import('./components/AdaptiveBodyCoachWidget').then((m) => m.AdaptiveBodyCoachWidget)
@@ -100,6 +104,7 @@ const LAZY_VIEWS = [
   StrengthHeatmapWidget,
   AthleteProfileCard,
   DailyReadinessWidget,
+  CnsReadinessWidget,
   GuideWidget,
   CueCardModal,
   WeeklyEvaluationModal,

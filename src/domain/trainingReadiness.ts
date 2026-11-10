@@ -6,6 +6,7 @@
  * - resting heart rate 5+ bpm over the past week's average
  * - a hard outside workout (BJJ, a hard run...) that ended in the last 24 h
  * - today's readiness check-in landed in the Cautious or Rest & Recovery tier
+ * - today's CNS readiness check came out Moderate or Low
  */
 import { healthForDate, restingHrTrend, type HealthDay } from './healthMetrics';
 import { interpretWorkout, type HealthWorkout } from './healthWorkouts';
@@ -23,6 +24,7 @@ export interface IncreaseGate {
 }
 
 const TIER_LABEL: Record<string, string> = { cautious: 'Cautious', rest_recovery: 'Rest & Recovery' };
+const CNS_LABEL: Record<string, string> = { moderate: 'Moderate', low: 'Low' };
 
 export function localDateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -32,7 +34,8 @@ export function increaseGate(
   now: Date,
   healthDays: HealthDay[],
   outsideWorkouts: HealthWorkout[],
-  checkIns: ReadinessCheckIn[]
+  checkIns: ReadinessCheckIn[],
+  cnsChecks: { date: string; tier?: string }[] = []
 ): IncreaseGate {
   const today = localDateKey(now);
   const reasons: string[] = [];
@@ -52,6 +55,9 @@ export function increaseGate(
 
   const checkIn = checkIns.find((c) => c.date === today);
   if (checkIn?.statusTier && TIER_LABEL[checkIn.statusTier]) reasons.push(`today's check-in is ${TIER_LABEL[checkIn.statusTier]}`);
+
+  const cns = cnsChecks.find((c) => c.date === today);
+  if (cns?.tier && CNS_LABEL[cns.tier]) reasons.push(`today's CNS check is ${CNS_LABEL[cns.tier]}`);
 
   return { hold: reasons.length > 0, reasons };
 }

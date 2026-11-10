@@ -897,6 +897,26 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     }, 1800);
   }, [logs, exercise.id, exercise.defaultWeightLbs, onUpdateSetLog]);
 
+  // Copy Set 1 reps down to the sets not yet done (a finished set keeps the reps it was logged with)
+  const [copyRepsFlash, setCopyRepsFlash] = useState<boolean>(false);
+  const handleCopySet1RepsToAll = useCallback(() => {
+    const rawSet1 = logs[0]?.repsAchieved;
+    const targetReps = rawSet1 && rawSet1 > 0 ? rawSet1 : extractTargetReps(logs[0]?.targetReps ?? '', 0);
+    if (targetReps <= 0) return;
+
+    if (!rawSet1 || rawSet1 <= 0) {
+      onUpdateSetLog(exercise.id, 0, { repsAchieved: targetReps });
+    }
+    for (let idx = 1; idx < logs.length; idx++) {
+      if (!logs[idx].isCompleted) onUpdateSetLog(exercise.id, idx, { repsAchieved: targetReps });
+    }
+
+    setCopyRepsFlash(true);
+    setTimeout(() => {
+      setCopyRepsFlash(false);
+    }, 1800);
+  }, [logs, exercise.id, onUpdateSetLog]);
+
   const isExerciseSkipped = useMemo(() => {
     return logs.some((l) => l.notes?.includes('[NOT DONE]'));
   }, [logs]);
@@ -2520,6 +2540,23 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   <span className="tracking-wide">{isMcGillBig3 || isDeadHangClubMills ? 'Drills' : 'Reps'}</span>
                   <span className="text-[8px] sm:text-[9px] text-slate-400 font-medium -mt-0.5">Done</span>
                 </div>
+                {!isMcGillBig3 && !isDeadHangClubMills && logs.length > 1 && (
+                  <button
+                    type="button"
+                    data-testid={`copy-set1-reps-th-${exercise.id}`}
+                    onClick={handleCopySet1RepsToAll}
+                    title="Copy Set 1 reps down to the sets not done yet"
+                    aria-label="Copy set 1 reps down to all sets"
+                    className={`mx-auto mt-0.5 text-[9px] px-1 py-0.5 rounded border transition-colors flex items-center gap-0.5 cursor-pointer font-sans normal-case tracking-normal active:scale-95 ${
+                      copyRepsFlash
+                        ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
+                        : 'bg-slate-800 hover:bg-emerald-950/70 border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-300'
+                    }`}
+                  >
+                    {copyRepsFlash ? <Check className="w-2.5 h-2.5 stroke-[3]" /> : <Copy className="w-2.5 h-2.5" />}
+                    <span aria-hidden="true">↓</span>
+                  </button>
+                )}
               </th>
               <th className="py-1 px-0.5 text-center w-11 sm:w-12 whitespace-nowrap">Done</th>
               <th className="py-1 px-1 text-center w-auto whitespace-nowrap">
@@ -2702,6 +2739,29 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                       className="w-10 sm:w-12 min-h-[36px] mx-auto bg-slate-950 border border-slate-700 rounded px-1 py-1 text-center text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 font-bold text-xs block"
                       min="0"
                     />
+                  )}
+                  {!isMcGillBig3 && !isDeadHangClubMills && idx === 0 && logs.length > 1 && (
+                    <button
+                      type="button"
+                      data-testid={`copy-set1-reps-btn-${exercise.id}`}
+                      onClick={handleCopySet1RepsToAll}
+                      title={`Copy Set 1 reps down to the sets not done yet (Sets 2–${logs.length})`}
+                      aria-label="Copy set 1 reps down to all sets"
+                      className={`mx-auto mt-0.5 text-[9px] font-semibold px-1 py-0.5 rounded border transition-all cursor-pointer flex items-center justify-center gap-0.5 whitespace-nowrap active:scale-95 ${
+                        copyRepsFlash
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'
+                          : 'bg-slate-900 hover:bg-emerald-950/70 border-slate-700 hover:border-emerald-500/50 text-slate-400 hover:text-emerald-300'
+                      }`}
+                    >
+                      {copyRepsFlash ? (
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                      ) : (
+                        <>
+                          <Copy className="w-2.5 h-2.5" />
+                          <span aria-hidden="true">↓</span>
+                        </>
+                      )}
+                    </button>
                   )}
                 </td>
 

@@ -44,6 +44,10 @@ export interface FrontalConfig {
   guide: 'toes' | 'midline' | 'none';
   track: { joint: 'hand' | 'knee' | 'elbow' | 'neck' | 'hip' | 'ankle'; side: 'N' | 'F' | 'mid'; label: string };
   cue: string;
+  /** lateral slide of everything above the feet (+ toward the lifter's left), e.g. a Cossack squat */
+  shift?: Lateral;
+  /** how far the free (left) hip drops below level; negative lifts it (pelvic leveling) */
+  hipDrop?: Lateral;
 }
 
 const DEFAULT_LAT: Record<LatJoint, number> = {
@@ -171,8 +175,9 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     view: 'front', label: 'Front',
     // keys at 0 / .25 / .5 / .75 / 1: hands meet in front, right hand takes it round, meet behind, left hand brings it back
     lat: {
-      hand: { N: [3, 24, 3, 17, 3], F: [3, 17, 3, 24, 3] },
-      elbow: { N: [13, 23, 14, 17, 13], F: [13, 17, 14, 23, 13] },
+      // eighth-rep keys follow the same rounded loop as the side-view keyframes
+      hand: { N: [3, 18, 24, 18, 3, 13, 17, 13, 3], F: [3, 13, 17, 13, 3, 18, 24, 18, 3] },
+      elbow: { N: [13, 20, 23, 20, 14, 16, 17, 16, 13], F: [13, 16, 17, 16, 14, 20, 23, 20, 13] },
       knee: { N: 8, F: 11 }, ankle: { N: 8, F: 10 }, toe: { N: 9, F: 11 },
     },
     props: [{ kind: 'kettlebell', side: 'N', d: [0, 8], handoff: { side: 'F', from: 0.5, to: 1 } }],
@@ -238,7 +243,7 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
   },
   warmup_hip: {
     view: 'front', label: 'Front',
-    lat: { hand: [20, 14], elbow: 18, hip: 9, knee: { N: 30, F: 30 }, ankle: { N: 6, F: 6 }, toe: { N: 2, F: 2 } },
+    lat: { hand: [20, 14], elbow: 18, hip: 9, knee: { N: 30, F: 14 }, ankle: { N: 6, F: 6 }, toe: { N: 2, F: 2 } },
     props: [], scenery: [], guide: 'midline',
     track: { joint: 'neck', side: 'mid', label: 'Chest over shin' },
     cue: 'Square the chest over the front shin',
@@ -309,6 +314,79 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     track: { joint: 'hand', side: 'N', label: '"W" to "Y"' },
     cue: '"W" to "Y" — forearms stay on the wall',
   },
+  hanging_knee_raise: {
+    view: 'front', label: 'Front',
+    lat: { hand: 24, elbow: 24, scap: 9, knee: 6, ankle: 5, toe: 6 },
+    props: [], scenery: pullBar, guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knees rise on the midline' },
+    cue: 'Knees rise together; pelvis curls, no swing',
+  },
+  hanging_corkscrew: {
+    view: 'front', label: 'Front',
+    // keys at 0 / .25 / .5 / .75 / 1: centre, knees to the lifter's right, centre, to the left, centre
+    lat: {
+      hand: 24, elbow: 24, scap: 9,
+      knee: { N: [6, 24, 6, -12, 6], F: [6, -12, 6, 24, 6] },
+      ankle: { N: [5, 28, 5, -18, 5], F: [5, -18, 5, 28, 5] },
+      toe: { N: [6, 30, 6, -16, 6], F: [6, -16, 6, 30, 6] },
+    },
+    props: [], scenery: pullBar, guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knees swing side to side' },
+    cue: 'Pelvis twists to each side; shoulders stay square',
+  },
+  curl_up: {
+    view: 'front', label: 'Feet-end',
+    lat: { hand: 14, elbow: 15, knee: { N: 10, F: 9 }, ankle: { N: 10, F: 9 }, toe: { N: 11, F: 10 } },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'neck', side: 'mid', label: 'Shoulders lift evenly' },
+    cue: 'Head and shoulders lift as one block; neck stays long',
+  },
+  plank_knee: {
+    view: 'front', label: 'Head-end',
+    lat: { hand: 9, elbow: 13, scap: [9, 12], knee: { N: [9, 12], F: 9 }, ankle: { N: [9, 11], F: 9 }, toe: 9 },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knee path' },
+    cue: 'Hips stay level; blades spread as you push the floor away',
+  },
+  mountain_climber: {
+    view: 'front', label: 'Head-end',
+    lat: { hand: 15, elbow: 16, knee: { N: [-6, 9], F: [9, -6] }, ankle: { N: [2, 10], F: [10, 2] }, toe: { N: [2, 11], F: [11, 2] } },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'knee', side: 'N', label: 'Knee crosses the midline' },
+    cue: 'Hips stay level and square as the knee crosses',
+  },
+  cossack_squat: {
+    view: 'front', label: 'Front',
+    // feet planted wide; the body slides 30 toward the lifter's right (N) foot and sinks
+    lat: { hand: 9, elbow: 15, knee: { N: [30, 36], F: [36, 52] }, ankle: 48, toe: 51 },
+    shift: [0, -30],
+    props: [{ kind: 'kettlebell', side: 'N', d: [9, 0] }],
+    scenery: [], guide: 'toes',
+    track: { joint: 'hip', side: 'mid', label: 'Hips slide over one foot' },
+    cue: 'Working knee tracks over the toes; trail leg long, toes up',
+  },
+  hollow_body: {
+    view: 'front', label: 'Feet-end',
+    lat: { hand: 8, elbow: 10, knee: 4, ankle: 3, toe: 3 },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'ankle', side: 'N', label: 'Legs together' },
+    cue: 'Legs squeezed together, low back glued to the floor',
+  },
+  cat_camel: {
+    view: 'back', label: 'Back',
+    lat: { hand: 14, elbow: 15, knee: 9, ankle: 9, toe: 9, scap: [8, 11, 8] },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'neck', side: 'mid', label: 'Spine stays centred' },
+    cue: 'Move one segment at a time; hips do not sway',
+  },
+  pelvic_drop: {
+    view: 'back', label: 'Back',
+    lat: { hand: 18, elbow: 17, knee: { N: 9, F: 10 }, ankle: { N: 9, F: 11 }, toe: { N: 10, F: 12 } },
+    hipDrop: [7, -1],
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'hip', side: 'F', label: 'Free hip rises level' },
+    cue: 'Free-side hip lifts level; standing-side glute squeezes',
+  },
 };
 
 export function getFrontal(type: DiagramType | string): FrontalConfig {
@@ -337,7 +415,20 @@ export interface FrontalSkeleton {
   progress: number;
 }
 
-function latFor(cfg: FrontalConfig, j: LatJoint, side: Side, progress: number): number {
+/** A fixed, start -> end, or evenly keyed value at rep progress. */
+export function valueAt(l: Lateral, progress: number): number {
+  if (!Array.isArray(l)) return l;
+  if (l.length <= 2) return l[0] + ((l[1] ?? l[0]) - l[0]) * progress;
+  const x = Math.min(1, Math.max(0, progress)) * (l.length - 1);
+  const i = Math.min(l.length - 2, Math.floor(x));
+  return l[i] + (l[i + 1] - l[i]) * (x - i);
+}
+
+export const shiftAt = (cfg: FrontalConfig, progress: number) => (cfg.shift === undefined ? 0 : valueAt(cfg.shift, progress));
+export const hipDropAt = (cfg: FrontalConfig, progress: number) => (cfg.hipDrop === undefined ? 0 : valueAt(cfg.hipDrop, progress));
+
+/** Lateral half-width of a joint at rep progress (also used by the 3-D oblique and top views). */
+export function latFor(cfg: FrontalConfig, j: LatJoint, side: Side, progress: number): number {
   const v = cfg.lat[j];
   let l: Lateral = DEFAULT_LAT[j];
   if (v !== undefined) l = typeof v === 'object' && !Array.isArray(v) ? v[side] : v;
@@ -364,14 +455,19 @@ const SIDE_JOINT: Record<Exclude<FrontalJoint, 'shoulder' | 'scap'>, [keyof Skel
 };
 
 export function projectFrontal(sk: Skeleton, cfg: FrontalConfig, progress: number): FrontalSkeleton {
+  // the body slides sideways over planted feet; on screen that is +x from the front, -x from behind
+  const sx = (cfg.view === 'front' ? 1 : -1) * shiftAt(cfg, progress);
+  const drop = hipDropAt(cfg, progress);
   const pt = (side: Side, j: FrontalJoint): FrontalPoint => {
     const lat = latFor(cfg, j, side, progress);
     if (j === 'shoulder' || j === 'scap') {
       const y = sk.neck[1] + (j === 'scap' ? 9 : 3);
-      return { p: [lateralX(cfg.view, side, lat), y], depth: sk.neck[0] };
+      return { p: [lateralX(cfg.view, side, lat) + sx, y], depth: sk.neck[0] };
     }
     const src = sk[SIDE_JOINT[j][side === 'N' ? 0 : 1]];
-    return { p: [lateralX(cfg.view, side, lat), src[1]], depth: src[0] };
+    const planted = j === 'ankle' || j === 'toe';
+    const y = src[1] + (j === 'hip' && side === 'F' ? drop : 0);
+    return { p: [lateralX(cfg.view, side, lat) + (planted ? 0 : sx), y], depth: src[0] };
   };
   const joints = {} as FrontalSkeleton['joints'];
   (['shoulder', 'elbow', 'hand', 'hip', 'knee', 'ankle', 'toe', 'scap'] as FrontalJoint[]).forEach((j) => {
@@ -379,9 +475,9 @@ export function projectFrontal(sk: Skeleton, cfg: FrontalConfig, progress: numbe
   });
   return {
     view: cfg.view,
-    head: { p: [CX, sk.head[1]], depth: sk.head[0] },
-    neck: { p: [CX, sk.neck[1]], depth: sk.neck[0] },
-    pelvis: { p: [CX, sk.hip[1]], depth: sk.hip[0] },
+    head: { p: [CX + sx, sk.head[1]], depth: sk.head[0] },
+    neck: { p: [CX + sx, sk.neck[1]], depth: sk.neck[0] },
+    pelvis: { p: [CX + sx, sk.hip[1] + drop / 2], depth: sk.hip[0] },
     joints,
     progress,
   };

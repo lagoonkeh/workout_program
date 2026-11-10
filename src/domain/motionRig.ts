@@ -88,6 +88,14 @@ export interface PoseSpec {
   footF?: number;
   /** shoulder-girdle elevation: raises the shoulders this far above the torso top (passive hang) */
   shrug?: number;
+  /**
+   * Side-view length of each leg as a share of its real length. A leg reaching out to the side
+   * (Cossack squat, straddle) looks short from the side; the 3-D views restore its true length.
+   */
+  scaleN?: number;
+  scaleF?: number;
+  /** spine curve for the side-view torso: + rounds the back (cat), - arches it (camel) */
+  spine?: number;
 }
 
 export type Skeleton = Record<JointId, Vec>;
@@ -148,17 +156,17 @@ export function buildSkeleton(p: PoseSpec): Skeleton {
     sk[e] = polar(sk.neck!, a1, BONES.upperArm);
     sk[h] = polar(sk[e]!, a2, BONES.forearm);
   };
-  const leg = (spec: LimbSpec, foot: number, k: 'kneeN' | 'kneeF', an: 'ankleN' | 'ankleF', to: 'toeN' | 'toeF') => {
-    const [a1, a2] = limbAngles(spec, sk.hip!, BONES.thigh, BONES.shin, sk);
-    sk[k] = polar(sk.hip!, a1, BONES.thigh);
-    sk[an] = polar(sk[k]!, a2, BONES.shin);
+  const leg = (spec: LimbSpec, foot: number, k: 'kneeN' | 'kneeF', an: 'ankleN' | 'ankleF', to: 'toeN' | 'toeF', scale: number) => {
+    const [a1, a2] = limbAngles(spec, sk.hip!, BONES.thigh * scale, BONES.shin * scale, sk);
+    sk[k] = polar(sk.hip!, a1, BONES.thigh * scale);
+    sk[an] = polar(sk[k]!, a2, BONES.shin * scale);
     sk[to] = polar(sk[an]!, foot, BONES.foot);
   };
 
   arm(p.armN, 'elbowN', 'handN');
   arm(p.armF ?? p.armN, 'elbowF', 'handF');
-  leg(p.legN, p.footN ?? 0, 'kneeN', 'ankleN', 'toeN');
-  leg(p.legF ?? p.legN, p.footF ?? p.footN ?? 0, 'kneeF', 'ankleF', 'toeF');
+  leg(p.legN, p.footN ?? 0, 'kneeN', 'ankleN', 'toeN', p.scaleN ?? 1);
+  leg(p.legF ?? p.legN, p.footF ?? p.footN ?? 0, 'kneeF', 'ankleF', 'toeF', p.scaleF ?? p.scaleN ?? 1);
   return sk as Skeleton;
 }
 
@@ -208,6 +216,9 @@ export function lerpPose(a: PoseSpec, b: PoseSpec, t: number): PoseSpec {
     footN: lerpAngle(a.footN ?? 0, b.footN ?? 0, t),
     footF: lerpAngle(a.footF ?? a.footN ?? 0, b.footF ?? b.footN ?? 0, t),
     shrug: lerp(a.shrug ?? 0, b.shrug ?? 0, t),
+    scaleN: lerp(a.scaleN ?? 1, b.scaleN ?? 1, t),
+    scaleF: lerp(a.scaleF ?? a.scaleN ?? 1, b.scaleF ?? b.scaleN ?? 1, t),
+    spine: lerp(a.spine ?? 0, b.spine ?? 0, t),
   };
 }
 

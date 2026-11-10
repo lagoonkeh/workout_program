@@ -93,6 +93,7 @@ describe('ExerciseDiagram Component', () => {
 
   it('draws the trajectory, ghosts, angle readout and tempo timeline, and toggles them', () => {
     render(<ExerciseDiagram diagramType="bench_press" tempo="30X1" />);
+    fireEvent.click(screen.getByTestId('diagram-view-side'));
     expect(screen.getByTestId('diagram-trajectory')).toBeInTheDocument();
     expect(screen.getByTestId('diagram-ghosts')).toBeInTheDocument();
     expect(screen.getByTestId('diagram-angle-readout')).toHaveTextContent(/\d+°/);
@@ -111,11 +112,59 @@ describe('ExerciseDiagram Component', () => {
     expect(worked).toEqual(expect.arrayContaining(['thN', 'thF']));
   });
 
-  it('opens on both views and switches between side, front/back and both in sync', () => {
+  it('opens each exercise in its best camera angle', () => {
+    const cases: [string, string, string][] = [
+      ['squat', 'Barbell Back Squat', 'front45'],
+      ['rdl', 'Barbell Romanian Deadlift (RDL)', 'rear45'],
+      ['pullup', 'Pull-Up Ladder & Negatives', 'rear45'],
+      ['face_pull', 'Athlean-X Face Pull', 'rear45'],
+      ['single_leg_atw', 'Single-Leg Kettlebell Around-the-Worlds', 'top'],
+      ['carry', 'Heavy Kettlebell Suitcase Carry', 'top'],
+      ['hanging_knee_raise', 'Athlean-X Hanging Knee Raise with Pelvic Curl', 'front45'],
+    ];
+    cases.forEach(([type, name, cam]) => {
+      const { unmount } = render(<ExerciseDiagram diagramType={type as never} exerciseName={name} />);
+      expect(screen.getByTestId(`diagram-view-${cam}`)).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByTestId('diagram-oblique')).toHaveAttribute('data-view', cam);
+      expect(screen.queryByTestId('diagram-frontal')).not.toBeInTheDocument();
+      unmount();
+    });
+  });
+
+  it('shows the shoulder blades, spine and hip line from behind, and twist lines from above', () => {
+    const { unmount } = render(<ExerciseDiagram diagramType="rdl" />);
+    expect(screen.getByTestId('oblique-scapulae')).toBeInTheDocument();
+    expect(screen.getByTestId('oblique-spine')).toBeInTheDocument();
+    expect(screen.getByTestId('oblique-hip-line')).toBeInTheDocument();
+    expect(screen.getByTestId('oblique-trajectory')).toBeInTheDocument();
+    unmount();
+    render(<ExerciseDiagram diagramType="single_leg_atw" />);
+    expect(screen.getByTestId('oblique-twist-lines')).toBeInTheDocument();
+    expect(screen.getByTestId('diagram-oblique-cue')).toHaveTextContent(/Top view: Bell circles the waist/);
+  });
+
+  it('switches through every camera, all driven by the same clock', () => {
+    render(<ExerciseDiagram diagramType="bench_press" tempo="30X1" />);
+    (['front45', 'rear45', 'top'] as const).forEach((cam) => {
+      fireEvent.click(screen.getByTestId(`diagram-view-${cam}`));
+      expect(screen.getByTestId('diagram-oblique')).toHaveAttribute('data-view', cam);
+      expect(screen.queryByTestId('diagram-frontal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('diagram-trajectory')).not.toBeInTheDocument();
+    });
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(screen.getByText(/Phase: Lower/i)).toBeInTheDocument();
+    expect(screen.getAllByTestId(/^diagram-view-/).map((b) => b.textContent)).toEqual(['Side', 'Head-end', '¾ Front', '¾ Rear', 'Top', 'Both']);
+  });
+
+  it('switches between side, front/back and both in sync', () => {
     render(<ExerciseDiagram diagramType="squat" tempo="30X1" />);
+    fireEvent.click(screen.getByTestId('diagram-view-both'));
     expect(screen.getByTestId('diagram-view-both')).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByTestId('diagram-frontal')).toHaveAttribute('data-view', 'front');
     expect(screen.getByTestId('diagram-trajectory')).toBeInTheDocument();
+    expect(screen.queryByTestId('diagram-oblique')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('diagram-view-frontal'));
     expect(screen.getByTestId('diagram-frontal')).toBeInTheDocument();
@@ -132,6 +181,7 @@ describe('ExerciseDiagram Component', () => {
   it('uses a back view with shoulder blades for pulling and hinging work', () => {
     render(<ExerciseDiagram diagramType="rdl" />);
     expect(screen.getByTestId('diagram-view-frontal')).toHaveTextContent('Back');
+    fireEvent.click(screen.getByTestId('diagram-view-frontal'));
     expect(screen.getByTestId('diagram-frontal')).toHaveAttribute('data-view', 'back');
     expect(screen.getByTestId('frontal-scapulae')).toBeInTheDocument();
   });
@@ -179,6 +229,15 @@ describe('ExerciseDiagram Component', () => {
       'warmup_wall_slide',
       'warmup_walk',
       'warmup_hip',
+      'hanging_knee_raise',
+      'hanging_corkscrew',
+      'curl_up',
+      'plank_knee',
+      'mountain_climber',
+      'cossack_squat',
+      'hollow_body',
+      'cat_camel',
+      'pelvic_drop',
     ] as const;
 
     allDiagramTypes.forEach((type) => {
