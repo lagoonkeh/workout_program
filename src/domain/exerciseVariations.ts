@@ -1133,6 +1133,45 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
       cycleAffiliation: 'B',
     },
   ],
+  // ==========================================
+  // RUN CONDITIONING — Aerobic Base & VO2 Max Engine
+  // ==========================================
+  t1_run_zone2: [
+    {
+      id: 't1_run_zone2',
+      baseExerciseId: 't1_run_zone2',
+      name: 'Zone 2 Aerobic Base Run (Mitochondrial Building)',
+      tier: 'T1',
+      targetSets: 1,
+      targetReps: '25–30 min',
+      tempo: '180 SPM Cadence',
+      restSeconds: 180,
+      equipment: 'bodyweight',
+      muscleGroups: ['Cardiovascular System', 'Soleus', 'Gastrocnemius', 'Quads', 'Glutes'],
+      creatorAttribution: 'Dr. Peter Attia & Dr. Iñigo San Millán',
+      scientificRationale: 'Zone 2 builds capillary density and mitochondrial capacity, creating the recovery baseline for repeated high-intensity efforts.',
+      biomechanicalPurpose: 'Low-intensity steady state aerobic conditioning maintaining conversational nasal breathing.',
+      progressionRule: 'Increase running duration by 2–3 minutes weekly while maintaining nasal-only breathing.',
+      cycleAffiliation: 'A',
+    },
+    {
+      id: 't1_run_norwegian_4x4',
+      baseExerciseId: 't1_run_zone2',
+      name: 'Norwegian 4x4 VO2 Max Intervals (Helgerud & Hoff Protocol)',
+      tier: 'T1',
+      targetSets: 4,
+      targetReps: '4 min (90–95% HRmax)',
+      tempo: 'Max Sustainable Pace',
+      restSeconds: 180,
+      equipment: 'bodyweight',
+      muscleGroups: ['Cardiovascular System', 'Left Ventricle Stroke Volume', 'Quads', 'Hamstrings', 'Calves'],
+      creatorAttribution: 'Dr. Jan Helgerud & Dr. Jan Hoff (NTNU)',
+      scientificRationale: 'Four 4-minute bouts at 90–95% HRmax with 3-minute active recoveries optimize cardiac stroke volume and maximal oxygen uptake (VO2 max) by 8–10% in 6–8 weeks, maximizing inter-scramble aerobic recovery in grappling and combat sports.',
+      biomechanicalPurpose: 'Expands the cardiac output ceiling and left ventricular end-diastolic volume with low joint impact (run on incline, AirBike, or rowing machine).',
+      progressionRule: 'Accumulate target heart rate (90–95% HRmax) during each 4-min bout. If using bike/treadmill, increase speed or incline while keeping 3-min active recoveries.',
+      cycleAffiliation: 'B',
+    },
+  ],
 };
 
 /**

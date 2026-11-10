@@ -99,6 +99,7 @@ const EXERCISE_MUSCLE_MAP: Record<string, string[]> = {
 
   // Conditioning & Recovery
   t1_run_zone2: ['quads', 'hamstrings', 'calves'],
+  t1_run_norwegian_4x4: ['quads', 'hamstrings', 'calves'],
   t2_backward_locomotion: ['quads', 'calves'],
   t3_rowing_metabolic_flush: ['quads', 'hamstrings', 'lats'],
 };
