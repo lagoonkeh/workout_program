@@ -172,8 +172,18 @@ export interface WorkoutInterpretation {
 const TRAINED_INVOLVEMENT = 0.4;
 const TRAINED_MIN_SETS = 2;
 
+/**
+ * BJJ logged on the calendar has no heart rate, so effort comes from how long the session ran
+ * (mixed class, ~7.5 MET): a short class is moderate, a full class hard, 90+ minutes very hard.
+ */
+export function effortFromMinutes(minutes: number): { band: Intensity; factor: number } {
+  if (minutes < 30) return { band: 'moderate', factor: 1 };
+  if (minutes < 90) return { band: 'hard', factor: 1.25 };
+  return { band: 'very hard', factor: 1.5 };
+}
+
 export function interpretWorkout(w: HealthWorkout): WorkoutInterpretation {
-  const { band, factor } = intensityOf(w.avgHr);
+  const { band, factor } = !w.avgHr && w.source === 'calendar' ? effortFromMinutes(w.minutes) : intensityOf(w.avgHr);
   const sets: Record<string, number> = {};
   const recorded = (w.sets || []).filter((s) => SEGMENT_MUSCLES[s.type]);
   const label = activityLabel(w);
@@ -194,7 +204,7 @@ export function interpretWorkout(w: HealthWorkout): WorkoutInterpretation {
     }
   }
   trained = trained.sort((a, b) => (sets[b] || 0) - (sets[a] || 0));
-  const effort = band === 'unknown' ? '' : ` · ${band}${w.avgHr ? ` (avg ${w.avgHr} bpm)` : ''}`;
+  const effort = band === 'unknown' ? '' : ` · ${band}${w.avgHr ? ` (avg ${w.avgHr} bpm)` : w.source === 'calendar' ? ' (from session length)' : ''}`;
   const summary = `${label} ${w.minutes} min${effort}`;
   return { uuid: w.uuid, label, minutes: w.minutes, intensity: band, sets, trained, fromRecordedSets, endMs: Date.parse(w.end), summary };
 }

@@ -178,7 +178,7 @@ export function tokenMatches(given, expected) {
   return crypto.timingSafeEqual(a, b);
 }
 
-async function readDays(accessToken, spreadsheetId) {
+export async function readDays(accessToken, spreadsheetId) {
   const res = await fetch(sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(`'${SHEET}'!A2:G${MAX_DAYS_KEPT + 50}`)}`), {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -187,7 +187,7 @@ async function readDays(accessToken, spreadsheetId) {
   return (data.values || []).map(rowToDay).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d.date));
 }
 
-async function readWorkouts(accessToken, spreadsheetId) {
+export async function readWorkouts(accessToken, spreadsheetId) {
   const res = await fetch(sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(`'${WORKOUT_SHEET}'!A2:L${MAX_WORKOUTS_KEPT + 50}`)}`), {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -196,7 +196,7 @@ async function readWorkouts(accessToken, spreadsheetId) {
   return (data.values || []).map(rowToWorkout).filter((w) => w.uuid && /^\d{4}-\d{2}-\d{2}$/.test(w.date));
 }
 
-async function writeTab(accessToken, spreadsheetId, sheet, lastCol, rows) {
+export async function writeTab(accessToken, spreadsheetId, sheet, lastCol, rows) {
   await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
     method: 'POST',
     body: JSON.stringify({ ranges: [`'${sheet}'!A1:${lastCol}${rows.length + 200}`] }),

@@ -1,6 +1,6 @@
 // src/components/CnsReadinessWidget.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Brain, Hand, Zap, RotateCcw, Trash2, ChevronRight, Info, CheckCircle2, AlertTriangle, XCircle, Moon, Minus, Plus } from 'lucide-react';
+import { Brain, Hand, Zap, RotateCcw, Trash2, ChevronRight, Info, CheckCircle2, AlertTriangle, XCircle, Moon, Minus, Plus, Swords, RefreshCw } from 'lucide-react';
 import {
   CNS_CHECKS_EVENT,
   MIN_BASELINE_CHECKS,
@@ -21,7 +21,8 @@ import {
 } from '../domain/cnsReadiness';
 import { healthForDate, loadCachedHealth } from '../domain/healthMetrics';
 import { localDateKey } from '../domain/trainingReadiness';
-import { loadCachedWorkouts } from '../domain/healthWorkouts';
+import { HEALTH_UPDATED_EVENT, effortFromMinutes, loadCachedWorkouts } from '../domain/healthWorkouts';
+import { BJJ_SYNC_EVENT, loadBjjSync, refreshHealthMetrics, syncBjjSessions, type BjjSyncState } from '../services/healthService';
 
 export interface CnsReadinessWidgetProps {
   className?: string;
@@ -239,6 +240,67 @@ const Rating: React.FC<{ label: string; low: string; high: string; value: number
   </div>
 );
 
+/* ---------------- BJJ from the calendar ---------------- */
+
+const statusText = (status: string) =>
+  status === 'synced' ? 'In Google Health' : status === 'recorded by watch' ? 'Watch already logged it' : status;
+
+/** "BJJ Trained" calendar events: minutes, calories and whether they reached Google Health. */
+export const BjjPanel: React.FC<{ nowMs: number }> = ({ nowMs }) => {
+  const [state, setState] = useState<BjjSyncState | null>(() => loadBjjSync());
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const onSync = () => setState(loadBjjSync());
+    window.addEventListener(BJJ_SYNC_EVENT, onSync);
+    return () => window.removeEventListener(BJJ_SYNC_EVENT, onSync);
+  }, []);
+  const syncNow = async () => {
+    setBusy(true);
+    try {
+      await syncBjjSessions({ force: true });
+      await refreshHealthMetrics(); // pulls the new sessions into readiness
+    } finally {
+      setBusy(false);
+    }
+  };
+  const week = (state?.sessions || []).filter((s) => Date.parse(s.end) >= nowMs - 7 * 86400000);
+  const minutes = week.reduce((a, s) => a + s.minutes, 0);
+  const kcal = week.reduce((a, s) => a + (s.kcal || 0), 0);
+  const last = [...(state?.sessions || [])].sort((a, b) => b.start.localeCompare(a.start))[0];
+  const hoursAgo = last ? Math.round((nowMs - Date.parse(last.end)) / 3600000) : null;
+  return (
+    <div data-testid="bjj-panel" className="rounded-xl bg-slate-950/40 border border-slate-800 p-3 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-semibold"><Swords className="w-4 h-4 text-cyan-400" /> BJJ (from your calendar)</div>
+        <button type="button" data-testid="bjj-sync" onClick={syncNow} disabled={busy} aria-label="Sync BJJ sessions" className="min-h-[44px] min-w-[44px] rounded-xl bg-slate-800 border border-slate-700 text-slate-300 flex items-center justify-center disabled:opacity-50">
+          <RefreshCw className={`w-4 h-4 ${busy ? 'animate-spin' : ''}`} />
+        </button>
+      </div>
+      {!state ? (
+        <p className="text-xs text-slate-400">Reads “BJJ Trained” events on your calendar. Tap sync to check.</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div><div data-testid="bjj-week-sessions" className="text-lg font-black tabular-nums">{week.length}</div><div className="text-[11px] text-slate-500">sessions / 7 d</div></div>
+            <div><div data-testid="bjj-week-minutes" className="text-lg font-black tabular-nums">{minutes}</div><div className="text-[11px] text-slate-500">minutes</div></div>
+            <div><div data-testid="bjj-week-kcal" className="text-lg font-black tabular-nums">{kcal.toLocaleString('en-US')}</div><div className="text-[11px] text-slate-500">active kcal</div></div>
+          </div>
+          {last && (
+            <p className="text-xs text-slate-300">
+              Last: {last.minutes} min{last.kcal ? `, ${last.kcal} kcal` : ''}, {hoursAgo! < 48 ? `${hoursAgo} h ago` : `${Math.round(hoursAgo! / 24)} days ago`} · counts as {effortFromMinutes(last.minutes).band} for CNS
+              <span className="block text-slate-500">{statusText(last.status)}</span>
+            </p>
+          )}
+          {state.ok && state.healthConnected === false && (
+            <p className="text-[11px] text-amber-300">Google Health isn’t connected yet — sessions are counted here and will be sent once it is.</p>
+          )}
+          {!state.ok && <p className="text-[11px] text-rose-300">Sync failed: {state.error}</p>}
+        </>
+      )}
+    </div>
+  );
+};
+
 /* ---------------- Widget ---------------- */
 
 export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ className = '', now, onNavigateToWorkout, history = [] }) => {
@@ -253,7 +315,12 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
   const [stress, setStress] = useState(todays?.stress ?? 3);
   const [showHow, setShowHow] = useState(false);
   const healthDays = useMemo(() => loadCachedHealth(), []);
-  const outsideWorkouts = useMemo(() => loadCachedWorkouts(), []);
+  const [outsideWorkouts, setOutsideWorkouts] = useState(() => loadCachedWorkouts());
+  useEffect(() => {
+    const onUpdate = () => setOutsideWorkouts(loadCachedWorkouts());
+    window.addEventListener(HEALTH_UPDATED_EVENT, onUpdate);
+    return () => window.removeEventListener(HEALTH_UPDATED_EVENT, onUpdate);
+  }, []);
   const hcSleep = healthForDate(healthDays, today)?.sleepHours ?? null;
   const [sleepHours, setSleepHours] = useState<number | null>(todays?.sleepHours ?? (hcSleep && hcSleep > 0 ? Math.round(hcSleep * 2) / 2 : null));
   const nowMs = (now ?? new Date()).getTime();
@@ -338,13 +405,15 @@ export const CnsReadinessWidget: React.FC<CnsReadinessWidgetProps> = ({ classNam
         </div>
       )}
 
+      <BjjPanel nowMs={nowMs} />
+
       {step === 'intro' && (
         <div className="flex flex-col gap-3">
           <ol className="text-sm text-slate-300 space-y-2">
             <li className="flex items-center gap-2"><Hand className="w-4 h-4 text-cyan-400" /> {TAP_TEST_SECONDS}-second tap test</li>
             <li className="flex items-center gap-2"><Zap className="w-4 h-4 text-cyan-400" /> Reaction test ({REACTION_TRIALS} taps)</li>
             <li className="flex items-center gap-2"><Brain className="w-4 h-4 text-cyan-400" /> Sleep + 3 quick ratings</li>
-            <li className="flex items-center gap-2 text-slate-400"><Moon className="w-4 h-4 text-slate-500" /> Rest and activity are read from your logged workouts and Health Connect</li>
+            <li className="flex items-center gap-2 text-slate-400"><Moon className="w-4 h-4 text-slate-500" /> Rest and activity are read from your logged workouts, Health Connect and BJJ on your calendar</li>
           </ol>
           {priorCount < MIN_BASELINE_CHECKS && (
             <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5">

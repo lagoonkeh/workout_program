@@ -40,5 +40,11 @@
       "source": "/((?!api/|api$).*)",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/bjj",
+      "schedule": "15 6 * * *"
+    }
   ]
 }
