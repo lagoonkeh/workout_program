@@ -15,7 +15,15 @@ GitHub: lagoonkeh/workout_program. Run `git log --oneline -15` for recent work.
 - `npm run dev` | `npm run build` (tsc && vite build) | `npm test` (vitest) | `npm run test:sim` (long simulation tests)
 
 ## Where things are
-- `src/App.tsx` (~178 KB) - main app shell and state. Very large: search it, don't read it whole.
+- `src/App.tsx` (~52 KB) - `WorkoutAppMain`: core state (session, logs, variations, deload, progression) and wiring.
+  Search it rather than reading it whole.
+- `src/workout/` - pieces split out of App.tsx (props in, no own state):
+  `SessionOverviewCard`, `WarmupSection`, `ExerciseTierSections`, `WorkoutCompleteCard`, `SessionCompletionToast`,
+  `MobilityReminderBanner`, `SyncToastBanner`, `SecondaryViews` (readiness/mobility/stretching/progress/assessment/guide tabs),
+  `BottomNavBar`, `AppOverlays` (tempo modal, cue card/weekly/completion/history modals, heatmap). Helpers in `shared.tsx`.
+- `src/workout/hooks/` - state logic split out of App.tsx: `useWarmupProgress`, `useSetLogging`, `useTempoAndWatchControls`,
+  `useSessionStats`, `useAutoCompleteSession`, `useSessionCompletion` (finish/save/reset flows), `useActiveCueCard`,
+  `useMobilityCheckIn`. Called from WorkoutAppMain in the original order; keep hook order unchanged.
 - `src/domain/` - program data (`programData.ts`), progression, deloads, readiness, mobility, strength standards,
   plate calculator, cue cards (`cueCardsData.ts`, ~160 KB), exercise variations.
   Motion demos: `motionLibrary.ts`, `motionRig.ts`, `frontalView.ts`, `exerciseVisualsData.ts`.
