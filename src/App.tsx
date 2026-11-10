@@ -54,12 +54,9 @@ import { audioSynthesizer } from './audio/audioSynthesizer';
 import { storageManager, CompletedWorkoutSession } from './storage/storageManager';
 import { Header, AppViewMode } from './components/Header';
 import { SessionNav, SessionProgressStats } from './components/SessionNav';
-import { ExerciseCard, SetLogRecord } from './components/ExerciseCard';
+import { SetLogRecord } from './components/ExerciseCard';
 import { RestTimerWidget, RestTargetContext } from './components/RestTimerWidget';
-import { LazyExerciseDiagram as ExerciseDiagram } from './components/LazyExerciseDiagram';
-import { WarmupPhaseSubCard } from './components/WarmupPhaseSubCard';
-import { EXERCISE_VISUALS } from './domain/exerciseVisualsData';
-import { Flame, ChevronDown, ChevronUp, Clock, RotateCcw, BookOpen, Check, CheckCircle2, AlertCircle, Sparkles, Zap, ListOrdered, Crosshair, Minimize2, Maximize2, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, ArrowLeftRight, Play, Timer, X, Layers } from 'lucide-react';
+import { ChevronDown, BookOpen, CheckCircle2, AlertCircle, Sparkles, Dumbbell, Activity, TrendingUp, Trophy, HeartPulse, X } from 'lucide-react';
 import {
   scanLastWorkout,
   LastWorkoutScanResult,
@@ -116,46 +113,14 @@ import {
   STORAGE_KEY_LOAD_SUGGESTIONS,
   STORAGE_KEY_DELOAD_POSTPONED,
 } from './storage/appStorageKeys';
-
-function ViewLoadingFallback() {
-  return (
-    <div className="flex items-center justify-center py-16 text-slate-400 text-sm" role="status">
-      Loading…
-    </div>
-  );
-}
+import { ViewLoadingFallback, createDefaultExerciseLogs, type AppliedSuggestion } from './workout/shared';
+import { SessionOverviewCard } from './workout/SessionOverviewCard';
+import { WarmupSection } from './workout/WarmupSection';
+import { WorkoutCompleteCard } from './workout/WorkoutCompleteCard';
+import { ExerciseTierSections } from './workout/ExerciseTierSections';
 
 // The cue card data (~130 KB) is its own chunk; start fetching it as soon as the app module runs
 void loadCueCards().catch(() => {});
-
-const TIER_META: Record<string, { label: string; desc: string; badgeClass: string }> = {
-  T1: {
-    label: 'Tier 1',
-    desc: 'Strength & Powerbuilding (AMRAP)',
-    badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
-  },
-  T2: {
-    label: 'Tier 2',
-    desc: 'Hypertrophy & Work Capacity',
-    badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-  },
-  T3: {
-    label: 'Tier 3',
-    desc: 'Accessory & Joint Bulletproofing',
-    badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-  },
-};
-
-function createDefaultExerciseLogs(exercise: WorkoutExercise): SetLogRecord[] {
-  return Array.from({ length: exercise.targetSets }, (_, i) => ({
-    setNumber: i + 1,
-    targetReps: exercise.targetReps,
-    weightLbs: exercise.defaultWeightLbs || exercise.defaultWeight || 0,
-    repsAchieved: 0,
-    isCompleted: false,
-    notes: '',
-  }));
-}
 
 export function WorkoutAppMain() {
   const { user } = useAuth();
@@ -1132,7 +1097,6 @@ export function WorkoutAppMain() {
 
   // Next-weight suggestions are written into an exercise's sets once per new workout they're based on,
   // and only before its first set is ticked. Set counts follow the plan (deload weeks have fewer sets).
-  type AppliedSuggestion = LoadSuggestion & { key: string; fromWeightLbs: number; undone?: boolean };
   const [appliedSuggestions, setAppliedSuggestions] = useState<Record<string, AppliedSuggestion>>(() => {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY_LOAD_SUGGESTIONS) || '{}') || {};
@@ -2549,1088 +2513,93 @@ export function WorkoutAppMain() {
             )}
 
             <div className="px-1 sm:px-3 md:px-6 py-2 sm:py-5 w-full max-w-7xl mx-auto">
-              {/* Session Overview Card (Collapsible) */}
-              {isSessionOverviewCollapsed ? (
-                /* Collapsed Session Header Summary */
-                <div className="bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 mb-3 sm:mb-5 shadow-xl transition-all">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <button
-                      type="button"
-                      onClick={handleToggleSessionOverview}
-                      className="flex items-center gap-2 text-left flex-1 min-w-0 cursor-pointer group"
-                      aria-expanded={false}
-                      aria-label="Expand session overview details"
-                    >
-                      <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                      <h2 className="text-xs sm:text-sm font-bold text-white group-hover:text-emerald-300 transition-colors truncate">
-                        {activeSession.title} — {activeSession.subtitle}
-                      </h2>
-                      <span className="text-[10px] sm:text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full shrink-0">
-                        {sessionStats[activeSessionId]?.completedSets || 0}/{sessionStats[activeSessionId]?.totalSets || 0} sets
-                      </span>
-                    </button>
+              <SessionOverviewCard
+                activeSession={activeSession}
+                activeSessionId={activeSessionId}
+                bulkCollapseState={bulkCollapseState}
+                completedWarmups={completedWarmups}
+                currentSessionCycle={currentSessionCycle}
+                customVariations={customVariations}
+                deloadInfo={deloadInfo}
+                handleResetSessionLogs={handleResetSessionLogs}
+                handleResetSessionVariations={handleResetSessionVariations}
+                handleSetDeloadPostponed={handleSetDeloadPostponed}
+                handleToggleBulkCollapse={handleToggleBulkCollapse}
+                handleToggleFocusMode={handleToggleFocusMode}
+                handleToggleSessionCycle={handleToggleSessionCycle}
+                handleToggleSessionOverview={handleToggleSessionOverview}
+                handleToggleSplitAllUnilateral={handleToggleSplitAllUnilateral}
+                isDeloadWeek={isDeloadWeek}
+                isFocusMode={isFocusMode}
+                isSessionOverviewCollapsed={isSessionOverviewCollapsed}
+                programAdaptations={programAdaptations}
+                sessionStats={sessionStats}
+                sessionTelemetry={sessionTelemetry}
+                setIsHeatmapModalOpen={setIsHeatmapModalOpen}
+                setIsWeeklyModalOpen={setIsWeeklyModalOpen}
+              />
 
-                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 max-w-full justify-start sm:justify-end shrink-0">
-                      {/* Periodized Cycle Wave Selector */}
-                      <div
-                        data-testid="session-cycle-selector"
-                        className="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-700/80 shrink-0"
-                      >
-                        <button
-                          type="button"
-                          data-testid="cycle-a-btn"
-                          onClick={() => {
-                            if (currentSessionCycle !== 'A') handleToggleSessionCycle();
-                          }}
-                          aria-pressed={currentSessionCycle === 'A'}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            currentSessionCycle === 'A'
-                              ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                          title="Cycle A: Primary Baseline Compound Strength & Hypertrophy"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          <span>Cycle A (Base)</span>
-                        </button>
-                        <button
-                          type="button"
-                          data-testid="cycle-b-btn"
-                          onClick={() => {
-                            if (currentSessionCycle !== 'B') handleToggleSessionCycle();
-                          }}
-                          aria-pressed={currentSessionCycle === 'B'}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            currentSessionCycle === 'B'
-                              ? 'bg-purple-500 text-slate-950 shadow-sm font-black'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                          title="Cycle B: Periodized Variations (Pause Squats, Deficit RDLs, Landmine, etc.)"
-                        >
-                          <Layers className="w-3 h-3" />
-                          <span>Cycle B (Wave)</span>
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleToggleFocusMode}
-                        aria-pressed={isFocusMode}
-                        aria-label="Toggle Focus Mode"
-                        title="Focus Mode: Keep only the active uncompleted exercise expanded"
-                        className={`flex items-center gap-1 px-2 py-1 rounded-xl border text-[11px] font-semibold cursor-pointer transition-all ${
-                          isFocusMode
-                            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
-                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
-                        }`}
-                      >
-                        <Crosshair className="w-3 h-3" />
-                        <span>Focus</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleToggleBulkCollapse}
-                        aria-label={bulkCollapseState === 'collapsed' ? 'Expand all cards' : 'Collapse all cards'}
-                        title={bulkCollapseState === 'collapsed' ? 'Expand all exercise and warmup cards' : 'Collapse all exercise and warmup cards'}
-                        className="flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-[11px] font-medium cursor-pointer transition-colors"
-                      >
-                        {bulkCollapseState === 'collapsed' ? (
-                          <>
-                            <Maximize2 className="w-3 h-3 text-emerald-400" />
-                            <span>Expand All</span>
-                          </>
-                        ) : (
-                          <>
-                            <Minimize2 className="w-3 h-3 text-slate-400" />
-                            <span>Collapse All</span>
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        data-testid="split-all-unilateral-btn"
-                        onClick={handleToggleSplitAllUnilateral}
-                        title="Split all unilateral exercises in this session into independent Left and Right side workouts to be completed"
-                        aria-label="Split all unilateral exercises into Left and Right workouts"
-                        className="flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700/80 text-[11px] font-medium cursor-pointer transition-colors"
-                      >
-                        <ArrowLeftRight className="w-3 h-3 text-blue-400" />
-                        <span>L/R Sides</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleResetSessionLogs}
-                        title="Reset completed sets for this session"
-                        className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700/60"
-                        aria-label="Reset session logs"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleToggleSessionOverview}
-                        aria-expanded={false}
-                        aria-label="Expand session overview"
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-                      >
-                        <span>Expand</span>
-                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* Expanded Session Header Card */
-                <div className="bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 mb-3 sm:mb-5 shadow-xl transition-all">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2.5 mb-2">
-                    <button
-                      type="button"
-                      onClick={handleToggleSessionOverview}
-                      className="text-left cursor-pointer group flex-1 min-w-0"
-                      aria-expanded={true}
-                      aria-label="Collapse session header"
-                    >
-                      <h2 className="text-base sm:text-2xl font-bold text-white group-hover:text-emerald-300 transition-colors tracking-tight">
-                        {activeSession.title} — {activeSession.subtitle}
-                      </h2>
-                    </button>
-
-                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 max-w-full justify-start sm:justify-end shrink-0">
-                      {/* Periodized Cycle Wave Selector */}
-                      <div
-                        data-testid="session-cycle-selector"
-                        className="flex items-center gap-1 p-0.5 rounded-xl bg-slate-950 border border-slate-700/80 shrink-0"
-                      >
-                        <button
-                          type="button"
-                          data-testid="cycle-a-btn"
-                          onClick={() => {
-                            if (currentSessionCycle !== 'A') handleToggleSessionCycle();
-                          }}
-                          aria-pressed={currentSessionCycle === 'A'}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            currentSessionCycle === 'A'
-                              ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                          title="Cycle A: Primary Baseline Compound Strength & Hypertrophy"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          <span>Cycle A (Base)</span>
-                        </button>
-                        <button
-                          type="button"
-                          data-testid="cycle-b-btn"
-                          onClick={() => {
-                            if (currentSessionCycle !== 'B') handleToggleSessionCycle();
-                          }}
-                          aria-pressed={currentSessionCycle === 'B'}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            currentSessionCycle === 'B'
-                              ? 'bg-purple-500 text-slate-950 shadow-sm font-black'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                          title="Cycle B: Periodized Variations (Pause Squats, Deficit RDLs, Landmine, etc.)"
-                        >
-                          <Layers className="w-3 h-3" />
-                          <span>Cycle B (Wave)</span>
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleToggleFocusMode}
-                        aria-pressed={isFocusMode}
-                        aria-label="Toggle Focus Mode"
-                        title="Focus Mode: Keep only the active uncompleted exercise expanded"
-                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
-                          isFocusMode
-                            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm'
-                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
-                        }`}
-                      >
-                        <Crosshair className="w-3.5 h-3.5" />
-                        <span>{isFocusMode ? 'Focus: ON' : 'Focus Mode'}</span>
-                      </button>
-
-
-                      <button
-                        type="button"
-                        data-testid="session-overview-heatmap-btn"
-                        onClick={() => setIsHeatmapModalOpen(true)}
-                        title="View anatomical muscle fatigue and recovery status"
-                        aria-label="Open Muscle Recovery Heatmap"
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-                      >
-                        <Activity className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Heatmap</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        data-testid="split-all-unilateral-btn"
-                        onClick={handleToggleSplitAllUnilateral}
-                        title="Split all unilateral exercises in this session into independent Left and Right side workouts to be completed"
-                        aria-label="Split all unilateral exercises into Left and Right workouts"
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-                      >
-                        <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400" />
-                        <span>L/R Sides</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleToggleBulkCollapse}
-                        aria-label={bulkCollapseState === 'collapsed' ? 'Expand all cards' : 'Collapse all cards'}
-                        title={bulkCollapseState === 'collapsed' ? 'Expand all exercise and warmup cards' : 'Collapse all exercise and warmup cards'}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-                      >
-                        {bulkCollapseState === 'collapsed' ? (
-                          <>
-                            <Maximize2 className="w-3.5 h-3.5 text-emerald-400" />
-                            <span className="hidden xs:inline">Expand All</span>
-                          </>
-                        ) : (
-                          <>
-                            <Minimize2 className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="hidden xs:inline">Collapse All</span>
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleToggleSessionOverview}
-                        aria-expanded={true}
-                        aria-label="Collapse session overview"
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors shrink-0"
-                        title="Collapse session overview"
-                      >
-                        <span>Collapse</span>
-                        <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-slate-300 mb-3 max-w-2xl leading-relaxed">
-                    {activeSession.focus}
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Warm-Up Progress Badge */}
-                    {activeSession.warmupSequence && activeSession.warmupSequence.length > 0 && (
-                      <div className="flex items-center gap-1.5 font-mono text-xs text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/30 whitespace-nowrap">
-                        <Flame className="w-3.5 h-3.5 text-amber-400" />
-                        <span>
-                          Warmup: {activeSession.warmupSequence.filter((w) => !!completedWarmups[w.id]).length}/{activeSession.warmupSequence.length}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Workout Sets Progress Badge */}
-                    <div className="flex items-center gap-1.5 font-mono text-xs text-emerald-300 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30 whitespace-nowrap">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>
-                        Sets: {sessionStats[activeSessionId]?.completedSets || 0}/{sessionStats[activeSessionId]?.totalSets || 0}
-                      </span>
-                    </div>
-
-                    {/* Live Session Volume Tonnage Badge (Hevy / Strong inspired) */}
-                    {sessionTelemetry.totalTonnageLbs > 0 && (
-                      <div
-                        data-testid="session-tonnage-badge"
-                        className="flex items-center gap-1.5 font-mono text-xs text-cyan-300 bg-cyan-500/10 px-3 py-1.5 rounded-xl border border-cyan-500/30 whitespace-nowrap"
-                      >
-                        <Dumbbell className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>Tonnage: {sessionTelemetry.totalTonnageLbs.toLocaleString()} lbs</span>
-                      </div>
-                    )}
-
-                    {/* Live Session PR Counter Badge */}
-                    {sessionTelemetry.prCount > 0 && (
-                      <div
-                        data-testid="session-prs-badge"
-                        className="flex items-center gap-1.5 font-mono text-xs text-amber-300 bg-amber-500/15 px-3 py-1.5 rounded-xl border border-amber-400/50 whitespace-nowrap"
-                      >
-                        <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                        <span>PRs: {sessionTelemetry.prCount}</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-1.5 font-mono text-xs text-sky-300 bg-sky-500/10 px-3 py-1.5 rounded-xl border border-sky-500/30 whitespace-nowrap">
-                      <Clock className="w-3.5 h-3.5 text-sky-400" />
-                      <span>~{activeSession.estimatedDurationMinutes} Minutes</span>
-                    </div>
-
-
-                    <button
-                      type="button"
-                      onClick={handleResetSessionLogs}
-                      title="Reset completed sets for this session"
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700/60"
-                      aria-label="Reset session logs"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Planned deload / training block position */}
-                  {activeSessionId in WORKOUT_PROGRAM && (
-                    <div
-                      data-testid="deload-banner"
-                      className={`mt-3.5 p-2.5 sm:p-3 rounded-xl border flex items-center justify-between gap-2 text-xs ${
-                        isDeloadWeek
-                          ? 'bg-sky-950/40 border-sky-500/40 text-sky-100'
-                          : 'bg-slate-900/60 border-slate-700/60 text-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Activity className={`w-4 h-4 shrink-0 ${isDeloadWeek ? 'text-sky-400' : 'text-slate-400'}`} />
-                        <span>
-                          {isDeloadWeek ? (
-                            <>
-                              <strong>Deload week.</strong> About half the sets at ~85% weight, so you come back stronger next week.
-                            </>
-                          ) : deloadInfo.postponed ? (
-                            <>
-                              <strong>Deload pushed back</strong> to next week. Training as normal.
-                            </>
-                          ) : (
-                            <>
-                              <strong>Week {deloadInfo.blockWeek} of 5.</strong>{' '}
-                              {deloadInfo.weeksUntilDeload === 1 ? 'Deload next week.' : `Deload in ${deloadInfo.weeksUntilDeload} weeks.`}
-                            </>
-                          )}
-                        </span>
-                      </div>
-                      {(isDeloadWeek || deloadInfo.postponed) && (
-                        <button
-                          type="button"
-                          data-testid="deload-postpone-btn"
-                          onClick={() => handleSetDeloadPostponed(isDeloadWeek)}
-                          className="text-xs underline font-semibold cursor-pointer whitespace-nowrap min-h-[36px] px-1 hover:opacity-80"
-                        >
-                          {isDeloadWeek ? 'Push back a week' : 'Deload this week'}
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Active Program Adaptations Banner */}
-                  {Object.keys(programAdaptations).length > 0 && (
-                    <div className="mt-3.5 p-2.5 sm:p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-200">
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>
-                          <strong>Adaptive Program Active:</strong> {Object.keys(programAdaptations).length} weekly adaptations applied.
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsWeeklyModalOpen(true)}
-                        className="text-xs text-emerald-400 hover:text-emerald-300 underline font-semibold ml-2 cursor-pointer whitespace-nowrap"
-                      >
-                        Review & Edit
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Custom Exercise Variations Active Banner */}
-                  {Object.keys(customVariations).length > 0 && (
-                    <div className="mt-2.5 p-2.5 sm:p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 flex items-center justify-between text-xs text-blue-200">
-                      <div className="flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-blue-400 shrink-0" />
-                        <span>
-                          <strong>Variable Workout Active:</strong> {Object.keys(customVariations).length} custom variation{Object.keys(customVariations).length === 1 ? '' : 's'} selected.
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        data-testid="reset-all-variations-btn"
-                        onClick={() => handleResetSessionVariations()}
-                        className="text-xs text-blue-400 hover:text-blue-300 underline font-semibold ml-2 cursor-pointer whitespace-nowrap"
-                      >
-                        Reset to Cycle Defaults
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Warm-Up Accordion Section */}
-              {activeSession.warmupSequence && activeSession.warmupSequence.length > 0 && (
-                <div className="mb-6 bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setShowWarmup(!showWarmup)}
-                    className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-bold text-slate-200 hover:text-white transition-colors cursor-pointer"
-                    aria-expanded={showWarmup}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Flame className="w-5 h-5 text-amber-400" />
-                      <span>
-                        Warm-Up & Biomechanical Priming Sequence ({activeSession.warmupSequence.length} Drills)
-                      </span>
-                    </div>
-                    {showWarmup ? (
-                      <ChevronUp className="w-5 h-5 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-slate-400" />
-                    )}
-                  </button>
-
-                  {showWarmup && (
-                    <div className="p-4 sm:p-6 pt-0 space-y-3.5 border-t border-slate-800/60">
-                      {[...activeSession.warmupSequence]
-                        .sort((a, b) => {
-                          const aDone = !!completedWarmups[a.id];
-                          const bDone = !!completedWarmups[b.id];
-                          if (aDone === bDone) return 0;
-                          return aDone ? 1 : -1;
-                        })
-                        .map((drill, idx) => {
-                        const isDrillDone = !!completedWarmups[drill.id];
-                        const focusWarmupDefaultCollapsed = isFocusMode ? drill.id !== activeFocusWarmupId : isDrillDone;
-                        const isDrillCollapsed = collapsedWarmupDrills[drill.id] ?? focusWarmupDefaultCollapsed;
-                        const drillVisual = EXERCISE_VISUALS[drill.id];
-                        const matchingWarmupCueCard =
-                          CUE_CARD_MAP.get(drill.id) ||
-                          CUE_CARD_MAP.get(drill.name.toLowerCase());
-                        const warmupInstructions = drill.setupInstructions || matchingWarmupCueCard?.setupInstructions || [];
-                        const completedPhaseCount = warmupInstructions.filter(
-                          (_, pIdx) => !!phaseTasks[`${drill.id}_phase_${pIdx}`]
-                        ).length;
-                        return (
-                          <div
-                            key={drill.id || idx}
-                            className={`border rounded-xl p-3.5 text-xs text-slate-300 space-y-2 transition-all ${
-                              isDrillDone
-                                ? 'bg-emerald-950/20 border-emerald-500/50 shadow-sm shadow-emerald-950/40'
-                                : 'bg-slate-950 border-slate-800/80'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between font-bold text-sm text-white flex-wrap gap-2">
-                              <div className="flex items-center gap-2.5">
-                                {drillVisual && (
-                                  <ExerciseDiagram
-                                    compact={true}
-                                    diagramType={drillVisual.diagramType}
-                                    exerciseName={drill.name}
-                                    onOpenZoom={() => setActiveCueCardId(drill.id)}
-                                  />
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleWarmupDrillCollapse(drill.id, isDrillCollapsed)}
-                                  className={`text-left hover:text-emerald-300 transition-colors cursor-pointer ${
-                                    isDrillDone ? 'text-emerald-400 line-through' : ''
-                                  }`}
-                                >
-                                  {idx + 1}. {drill.name}
-                                </button>
-                              </div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {warmupInstructions.length > 0 && (
-                                  <span
-                                    className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md border ${
-                                      completedPhaseCount === warmupInstructions.length
-                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                        : completedPhaseCount > 0
-                                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                        : 'bg-slate-800 text-slate-400 border-slate-700'
-                                    }`}
-                                    title={`${completedPhaseCount} of ${warmupInstructions.length} phases completed`}
-                                  >
-                                    {completedPhaseCount}/{warmupInstructions.length} Tasks
-                                  </span>
-                                )}
-                                <span className="text-amber-400 font-mono text-xs">
-                                  {drill.targetDurationOrReps}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleWarmupDrill(drill.id, warmupInstructions.length)}
-                                  aria-label={`Mark drill ${drill.name} as ${isDrillDone ? 'incomplete' : 'completed'}`}
-                                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
-                                    isDrillDone
-                                      ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40'
-                                      : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
-                                  }`}
-                                >
-                                  <div
-                                    className={`w-3.5 h-3.5 rounded flex items-center justify-center border transition-all ${
-                                      isDrillDone
-                                        ? 'bg-emerald-500 border-emerald-400 text-slate-950'
-                                        : 'border-slate-500 bg-slate-900'
-                                    }`}
-                                  >
-                                    {isDrillDone && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                                  </div>
-                                  <span>{isDrillDone ? 'Completed' : 'Complete'}</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleWarmupDrillCollapse(drill.id, isDrillCollapsed)}
-                                  aria-expanded={!isDrillCollapsed}
-                                  aria-label={`${isDrillCollapsed ? 'Expand' : 'Collapse'} warmup drill ${drill.name}`}
-                                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium cursor-pointer transition-colors"
-                                >
-                                  <span>{isDrillCollapsed ? 'Expand' : 'Collapse'}</span>
-                                  {isDrillCollapsed ? (
-                                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                                  ) : (
-                                    <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                            {!isDrillCollapsed && (
-                              <>
-                                <div className="text-slate-400">
-                                  <strong>Coach / Creator:</strong> {drill.creatorAttribution} ·{' '}
-                                  <strong>Equipment:</strong> {drill.equipment}
-                                </div>
-                                <p className="text-slate-300 leading-relaxed">
-                                  <strong>Purpose:</strong> {drill.biomechanicalPurpose}
-                                </p>
-                                <div className="text-slate-400 italic">💡 {drill.coachingNotes}</div>
-                                {(() => {
-                                  const matchingWarmupCueCard =
-                                    CUE_CARD_MAP.get(drill.id) ||
-                                    CUE_CARD_MAP.get(drill.name.toLowerCase());
-                                  const warmupInstructions = drill.setupInstructions || matchingWarmupCueCard?.setupInstructions || [];
-
-                                  return (
-                                    <>
-                                      <div className="flex flex-wrap items-center gap-3 pt-1">
-                                        {/* 1-Tap Dedicated Warmup Drill Timer / Cadence Launcher */}
-                                        {(() => {
-                                          const drillTempo = drill.tempo || matchingWarmupCueCard?.tempo;
-                                          const targetLower = drill.targetDurationOrReps.toLowerCase();
-                                          const nameLower = drill.name.toLowerCase();
-                                          const isIsometricHold =
-                                            targetLower.includes('hold') ||
-                                            nameLower.includes('hold') ||
-                                            drillTempo?.toLowerCase().includes('hold') ||
-                                            drillTempo?.toLowerCase().includes('0010');
-
-                                          const isTimedMinutes = targetLower.includes('min');
-
-                                          if (isTimedMinutes) {
-                                            let timerSec = 180;
-                                            if (targetLower.includes('4–5') || targetLower.includes('4-5') || targetLower.includes('5 min')) timerSec = 240;
-                                            else if (targetLower.includes('5–6') || targetLower.includes('5-6') || targetLower.includes('6 min')) timerSec = 300;
-                                            else if (targetLower.includes('3–4') || targetLower.includes('3-4')) timerSec = 180;
-                                            else if (targetLower.includes('3 min')) timerSec = 180;
-
-                                            return (
-                                              <button
-                                                type="button"
-                                                onClick={() => handleQuickStartRest(timerSec)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-semibold text-xs cursor-pointer shadow-md shadow-blue-900/30 transition-all"
-                                                title={`Start ${Math.round(timerSec / 60)}-minute drill clock`}
-                                                aria-label={`Start ${Math.round(timerSec / 60)}-minute drill clock`}
-                                              >
-                                                <Timer className="w-3.5 h-3.5" />
-                                                <span>Start {Math.round(timerSec / 60)}-Min Drill Clock</span>
-                                              </button>
-                                            );
-                                          }
-
-                                          if (isIsometricHold) {
-                                            const holdSec = targetLower.includes('10s') ? 10 : targetLower.includes('30s') ? 30 : 10;
-                                            const targetReps = targetLower.includes('4 reps') ? 4 : targetLower.includes('8 reps') ? 8 : 4;
-                                            return (
-                                              <button
-                                                type="button"
-                                                onClick={() => handleQuickStartTempo(`HOLD-${holdSec}`, drill.id, targetReps)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs cursor-pointer shadow-md shadow-emerald-900/30 transition-all"
-                                                title={`Start ${holdSec}s Hold Clock (${targetReps} reps/side)`}
-                                                aria-label={`Start ${holdSec}s Hold Clock (${targetReps} reps/side)`}
-                                              >
-                                                <Flame className="w-3.5 h-3.5 text-amber-300" />
-                                                <span>Start {holdSec}s Hold Clock ({targetReps} reps/side)</span>
-                                              </button>
-                                            );
-                                          }
-
-                                          if (drillTempo) {
-                                            // Paced breathing and holds need a clock; a plain rep cadence on a rep-based drill doesn't
-                                            const pacedBreathing = drillTempo === '5083' || drillTempo === '4040' || drillTempo === '4083';
-                                            if (!pacedBreathing && !isTimedPrescription(drill.targetDurationOrReps, drillTempo)) return null;
-                                            const targetReps = extractTargetReps(drill.targetDurationOrReps, 10);
-                                            const tempoLabel = drillTempo.startsWith('HOLD-')
-                                              ? `${drillTempo.replace('HOLD-', '')}s Hold`
-                                              : drillTempo === '5083'
-                                              ? '90/90 Breathing (5-0-8-3)'
-                                              : drillTempo === '4040'
-                                              ? 'Cat-Camel Wave (4040)'
-                                              : drillTempo === '4083'
-                                              ? 'Vacuum Breath (4083)'
-                                              : `Cadence (${drillTempo})`;
-
-                                            return (
-                                              <button
-                                                type="button"
-                                                onClick={() => handleQuickStartTempo(drillTempo, drill.id, targetReps)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white font-semibold text-xs cursor-pointer shadow-md shadow-emerald-950/30 transition-all"
-                                                title={`Start metronome cadence ${drillTempo} for ${targetReps} reps`}
-                                                aria-label={`Start metronome cadence ${drillTempo} for ${targetReps} reps`}
-                                              >
-                                                <Play className="w-3.5 h-3.5 fill-white" />
-                                                <span>Start {tempoLabel} ({targetReps} reps)</span>
-                                              </button>
-                                            );
-                                          }
-
-                                          return null;
-                                        })()}
-
-                                        <button
-                                          type="button"
-                                          onClick={() => setActiveCueCardId(drill.id)}
-                                          className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer text-xs transition-colors"
-                                        >
-                                          <BookOpen className="w-3.5 h-3.5" />
-                                          <span>View Technique Cues & Science</span>
-                                        </button>
-
-                                        {warmupInstructions.length > 0 && (
-                                          <button
-                                            type="button"
-                                            onClick={() => handleToggleWarmupInstructions(drill.id)}
-                                            className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white font-medium cursor-pointer text-xs transition-colors"
-                                          >
-                                            <ListOrdered className="w-3.5 h-3.5 text-emerald-400" />
-                                            <span>
-                                              {expandedWarmupInstructions[drill.id] ? 'Hide Instructions' : 'Step-by-Step Instructions'}
-                                            </span>
-                                            {expandedWarmupInstructions[drill.id] ? (
-                                              <ChevronUp className="w-3.5 h-3.5" />
-                                            ) : (
-                                              <ChevronDown className="w-3.5 h-3.5" />
-                                            )}
-                                          </button>
-                                        )}
-                                      </div>
-
-                                      {expandedWarmupInstructions[drill.id] && warmupInstructions.length > 0 && (
-                                        <div className="mt-2.5 p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 space-y-2.5 animate-in fade-in duration-200">
-                                          <div className="font-bold text-slate-200 flex items-center justify-between pb-1.5 border-b border-slate-800/80 flex-wrap gap-2">
-                                            <span className="flex items-center gap-1.5 text-emerald-400">
-                                              <ListOrdered className="w-4 h-4" />
-                                              <span>Execution Tasks & Phases</span>
-                                            </span>
-                                            <div className="flex items-center gap-2 text-[11px] font-mono">
-                                              <span className="text-emerald-400 font-semibold">
-                                                {completedPhaseCount}/{warmupInstructions.length} Done
-                                              </span>
-                                              <button
-                                                type="button"
-                                                onClick={() => handleToggleAllDrillPhases(drill.id, warmupInstructions.length)}
-                                                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors cursor-pointer"
-                                              >
-                                                {completedPhaseCount === warmupInstructions.length ? 'Reset All' : 'Mark All Done'}
-                                              </button>
-                                            </div>
-                                          </div>
-                                          <div className="space-y-2.5 pt-1">
-                                            {warmupInstructions.map((instruction, sIdx) => {
-                                              const phaseKey = `${drill.id}_phase_${sIdx}`;
-                                              const isPhaseDone = !!phaseTasks[phaseKey];
-
-                                              return (
-                                                <WarmupPhaseSubCard
-                                                  key={sIdx}
-                                                  drillId={drill.id}
-                                                  drillName={drill.name}
-                                                  phaseIndex={sIdx}
-                                                  totalPhases={warmupInstructions.length}
-                                                  instruction={instruction}
-                                                  isDone={isPhaseDone}
-                                                  onToggleDone={() =>
-                                                    handleTogglePhaseTask(phaseKey, drill.id, warmupInstructions.length)
-                                                  }
-                                                  drillVisual={drillVisual}
-                                                  onOpenDemoModal={() => setActiveCueCardId(drill.id)}
-                                                  onStartTimer={(seconds) => handleQuickStartRest(seconds)}
-                                                />
-                                              );
-                                            })}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </>
-                                  );
-                                })()}
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
+              <WarmupSection
+                activeFocusWarmupId={activeFocusWarmupId}
+                activeSession={activeSession}
+                collapsedWarmupDrills={collapsedWarmupDrills}
+                completedWarmups={completedWarmups}
+                CUE_CARD_MAP={CUE_CARD_MAP}
+                expandedWarmupInstructions={expandedWarmupInstructions}
+                handleQuickStartRest={handleQuickStartRest}
+                handleQuickStartTempo={handleQuickStartTempo}
+                handleToggleAllDrillPhases={handleToggleAllDrillPhases}
+                handleTogglePhaseTask={handleTogglePhaseTask}
+                handleToggleWarmupDrill={handleToggleWarmupDrill}
+                handleToggleWarmupDrillCollapse={handleToggleWarmupDrillCollapse}
+                handleToggleWarmupInstructions={handleToggleWarmupInstructions}
+                isFocusMode={isFocusMode}
+                phaseTasks={phaseTasks}
+                setActiveCueCardId={setActiveCueCardId}
+                setShowWarmup={setShowWarmup}
+                showWarmup={showWarmup}
+              />
 
               {/* Collapsible Tier Sections */}
               <div className="space-y-4 sm:space-y-6">
-                {(['T1', 'T2', 'T3'] as const).map((tierKey) => {
-                  const tierExercises = sessionExercises.filter((ex) => ex.tier === tierKey);
-                  if (tierExercises.length === 0) return null;
+                <ExerciseTierSections
+                  activeFocusExerciseId={activeFocusExerciseId}
+                  activeSession={activeSession}
+                  appliedSuggestions={appliedSuggestions}
+                  bulkCollapseState={bulkCollapseState}
+                  collapseRevision={collapseRevision}
+                  currentSessionCycle={currentSessionCycle}
+                  expandedTiers={expandedTiers}
+                  getExerciseLogs={getExerciseLogs}
+                  handleOpenCueCard={handleOpenCueCard}
+                  handleQuickStartRestForExercise={handleQuickStartRestForExercise}
+                  handleQuickStartTempo={handleQuickStartTempo}
+                  handleResetExerciseLogs={handleResetExerciseLogs}
+                  handleSelectExerciseVariation={handleSelectExerciseVariation}
+                  handleSwitchToPairedSide={handleSwitchToPairedSide}
+                  handleToggleSplitSides={handleToggleSplitSides}
+                  handleToggleTier={handleToggleTier}
+                  handleUndoSuggestion={handleUndoSuggestion}
+                  handleUpdateSetLog={handleUpdateSetLog}
+                  isDailyAbsFinisherExpanded={isDailyAbsFinisherExpanded}
+                  isFocusMode={isFocusMode}
+                  progressionByExercise={progressionByExercise}
+                  sessionExercises={sessionExercises}
+                  setIsDailyAbsFinisherExpanded={setIsDailyAbsFinisherExpanded}
+                  splitSidesExercises={splitSidesExercises}
+                />
 
-                  const isExpanded = expandedTiers[tierKey] !== false;
-                  const meta = TIER_META[tierKey];
-
-                  return (
-                    <section
-                      key={tierKey}
-                      className="rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden shadow-lg"
-                      aria-label={`${meta.label}: ${meta.desc}`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleToggleTier(tierKey)}
-                        aria-expanded={isExpanded}
-                        className="w-full flex items-center justify-between p-3.5 sm:p-4 text-left transition-colors cursor-pointer bg-slate-900/90 hover:bg-slate-800/70 border-b border-slate-800/60"
-                      >
-                        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                          <span
-                            className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border ${meta.badgeClass}`}
-                          >
-                            {meta.label}
-                          </span>
-                          <span className="text-sm sm:text-base font-bold text-slate-200">
-                            {meta.desc}
-                          </span>
-                          <span className="text-xs text-slate-500 font-mono">
-                            ({tierExercises.length} {tierExercises.length === 1 ? 'Exercise' : 'Exercises'})
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-slate-400">
-                          {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-slate-400" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-slate-400" />
-                          )}
-                        </div>
-                      </button>
-
-                      {isExpanded && (
-                        <div className="p-2 sm:p-4 space-y-4">
-                          {[...tierExercises]
-                            .sort((a, b) => {
-                              const aLogs = getExerciseLogs(a);
-                              const bLogs = getExerciseLogs(b);
-                              const aDone = aLogs.length > 0 && aLogs.every((l) => l.isCompleted);
-                              const bDone = bLogs.length > 0 && bLogs.every((l) => l.isCompleted);
-                              if (aDone === bDone) return 0;
-                              return aDone ? 1 : -1;
-                            })
-                            .map((exercise) => {
-                              const cardDefaultCollapsed = isFocusMode
-                                ? exercise.id !== activeFocusExerciseId
-                                : bulkCollapseState === 'collapsed'
-                                ? true
-                                : bulkCollapseState === 'expanded'
-                                ? false
-                                : undefined;
-                              return (
-                                <ExerciseCard
-                                  key={exercise.id}
-                                  exercise={exercise}
-                                  logs={getExerciseLogs(exercise)}
-                                  defaultCollapsed={cardDefaultCollapsed}
-                                  collapseRevision={collapseRevision}
-                                  onUpdateSetLog={handleUpdateSetLog}
-                                  onResetExercise={handleResetExerciseLogs}
-                                  onOpenCueCard={handleOpenCueCard}
-                                  onQuickStartRest={(sec) => handleQuickStartRestForExercise(sec, exercise)}
-                                  onQuickStartTempo={handleQuickStartTempo}
-                                  onToggleSplitSides={handleToggleSplitSides}
-                                  onSwitchToPairedSide={handleSwitchToPairedSide}
-                                  isSideSplitActive={!!splitSidesExercises[exercise.baseExerciseId || exercise.id]}
-                                  onSelectVariation={handleSelectExerciseVariation}
-                                  currentCycle={currentSessionCycle}
-                                  lastTime={progressionByExercise[exercise.id]?.last ?? null}
-                                  loadSuggestion={appliedSuggestions[exercise.id] ?? null}
-                                  onUndoSuggestion={handleUndoSuggestion}
-                                />
-                              );
-                            })}
-                        </div>
-                      )}
-                    </section>
-                  );
-                })}
-
-                {/* Athlean-X Daily Core Finisher Section */}
-                {activeSession.dailyCoreFinisher && activeSession.dailyCoreFinisher.length > 0 && (
-                  <section
-                    className="rounded-2xl bg-gradient-to-b from-amber-950/20 via-slate-900/90 to-slate-900 border border-amber-500/40 overflow-hidden shadow-xl"
-                    aria-label="Athlean-X Daily Core Finisher"
-                    data-testid="daily-core-finisher-section"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setIsDailyAbsFinisherExpanded((prev) => !prev)}
-                      aria-expanded={isDailyAbsFinisherExpanded}
-                      className="w-full flex items-center justify-between p-3.5 sm:p-4 text-left transition-colors cursor-pointer bg-slate-900/90 hover:bg-slate-800/70 border-b border-amber-500/30"
-                    >
-                      <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                        <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg border bg-amber-500/20 text-amber-300 border-amber-500/40 flex items-center gap-1.5">
-                          <Flame className="w-3.5 h-3.5 text-amber-400" />
-                          <span>CORE FINISHER</span>
-                        </span>
-                        <span className="text-sm sm:text-base font-bold text-white">
-                          Athlean-X Daily Core Progression
-                        </span>
-                        <span className="text-xs text-amber-300/80 font-mono">
-                          (6-Min Kinetic Sequence · 6 Exercises)
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-                          {isDailyAbsFinisherExpanded ? 'Hide Finisher' : 'Show Finisher'}
-                        </span>
-                        {isDailyAbsFinisherExpanded ? (
-                          <ChevronUp className="w-5 h-5 text-amber-400" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-amber-400" />
-                        )}
-                      </div>
-                    </button>
-
-                    {isDailyAbsFinisherExpanded && (
-                      <div className="p-2 sm:p-4 space-y-4">
-                        <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200">
-                          <div>
-                            <span className="font-bold text-amber-300">Jeff Cavaliere Kinetic Sequence:</span>{' '}
-                            <span>Bottom-Up ➔ Rotational ➔ Mid-Range Hold ➔ Top-Down ➔ Flexion ➔ Core Cylinder</span>
-                          </div>
-                          {(() => {
-                            const isAllCoreDone = !!activeSession.dailyCoreFinisher?.every((ex) => {
-                              const l = getExerciseLogs(ex);
-                              return l.length > 0 && l.every((s) => s.isCompleted);
-                            });
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const nextDone = !isAllCoreDone;
-                                  activeSession.dailyCoreFinisher?.forEach((ex) => {
-                                    handleUpdateSetLog(ex.id, 0, { isCompleted: nextDone });
-                                  });
-                                }}
-                                className={`px-3 py-1.5 rounded-lg font-semibold border self-start sm:self-auto transition-colors flex items-center gap-1.5 cursor-pointer ${
-                                  isAllCoreDone
-                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
-                                    : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/40'
-                                }`}
-                              >
-                                {isAllCoreDone && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                                <span>{isAllCoreDone ? 'All 6 Core Sets Done ✓' : 'Mark All 6 Core Sets Done'}</span>
-                              </button>
-                            );
-                          })()}
-                        </div>
-
-                        {activeSession.dailyCoreFinisher.map((exercise) => {
-                          const cardDefaultCollapsed = isFocusMode
-                            ? exercise.id !== activeFocusExerciseId
-                            : bulkCollapseState === 'collapsed'
-                            ? true
-                            : bulkCollapseState === 'expanded'
-                            ? false
-                            : undefined;
-                          return (
-                            <ExerciseCard
-                              key={exercise.id}
-                              exercise={exercise}
-                              logs={getExerciseLogs(exercise)}
-                              defaultCollapsed={cardDefaultCollapsed}
-                              collapseRevision={collapseRevision}
-                              onUpdateSetLog={handleUpdateSetLog}
-                              onResetExercise={handleResetExerciseLogs}
-                              onOpenCueCard={handleOpenCueCard}
-                              onQuickStartRest={(sec) => handleQuickStartRestForExercise(sec, exercise)}
-                              onQuickStartTempo={handleQuickStartTempo}
-                              onToggleSplitSides={handleToggleSplitSides}
-                              onSwitchToPairedSide={handleSwitchToPairedSide}
-                              onSelectVariation={handleSelectExerciseVariation}
-                              currentCycle={currentSessionCycle}
-                                  lastTime={progressionByExercise[exercise.id]?.last ?? null}
-                                  loadSuggestion={appliedSuggestions[exercise.id] ?? null}
-                                  onUndoSuggestion={handleUndoSuggestion}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {/* Fallback for any non-T1/T2/T3 exercises */}
-                {[...sessionExercises.filter((ex) => !['T1', 'T2', 'T3'].includes(ex.tier))]
-                  .sort((a, b) => {
-                    const aLogs = getExerciseLogs(a);
-                    const bLogs = getExerciseLogs(b);
-                    const aDone = aLogs.length > 0 && aLogs.every((l) => l.isCompleted);
-                    const bDone = bLogs.length > 0 && bLogs.every((l) => l.isCompleted);
-                    if (aDone === bDone) return 0;
-                    return aDone ? 1 : -1;
-                  })
-                  .map((exercise) => {
-                    const cardDefaultCollapsed = isFocusMode
-                      ? exercise.id !== activeFocusExerciseId
-                      : bulkCollapseState === 'collapsed'
-                      ? true
-                      : bulkCollapseState === 'expanded'
-                      ? false
-                      : undefined;
-                    return (
-                      <ExerciseCard
-                        key={exercise.id}
-                        exercise={exercise}
-                        logs={getExerciseLogs(exercise)}
-                        defaultCollapsed={cardDefaultCollapsed}
-                        collapseRevision={collapseRevision}
-                        onUpdateSetLog={handleUpdateSetLog}
-                        onResetExercise={handleResetExerciseLogs}
-                        onOpenCueCard={handleOpenCueCard}
-                        onQuickStartRest={(sec) => handleQuickStartRestForExercise(sec, exercise)}
-                        onQuickStartTempo={handleQuickStartTempo}
-                        onToggleSplitSides={handleToggleSplitSides}
-                        onSwitchToPairedSide={handleSwitchToPairedSide}
-                        isSideSplitActive={!!splitSidesExercises[exercise.baseExerciseId || exercise.id]}
-                        onSelectVariation={handleSelectExerciseVariation}
-                        currentCycle={currentSessionCycle}
-                                  lastTime={progressionByExercise[exercise.id]?.last ?? null}
-                                  loadSuggestion={appliedSuggestions[exercise.id] ?? null}
-                                  onUndoSuggestion={handleUndoSuggestion}
-                      />
-                    );
-                  })}
-
-                {/* Workout Completed Option Card at the End of All Exercise Cards */}
-                <div
-                  data-testid="workout-completion-card"
-                  className="mt-6 p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-emerald-950/30 to-slate-900 border border-emerald-500/40 shadow-2xl relative overflow-hidden space-y-4"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3.5">
-                      <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-inner">
-                        <Trophy className="w-6 h-6 text-emerald-400" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                            {currentSessionCompletion === 100 ? '🎉 Workout Completed!' : '🏁 Workout Completion'}
-                          </h3>
-                          <span
-                            data-testid="workout-completion-badge"
-                            className={`text-xs font-bold font-mono px-2.5 py-0.5 rounded-full border ${
-                              currentSessionCompletion === 100
-                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
-                                : 'bg-slate-800 text-slate-300 border-slate-700'
-                            }`}
-                          >
-                            Status: {currentSessionCompletion} / 100 Done
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-300 mt-1">
-                          {activeSession.title} · {activeSession.subtitle}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <button
-                        type="button"
-                        data-testid="mark-workout-completed-btn"
-                        onClick={handleToggleWorkoutCompleted}
-                        disabled={isSavingAndAdvancing}
-                        className={`px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
-                          currentSessionCompletion === 100
-                            ? 'bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-300 border border-emerald-500/50 ring-1 ring-emerald-500/30'
-                            : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-950/50 hover:shadow-emerald-900/60'
-                        } ${isSavingAndAdvancing ? 'opacity-80 cursor-wait' : ''}`}
-                        aria-label={currentSessionCompletion === 100 ? 'Workout Completed (100% Done)' : 'Mark Workout as Completed'}
-                      >
-                        {isSavingAndAdvancing ? (
-                          <>
-                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                            <span>Confirming & Saving Workout...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Check className="w-5 h-5 stroke-[3]" />
-                            <span>
-                              {currentSessionCompletion === 100
-                                ? '✓ Complete & Save to History'
-                                : '✓ Mark Workout as Completed'}
-                            </span>
-                          </>
-                        )}
-                      </button>
-
-                    </div>
-                  </div>
-
-                  {/* Visual Progress Bar */}
-                  <div className="w-full bg-slate-800/80 rounded-full h-3 overflow-hidden border border-slate-700/60 p-0.5">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500 ease-out"
-                      style={{ width: `${currentSessionCompletion}%` }}
-                    />
-                  </div>
-
-                  {/* Session Telemetry Badges */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col">
-                      <span className="text-slate-400 text-[11px]">Sets Completed</span>
-                      <span className="text-white font-mono font-bold text-sm">
-                        {sessionStats[activeSessionId]?.completedSets || 0} / {sessionStats[activeSessionId]?.totalSets || 0}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col">
-                      <span className="text-slate-400 text-[11px]">Total Volume</span>
-                      <span className="text-white font-mono font-bold text-sm">
-                        {sessionTelemetry.totalTonnageLbs.toLocaleString()} lbs
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col">
-                      <span className="text-slate-400 text-[11px]">Personal Records</span>
-                      <span className="text-amber-300 font-mono font-bold text-sm">
-                        {sessionTelemetry.prCount} PRs
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col">
-                      <span className="text-slate-400 text-[11px]">Exercises Done</span>
-                      <span className="text-emerald-300 font-mono font-bold text-sm">
-                        {sessionStats[activeSessionId]?.completedExercises || 0} / {sessionExercises.length}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Post-Workout Recovery Quick Actions */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
-                    <span className="text-xs text-slate-400 font-medium">Post-Workout Shortcuts:</span>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentView('stretching')}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
-                      >
-                        <span>🧘 Post-Workout Stretching ➔</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <WorkoutCompleteCard
+                  activeSession={activeSession}
+                  activeSessionId={activeSessionId}
+                  currentSessionCompletion={currentSessionCompletion}
+                  handleToggleWorkoutCompleted={handleToggleWorkoutCompleted}
+                  isSavingAndAdvancing={isSavingAndAdvancing}
+                  sessionExercises={sessionExercises}
+                  sessionStats={sessionStats}
+                  sessionTelemetry={sessionTelemetry}
+                  setCurrentView={setCurrentView}
+                />
               </div>
             </div>
           </div>
