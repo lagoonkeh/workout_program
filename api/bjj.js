@@ -21,7 +21,14 @@ import {
 
 const HEALTH_URL = 'https://health.googleapis.com/v4/users/me/dataTypes/exercise/dataPoints';
 
-async function healthAccessToken() {
+const HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly';
+const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+
+/**
+ * Access token from the Google Health sign-in, narrowed to one scope: Google Health refuses tokens
+ * that also carry other scopes (calendar), so each API gets its own.
+ */
+async function healthAccessToken(scope = HEALTH_SCOPE) {
   const refreshToken = process.env.GOOGLE_HEALTH_REFRESH_TOKEN;
   const clientId = process.env.GOOGLE_HEALTH_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_HEALTH_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
@@ -29,7 +36,7 @@ async function healthAccessToken() {
   const r = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken, grant_type: 'refresh_token' }),
+    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken, grant_type: 'refresh_token', scope }),
   });
   if (!r.ok) return { token: null, error: `Google Health sign-in failed (${r.status}) - run scripts/google-health-token.mjs again` };
   return { token: (await r.json()).access_token, error: null };
@@ -99,8 +106,8 @@ export default async function handler(req, res) {
 
     const timeMin = new Date(now.getTime() - days * 86400000).toISOString();
     // The Google Health sign-in also carries calendar.readonly (the main token has no calendar access)
-    const health = await healthAccessToken();
-    const sessions = sessionsFromEvents(await listBjjEvents(health.token || accessToken, timeMin, now.toISOString()), now);
+    const [health, calendar] = await Promise.all([healthAccessToken(HEALTH_SCOPE), healthAccessToken(CALENDAR_SCOPE)]);
+    const sessions = sessionsFromEvents(await listBjjEvents(calendar.token || accessToken, timeMin, now.toISOString()), now);
 
     await ensureSheets(accessToken, spreadsheetId, [BJJ_SHEET, WORKOUT_SHEET]);
     const [stored, workouts, healthDays] = await Promise.all([

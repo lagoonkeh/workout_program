@@ -134,7 +134,7 @@ describe('api/bjj handler', () => {
     const healthPosts: any[] = [];
     const json = (v: unknown) => ({ ok: true, json: async () => v, text: async () => '' });
     vi.stubGlobal('fetch', vi.fn(async (url: string, init: any = {}) => {
-      if (url.includes('oauth2')) return json({ access_token: String(init.body).includes('refresh_token=hr') ? 'health-at' : 'at' });
+      if (url.includes('oauth2')) { const b = String(init.body); return json({ access_token: !b.includes('refresh_token=hr') ? 'at' : b.includes('calendar.readonly') ? 'cal-at' : 'health-at' }); }
       if (url.includes('calendar/v3')) {
         expect(url).toMatch(/calendars\/(primary|f9b8d284[^/]+)\/events/);
         return json({ items: [
