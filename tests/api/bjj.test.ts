@@ -136,7 +136,7 @@ describe('api/bjj handler', () => {
     vi.stubGlobal('fetch', vi.fn(async (url: string, init: any = {}) => {
       if (url.includes('oauth2')) return json({ access_token: String(init.body).includes('refresh_token=hr') ? 'health-at' : 'at' });
       if (url.includes('calendar/v3')) {
-        expect(url).toContain('calendars/primary/events');
+        expect(url).toMatch(/calendars\/(primary|f9b8d284[^/]+)\/events/);
         return json({ items: [
           { id: 'e1', summary: 'BJJ Trained', status: 'confirmed', start: { dateTime: '2026-11-09T18:00:00-08:00' }, end: { dateTime: '2026-11-09T19:30:00-08:00' } },
           { id: 'bad', summary: 'BJJ Trained', status: 'confirmed', start: { dateTime: '5326-05-30T17:37:00-07:00' }, end: { dateTime: '8627-10-19T23:25:00-07:00' } },

@@ -1,5 +1,5 @@
 // api/bjj.js
-// Scans the primary Google Calendar for "BJJ Trained" events and, for each finished session:
+// Scans the main and "Workouts" Google Calendars for "BJJ Trained" events and, for each finished session:
 //  - works out active calories from its length and body weight (see _bjj.js),
 //  - writes it to Google Health as a Martial Arts exercise session with those calories,
 //  - adds it to the "Health Workouts" tab so CNS readiness and the heatmap count it,
@@ -35,20 +35,26 @@ async function healthAccessToken() {
   return { token: (await r.json()).access_token, error: null };
 }
 
+/** Calendars scanned for "BJJ Trained": the main one and the app's "Workouts" calendar. */
+export const BJJ_CALENDARS = (process.env.BJJ_CALENDAR_IDS || 'primary,f9b8d2847324743fc078081d1d421e4660bc06f309ee836ea06f17b20afc86eb@group.calendar.google.com')
+  .split(',').map((s) => s.trim()).filter(Boolean);
+
 async function listBjjEvents(accessToken, timeMin, timeMax) {
-  const events = [];
-  let pageToken = '';
-  for (let page = 0; page < 5; page++) {
-    const qs = new URLSearchParams({ q: BJJ_EVENT_TITLE, timeMin, timeMax, singleEvents: 'true', maxResults: '250', orderBy: 'startTime' });
-    if (pageToken) qs.set('pageToken', pageToken);
-    const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?${qs}`, { headers: { Authorization: `Bearer ${accessToken}` } });
-    if (!r.ok) throw new Error(`Google Calendar ${r.status}: ${(await r.text()).slice(0, 200)}`);
-    const data = await r.json();
-    events.push(...(data.items || []));
-    pageToken = data.nextPageToken || '';
-    if (!pageToken) break;
+  const byId = new Map();
+  for (const calendarId of BJJ_CALENDARS) {
+    let pageToken = '';
+    for (let page = 0; page < 5; page++) {
+      const qs = new URLSearchParams({ q: BJJ_EVENT_TITLE, timeMin, timeMax, singleEvents: 'true', maxResults: '250', orderBy: 'startTime' });
+      if (pageToken) qs.set('pageToken', pageToken);
+      const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${qs}`, { headers: { Authorization: `Bearer ${accessToken}` } });
+      if (!r.ok) throw new Error(`Google Calendar ${r.status} (${calendarId === 'primary' ? 'main' : 'Workouts'} calendar): ${(await r.text()).slice(0, 200)}`);
+      const data = await r.json();
+      for (const e of data.items || []) if (e?.id) byId.set(e.id, e);
+      pageToken = data.nextPageToken || '';
+      if (!pageToken) break;
+    }
   }
-  return events;
+  return [...byId.values()];
 }
 
 async function readBjj(accessToken, spreadsheetId) {
