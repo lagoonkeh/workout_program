@@ -9,7 +9,7 @@
 //   GET  /api/bjj   Authorization: Bearer <CRON_SECRET>          (Vercel cron, nightly)
 //
 // Calendar and Sheets use GOOGLE_REFRESH_TOKEN. Google Health needs its own consent
-// (googlehealth.activity_and_fitness): GOOGLE_HEALTH_REFRESH_TOKEN, made with scripts/google-health-token.mjs.
+// (googlehealth.activity_and_fitness.writeonly): GOOGLE_HEALTH_REFRESH_TOKEN, made with scripts/google-health-token.mjs.
 // Without it, sessions are still logged here and sent to Google Health once it is connected.
 import { verifyRequest, getAccessToken, ensureSheets, spreadsheetIdFromEnv, sheetsUrl } from './sync.js';
 import { readDays, readWorkouts, writeTab, tokenMatches } from './health.js';
