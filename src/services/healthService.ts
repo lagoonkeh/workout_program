@@ -54,9 +54,11 @@ function saveBjjSync(state: BjjSyncState): void {
   }
 }
 
+/** Latest logged bodyweight; null when none is logged here, so the server uses the scale weight from Health Connect. */
 function bodyweightLbs(): number | null {
   try {
-    return currentBodyweight(bodyweightTimeline(loadProfile(), loadQuarterlyAssessments()));
+    const timeline = bodyweightTimeline(loadProfile(), loadQuarterlyAssessments());
+    return timeline.length ? currentBodyweight(timeline) : null;
   } catch {
     return null;
   }
