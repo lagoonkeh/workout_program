@@ -30,7 +30,8 @@ if (!clientId || !clientSecret) {
 }
 const PORT = 5179;
 const redirectUri = `http://localhost:${PORT}/callback`;
-const scope = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly';
+// Health write for the sessions, plus calendar read so /api/bjj can find the "BJJ Trained" events
+const scope = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly https://www.googleapis.com/auth/calendar.readonly';
 const authUrl =
   'https://accounts.google.com/o/oauth2/v2/auth?' +
   new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', scope, access_type: 'offline', prompt: 'consent' });

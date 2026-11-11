@@ -98,7 +98,9 @@ export default async function handler(req, res) {
     if (!accessToken) return res.status(500).json({ error: 'Missing Google OAuth credentials.' });
 
     const timeMin = new Date(now.getTime() - days * 86400000).toISOString();
-    const sessions = sessionsFromEvents(await listBjjEvents(accessToken, timeMin, now.toISOString()), now);
+    // The Google Health sign-in also carries calendar.readonly (the main token has no calendar access)
+    const health = await healthAccessToken();
+    const sessions = sessionsFromEvents(await listBjjEvents(health.token || accessToken, timeMin, now.toISOString()), now);
 
     await ensureSheets(accessToken, spreadsheetId, [BJJ_SHEET, WORKOUT_SHEET]);
     const [stored, workouts, healthDays] = await Promise.all([
@@ -113,7 +115,6 @@ export default async function handler(req, res) {
 
     const byId = new Map(stored.map((s) => [s.eventId, s]));
     const pending = sessions.filter((s) => needsHealthWrite(s, byId.get(s.eventId)));
-    const health = pending.length ? await healthAccessToken() : { token: null, error: null };
     const stamp = now.toISOString();
     let written = 0;
 
