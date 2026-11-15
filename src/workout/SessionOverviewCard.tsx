@@ -104,7 +104,7 @@ export function SessionOverviewCard({ activeSession, activeSessionId, bulkCollap
                 aria-pressed={isFocusMode}
                 aria-label="Toggle Focus Mode"
                 title="Focus Mode: Keep only the active uncompleted exercise expanded"
-                className={`flex items-center gap-1 px-2 py-1 rounded-xl border text-[11px] font-semibold cursor-pointer transition-all ${
+                className={`flex items-center gap-1.5 px-2 py-0.5 min-h-[36px] rounded-lg border text-[11px] font-semibold cursor-pointer transition-all ${
                           isFocusMode
                             ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
                             : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
@@ -119,7 +119,7 @@ export function SessionOverviewCard({ activeSession, activeSessionId, bulkCollap
                 onClick={handleToggleBulkCollapse}
                 aria-label={bulkCollapseState === 'collapsed' ? 'Expand all cards' : 'Collapse all cards'}
                 title={bulkCollapseState === 'collapsed' ? 'Expand all exercise and warmup cards' : 'Collapse all exercise and warmup cards'}
-                className="flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-[11px] font-medium cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 px-2 py-0.5 min-h-[36px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-[11px] font-medium cursor-pointer transition-colors"
               >
                 {bulkCollapseState === 'collapsed' ? (
                   <>

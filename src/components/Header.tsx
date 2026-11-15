@@ -74,7 +74,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                 onClick={onSync}
                 disabled={isSyncing}
                 aria-label="Sync to Google Sheets"
-                className={`p-2 min-h-[44px] min-w-[44px] rounded-xl border transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
+                className={`px-2 py-1 min-h-[44px] rounded-xl border transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
                   syncSuccessFlash
                     ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
                     : isSyncing
@@ -90,9 +90,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                 ) : (
                   <Cloud className="w-3.5 h-3.5 text-emerald-400" />
                 )}
-                <span className="hidden sm:inline text-[10px] font-semibold">
-                  {isSyncing ? '...' : syncSuccessFlash ? 'Synced' : 'Sync'}
-                </span>
+                <span className="text-[10px] font-semibold">Sheets</span>
               </button>
             )}
 
@@ -126,7 +124,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
             {user && (
               <div
                 data-testid="mobile-cloud-sync-indicator"
-                className="p-2 min-h-[44px] min-w-[44px] rounded-xl border border-slate-800 bg-slate-900/90 flex items-center justify-center text-xs"
+                className="px-2 py-1 min-h-[44px] rounded-xl border border-slate-800 bg-slate-900/90 flex items-center justify-center gap-1 text-xs"
                 title={
                   lastCloudSyncedTime
                     ? `Cloud Synced at ${new Date(lastCloudSyncedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
@@ -138,6 +136,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                 ) : (
                   <Cloud className={`w-3.5 h-3.5 ${cloudSyncStatus === 'synced' ? 'text-cyan-400' : 'text-slate-400'}`} />
                 )}
+                <span className="text-[10px] font-mono text-cyan-300 font-semibold">Live</span>
               </div>
             )}
 

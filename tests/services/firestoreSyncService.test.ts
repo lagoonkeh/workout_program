@@ -6,6 +6,9 @@ const {
   mockDoc,
   mockOnSnapshot,
   mockGetFirestore,
+  mockInitializeFirestore,
+  mockPersistentLocalCache,
+  mockPersistentMultipleTabManager,
   mockEnableIndexedDbPersistence,
   snapshotHolder,
 } = vi.hoisted(() => {
@@ -19,6 +22,9 @@ const {
       return vi.fn(); // unsubscribe
     }),
     mockGetFirestore: vi.fn(() => ({ app: {} })),
+    mockInitializeFirestore: vi.fn(() => ({ app: {} })),
+    mockPersistentLocalCache: vi.fn((opts) => opts),
+    mockPersistentMultipleTabManager: vi.fn(() => ({})),
     mockEnableIndexedDbPersistence: vi.fn().mockResolvedValue(undefined),
     snapshotHolder: holder,
   };
@@ -26,6 +32,9 @@ const {
 
 vi.mock('firebase/firestore', () => ({
   getFirestore: mockGetFirestore,
+  initializeFirestore: mockInitializeFirestore,
+  persistentLocalCache: mockPersistentLocalCache,
+  persistentMultipleTabManager: mockPersistentMultipleTabManager,
   doc: mockDoc,
   setDoc: mockSetDoc,
   getDoc: vi.fn(),

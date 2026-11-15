@@ -30,7 +30,6 @@ type FirestoreModule = typeof import('firebase/firestore');
 
 let firestoreModulePromise: Promise<FirestoreModule> | null = null;
 let dbSetup: Promise<Firestore> | null = null;
-let persistenceEnabled = false;
 
 export const loadFirestoreModule = (): Promise<FirestoreModule> => {
   if (!firestoreModulePromise) {
@@ -47,23 +46,26 @@ export const getFirebaseDb = async (): Promise<Firestore | null> => {
     if (!auth || !auth.app) return null;
     await auth.authStateReady().catch(() => {});
     if (!auth.currentUser) return null;
-    // Callers often ask at the same moment on startup: share one setup, so offline persistence is
-    // enabled exactly once, before anything uses the database (enabling it later throws)
+    // Callers often ask at the same moment on startup: share one setup, so multi-tab offline persistence is
+    // enabled exactly once, before anything uses the database
     if (!dbSetup) {
       const app = auth.app;
-      dbSetup = loadFirestoreModule().then(({ getFirestore, enableIndexedDbPersistence }) => {
-        const instance = getFirestore(app);
-        if (typeof window !== 'undefined' && !persistenceEnabled) {
-          enableIndexedDbPersistence(instance)
-            .then(() => {
-              persistenceEnabled = true;
-            })
-            .catch(() => {
-              // failed-precondition: another tab has persistence; unimplemented: no IndexedDB. Sync still works online.
-            });
+      dbSetup = loadFirestoreModule().then(
+        ({ initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore }) => {
+          if (typeof initializeFirestore === 'function' && typeof persistentLocalCache === 'function') {
+            try {
+              return initializeFirestore(app, {
+                localCache: persistentLocalCache({
+                  tabManager: typeof persistentMultipleTabManager === 'function' ? persistentMultipleTabManager() : undefined,
+                }),
+              });
+            } catch {
+              return getFirestore(app);
+            }
+          }
+          return getFirestore(app);
         }
-        return instance;
-      });
+      );
       dbSetup.catch(() => {
         dbSetup = null; // let the next call try again
       });

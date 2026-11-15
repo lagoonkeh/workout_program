@@ -1585,7 +1585,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 onClick={() => setShowWarmupRamp((prev) => !prev)}
                 aria-expanded={showWarmupRamp}
                 aria-label={`Toggle warm-up ramp for ${exercise.name}`}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-xl border text-xs font-medium cursor-pointer transition-colors ${
+                className={`flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg border text-xs font-medium cursor-pointer transition-colors ${
                   showWarmupRamp
                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
                     : 'bg-slate-800/80 hover:bg-slate-700 text-amber-300/90 border-slate-700/80'
@@ -1604,7 +1604,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 data-testid={`exercise-variations-btn-${exercise.id}`}
                 onClick={() => setIsVariationModalOpen(true)}
                 aria-label={`View variations for ${activeExerciseName}`}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-blue-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+                className="flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-blue-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
                 title={`Browse ${availableVariations.length} science-verified variations`}
               >
                 <Layers className="w-3.5 h-3.5 text-blue-400" />
@@ -1616,7 +1616,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               type="button"
               onClick={handleReset}
               aria-label={`Reset ${exercise.name} sets`}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+              className="flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
               title={`Reset ${exercise.name} sets`}
             >
               <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
@@ -1627,7 +1627,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               type="button"
               onClick={handleToggleCardCollapse}
               aria-label={`Collapse ${exercise.name}`}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+              className="flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
               title={`Collapse ${exercise.name} card`}
             >
               <span>Collapse</span>
@@ -1651,7 +1651,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   handleStartInlineTempo();
                 }
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-[38px] rounded-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 ${
                 isInlineTempoActive
                   ? inlineTempoSnapshot?.state === 'PAUSED'
                     ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
@@ -1702,7 +1702,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             <button
               type="button"
               onClick={() => onQuickStartTempo(effectiveTempo, exercise.id)}
-              className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[44px] sm:min-h-[38px] min-w-[44px] rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-mono font-medium transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-1.5 px-2 py-0.5 min-h-[36px] min-w-[36px] rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-mono font-medium transition-colors cursor-pointer"
               title={`Launch tempo metronome for ${effectiveTempo}`}
               aria-label={`Launch tempo metronome for ${effectiveTempo}`}
             >
@@ -1717,7 +1717,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             type="button"
             data-testid={`quick-start-rest-${exercise.id}`}
             onClick={() => onQuickStartRest(exercise.restSeconds)}
-            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-[38px] rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium transition-colors cursor-pointer active:scale-95"
+            className="flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium transition-colors cursor-pointer active:scale-95"
             title={`Start ${exercise.restSeconds}s rest timer`}
           >
             <Clock className="w-3.5 h-3.5 text-emerald-400" />

@@ -1053,7 +1053,7 @@ export function WorkoutAppMain() {
       <SyncToastBanner setSyncToast={setSyncToast} syncToast={syncToast} />
 
       {/* Main View Area */}
-      <main className="flex-1 w-full max-w-full overflow-x-hidden min-w-0 mx-auto pb-32 sm:pb-32">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden min-w-0 mx-auto pb-44 sm:pb-36">
         <MobilityReminderBanner
           currentView={currentView}
           handleDismissMobilityPrompt={handleDismissMobilityPrompt}
