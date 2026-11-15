@@ -29,22 +29,22 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Aaron Horschig (Squat University)',
+        creator: 'Form Cue',
         quote: 'Establish your foot tripod (big toe knuckle, pinky toe knuckle, center of heel). Screw your feet into the floor to create external rotation torque at the hips. Inhale a 360-degree breath into your abdomen and obliques, and lock your brace.',
         biomechanicalRationale: 'Rooting the foot tripod maintains the medial longitudinal arch, preventing tibial internal rotation and patellofemoral valgus collapse.'
       },
       {
-        creator: 'Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'Control the descent for a full 3 seconds. Descend to parallel or slightly below to maximize stretch-mediated hypertrophy of the quads, pausing for 1 second in the hole without relaxing tension.',
         biomechanicalRationale: 'Stretch-mediated hypertrophy is greatest at long muscle lengths; pausing in the hole dissipates stretch reflex recoil and places mechanical tension purely on quad fibers.'
       },
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'Maintain a rigid, neutral lumbar spine throughout the entire excursion. Never sacrifice lumbar stiffness for extra depth (butt wink); reverse movement before pelvic tuck occurs.',
         biomechanicalRationale: 'Flexion under heavy compressive axial loads causes posterior migration of the nucleus pulposus and dramatic increases in shear stress on lumbar ligaments.'
       },
       {
-        creator: 'Lucas Hardie (Range of Strength)',
+        creator: 'Form Cue',
         quote: 'To achieve extreme squat depth and pelvic centration without impingement, rotate your pelvis into anterior tilt and actively drive your knees wide. Flexibility is not passive relaxation—it is an active feat of antagonist pulling.',
         biomechanicalRationale: 'Active hip abduction and anterior pelvic tilt clears the femoral head within the acetabular rim, allowing deep hip flexion without femoral-acetabular impingement.'
       }
@@ -81,22 +81,22 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Ben Patrick (ATG)',
+        creator: 'Form Cue',
         quote: 'The standard is full knee bend: your hamstring must completely cover your calf, with your torso tall and rear knee off the floor. If you experience any tendon ache (>2/10), elevate the front foot immediately until the movement is 100% pain-free.',
         biomechanicalRationale: 'Full knee flexion under pain-free progressive loading strengthens connective tissue and creates robust structural remodeling of the patellar tendon and VMO.'
       },
       {
-        creator: 'Yellow Dude',
+        creator: 'Form Cue',
         quote: 'Take 3 to 4 seconds on the descent. This slow eccentric load sends cellular signals to tenocytes to synthesize parallel type I collagen fibrils rather than disorganized scar tissue.',
         biomechanicalRationale: 'Slow strain rates promote organized tensile realignment of tendon fibers without triggering inflammatory tendon responses.'
       },
       {
-        creator: 'Marcus Filly (FBB)',
+        creator: 'Form Cue',
         quote: 'Maintain strict vertical torso posture. Hold the 1-second pause at maximum stretch without resting your rear knee on the ground or losing core compression.',
         biomechanicalRationale: 'Preserving vertical posture maximizes active stretch on the rear-leg iliopsoas while training unilateral hip balance.'
       },
       {
-        creator: 'Lucas Hardie (Range of Strength)',
+        creator: 'Form Cue',
         quote: 'In any deep split or lunge, prioritize a squared pelvis over turned-out martial arts hips. Internal rotation of the rear hip directly loads the psoas and rectus femoris at extreme length, transforming hip extension into an active strength feat.',
         biomechanicalRationale: 'Squaring the pelvis ensures true loaded hip extension of the rear leg, stimulating sarcomere addition in series and restoring anterior kinetic chain elasticity.'
       }
@@ -140,22 +140,22 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Alyssa Lu (Proformance)',
+        creator: 'Form Cue',
         quote: 'This is active hamstring lengthening under load. Do not passively round your spine or reach towards the floor. Push your hips back into the wall behind you until your hamstrings reach their active end-range, pause for 1 second, and drive forward through your heels.',
         biomechanicalRationale: 'Active hip hinging recruits the hamstring muscle-tendon complex dynamically while guarding against passive overstretching and sacroiliac joint strain.'
       },
       {
-        creator: 'Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'Keep the barbell painted against your thighs throughout the entire descent. If the bar drifts forward by even 1 inch, the lumbar moment arm multiplies and takes tension away from the hamstrings.',
         biomechanicalRationale: 'Keeping the load close to the center of mass reduces external lumbar flexion moment and maximizes torque on the hip extensor group.'
       },
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'Actively "bend the bar" across your shins to fire the latissimus dorsi. This lat co-contraction creates a rigid posterior tension band that locks the thoracolumbar fascia.',
         biomechanicalRationale: 'Latissimus dorsi activation tensions the thoracolumbar fascia, decreasing shear strain across the L4–S1 vertebrae.'
       },
       {
-        creator: 'Lucas Hardie (Range of Strength)',
+        creator: 'Form Cue',
         quote: 'Never let gravity pull you down passively into a hinge. Actively pull yourself into deep hip flexion using your hip flexors and abdominals. When you compress actively under load, the hamstrings remodel at their furthest mechanical limit.',
         biomechanicalRationale: 'Active antagonist compression during loaded hip hinging overrides stretch reflex resistance via reciprocal inhibition, maximizing stretch-mediated hypertrophy.'
       }
@@ -192,17 +192,17 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Tuck your elbows to a 45-degree angle relative to your ribs. Do NOT flare your elbows out to 90 degrees — that is a recipe for subacromial impingement and labral fraying. Retract and depress your shoulder blades into the bench.',
         biomechanicalRationale: 'Flaring to 90° compresses the supraspinatus tendon between the humeral head and acromion process. A 45° angle maximizes pectoral recruitment while preserving subacromial space.'
       },
       {
-        creator: 'Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'Lower the bar along a gentle curved path (J-curve): touching down on the lower sternum at the nipple line, and pressing backward towards the rack above the shoulders at lockout.',
         biomechanicalRationale: 'The J-curve bar path aligns perpendicular to the clavicular and sternocostal muscle fibers, optimizing mechanical efficiency.'
       },
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'Root your feet firmly into the floor and drive through your legs to establish full-body tension. A rigid torso platform protects the spine and enhances force transfer.',
         biomechanicalRationale: 'Leg drive pre-activates the anterior abdominal wall and posterior kinetic chain, creating a rock-solid platform for pressing.'
       }
@@ -238,17 +238,17 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Coach Eugene Teo',
+        creator: 'Form Cue',
         quote: 'Pull your elbow toward your back pocket, not straight up to your chest.',
         biomechanicalRationale: 'A hip-ward arc matches the line of the lower and mid lat fibers, so the lat does the work instead of the upper traps and biceps.'
       },
       {
-        creator: 'Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'Let the shoulder blade fully protract at the bottom of every rep and pause in the stretch.',
         biomechanicalRationale: 'Loading the lat at long muscle lengths drives stretch-mediated hypertrophy.'
       },
       {
-        creator: 'Marcus Filly (FBB)',
+        creator: 'Form Cue',
         quote: 'Keep the torso still. If you have to twist to finish the rep, the bell is too heavy.',
         biomechanicalRationale: 'Resisting rotation trains the obliques and quadratus lumborum isometrically.'
       }
@@ -270,8 +270,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_06_athlean_face_pull',
     exerciseId: 't3_athlean_face_pull',
-    exerciseName: 'Athlean-X Non-Negotiable Face Pull',
-    title: 'Athlean-X Non-Negotiable Face Pull',
+    exerciseName: 'Kettlebell High Pull & External Rotation (Face Pull Alternative)',
+    title: 'Kettlebell High Pull & External Rotation (Face Pull Alternative)',
     tier: 'T3',
     tempo: '2112',
     prescribedTempo: '2112',
@@ -288,7 +288,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'The face pull is not a rowing exercise! Lead with your hands, not your elbows. At peak contraction, your thumbs must be pointing behind you, your hands must be higher than your elbows, and you must be pulling towards your forehead. Squeeze your external rotators hard!',
         biomechanicalRationale: 'Pulling with elbows high and hands low forces internal rotation under load (harmful). Leading with the hands forces external rotation, activating the infraspinatus and teres minor to balance anterior pressing volume.'
       }
@@ -323,12 +323,12 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Aaron Horschig (Squat University)',
+        creator: 'Form Cue',
         quote: 'Press within the scapular plane (elbows angled approximately 30 degrees forward of the side). Squeeze your glutes and lock your 360-degree core brace so your lower back does not hyperextend under overhead load.',
         biomechanicalRationale: 'The scapular plane aligns with the natural orientation of the glenoid fossa, avoiding subacromial pinch against the acromion.'
       },
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Clear your head backward slightly to let the bar travel in a straight vertical line. Once the bar passes your forehead, push your head forward "through the window", finishing with an active scapular upward shrug at the top.',
         biomechanicalRationale: 'Upward scapular rotation at lockout ensures the humerus clears the subacromial space safely and engages the serratus anterior.'
       }
@@ -363,12 +363,12 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Yellow Dude',
+        creator: 'Form Cue',
         quote: 'Never kip or swing. Connective tissue adaptation requires strict control. On eccentric negatives, count a full 4 seconds from chin-over-bar down to full dead hang. For ladders, perform submaximal clusters (1-2-3 reps) to accumulate high volume without hitting neurological failure.',
         biomechanicalRationale: '4-second eccentric negatives stimulate collagen synthesis in the biceps tendon and lat fascia. Submaximal volume ladders build motor efficiency without central nervous system burnout.'
       },
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Initiate every pull by depressing your shoulder blades before your elbows bend. Think of pulling your elbows down into your back pockets.',
         biomechanicalRationale: 'Scapular depression recruits the lower trapezius and latissimus dorsi before arm flexors take over, sparing the bicipital tendon.'
       }
@@ -411,7 +411,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Ben Patrick (ATG)',
+        creator: 'Form Cue',
         quote: 'Pull your toes up towards your knees as high as possible. Hold for 1 second at maximum dorsiflexion, then lower under control for 2 seconds. The tibialis anterior is the body’s front brake and first line of shock absorption. Strengthening it removes immense decelerative shear from your patellar tendon.',
         biomechanicalRationale: 'The tibialis anterior absorbs ground reaction forces upon heel strike. When weak, decelerative ground forces transfer directly to the knee joint and patellar tendon.'
       }
@@ -451,7 +451,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Ben Patrick (ATG)',
+        creator: 'Form Cue',
         quote: 'Keep your working heel glued flat to the plate. Push your working knee forward over your toes while reaching the opposite heel out in front of you. Tap the floor as gently as if you were touching thin glass, then press back up through the working foot.',
         biomechanicalRationale: 'Forces progressive knee-over-toe translation in a controlled, low-angle setting, isolating the VMO and building tendon compliance without high shear.'
       }
@@ -474,8 +474,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_11_alyssa_lu_9090',
     exerciseId: 'w_lower_a_2',
-    exerciseName: 'Alyssa Lu 90/90 Positional Breathing & Hip Reset',
-    title: 'Alyssa Lu 90/90 Positional Breathing & Hip Reset',
+    exerciseName: '90/90 Positional Breathing & Hip Reset',
+    title: '90/90 Positional Breathing & Hip Reset',
     tier: 'Warmup',
     tempo: '5083',
     prescribedTempo: '5083 (5s Inhale / 8s Exhale / 3s Pause)',
@@ -492,7 +492,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Alyssa Lu (Proformance)',
+        creator: 'Form Cue',
         quote: 'Gently dig your heels downward into the bench to turn on your hamstrings. You will feel your pelvis tilt backward into neutral and your lower back flatten against the floor. Take a 5-second breath in through your nose expanding your ribs 360 degrees, then exhale through your mouth for 8 seconds until your ribs fully sink. Hold for 3 seconds.',
         biomechanicalRationale: 'Active proximal hamstring engagement creates a posterior pelvic tilt, reflexively inhibiting the overactive psoas and rectus femoris via reciprocal inhibition.'
       }
@@ -527,7 +527,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Ben Patrick (ATG)',
+        creator: 'Form Cue',
         quote: 'Bend one knee while actively straightening the other knee completely by flexing your quadriceps. Hold that quad flex for a moment, then alternate legs with a smooth rhythm for 20 reps per side. The strong quad squeeze forces your hamstring to release dynamically without tearing tissue.',
         biomechanicalRationale: 'Utilizes reciprocal inhibition to relax tight hamstrings dynamically while desensitizing the sciatic nerve path through rhythmic flossing.'
       }
@@ -544,8 +544,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_13_filly_z_press',
     exerciseId: 't3_filly_kb_z_press',
-    exerciseName: 'Marcus Filly Single-Arm Kettlebell Z-Press',
-    title: 'Marcus Filly Single-Arm Kettlebell Z-Press',
+    exerciseName: 'Single-Arm Kettlebell Z-Press',
+    title: 'Single-Arm Kettlebell Z-Press',
     tier: 'T3',
     tempo: '30X1',
     prescribedTempo: '30X1',
@@ -562,7 +562,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Marcus Filly (FBB)',
+        creator: 'Form Cue',
         quote: 'Without a bench backrest to lean on, you cannot cheat. Sit tall on your sitz bones. Compress your hip flexors and brace your midsection tightly. Press the kettlebell straight overhead, locking out directly over your ear with zero torso lean.',
         biomechanicalRationale: 'Eliminates all lower-body momentum and spinal arching, exposing thoracic spine limitations and demanding pure core stabilization under unilateral overhead load.'
       }
@@ -579,8 +579,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_14_mcgill_big_3',
     exerciseId: 't3_mcgill_big_3',
-    exerciseName: 'Dr. Stuart McGill Big 3 Endurance Tri-Set',
-    title: 'Dr. Stuart McGill Big 3 Endurance Tri-Set',
+    exerciseName: 'Big 3 Core Endurance Tri-Set',
+    title: 'Big 3 Core Endurance Tri-Set',
     tier: 'T3',
     tempo: '0010',
     prescribedTempo: 'Isometric 10s Holds (McGill Pyramid)',
@@ -597,7 +597,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'True spinal stability is about muscular endurance, not peak 1RM strength. We preserve the neutral lordotic curve while challenging abdominal wall co-contraction without disc-destroying spinal flexion.',
         biomechanicalRationale: 'Spares lumbar discs from repeated flexion-shear while building the exact isometric muscle endurance ratios required to prevent spinal injury.'
       }
@@ -614,11 +614,11 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_15_kb_floor_press_er',
     exerciseId: 't3_kb_floor_press_er',
-    exerciseName: 'Athlean-X 20 Effective Reps (ER) Kettlebell Floor Press',
-    title: 'Athlean-X 20 Effective Reps (ER) Kettlebell Floor Press',
+    exerciseName: '20 Effective Reps (ER) Kettlebell Floor Press',
+    title: '20 Effective Reps (ER) Kettlebell Floor Press',
     tier: 'T3',
     tempo: '2010',
-    prescribedTempo: '2010 (Athlean-X ER Cluster)',
+    prescribedTempo: '2010 (ER Cluster)',
     primaryMuscles: ['Pectoralis Major', 'Triceps Brachii', 'Rotator Cuff Stabilizers'],
     equipment: 'BowFlex Kettlebell (8–40 lbs) & Floor',
     setup: 'Lie supine on floor with knees bent; press kettlebell from floor stop with upper arm at 45 degrees.',
@@ -632,7 +632,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Effective reps are the repetitions closest to failure that stimulate high-threshold motor unit recruitment. By resting 15 to 20 seconds between micro-clusters, you accumulate pure hypertrophic tension with zero joint breakdown.',
         biomechanicalRationale: 'The floor naturally prevents shoulder hyperextension, while short rest-pause clusters maximize mechanical tension on high-threshold fast-twitch muscle fibers.'
       }
@@ -667,7 +667,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere & Marcus Filly',
+        creator: 'Form Cue',
         quote: 'Hanging remodels the acromion arch and gently decompresses compressed spinal discs. Combining hanging with light club casts activates rotator cuff mechanoreceptors and lubricates the joint capsule.',
         biomechanicalRationale: 'Passive gravitational traction increases subacromial joint space while rotational club swings stimulate synovial fluid perfusion across glenohumeral articular cartilage.'
       }
@@ -702,7 +702,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Nippard & Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'Good mornings overload the hamstrings at long muscle lengths. By keeping the load held close to your sternum, you cut the compressive lever arm on the spine by half compared to a barbell behind the neck.',
         biomechanicalRationale: 'Maintains hip hinge moment arm while minimizing cervical and lumbar shear forces, achieving optimal stretch-mediated hypertrophy.'
       }
@@ -742,7 +742,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'The Biering-Sørensen test is the gold standard of back health. Individuals who can hold horizontal for 2 minutes or longer have dramatically lower incidence of future low back pain episodes.',
         biomechanicalRationale: 'Builds isometric endurance in slow-twitch multifidus and longissimus thoracis muscle fibers without compressive spinal cycling.'
       }
@@ -777,7 +777,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'Suitcase carries challenge the quadratus lumborum and contralateral gluteus medius to lock the pelvis. It is the ultimate functional anti-lateral-flexion exercise.',
         biomechanicalRationale: 'Forces intense unilateral isometric co-contraction of spinal stabilizers, training the abdominal cylinder to resist asymmetric lateral loads.'
       }
@@ -794,8 +794,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_20_yellow_dude_lsit',
     exerciseId: 't3_yellow_dude_lsit',
-    exerciseName: 'Yellow Dude L-Sit Compression Holds',
-    title: 'Yellow Dude L-Sit Compression Holds',
+    exerciseName: 'L-Sit Compression Holds',
+    title: 'L-Sit Compression Holds',
     tier: 'T3',
     tempo: '0010',
     prescribedTempo: 'Isometric Hold (15–25s)',
@@ -812,7 +812,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Yellow Dude',
+        creator: 'Form Cue',
         quote: 'Compression strength is the missing link between calisthenics and tendon longevity. Keep your knees fully locked and point your toes. Active compression strengthens the iliopsoas-abdominal synergy.',
         biomechanicalRationale: 'Maximally activates distal quadriceps lock, deep hip flexors, and lower rectus abdominis while building tendon tolerance in the anterior chain.'
       }
@@ -847,7 +847,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Marcus Filly & Jeff Cavaliere',
+        creator: 'Form Cue',
         quote: 'Antagonist supersetting promotes tendon balance and reciprocal joint flushing. Neutral-grip hammer curls strengthen the brachioradialis and distal biceps tendon without aggravating the medial epicondyle.',
         biomechanicalRationale: 'Controlled eccentric tension under neutral wrist orientation protects elbow collateral ligaments and stimulates tenocyte collagen remodeling.'
       }
@@ -887,7 +887,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Lucas Hardie (Range of Strength)',
+        creator: 'Form Cue',
         quote: 'The horse stance is the gateway to the side split. Never relax into passive stretch. Hold the weight low, maintain slight anterior pelvic tilt to avoid bone-on-bone impingement, and pulse actively against the resistance.',
         biomechanicalRationale: 'Loaded quasi-isometrics at long muscle lengths stimulate collagen synthesis in the adductor tendon insertions while recruiting high-threshold motor units.'
       }
@@ -923,12 +923,12 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Lucas Hardie (Range of Strength)',
+        creator: 'Form Cue',
         quote: 'The Jefferson Curl is not a deadlift; it is a movement of spinal articulation and distal hamstring remodeling. Roll down bone by bone. Build to 25% of your bodyweight passing below your toes with straight knees.',
         biomechanicalRationale: 'Progressive, submaximal loaded flexion adapts the posterior longitudinal ligament and erector spinae tendons, building structural resilience against accidental flexion injuries.'
       },
       {
-        creator: 'Ben Patrick (ATG)',
+        creator: 'Form Cue',
         quote: 'By keeping the knees completely locked, the Jefferson Curl forces the distal hamstring and gastrocnemius tendon complex to elongate under load, creating bulletproof posterior elasticity.',
         biomechanicalRationale: 'Straight-knee loaded flexion targets the semitendinosus and biceps femoris at their maximal sarcomere lengths, triggering stretch-mediated hypertrophy.'
       }
@@ -964,7 +964,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Lucas Hardie (Range of Strength)',
+        creator: 'Form Cue',
         quote: 'The German Hang is the ultimate antidote to modern desk posture and heavy pressing. Exposing the shoulder to loaded extension on rings or a bar builds tendon resilience in the biceps and pecs that conventional lifting never touches.',
         biomechanicalRationale: 'Shoulder hyperextension under tensile loading promotes extracellular matrix remodeling in the anterior capsule and long head of the biceps tendon.'
       }
@@ -997,13 +997,13 @@ export const CUE_CARDS: CueCard[] = [
     setupInstructions: [
       'Phase 1 — Machine Setup & Foot Straps: Adjust the foot stretcher so the strap sits directly across the widest part of your foot (the ball of the foot). Set the damper to moderate resistance (setting 4–6).',
       'Phase 2 — Reverse Leg-Drive Posture: Sit tall on the seat with spine upright and arms extended forward holding the handle. Do not slouch or round your thoracic spine.',
-      'Phase 3 — Forefoot Push Initiation: Push backward purely through the balls of your feet and forefoot (rather than heels first). This directly simulates Ben Patrick’s backward sled walking, driving blood flow and synovial fluid directly into the VMO.',
+      'Phase 3 — Forefoot Push Initiation: Push backward purely through the balls of your feet and forefoot (rather than heels first). This directly simulates backward sled walking, driving blood flow and synovial fluid directly into the VMO.',
       'Phase 4 — Fluid Knee Extension (Zero Lockout Impact): Drive the seat backward smoothly without snapping your knees into hyperextension. Maintain continuous, controlled quad tension.',
       'Phase 5 — Rhythmic Recovery (18–20 SPM): Return forward under control by letting knees bend smoothly over toes. Maintain a steady, relaxed pace (18–20 strokes per minute) for 4 to 5 minutes until knees feel warm, lubricated, and pain-free.'
     ],
     creatorCues: [
       {
-        creator: 'Ben Patrick (ATG)',
+        creator: 'Form Cue',
         quote: 'Backward movement is the foundation of knee bulletproofing. By pushing through the balls of the feet with resistance, you pump blood directly into the patellar tendon and VMO without creating decelerative shear stress.',
         biomechanicalRationale: 'Eliminates eccentric patellar braking shear while activating the VMO and delivering nutrient-rich synovial fluid to articular cartilage.'
       }
@@ -1020,8 +1020,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_wu_lower_a_3',
     exerciseId: 'w_lower_a_3',
-    exerciseName: 'Eugene Teo Standing Calf Raise (Pre-Fatigue)',
-    title: 'Eugene Teo Standing Calf Raise (Pre-Fatigue)',
+    exerciseName: 'Standing Calf Raise (Pre-Fatigue)',
+    title: 'Standing Calf Raise (Pre-Fatigue)',
     tier: 'Warmup',
     tempo: '3012',
     prescribedTempo: '3012 (3s Lower / 2s Peak Squeeze)',
@@ -1037,7 +1037,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Coach Eugene Teo',
+        creator: 'Form Cue',
         quote: 'Do not squat with cold, stiff calves. Pre-fatiguing and actively stretching the calves before leg sessions stabilizes the ankle joint and eliminates forward tibial shear that destroys patellar tendons.',
         biomechanicalRationale: 'Pre-activates the gastrocnemius-soleus complex to act as an active dynamic shock absorber during squat descent.'
       }
@@ -1054,8 +1054,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_wu_lower_a_4',
     exerciseId: 'w_lower_a_4',
-    exerciseName: 'Eugene Teo Light KB Romanian Hinge (Pre-Fatigue)',
-    title: 'Eugene Teo Light KB Romanian Hinge (Pre-Fatigue)',
+    exerciseName: 'Light KB Romanian Hinge (Pre-Fatigue)',
+    title: 'Light KB Romanian Hinge (Pre-Fatigue)',
     tier: 'Warmup',
     tempo: '3110',
     prescribedTempo: '3110 (3s Hinge / 1s Stretch / 1s Drive)',
@@ -1071,7 +1071,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Coach Eugene Teo',
+        creator: 'Form Cue',
         quote: 'Firing the hamstrings before heavy squats activates the posterior co-contraction mechanism. When your hamstrings are awake, they actively pull the tibia backward, removing tremendous shear from your patellar tendon.',
         biomechanicalRationale: 'Hamstring co-contraction stabilizes the knee joint by balancing anterior quadriceps translation during deep knee flexion.'
       }
@@ -1105,7 +1105,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Aaron Horschig (Squat University)',
+        creator: 'Form Cue',
         quote: 'Limited ankle dorsiflexion is the number one hidden cause of knee pain during squats. If your ankle cannot bend, your tibia will rotate inward and your knee will collapse into valgus shear. Mobilize the ankle and root the tripod first.',
         biomechanicalRationale: 'Restores talocrural anterior-posterior joint play and prevents valgus knee collapse caused by dorsiflexion restrictions.'
       }
@@ -1139,7 +1139,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Marcus Filly & Athlean-X Priming',
+        creator: 'Form Cue',
         quote: 'Light rotational club casting awakens dormant rotator cuff mechanoreceptors and lubricates the shoulder joint capsule with synovial fluid without creating neurological fatigue.',
         biomechanicalRationale: 'Rotational torque stimulates mechanoreceptors and increases synovial perfusion across glenohumeral cartilage.'
       }
@@ -1155,8 +1155,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_wu_upper_a_2',
     exerciseId: 'w_upper_a_2',
-    exerciseName: 'Athlean-X Scapular Retractions & Depressions',
-    title: 'Athlean-X Scapular Retractions & Depressions',
+    exerciseName: 'Scapular Retractions & Depressions',
+    title: 'Scapular Retractions & Depressions',
     tier: 'Warmup',
     tempo: '2012',
     prescribedTempo: '2012 (2s End-Range Squeeze)',
@@ -1172,7 +1172,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'The shoulder blade is the base of support for your entire upper arm. If you cannot retract and depress your scapulae, your rotator cuff has to work overtime, leading straight to impingement.',
         biomechanicalRationale: 'Depressing and retracting the scapula seats the humeral head deeply into the glenoid fossa, maximizing subacromial clearance.'
       }
@@ -1188,8 +1188,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_wu_upper_a_3',
     exerciseId: 'w_upper_a_3',
-    exerciseName: 'McGill Bird-Dog Core & Lat Tension Priming',
-    title: 'McGill Bird-Dog Core & Lat Tension Priming',
+    exerciseName: 'Bird-Dog Core & Lat Tension Priming',
+    title: 'Bird-Dog Core & Lat Tension Priming',
     tier: 'Warmup',
     tempo: '0010',
     prescribedTempo: 'Isometric 10s Holds (4 reps / side)',
@@ -1205,7 +1205,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'Bird-dog holds train the abdominal wall, gluteals, and back extensors to lock the spine against rotation. This core stiffness is mandatory before lifting heavy loads.',
         biomechanicalRationale: 'Activates the posterior oblique sling (contralateral glute and lat) without imposing compressive lumbar shear.'
       }
@@ -1222,8 +1222,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_wu_lower_b_1',
     exerciseId: 'w_lower_b_1',
-    exerciseName: 'Alyssa Lu 10-Minute Active Hip Reset Protocol',
-    title: 'Alyssa Lu 10-Minute Active Hip Reset Protocol',
+    exerciseName: '10-Minute Active Hip Reset Protocol',
+    title: '10-Minute Active Hip Reset Protocol',
     tier: 'Warmup',
     tempo: '5083',
     prescribedTempo: 'Controlled Flow (5–6 Minutes)',
@@ -1239,7 +1239,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Alyssa Lu (Proformance)',
+        creator: 'Form Cue',
         quote: 'Tight hamstrings are often an illusion caused by an anteriorly tilted pelvis pulling them taut like a guitar string. Resetting the pelvis with 90/90 breathing and adductor bridges restores pelvic neutral and unlocks true active length.',
         biomechanicalRationale: 'Reciprocal inhibition of anterior hip capsule flexors via proximal hamstring and adductor co-activation.'
       }
@@ -1272,7 +1272,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Eugene Teo & Conditioning Base',
+        creator: 'Form Cue',
         quote: 'A light 3 to 4-minute row warms the synovial fluid in the hips and lower back through dynamic reciprocal movement without exhausting energy reserves.',
         biomechanicalRationale: 'Cyclical hip flexion and extension with low resistance stimulates articular lubrication across lumbar facet and hip joints.'
       }
@@ -1305,7 +1305,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Aaron Horschig (Squat University)',
+        creator: 'Form Cue',
         quote: 'Around-the-worlds feel easy with a light weight on two legs. Do them on a single leg and the hip has to work to keep you from rotating and the knee from collapsing.',
         biomechanicalRationale: 'The moving load creates a changing rotational moment that the stance-side glute medius and hip rotators must resist, training frontal- and transverse-plane knee control.'
       }
@@ -1323,8 +1323,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_wu_upper_b_1',
     exerciseId: 'w_upper_b_1',
-    exerciseName: 'Athlean-X Active Scapular Dead Hang Pulls',
-    title: 'Athlean-X Active Scapular Dead Hang Pulls',
+    exerciseName: 'Active Scapular Dead Hang Pulls',
+    title: 'Active Scapular Dead Hang Pulls',
     tier: 'Warmup',
     tempo: '2112',
     prescribedTempo: '2112 (2s Hold at Peak Scapular Elevation)',
@@ -1340,7 +1340,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Scapular pulls bridge the gap between dead hanging and pull-ups. Teaching your lower traps and serratus to initiate the pull protects your rotator cuff tendons from impingement.',
         biomechanicalRationale: 'Pre-activates upward and downward scapular rotators, preserving the subacromial space under traction.'
       }
@@ -1373,7 +1373,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Marcus Filly & Athlean-X Priming',
+        creator: 'Form Cue',
         quote: 'The shoulder is a 360-degree ball-and-socket joint that rarely moves in single planes. Indian clubs force the joint through spiral patterns, warming every corner of the rotator cuff.',
         biomechanicalRationale: 'Multi-planar rotational patterns stimulate dynamic stabilization across the rotator cuff and long head of the biceps.'
       }
@@ -1407,7 +1407,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Aaron Horschig (Squat University)',
+        creator: 'Form Cue',
         quote: 'If you cannot slide your arms overhead against a wall without arching your lower back, you do not have the mobility to press a barbell overhead safely. Wall slides test and restore true thoracic extension.',
         biomechanicalRationale: 'Demands active upward scapular rotation via serratus anterior and lower traps while maintaining abdominal wall neutral spine.'
       }
@@ -1427,8 +1427,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_athlean_hanging_knee_raise',
     exerciseId: 't3_athlean_hanging_knee_raise',
-    exerciseName: 'Athlean-X Hanging Knee Raise with Posterior Pelvic Tilt',
-    title: 'Athlean-X Hanging Knee Raise with Posterior Pelvic Tilt',
+    exerciseName: 'Hanging Knee Raise with Posterior Pelvic Tilt',
+    title: 'Hanging Knee Raise with Posterior Pelvic Tilt',
     tier: 'T3',
     tempo: '2112',
     prescribedTempo: '2112 (2s Lower / 1s Bottom / 1s Lift / 2s Top Squeeze)',
@@ -1445,7 +1445,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'If you just lift your legs, your hip flexors do 90% of the work and pull your spine forward. To actually work the abs, you must curl your pelvis up toward your ribcage. Show your tailbone to the wall in front of you!',
         biomechanicalRationale: 'Pelvic elevation actively recruits the lower rectus abdominis against the gravitational torque of the lower body, prioritizing core contraction over psoas dominance.'
       }
@@ -1462,8 +1462,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_athlean_hanging_corkscrew',
     exerciseId: 't3_athlean_hanging_corkscrew',
-    exerciseName: 'Athlean-X Hanging Corkscrews (Bottom-Up Oblique Drive)',
-    title: 'Athlean-X Hanging Corkscrews',
+    exerciseName: 'Hanging Corkscrews (Bottom-Up Oblique Drive)',
+    title: 'Hanging Corkscrews',
     tier: 'T3',
     tempo: '2111',
     prescribedTempo: '2111 (Controlled Diagonal Twist)',
@@ -1479,7 +1479,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'The obliques do not just bend you sideways; they rotate the pelvis and ribcage in opposition. By adding a corkscrew twist to the bottom-up raise, we fire both the internal and external oblique slings simultaneously.',
         biomechanicalRationale: 'Diagonal pelvic flexion under suspension engages the contralateral external oblique and ipsilateral internal oblique force-couple while sparing lumbar discs.'
       }
@@ -1495,8 +1495,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_athlean_hollow_body_hold',
     exerciseId: 't3_athlean_hollow_body_hold',
-    exerciseName: 'Athlean-X Hollow Body Core Compression Hold',
-    title: 'Athlean-X Hollow Body Core Compression Hold',
+    exerciseName: 'Hollow Body Core Compression Hold',
+    title: 'Hollow Body Core Compression Hold',
     tier: 'T3',
     tempo: '0010',
     prescribedTempo: 'Isometric Hold (25–35s)',
@@ -1512,7 +1512,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X) & Yellow Dude',
+        creator: 'Form Cue',
         quote: 'The moment your lower back leaves the floor, your abs have surrendered and your lumbar spine is bearing the load. Glue that lower back down and breathe through the compression.',
         biomechanicalRationale: 'Maximizes mid-range isometric anti-extension and co-activates the transversus abdominis and rectus abdominis to resist anterior pelvic tilt.'
       }
@@ -1529,8 +1529,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_athlean_cross_mountain_climber',
     exerciseId: 't3_athlean_cross_mountain_climber',
-    exerciseName: 'Athlean-X Cross-Body Mountain Climbers',
-    title: 'Athlean-X Cross-Body Mountain Climbers',
+    exerciseName: 'Cross-Body Mountain Climbers',
+    title: 'Cross-Body Mountain Climbers',
     tier: 'T3',
     tempo: '2011',
     prescribedTempo: '2011 (Controlled Cross-Body Drive)',
@@ -1547,7 +1547,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Do not bounce through these like high-school cardio drills. Slow it down! Drive the knee across, squeeze your obliques hard against the opposite elbow for a full second, then reset.',
         biomechanicalRationale: 'Top-down rotational vector that trains the oblique force-couple against rotational torque on a stable pelvic platform.'
       }
@@ -1563,8 +1563,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_athlean_iso_crunch',
     exerciseId: 't3_athlean_iso_crunch',
-    exerciseName: 'Athlean-X 2-Second Peak Squeeze Floor Curl-Up',
-    title: 'Athlean-X 2-Second Peak Squeeze Floor Curl-Up',
+    exerciseName: '2-Second Peak Squeeze Floor Curl-Up',
+    title: '2-Second Peak Squeeze Floor Curl-Up',
     tier: 'T3',
     tempo: '2112',
     prescribedTempo: '2112 (2s Lower / 1s Rest / 1s Curl / 2s Peak Squeeze)',
@@ -1581,7 +1581,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Do not sit all the way up! Once your shoulder blades leave the floor, any additional movement is done by the hip flexors. Stop at 30 degrees, exhale all your air, and squeeze your abs for 2 seconds.',
         biomechanicalRationale: 'Limits spinal flexion to the thoracic region, sparing lumbar discs while maximizing peak concentric tension on the upper rectus abdominis.'
       }
@@ -1598,8 +1598,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_athlean_serratus_plank',
     exerciseId: 't3_athlean_serratus_plank',
-    exerciseName: 'Athlean-X Serratus Elbow-to-Knee Plank + Vacuum Brace',
-    title: 'Athlean-X Serratus Elbow-to-Knee Plank + Vacuum Brace',
+    exerciseName: 'Serratus Elbow-to-Knee Plank + Vacuum Brace',
+    title: 'Serratus Elbow-to-Knee Plank + Vacuum Brace',
     tier: 'T3',
     tempo: '0010',
     prescribedTempo: 'Isometric Hold (30–45s)',
@@ -1615,7 +1615,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X) & Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'A passive plank where you just hang out on your joints for two minutes is useless. Active tension—protracting the serratus and pulling elbows to toes—creates maximum intra-abdominal stiffness in 30 seconds.',
         biomechanicalRationale: 'Actively couples the serratus anterior and transversus abdominis to form a rigid, 360-degree corset around the lumbar spine.'
       }
@@ -1632,8 +1632,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_w_abs_1',
     exerciseId: 'w_abs_1',
-    exerciseName: 'Dr. Stuart McGill Cat-Camel Spinal Wave',
-    title: 'Dr. Stuart McGill Cat-Camel Spinal Wave',
+    exerciseName: 'Cat-Camel Spinal Wave',
+    title: 'Cat-Camel Spinal Wave',
     tier: 'Warmup',
     tempo: '4040',
     prescribedTempo: '4040 (4s Arch Up / 4s Gentle Sag Down)',
@@ -1648,7 +1648,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'The Cat-Camel is not a stretch—it is a motion cycle to reduce internal friction and lubricate the intervertebral joints before loading.',
         biomechanicalRationale: 'Reduces passive spinal stiffness and flushes synovial fluid across intervertebral disc spaces.'
       }
@@ -1664,8 +1664,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_w_abs_2',
     exerciseId: 'w_abs_2',
-    exerciseName: 'Athlean-X 90/90 Diaphragmatic Vacuum Breath',
-    title: 'Athlean-X 90/90 Diaphragmatic Vacuum Breath',
+    exerciseName: '90/90 Diaphragmatic Vacuum Breath',
+    title: '90/90 Diaphragmatic Vacuum Breath',
     tier: 'Warmup',
     tempo: '4083',
     prescribedTempo: '4s Inhale / 8s Full Exhale / 3s Vacuum Hold',
@@ -1681,7 +1681,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'You cannot train your core properly if you do not know how to engage your transversus abdominis. Exhale completely, draw your belly button in, and feel that deep inner belt tighten.',
         biomechanicalRationale: 'Activates the deep transversus abdominis and resets the diaphragm before core training.'
       }
@@ -1697,8 +1697,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_t3_bjj_hanging_knee_raise',
     exerciseId: 't3_bjj_hanging_knee_raise',
-    exerciseName: 'Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression',
-    title: 'Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression',
+    exerciseName: 'Post-Grappling Hanging Knee Raise & Pelvic Decompression',
+    title: 'Post-Grappling Hanging Knee Raise & Pelvic Decompression',
     tier: 'T3',
     tempo: '2112',
     prescribedTempo: '2112 (2s Down / 1s Hang / 1s Drive / 2s Peak Posterior Tilt)',
@@ -1714,7 +1714,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Hanging knee raises are NOT just lifting your legs. If your pelvis does not tilt upward toward your sternum, you are merely training the hip flexors while jamming your lumbar spine. Curl the pelvis, squeeze the lower abs, and use gravity to decompress.',
         biomechanicalRationale: 'Bottom-up kinetic chain vector combined with gravitational axial traction creates intervertebral disc spacing while firing lower rectus abdominis fibers.'
       }
@@ -1731,8 +1731,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_t3_bjj_hollow_body_hold',
     exerciseId: 't3_bjj_hollow_body_hold',
-    exerciseName: 'Athlean-X Grappler Hollow Body Core Compression Hold',
-    title: 'Athlean-X Grappler Hollow Body Core Compression Hold',
+    exerciseName: 'Grappler Hollow Body Core Compression Hold',
+    title: 'Grappler Hollow Body Core Compression Hold',
     tier: 'T3',
     tempo: '0010',
     prescribedTempo: 'Isometric Hold (25–35s)',
@@ -1747,7 +1747,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X) & Yellow Dude',
+        creator: 'Form Cue',
         quote: 'The hollow body hold is the ultimate test of anti-extension. If your lower back leaves the floor, your core has failed and your lumbar spine is bearing the load. Regress to tuck if needed, but never compromise the zero-gap rule.',
         biomechanicalRationale: 'Locks the anterior core into a unified force shield, countering excessive lordosis and building endurance for closed guard and grappling posture.'
       }
@@ -1764,8 +1764,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_t3_bjj_cross_mountain_climber',
     exerciseId: 't3_bjj_cross_mountain_climber',
-    exerciseName: 'Athlean-X Cross-Body Oblique Climbers & Serratus Punch',
-    title: 'Athlean-X Cross-Body Oblique Climbers & Serratus Punch',
+    exerciseName: 'Cross-Body Oblique Climbers & Serratus Punch',
+    title: 'Cross-Body Oblique Climbers & Serratus Punch',
     tier: 'T3',
     tempo: '2011',
     prescribedTempo: '2011 (2s Return / 0s Pause / 1s Drive / 1s Peak Isometric Squeeze)',
@@ -1781,7 +1781,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Cavaliere (ATHLEAN-X)',
+        creator: 'Form Cue',
         quote: 'Stop sprinting through mountain climbers like cardio. For core development, cross-body drives require a deliberate pause at the top where the oblique twists the ribcage across a stable pelvis.',
         biomechanicalRationale: 'Activates internal and external obliques in a cross-body kinetic vector, resetting rotational torque after asymmetric grappling passes and escapes.'
       }
@@ -1798,8 +1798,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_t3_bjj_mcgill_curl_up',
     exerciseId: 't3_bjj_mcgill_curl_up',
-    exerciseName: 'Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace',
-    title: 'Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace',
+    exerciseName: 'Post-Grappling Isometric Curl-Up & Vacuum Brace',
+    title: 'Post-Grappling Isometric Curl-Up & Vacuum Brace',
     tier: 'T3',
     tempo: '1311',
     prescribedTempo: '1311 (1s Lift / 3s Iso Hold / 1s Down / 1s Reset)',
@@ -1815,7 +1815,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'Traditional sit-ups and crunches impose thousands of Newtons of destructive shear force on vulnerable lumbar discs. The McGill Curl-Up preserves natural lumbar lordosis while activating the rectus abdominis and deep abdominal wall with zero spinal motion.',
         biomechanicalRationale: 'Locks the lumbar spine in its neutral lordotic alignment, eliminating flexion shear stress on intervertebral discs after intense ground grappling.'
       }
@@ -1848,7 +1848,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Lucas Hardie (Range of Strength)',
+        creator: 'Form Cue',
         quote: 'The back bridge is the knees-over-toes concept for the lower back. Avoiding spinal extension entirely makes the spine fragile and brittle. Distribute the extension arc evenly through the thoracic spine and open the ribcage to reverse thousands of seconds of grappling flexion.',
         biomechanicalRationale: 'Restores active sagittal spinal extension and anterior chain compliance, decompressing anterior intervertebral disc margins compressed during prolonged guard play.'
       }
@@ -1881,7 +1881,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Derek (More Plates More Dates)',
+        creator: 'Form Cue',
         quote: 'Physical training and martial arts cannot be isolated from internal biochemistry and autonomic recovery. Heavy sweating depletes plasma volume, potassium, and sodium, leaving you in sympathetic overdrive. Standardize 5g daily creatine, replenish electrolytes post-session, and enforce an 8-to-10 hour caffeine curfew to protect sleep architecture and hormone levels.',
         biomechanicalRationale: 'Accelerates cortisol clearance and vagal nerve activation via controlled diaphragmatic respiration, while sodium-potassium rehydration restores intravascular volume and prevents hyponatremic cramping.'
       }
@@ -1914,7 +1914,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Aaron Horschig (Squat University)',
+        creator: 'Form Cue',
         quote: 'Dorsiflexion restriction forces the foot into pronation and the knee into valgus collapse during ground strike. Root the foot tripod and drive the knee over the second toe without letting the heel lift.',
         biomechanicalRationale: 'Restores posterior talar glide within the mortise joint, preventing tibial internal rotational torque.'
       }
@@ -1946,7 +1946,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Ben Patrick (ATG)',
+        creator: 'Form Cue',
         quote: 'The tibialis anterior is the first line of defense for ground impact deceleration. Bulletproofing the tibialis protects the knees, ankles, and shins from 3–4x bodyweight running impact.',
         biomechanicalRationale: 'Builds eccentric force absorption capacity in the anterior compartment, preventing shin splints.'
       }
@@ -1962,8 +1962,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_w_run_3',
     exerciseId: 'w_run_3',
-    exerciseName: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
-    title: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
+    exerciseName: 'Glute Medius & Pelvic Leveling',
+    title: 'Glute Medius & Pelvic Leveling',
     tier: 'Warmup',
     tempo: '2020',
     prescribedTempo: '2020 (2s Single-Leg Level / 0s / 2s Glute Hold / 0s Switch)',
@@ -1978,7 +1978,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Alyssa Lu (Proformance)',
+        creator: 'Form Cue',
         quote: 'Running is a continuous series of single-leg landings. If the glute medius is dormant, the opposite hip drops and the stance knee rotates inward, causing IT band friction and runner knee.',
         biomechanicalRationale: 'Activates lateral hip abductors to maintain horizontal pelvic alignment in the frontal plane.'
       }
@@ -1994,8 +1994,8 @@ export const CUE_CARDS: CueCard[] = [
   {
     id: 'cue_w_bjj_1',
     exerciseId: 'w_bjj_1',
-    exerciseName: 'McGill Down-Regulation Diaphragmatic Breathing',
-    title: 'McGill Down-Regulation Diaphragmatic Breathing',
+    exerciseName: 'Down-Regulation Diaphragmatic Breathing',
+    title: 'Down-Regulation Diaphragmatic Breathing',
     tier: 'Warmup',
     tempo: '4070',
     prescribedTempo: '4070 (4s Nasal Inhale / 0s Hold / 7s Mouth Exhale / 0s Reset)',
@@ -2010,7 +2010,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Stuart McGill',
+        creator: 'Form Cue',
         quote: 'After extreme spinal flexion and combat stress, the sympathetic nervous system locks muscles into guarded splinting. Long, controlled diaphragmatic exhalations reset tone and decompress intervertebral discs.',
         biomechanicalRationale: 'Activates parasympathetic vagal stimulation, lowering heart rate and normalizing intra-abdominal resting pressure.'
       }
@@ -2047,12 +2047,12 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'A strict 2-second pause completely dissipates elastic tendon recoil. You eliminate passive rebound and force the quad fibers to generate pure contractile force from the deepest knee angle.',
         biomechanicalRationale: 'Removes the stretch-shortening cycle (SSC), increasing motor unit synchronization and rate of force development (RFD).'
       },
       {
-        creator: 'Dr. Aaron Horschig (Squat University)',
+        creator: 'Form Cue',
         quote: 'Do not let your chest collapse or butt wink during the pause. Keep the 360-degree intra-abdominal pressure locked solid throughout the 2 seconds.',
         biomechanicalRationale: 'Maintains neutral spine against compressive axial load, preventing lumbar ligamentous flexion strain.'
       }
@@ -2085,7 +2085,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Coach Eugene Teo',
+        creator: 'Form Cue',
         quote: 'Leaning back into the angled barbell changes the resultant force vector. It removes shearing force from the lumbar spine and allows pain-free, deep knee flexion directly onto the quads.',
         biomechanicalRationale: 'Posterior center of mass displacement dramatically reduces shear across the patellar tendon while maximizing quad fiber stretch.'
       }
@@ -2118,7 +2118,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'Close-grip bench press shifts the moment arm to the elbow joint, heavily recruiting all three heads of the triceps while keeping the humerus inside a narrow 30-degree tuck that spares the rotator cuff.',
         biomechanicalRationale: 'Reduces shoulder abduction angle, eliminating subacromial impingement during maximal horizontal pushing.'
       }
@@ -2151,7 +2151,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Coach Eugene Teo',
+        creator: 'Form Cue',
         quote: 'Pull the barbell in an arc towards the hip, not straight up to your armpit. The arc matches the oblique angle of the lower lat fibers for superior recruitment.',
         biomechanicalRationale: 'Aligns the line of pull with lat pennation angles while unilateral bracing removes spinal shear.'
       }
@@ -2185,7 +2185,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'The 1 to 2 inch deficit allows the barbell to travel into the deepest stretch possible before bottoming out, producing powerful stretch-mediated hypertrophy across the entire hamstring belly.',
         biomechanicalRationale: 'Maximizes mechanical tension at long muscle lengths where titin filament signaling and sarcomere addition in series are stimulated.'
       }
@@ -2218,7 +2218,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Alyssa Lu (Proformance)',
+        creator: 'Form Cue',
         quote: 'The B-stance gives you all the unilateral benefits of single-leg loading—pelvic centering and glute medius activation—without the balance wobble that steals tension from the hamstring.',
         biomechanicalRationale: 'Tri-planar pelvic stability with isolated sagittal plane posterior chain loading.'
       }
@@ -2251,7 +2251,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'GZCL & Jeff Nippard',
+        creator: 'Form Cue',
         quote: 'Pin presses force you to overcome inertia from a dead stop. You cannot rely on a bounce or stretch reflex, which builds incredible neural drive at your sticking point.',
         biomechanicalRationale: 'Concentric-only initiation stimulates high-threshold motor unit recruitment without tendon microtrauma.'
       }
@@ -2284,7 +2284,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Coach Eugene Teo & Yellow Dude',
+        creator: 'Form Cue',
         quote: 'Neutral and supinated grips place the biceps and brachialis in their strongest line of pull while sparing the wrist and medial elbow tendons from rotational torque.',
         biomechanicalRationale: 'Spares the medial epicondyle while maintaining high lat mechanical tension and eccentric tenocyte stimulation.'
       }
@@ -2317,7 +2317,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Marcus Filly (Functional Bodybuilding)',
+        creator: 'Form Cue',
         quote: 'The ~45-degree angle of the landmine gives you the vertical pressing stimulus without requiring complete 180-degree overhead shoulder mobility. It is the premier shoulder longevity press.',
         biomechanicalRationale: 'Aligns perfectly with the plane of the scapula (scaption), preventing acromial impingement.'
       }
@@ -2327,14 +2327,14 @@ export const CUE_CARDS: CueCard[] = [
       'Arching lower back instead of pressing with the shoulder and arm.'
     ],
     rehabRegressions: [
-      'Marcus Filly Single-Arm Kettlebell Z-Press on floor.'
+      'Single-Arm Kettlebell Z-Press on floor.'
     ]
   },
   {
     id: 'cue_rp_loaded_muscle_stretch',
     exerciseId: 't3_bjj_rp_sfr_loaded_stretch',
-    exerciseName: 'Dr. Mike Israetel (RP) High-SFR Loaded Stretched-Position Hang',
-    title: 'Dr. Mike Israetel (RP) High-SFR Loaded Stretched-Position Hang',
+    exerciseName: 'High-SFR Loaded Stretched-Position Hang',
+    title: 'High-SFR Loaded Stretched-Position Hang',
     tier: 'T3',
     tempo: '0060',
     prescribedTempo: 'HOLD-60 (60s Controlled Lengthened Hold / Continuous Nasal Breathing)',
@@ -2350,12 +2350,12 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Dr. Mike Israetel (Renaissance Periodization)',
+        creator: 'Form Cue',
         quote: 'Loaded stretching at long muscle lengths provides massive localized hypertrophic stimulus with virtually zero systemic axial or CNS fatigue. It is the pinnacle of high Stimulus-to-Fatigue Ratio (SFR) training.',
         biomechanicalRationale: 'Mechanical tension in the lengthened position stimulates intracellular signaling cascades for sarcomere addition in series (sarcomerogenesis) without compressive joint damage.'
       },
       {
-        creator: 'House of Hypertrophy',
+        creator: 'Form Cue',
         quote: 'Meta-analytic research shows that mechanical tension experienced in stretched muscle positions accounts for disproportionate hypertrophy gains compared to contractions at shortened muscle lengths.',
         biomechanicalRationale: 'Stretch-mediated hypertrophy triggers both passive and active mechanical tension, promoting connective tissue remodeling and myofibrillar hypertrophy.'
       }
@@ -2387,7 +2387,7 @@ export const CUE_CARDS: CueCard[] = [
     ],
     creatorCues: [
       {
-        creator: 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)',
+        creator: 'Form Cue',
         quote: 'Do not let arbitrary calendar schedules dictate your intensity. Autoregulate daily training loads and reactive deloads based on objective bar speed and true Reps in Reserve.',
         biomechanicalRationale: 'Mitigates non-linear systemic fatigue variance caused by life stressors, poor sleep, or training accumulation, preserving long-term progress.'
       }

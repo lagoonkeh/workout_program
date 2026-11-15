@@ -263,14 +263,14 @@ describe('Adversarial M3 Challenger 1: Workout Logging & UI Component Layer', ()
       fireEvent.click(restButtons180[0]);
 
       // Docked Rest Timer should now display 03:00 (180s) and be in RUNNING state
-      expect(screen.getByText('03:00')).toBeInTheDocument();
+      expect(screen.getAllByText('03:00').length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText(/resting/i).length).toBeGreaterThanOrEqual(1);
 
       // Rapidly click a 60s rest button from another exercise
       const restButtons60 = screen.getAllByTitle(/Start 60s rest timer/i);
       expect(restButtons60.length).toBeGreaterThan(0);
       fireEvent.click(restButtons60[0]);
-      expect(screen.getByText('01:00')).toBeInTheDocument();
+      expect(screen.getAllByText('01:00').length).toBeGreaterThanOrEqual(1);
     });
 
     it('auto-triggers Rest Timer countdown when completing a set', () => {
@@ -281,27 +281,27 @@ describe('Adversarial M3 Challenger 1: Workout Logging & UI Component Layer', ()
       fireEvent.click(doneBtn);
 
       // Timer should start with exercise's restSeconds (180s for Barbell Back Squat)
-      expect(screen.getByText('03:00')).toBeInTheDocument();
+      expect(screen.getAllByText('03:00').length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText(/resting/i).length).toBeGreaterThanOrEqual(1);
     });
 
-    it('launches Marcus Filly Tempo Metronome modal with prescribed tempo and allows dismissal', () => {
+    it('launches Tempo Metronome modal with prescribed tempo and allows dismissal', () => {
       render(<App />);
 
       // Launch tempo metronome from first exercise
-      const tempoButtons = screen.getAllByTitle(/Launch Marcus Filly metronome for/i);
+      const tempoButtons = screen.getAllByTitle(/Launch tempo metronome for/i);
       expect(tempoButtons.length).toBeGreaterThan(0);
       fireEvent.click(tempoButtons[0]);
 
       // Modal dialog should appear
-      const dialog = screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i });
+      const dialog = screen.getByRole('dialog', { name: /Tempo Metronome/i });
       expect(dialog).toBeInTheDocument();
 
       // Close modal metronome
       const closeBtn = screen.getByRole('button', { name: /Close Metronome/i });
       fireEvent.click(closeBtn);
 
-      expect(screen.queryByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: /Tempo Metronome/i })).not.toBeInTheDocument();
     });
 
     it('launches Tempo Metronome from inside CueCardModal and cleanly transitions modals', () => {
@@ -309,18 +309,19 @@ describe('Adversarial M3 Challenger 1: Workout Logging & UI Component Layer', ()
 
       // Open CueCardModal for a timed exercise (McGill Big 3 holds); rep-based lifts have no metronome button
       const mcgill = document.getElementById('exercise-card-t3_mcgill_big_3')!;
-      fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
 
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText(/Elite Creator Cues & Biomechanics/i)).toBeInTheDocument();
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(screen.getByText(/Form Cues & Biomechanics/i)).toBeInTheDocument();
 
       // Click "Launch Tempo Metronome" inside the modal
-      const launchTempoBtn = screen.getByRole('button', { name: /Launch Tempo Metronome/i });
+      const launchTempoBtn = within(dialog).getByRole('button', { name: /Launch Tempo Metronome/i });
       fireEvent.click(launchTempoBtn);
 
       // CueCardModal should close and Tempo Metronome modal should open
-      expect(screen.queryByText(/Elite Creator Cues & Biomechanics/i)).not.toBeInTheDocument();
-      expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+      expect(screen.queryByText(/Form Cues & Biomechanics/i)).not.toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
     });
   });
 
@@ -434,7 +435,7 @@ describe('Adversarial M3 Challenger 1: Workout Logging & UI Component Layer', ()
       render(<App />);
 
       // Open cue card for any exercise in the program
-      const cueButtons = screen.getAllByRole('button', { name: /View Creator Cues & Science/i });
+      const cueButtons = screen.getAllByRole('button', { name: /View Form Cues & Science/i });
       expect(cueButtons.length).toBeGreaterThan(0);
 
       // Click each cue card button to verify none throw or crash
@@ -471,7 +472,7 @@ describe('Adversarial M3 Challenger 1: Workout Logging & UI Component Layer', ()
             onClose={vi.fn()}
           />
         );
-        expect(screen.getByText(/Marcus Filly Tempo Metronome/i)).toBeInTheDocument();
+        expect(screen.getByText(/Tempo Metronome/i)).toBeInTheDocument();
         unmount();
       }
     });

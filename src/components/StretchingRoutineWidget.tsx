@@ -712,7 +712,7 @@ const StretchingRoutineWidgetComponent: React.FC<StretchingRoutineWidgetProps> =
                       Step {originalIdx + 1}
                     </span>
                     <span className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      {stretch.creator}
+                      {stretch.targetMuscles.join(', ')}
                     </span>
                     {stretch.isBilateral ? (
                       <span className="text-[10px] sm:text-xs font-mono px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">

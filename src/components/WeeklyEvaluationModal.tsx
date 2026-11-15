@@ -301,11 +301,6 @@ export const WeeklyEvaluationModal: React.FC<WeeklyEvaluationModalProps> = ({
                           <p className="text-xs text-slate-300 leading-snug">
                             {adapt.rationale}
                           </p>
-
-                          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono pt-0.5">
-                            <span className="text-emerald-400 font-semibold">Influence:</span>
-                            <span>{adapt.creatorInfluence}</span>
-                          </div>
                         </div>
                       </div>
                     </label>

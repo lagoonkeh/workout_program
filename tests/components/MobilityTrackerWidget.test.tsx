@@ -24,7 +24,7 @@ describe('MobilityTrackerWidget Component', () => {
     render(<MobilityTrackerWidget />);
     fireEvent.click(screen.getByRole('tab', { name: /Knee-to-Wall/i }));
     expect(screen.getAllByText(/Knee-to-Wall Ankle Dorsiflexion Test/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Dr\. Aaron Horschig/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Talocrural Joint & Soleus Muscle/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it('displays real-time live benchmark classification badge as user types', async () => {

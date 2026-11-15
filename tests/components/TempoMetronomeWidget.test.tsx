@@ -12,7 +12,7 @@ describe('TempoMetronomeWidget Component', () => {
     expect(screen.getByText('X')).toBeInTheDocument();
     expect(screen.getByText('1s')).toBeInTheDocument();
 
-    expect(screen.getByText(/Marcus Filly Tempo Metronome/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tempo Metronome/i)).toBeInTheDocument();
   });
 
   it('renders circular SVG pacing ring with radius 56', () => {

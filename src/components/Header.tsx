@@ -55,7 +55,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                   <span className="hidden max-[374px]:inline" aria-hidden="true">Upper/Lower</span>
                 </h1>
                 <span className="hidden sm:inline-block text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                  GZCL + 9 Creators
+                  Strength & Hypertrophy
                 </span>
               </div>
               {/* Active workout subtitle: displayed cleanly on desktop workout view; hidden on mobile & non-routine views where it is redundant */}

@@ -120,9 +120,6 @@ export const ExerciseVariationModal: React.FC<ExerciseVariationModalProps> = ({
                           Cycle {v.cycleAffiliation} {v.cycleAffiliation === 'A' ? '(Base)' : '(Wave)'}
                         </span>
                       )}
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                        {v.creatorAttribution}
-                      </span>
                     </div>
 
                     {isSelected ? (

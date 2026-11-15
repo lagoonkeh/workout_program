@@ -189,7 +189,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_mcgill_big_3: {
     id: 't3_mcgill_big_3',
-    exerciseName: 'McGill Big 3 Core Protocol',
+    exerciseName: 'Big 3 Core Protocol',
     diagramType: 'core_mcgill',
     startPositionLabel: '1. Neutral Quadruped / Setup',
     bottomPositionLabel: '2. Anti-Rotation Endurance Lock',
@@ -210,7 +210,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   side_bridge: {
     id: 'side_bridge',
-    exerciseName: 'McGill Side Bridge / Plank',
+    exerciseName: 'Side Bridge / Plank',
     diagramType: 'side_bridge',
     startPositionLabel: '1. Side-Lying Forearm Alignment',
     bottomPositionLabel: '2. Rigid Lateral Bridge Hold',
@@ -278,7 +278,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'floor_press',
     startPositionLabel: '1. Lockout Over Chest',
     bottomPositionLabel: '2. Tricep Floor Contact Pause',
-    caption: 'Athlean-X Effective Reps floor press: triceps touch floor to eliminate shoulder hyper-extension.',
+    caption: 'Effective Reps floor press: triceps touch floor to eliminate shoulder hyper-extension.',
     keyCues: [
       'Lie flat with knees bent, feet flat on the floor',
       'Lower kettlebell until tricep gently touches the floor',
@@ -295,11 +295,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_athlean_face_pull: {
     id: 't3_athlean_face_pull',
-    exerciseName: 'Athlean-X Face Pull',
+    exerciseName: 'Kettlebell High Pull & External Rotation',
     diagramType: 'face_pull',
     startPositionLabel: '1. Arms Extended In Front (or 30° Hinge)',
     bottomPositionLabel: '2. High Thumbs External Rotation Lock',
-    caption: 'Athlean-X 2-in-1 face pull alternative: pull kettlebell/clubs high while externally rotating hands backward and higher than elbows without cables.',
+    caption: '2-in-1 face pull alternative: pull kettlebell/clubs high while externally rotating hands backward and higher than elbows without cables.',
     keyCues: [
       'Thumbs turned backward (external rotation of humerus)',
       'Hands MUST finish higher than elbows at peak contraction',
@@ -417,7 +417,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
       bottom: 'Perfect 180° horizontal alignment against gravity'
     },
     trajectoryNote: 'Pure static isometric endurance hold resisting gravity.',
-    safetyNote: 'Stuart McGill benchmark: ≥ 120s hold is the number one predictor of lower back resilience.'
+    safetyNote: 'Benchmark: ≥ 120s hold is a key predictor of lower back resilience.'
   },
 
   t3_kb_suitcase_carry: {
@@ -486,7 +486,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_filly_kb_z_press: {
     id: 't3_filly_kb_z_press',
-    exerciseName: 'Marcus Filly Single-Arm KB Z-Press',
+    exerciseName: 'Single-Arm Kettlebell Z-Press',
     diagramType: 'z_press',
     startPositionLabel: '1. Seated L-Sit Rack Position',
     bottomPositionLabel: '2. Strict Vertical Lockout & Pause',
@@ -507,11 +507,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_yellow_dude_lsit: {
     id: 't3_yellow_dude_lsit',
-    exerciseName: 'Yellow Dude L-Sit & Compression',
+    exerciseName: 'L-Sit & Compression',
     diagramType: 'lsit',
     startPositionLabel: '1. Hands Planted Support',
     bottomPositionLabel: '2. Legs Elevated Compression Hold',
-    caption: 'Yellow Dude calisthenics gate progression: hands on floor or plates, push down to lift hips, legs straight.',
+    caption: 'Calisthenics gate progression: hands on floor or plates, push down to lift hips, legs straight.',
     keyCues: [
       'Depress scapulae hard through palms into floor or weight plates',
       'Compress quads toward chest using hip flexors and deep lower abdominals',
@@ -572,7 +572,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_lower_a_2: {
     id: 'w_lower_a_2',
-    exerciseName: 'Alyssa Lu 90/90 Positional Breathing + Bridge',
+    exerciseName: '90/90 Positional Breathing + Bridge',
     diagramType: 'warmup_90_90',
     startPositionLabel: '1. 90/90 Supine Heel Dig',
     bottomPositionLabel: '2. Pelvic Reset Bridge & Exhale Hold',
@@ -593,7 +593,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_lower_a_3: {
     id: 'w_lower_a_3',
-    exerciseName: 'Eugene Teo Standing Calf Raise (Pre-Fatigue)',
+    exerciseName: 'Standing Calf Raise (Pre-Fatigue)',
     diagramType: 'warmup_calf',
     startPositionLabel: '1. Deep Deficit Heel Stretch',
     bottomPositionLabel: '2. Peak Plantarflexion Squeeze',
@@ -614,7 +614,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_lower_a_4: {
     id: 'w_lower_a_4',
-    exerciseName: 'Eugene Teo Light KB Romanian Hinge (Pre-Fatigue)',
+    exerciseName: 'Light KB Romanian Hinge (Pre-Fatigue)',
     diagramType: 'rdl',
     startPositionLabel: '1. Upright Standing Hold',
     bottomPositionLabel: '2. Posterior Hip Hinge Stretch',
@@ -639,7 +639,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'warmup_ankle',
     startPositionLabel: '1. Half-Kneeling Neutral Stance',
     bottomPositionLabel: '2. Knee Past Toes Over 2nd/3rd Toe',
-    caption: 'Dr. Aaron Horschig mobility drill: drives talocrural dorsiflexion while rooting big toe, pinky toe, and heel.',
+    caption: 'Talocrural dorsiflexion mobility drill: drives dorsiflexion while rooting big toe, pinky toe, and heel.',
     keyCues: [
       'Keep front heel glued to the floor',
       'Drive knee straight out over the 2nd and 3rd toes',
@@ -678,11 +678,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_upper_a_2: {
     id: 'w_upper_a_2',
-    exerciseName: 'Athlean-X Scapular Retractions & Depressions',
+    exerciseName: 'Scapular Retractions & Depressions',
     diagramType: 'warmup_scapular',
     startPositionLabel: '1. Arms Forward (Protract Scapula)',
     bottomPositionLabel: '2. Scapular Pinch & Depress Down',
-    caption: 'Jeff Cavaliere shoulder health activator: pinch shoulder blades down and back to seat humeral head in glenoid socket.',
+    caption: 'Shoulder health activator: pinch shoulder blades down and back to seat humeral head in glenoid socket.',
     keyCues: [
       'Keep elbows completely straight',
       'Imagine pinching a pencil between shoulder blades',
@@ -699,11 +699,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_upper_a_3: {
     id: 'w_upper_a_3',
-    exerciseName: 'McGill Bird-Dog Core & Lat Tension Priming',
+    exerciseName: 'Bird-Dog Core & Lat Tension Priming',
     diagramType: 'core_mcgill',
     startPositionLabel: '1. Quadruped Tabletop Setup',
     bottomPositionLabel: '2. Opposite Arm & Leg Extended Line',
-    caption: 'Dr. Stuart McGill core stability drill: extend opposite arm and leg, clench fist, push heel back, hold 10 seconds.',
+    caption: 'Core stability drill: extend opposite arm and leg, clench fist, push heel back, hold 10 seconds.',
     keyCues: [
       'Zero rotation of pelvis or dipping of lower back',
       'Clench fist forward as if punching through a wall',
@@ -721,7 +721,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   // Lower B:
   w_lower_b_1: {
     id: 'w_lower_b_1',
-    exerciseName: 'Alyssa Lu 10-Minute Active Hip Reset Protocol',
+    exerciseName: '10-Minute Active Hip Reset Protocol',
     diagramType: 'warmup_hip',
     startPositionLabel: '1. Seated 90/90 Neutral Spine',
     bottomPositionLabel: '2. Chest Lean Over Front Femur',
@@ -747,7 +747,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'warmup_elephant',
     startPositionLabel: '1. Hands on Support (Knees Soft)',
     bottomPositionLabel: '2. Unilateral Knee Lock (Hamstring Floss)',
-    caption: 'Ben Patrick ATG hamstring flossing: alternate locking one knee at a time while hands rest on bench or floor.',
+    caption: 'Hamstring flossing: alternate locking one knee at a time while hands rest on bench or floor.',
     keyCues: [
       'Rest hands comfortably on bench, rack, or floor',
       'Lock working knee completely straight with strong quad squeeze',
@@ -789,7 +789,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'single_leg_atw',
     startPositionLabel: '1. Single-Leg Stance, Bell in Front',
     bottomPositionLabel: '2. Bell Passed Behind, Hips Level',
-    caption: 'Dr. Aaron Horschig drill: light 8–12 lb kettlebell passed around the waist on one leg to train glute medius and foot-tripod stability against a moving rotational load.',
+    caption: 'Tripod stability drill: light 8–12 lb kettlebell passed around the waist on one leg to train glute medius and foot-tripod stability against a moving rotational load.',
     keyCues: [
       'Root the foot tripod and keep a soft stance knee',
       'Hips stay level — free-leg hip must not drop',
@@ -807,11 +807,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   // Upper B:
   w_upper_b_1: {
     id: 'w_upper_b_1',
-    exerciseName: 'Athlean-X Active Scapular Dead Hang Pulls',
+    exerciseName: 'Active Scapular Dead Hang Pulls',
     diagramType: 'warmup_dead_hang',
     startPositionLabel: '1. Passive Dead Hang Overhead',
     bottomPositionLabel: '2. Active Scapular Pull (Elevate Body)',
-    caption: 'Jeff Cavaliere vertical prep: hang with relaxed shoulders, then actively pull shoulder blades down to elevate body without bending elbows.',
+    caption: 'Vertical prep: hang with relaxed shoulders, then actively pull shoulder blades down to elevate body without bending elbows.',
     keyCues: [
       'Elbows remain completely locked straight throughout',
       'Pull shoulder blades down toward back pockets',
@@ -853,7 +853,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'warmup_wall_slide',
     startPositionLabel: '1. W-Position (Forearms Against Wall)',
     bottomPositionLabel: '2. Y-Reach (Full Overhead Extension)',
-    caption: 'Dr. Aaron Horschig upper back activator: back and forearms flat against wall, slide up into Y-position while keeping ribs down.',
+    caption: 'Upper back activator: back and forearms flat against wall, slide up into Y-position while keeping ribs down.',
     keyCues: [
       'Lower back, elbows, and wrists must remain in contact with wall',
       'Slide arms up into a Y-shape without arching lower back',
@@ -875,7 +875,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'warmup_walk',
     startPositionLabel: '1. Toe-to-Heel Roll',
     bottomPositionLabel: '2. Full Knee Extension Push',
-    caption: 'Ben Patrick ATG knee-bulletproofing warmup: walk backward rolling from toe to heel with knee driving over toe.',
+    caption: 'Knee-bulletproofing warmup: walk backward rolling from toe to heel with knee driving over toe.',
     keyCues: [
       'Contact ground with forefoot first, rolling backward to heel',
       'Drive each step through the big toe knuckle into full knee lockout',
@@ -914,11 +914,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   // --- ATHLEAN-X DAILY ABS PROTOCOL ---
   t3_athlean_hanging_knee_raise: {
     id: 't3_athlean_hanging_knee_raise',
-    exerciseName: 'Athlean-X Hanging Knee Raise with Pelvic Curl',
+    exerciseName: 'Hanging Knee Raise with Pelvic Curl',
     diagramType: 'hanging_knee_raise',
     startPositionLabel: '1. Active Dead Hang (Depressed Scapulae)',
     bottomPositionLabel: '2. Top Pelvic Curl (Show Tailbone)',
-    caption: 'Jeff Cavaliere kinetic sequence step 1: curl pelvis upward toward chest, not just lifting thighs with hip flexors.',
+    caption: 'Kinetic sequence step 1: curl pelvis upward toward chest, not just lifting thighs with hip flexors.',
     keyCues: [
       'Grip bar shoulder-width, engage lats and shoulders into active hang',
       'Curl pelvis upward toward ribcage into posterior tilt',
@@ -935,7 +935,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_athlean_hanging_corkscrew: {
     id: 't3_athlean_hanging_corkscrew',
-    exerciseName: 'Athlean-X Hanging Corkscrews',
+    exerciseName: 'Hanging Corkscrews',
     diagramType: 'hanging_corkscrew',
     startPositionLabel: '1. Active Hang Centerline',
     bottomPositionLabel: '2. Diagonal Knee Drive to Armpit',
@@ -956,11 +956,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_athlean_hollow_body_hold: {
     id: 't3_athlean_hollow_body_hold',
-    exerciseName: 'Athlean-X Hollow Body Core Compression',
+    exerciseName: 'Hollow Body Core Compression',
     diagramType: 'hollow_body',
     startPositionLabel: '1. Supine Floor Setup (Zero Gap)',
     bottomPositionLabel: '2. Banana Curved Compression Hold',
-    caption: 'Yellow Dude & Athlean-X anti-extension gate: press lumbar spine flush against floor, elevate extremities 4–6 inches.',
+    caption: 'Anti-extension core gate: press lumbar spine flush against floor, elevate extremities 4–6 inches.',
     keyCues: [
       'Lower back glued flat against floor with zero air gap',
       'Arms overhead, legs extended straight, toes pointed',
@@ -977,7 +977,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_athlean_cross_mountain_climber: {
     id: 't3_athlean_cross_mountain_climber',
-    exerciseName: 'Athlean-X Cross-Body Mountain Climbers',
+    exerciseName: 'Cross-Body Mountain Climbers',
     diagramType: 'mountain_climber',
     startPositionLabel: '1. High Push-Up Plank Base',
     bottomPositionLabel: '2. Cross-Body Knee Drive to Opposite Elbow',
@@ -998,7 +998,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_athlean_iso_crunch: {
     id: 't3_athlean_iso_crunch',
-    exerciseName: 'Athlean-X 2-Second Peak Squeeze Floor Curl-Up',
+    exerciseName: '2-Second Peak Squeeze Floor Curl-Up',
     diagramType: 'curl_up',
     startPositionLabel: '1. Supine 90° Bent-Knee Setup',
     bottomPositionLabel: '2. 30° Thoracic Curl with 2s Squeeze',
@@ -1019,11 +1019,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_athlean_serratus_plank: {
     id: 't3_athlean_serratus_plank',
-    exerciseName: 'Athlean-X Serratus Elbow-to-Knee Plank',
+    exerciseName: 'Serratus Elbow-to-Knee Plank',
     diagramType: 'plank_knee',
     startPositionLabel: '1. Forearm Plank Alignment',
     bottomPositionLabel: '2. Active Serratus & Elbow-Toe Drag',
-    caption: 'Jeff Cavaliere & Stuart McGill core cylinder finisher: protract shoulder blades, isometrically pull elbows toward toes.',
+    caption: 'Core cylinder finisher: protract shoulder blades, isometrically pull elbows toward toes.',
     keyCues: [
       'Elbows directly under shoulders, forearms parallel',
       'Push floor away to protract scapulae (serratus activation)',
@@ -1040,11 +1040,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_abs_1: {
     id: 'w_abs_1',
-    exerciseName: 'Dr. Stuart McGill Cat-Camel Spinal Wave',
+    exerciseName: 'Cat-Camel Spinal Wave',
     diagramType: 'cat_camel',
     startPositionLabel: '1. Gentle Camel Sag (Extension)',
     bottomPositionLabel: '2. Gentle Cat Arch (Flexion)',
-    caption: 'Stuart McGill motion cycle: 4s gentle arch up, 4s smooth sag down. Lubricates intervertebral discs without loading.',
+    caption: 'Spinal motion cycle: 4s gentle arch up, 4s smooth sag down. Lubricates intervertebral discs without loading.',
     keyCues: [
       'Hands under shoulders, knees under hips',
       'Slow 4s wave into flexion, slow 4s wave into extension',
@@ -1061,11 +1061,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_abs_2: {
     id: 'w_abs_2',
-    exerciseName: 'Athlean-X 90/90 Diaphragmatic Vacuum Breath',
+    exerciseName: '90/90 Diaphragmatic Vacuum Breath',
     diagramType: 'warmup_90_90',
     startPositionLabel: '1. 90/90 Supine Setup & 360 Inhale',
     bottomPositionLabel: '2. Forced Exhale & Transverse Vacuum',
-    caption: 'Jeff Cavaliere deep core primer: 4s 360° inhale, 8s forced exhale, pull navel to spine for 3s vacuum hold.',
+    caption: 'Deep core primer: 4s 360° inhale, 8s forced exhale, pull navel to spine for 3s vacuum hold.',
     keyCues: [
       'Calves resting on bench or chair at 90 degrees',
       'Inhale 4s through nose expanding belly 360 degrees',
@@ -1083,7 +1083,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
   // --- POST-BJJ RECOVERY AB WORKOUT ---
   t3_bjj_hanging_knee_raise: {
     id: 't3_bjj_hanging_knee_raise',
-    exerciseName: 'Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression',
+    exerciseName: 'Post-Grappling Hanging Knee Raise & Pelvic Decompression',
     diagramType: 'hanging_knee_raise',
     startPositionLabel: '1. Active Dead Hang (Depressed Scapulae)',
     bottomPositionLabel: '2. Posterior Pelvic Tilt Curl',
@@ -1104,7 +1104,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_bjj_hollow_body_hold: {
     id: 't3_bjj_hollow_body_hold',
-    exerciseName: 'Athlean-X Grappler Hollow Body Core Compression Hold',
+    exerciseName: 'Grappler Hollow Body Core Compression Hold',
     diagramType: 'hollow_body',
     startPositionLabel: '1. Supine Floor Setup (Zero Gap)',
     bottomPositionLabel: '2. Hollow Body Tension Arch',
@@ -1125,7 +1125,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_bjj_cross_mountain_climber: {
     id: 't3_bjj_cross_mountain_climber',
-    exerciseName: 'Athlean-X Cross-Body Oblique Climbers & Serratus Punch',
+    exerciseName: 'Cross-Body Oblique Climbers & Serratus Punch',
     diagramType: 'mountain_climber',
     startPositionLabel: '1. High Push-Up Plank Base',
     bottomPositionLabel: '2. Cross-Body Knee-to-Elbow Squeeze',
@@ -1146,11 +1146,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   t3_bjj_mcgill_curl_up: {
     id: 't3_bjj_mcgill_curl_up',
-    exerciseName: 'Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace',
+    exerciseName: 'Post-Grappling Isometric Curl-Up & Vacuum Brace',
     diagramType: 'curl_up',
     startPositionLabel: '1. Supine Neutral Spine with Hands Under Lumbar',
     bottomPositionLabel: '2. Unitized Head & Shoulder Elevation',
-    caption: 'Dr. Stuart McGill spinal-sparing core curl-up: preserve neutral lumbar curve with hands while elevating head and shoulders 1 inch.',
+    caption: 'Spinal-sparing core curl-up: preserve neutral lumbar curve with hands while elevating head and shoulders 1 inch.',
     keyCues: [
       'One knee bent at 90°, other leg flat on mat',
       'Place hands under lower back to preserve natural neutral lordosis',
@@ -1171,7 +1171,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'warmup_ankle',
     startPositionLabel: '1. Half-Kneeling Tripod Setup',
     bottomPositionLabel: '2. Knee Drive Over 2nd/3rd Toe',
-    caption: 'Dr. Aaron Horschig pre-run primer: roots foot tripod and mobilizes talocrural dorsiflexion to eliminate running foot collapse and knee valgus.',
+    caption: 'Pre-run mobility primer: roots foot tripod and mobilizes talocrural dorsiflexion to eliminate running foot collapse and knee valgus.',
     keyCues: [
       'Pin front heel firmly to the floor',
       'Root big toe knuckle, pinky toe knuckle, and heel center',
@@ -1192,7 +1192,7 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     diagramType: 'tibialis',
     startPositionLabel: '1. Wall Lean Heel Contact',
     bottomPositionLabel: '2. Peak Tibialis Dorsiflexion Squeeze',
-    caption: 'Ben Patrick ATG pre-run primer: activates tibialis anterior to absorb 3–4x bodyweight ground impact forces and protect patellar tendons.',
+    caption: 'Pre-run tibialis primer: activates tibialis anterior to absorb 3–4x bodyweight ground impact forces and protect patellar tendons.',
     keyCues: [
       'Lean hips against wall with straight legs 12–18 inches out',
       'Pull toes and balls of feet as high toward shins as possible',
@@ -1209,11 +1209,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_run_3: {
     id: 'w_run_3',
-    exerciseName: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
+    exerciseName: 'Glute Medius & Pelvic Leveling',
     diagramType: 'pelvic_drop',
     startPositionLabel: '1. Single-Leg Athletic Stance',
     bottomPositionLabel: '2. Horizontal Pelvic Hold & Glute Squeeze',
-    caption: 'Dr. Alyssa Lu pre-run primer: stabilizes the pelvis in single-leg stance, eliminating Trendelenburg hip drop and IT band friction during running.',
+    caption: 'Pre-run pelvic primer: stabilizes the pelvis in single-leg stance, eliminating Trendelenburg hip drop and IT band friction during running.',
     keyCues: [
       'Stand on one leg with a soft knee and slight athletic hip hinge',
       'Keep pelvis perfectly level with floor—do not let opposite hip drop',
@@ -1230,11 +1230,11 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
 
   w_bjj_1: {
     id: 'w_bjj_1',
-    exerciseName: 'McGill Down-Regulation Diaphragmatic Breathing',
+    exerciseName: 'Down-Regulation Diaphragmatic Breathing',
     diagramType: 'warmup_90_90',
     startPositionLabel: '1. Supine 90/90 Decompressed Position',
     bottomPositionLabel: '2. 360° Expansion & Long Mouth Exhale',
-    caption: 'Dr. Stuart McGill recovery reset: down-regulates high sympathetic nervous system tone and resets ribcage positioning following intense grappling.',
+    caption: 'Recovery reset: down-regulates high sympathetic nervous system tone and resets ribcage positioning following intense grappling.',
     keyCues: [
       'Lie flat on back with calves elevated on bench or couch at 90°',
       'Inhale 4 seconds deeply through nose, expanding belly and ribcage',

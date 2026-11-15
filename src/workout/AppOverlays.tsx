@@ -52,13 +52,13 @@ export interface AppOverlaysProps {
 export function AppOverlays({ activeCueCard, activeCueCardTimed, activeSession, activeTempo, activeTempoExerciseId, activeTempoTargetReps, adaptedSessions, completedWorkouts, getExerciseLogs, handleApplyCompletionAdjustments, handleApplyWeeklyAdaptations, handleCompleteWithoutAdjustments, handleResetAllAndStartFresh, handleResetWeeklyAdaptations, handleSaveCurrentSessionToHistory, handleScanLastWorkout, handleTempoSetComplete, isHeatmapModalOpen, isSavingAndAdvancing, isWeeklyModalOpen, isWorkoutCompletionModalOpen, isWorkoutHistoryModalOpen, programAdaptations, sessionAuditResult, sessionExercises, setActiveCueCardId, setActiveTempo, setActiveTempoExerciseId, setIsHeatmapModalOpen, setIsWeeklyModalOpen, setIsWorkoutCompletionModalOpen, setIsWorkoutHistoryModalOpen, setPhaseTasks, setSessionAuditResult, weeklyEvaluation, workoutLogs }: AppOverlaysProps) {
   return (
     <>
-      {/* Marcus Filly Tempo Metronome Modal (When Triggered) */}
+      {/* Tempo Metronome Modal (When Triggered) */}
       {activeTempo && (
         <div
           className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
           role="dialog"
           aria-modal="true"
-          aria-label="Marcus Filly Tempo Metronome"
+          aria-label="Tempo Metronome"
         >
           <div className="max-w-2xl w-full my-auto">
             <Suspense fallback={<ViewLoadingFallback />}>

@@ -152,7 +152,7 @@ describe('Fitness Assessment Domain Logic (DOB 10/10/1991, 5\'6", 168 lbs)', () 
     it('flags warning when Biering-Sørensen is under 160 seconds', () => {
       const result = calculateMcGillRatios(120, 110, 60, 60);
       expect(result.isSpineProtected).toBe(false);
-      expect(result.clinicalFeedback.some((f) => f.includes('below Dr. McGill\'s 160s'))).toBe(true);
+      expect(result.clinicalFeedback.some((f) => f.includes('below the 160s disc protection standard'))).toBe(true);
     });
   });
 

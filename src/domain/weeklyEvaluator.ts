@@ -114,7 +114,7 @@ export function parseAthleteComment(note: string, exercise: WorkoutExercise): Pa
       sentiment: 'form_issue',
       keywordsDetected: formHits,
       biomechanicalFinding: `Kinematic deviation or stability loss detected (${formHits.join(', ')}).`,
-      recommendation: 'Slow down cadence with Marcus Filly 31X1 tempo and prioritize tripod foot rooting or scapular depression.',
+      recommendation: 'Slow down cadence with 31X1 tempo and prioritize tripod foot rooting or scapular depression.',
     };
   }
 
@@ -298,8 +298,8 @@ export function evaluateWeeklyPerformance(
             currentValue: false,
             proposedValue: true,
             proposedLabel: `Swap to ${ex.regression.name}`,
-            rationale: `Athlete comment noted knee/joint discomfort. Per Ben Patrick & Yellow Dude protocols, deload joint shear and shift to ${ex.regression.name} with slow eccentrics.`,
-            creatorInfluence: 'Ben Patrick (ATG) & Yellow Dude',
+            rationale: `Athlete comment noted knee/joint discomfort. Deload joint shear and shift to ${ex.regression.name} with slow eccentrics.`,
+            creatorInfluence: 'Tendon Deload & Progression',
             applied: false,
           });
         } else {
@@ -314,7 +314,7 @@ export function evaluateWeeklyPerformance(
             proposedValue: '4010',
             proposedLabel: 'Increase eccentric to 4010 (4s slow descent)',
             rationale: 'Slow 4-second eccentric descent increases tendon load capacity and tenocyte collagen synthesis without ballistic shock.',
-            creatorInfluence: 'Yellow Dude & Marcus Filly',
+            creatorInfluence: 'Controlled Cadence & Pacing',
             applied: false,
           });
         }
@@ -353,7 +353,7 @@ export function evaluateWeeklyPerformance(
             rationale: amrapOverperformed
               ? `AMRAP set exceeded target (+${(logs[logs.length - 1]?.repsAchieved || 0) - (parseInt(ex.targetReps, 10) || 3)} reps). GZCL linear progression applies.`
               : 'Smooth execution and positive comment log indicate mechanical readiness for load progression.',
-            creatorInfluence: 'GZCL & Jeff Nippard',
+            creatorInfluence: 'Volume & Auto-Regulation',
             applied: false,
           });
         }
@@ -372,7 +372,7 @@ export function evaluateWeeklyPerformance(
             proposedValue: newRest,
             proposedLabel: `+60s Rest (${ex.restSeconds}s → ${newRest}s)`,
             rationale: 'Fatigue/failure noted on compound strength work. Increasing rest period restores ATP-CP stores to preserve high-threshold motor unit recruitment.',
-            creatorInfluence: 'ATHLEAN-X & Jeff Nippard',
+            creatorInfluence: 'Effective Reps & Line of Pull',
             applied: false,
           });
         } else if (maxWeightForExercise > 0) {
@@ -386,7 +386,7 @@ export function evaluateWeeklyPerformance(
             proposedValue: maxWeightForExercise,
             proposedLabel: `Hold at ${maxWeightForExercise} lbs (Consolidate volume)`,
             rationale: 'Target reps missed or high RPE reported. Consolidate current load before progressing weight.',
-            creatorInfluence: 'GZCL Method',
+            creatorInfluence: 'Tiered Progression',
             applied: false,
           });
         }
@@ -400,16 +400,16 @@ export function evaluateWeeklyPerformance(
         const proposedSets = Math.max(2, ex.targetSets - 1);
 
         let rationale = `Exercise was marked not done during ${session.title}. Volume auto-regulated to ${proposedSets} sets to restore consistency and avoid fatigue spikes.`;
-        let creatorInfluence = 'GZCL Auto-Regulation & Dr. Stuart McGill';
+        let creatorInfluence = 'Auto-Regulation & Spinal Sparing';
         let proposedLabel = `Auto-regulate to ${proposedSets} sets (Skipped)`;
 
         if (isTime) {
           rationale = `Exercise skipped due to athlete time constraint. Target auto-regulated to ${proposedSets} sets with superset pairing to maximize density without missing key volume.`;
-          creatorInfluence = 'Jeff Nippard Minimalist Training & GZCL Auto-Regulation';
+          creatorInfluence = 'Minimalist Auto-Regulation';
           proposedLabel = `Auto-regulate to ${proposedSets} sets (Time Saver)`;
         } else if (isEquip) {
           rationale = `Exercise skipped due to equipment unavailability. Volume consolidated to ${proposedSets} sets; consider dumbbell or bodyweight equivalent when stations are occupied.`;
-          creatorInfluence = 'Eugene Teo & GZCL Auto-Regulation';
+          creatorInfluence = 'Posterior Chain Auto-Regulation';
           proposedLabel = `Auto-regulate to ${proposedSets} sets (Equip Sub)`;
         }
 
@@ -449,7 +449,7 @@ export function evaluateWeeklyPerformance(
             proposedValue: '31X1',
             proposedLabel: 'Add 1s pause in the hole (31X1 tempo)',
             rationale: `Latest Knee-to-Wall ankle dorsiflexion was ${latest.value}" (below 5" benchmark). Adding a 1-second pause improves bottom-position ankle stability and reduces patellar shear.`,
-            creatorInfluence: 'Dr. Aaron Horschig (Squat University)',
+            creatorInfluence: 'Joint Mobility & Rooting',
             applied: false,
           });
         }
@@ -467,7 +467,7 @@ export function evaluateWeeklyPerformance(
   if (painCount > 0) {
     overallStatus = 'adapting_for_recovery';
     coachVerdict = `Athlete logged ${painCount} pain/discomfort flag(s). Priority is joint bulletproofing: pain-free regressions and extended 4-second eccentric cadences have been queued to promote tendon collagen remodeling.`;
-    nextWeekFocus = 'Adhere to pain ≤ 2/10 threshold, focus on Eugene Teo hamstring pre-fatigue, and slow down eccentrics.';
+    nextWeekFocus = 'Adhere to pain ≤ 2/10 threshold, focus on hamstring pre-fatigue, and slow down eccentrics.';
   } else if (adaptations.some((a) => a.action === 'increase_weight') || progressionCount >= 2) {
     overallStatus = 'progressing';
     coachVerdict = `Outstanding training execution! Adherence is strong at ${adherenceRate}%, with positive readiness notes and clean AMRAP set completions. Progressive overload weights are queued for next week.`;

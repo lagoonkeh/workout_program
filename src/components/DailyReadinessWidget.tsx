@@ -672,9 +672,6 @@ export const DailyReadinessWidget: React.FC<DailyReadinessWidgetProps> = ({
                         {adapt.rationale}
                       </p>
                     </div>
-                    <div className="text-[10px] font-mono text-slate-500 border-t border-slate-800/80 pt-1 flex items-center justify-between">
-                      <span>Source: {adapt.creatorInfluence}</span>
-                    </div>
                   </div>
                 ))}
               </div>

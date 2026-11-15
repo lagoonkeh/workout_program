@@ -165,12 +165,12 @@ describe('Tier 2: Boundary & Corner Cases (F1 to F14)', () => {
   });
 
   // =========================================================================
-  // F4: Creator Cue Cards Encyclopedia Boundaries
+  // F4: Form Cue Cards Encyclopedia Boundaries
   // =========================================================================
-  describe('F4: Creator Cue Cards Boundaries', () => {
+  describe('F4: Form Cue Cards Boundaries', () => {
     it('F4-B1: dynamic fallback generates valid cue card for unknown drill/exercise IDs', () => {
       render(<App />);
-      const cueBtns = screen.getAllByRole('button', { name: /View Creator Cues & Science/i });
+      const cueBtns = screen.getAllByRole('button', { name: /View Form Cues & Science/i });
       expect(cueBtns.length).toBeGreaterThanOrEqual(1);
 
       fireEvent.click(cueBtns[cueBtns.length - 1]);
@@ -188,7 +188,7 @@ describe('Tier 2: Boundary & Corner Cases (F1 to F14)', () => {
 
     it('F4-B3: rapid open/close 10x cycles of cue modal does not leak dialog elements', () => {
       render(<App />);
-      const cueBtn = screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0];
+      const cueBtn = screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0];
 
       for (let i = 0; i < 10; i++) {
         fireEvent.click(cueBtn);
@@ -201,7 +201,7 @@ describe('Tier 2: Boundary & Corner Cases (F1 to F14)', () => {
 
     it('F4-B4: clicking modal backdrop dismisses the dialog', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
       const dialog = screen.getByRole('dialog');
 
       fireEvent.click(dialog);
@@ -210,14 +210,14 @@ describe('Tier 2: Boundary & Corner Cases (F1 to F14)', () => {
 
     it('F4-B5: launches tempo metronome directly from cue card footer and closes cue modal', () => {
       render(<App />);
-      // only timed exercises' cue cards have the metronome button (McGill Big 3 holds)
       const mcgill = document.getElementById('exercise-card-t3_mcgill_big_3')!;
-      fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
 
-      const launchTempoBtn = screen.getByRole('button', { name: /Launch Tempo Metronome/i });
+      const dialog = screen.getByRole('dialog');
+      const launchTempoBtn = within(dialog).getByRole('button', { name: /Launch Tempo Metronome/i });
       fireEvent.click(launchTempoBtn);
 
-      expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
     });
   });
 
@@ -347,9 +347,9 @@ describe('Tier 2: Boundary & Corner Cases (F1 to F14)', () => {
   });
 
   // =========================================================================
-  // F8: Marcus Filly Tempo Metronome Boundaries
+  // F8: Tempo Metronome Boundaries
   // =========================================================================
-  describe('F8: Marcus Filly Tempo Metronome Boundaries', () => {
+  describe('F8: Tempo Metronome Boundaries', () => {
     it('F8-B1: rejects invalid non-4-digit strings in tryParseTempo', () => {
       expect(tryParseTempo('abc').success).toBe(false);
       expect(tryParseTempo('123').success).toBe(false);

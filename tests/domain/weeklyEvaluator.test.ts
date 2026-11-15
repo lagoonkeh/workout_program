@@ -106,7 +106,7 @@ describe('weeklyEvaluator Domain Engine', () => {
       expect(squatAdaptation).toBeDefined();
       expect(squatAdaptation?.action).toBe('increase_weight');
       expect(squatAdaptation?.proposedValue).toBe(195); // 185 + 10 lbs for lower body
-      expect(squatAdaptation?.creatorInfluence).toContain('GZCL');
+      expect(squatAdaptation?.creatorInfluence).toContain('Volume & Auto-Regulation');
     });
 
     it('proposes regression swap when athlete logs knee tendinitis note', () => {
@@ -124,7 +124,7 @@ describe('weeklyEvaluator Domain Engine', () => {
       );
       expect(regressionAdaptation).toBeDefined();
       expect(regressionAdaptation?.proposedLabel).toContain('Barbell Box Squat to Parallel');
-      expect(regressionAdaptation?.creatorInfluence).toContain('Ben Patrick');
+      expect(regressionAdaptation?.creatorInfluence).toContain('Tendon Deload & Progression');
     });
 
     it('proposes rest interval increase when athlete notes fatigue and missed reps', () => {
@@ -158,7 +158,7 @@ describe('weeklyEvaluator Domain Engine', () => {
       expect(volumeAdaptation?.parameter).toBe('targetSets');
       expect(volumeAdaptation?.proposedValue).toBe(2); // Reduced from 3 to 2 sets
       expect(volumeAdaptation?.proposedLabel).toContain('Auto-regulate to 2 sets');
-      expect(volumeAdaptation?.creatorInfluence).toContain('GZCL Auto-Regulation');
+      expect(volumeAdaptation?.creatorInfluence).toContain('Auto-Regulation');
     });
 
     it('cross-references ankle mobility restrictions and proposes pause tempo', () => {
@@ -171,7 +171,7 @@ describe('weeklyEvaluator Domain Engine', () => {
       const ankleAdaptation = result.adaptations.find((a) => a.id === 'adapt_mobility_ankle_dorsiflexion');
       expect(ankleAdaptation).toBeDefined();
       expect(ankleAdaptation?.proposedLabel).toContain('31X1');
-      expect(ankleAdaptation?.creatorInfluence).toContain('Dr. Aaron Horschig');
+      expect(ankleAdaptation?.creatorInfluence).toContain('Joint Mobility & Rooting');
     });
 
     it('advances kettlebell movements strictly to the next Bowflex 840 notch (e.g. 20 -> 25 lbs)', () => {

@@ -86,13 +86,13 @@ describe('Guide tab', () => {
     fireEvent.click(screen.getByTestId('guide-tab-glossary'));
     fireEvent.click(screen.getByRole('button', { name: 'Exercise demos' }));
     expect(screen.getByTestId('glossary-count')).toHaveTextContent(/\d+ exercise demos/);
-    const curl = screen.getByTestId('glossary-demo-athlean-x-2-second-peak-squeeze-floor-curl-up');
+    const curl = screen.getByTestId('glossary-demo-2-second-peak-squeeze-floor-curl-up');
     fireEvent.click(curl);
     await waitFor(() => expect(screen.getAllByTestId('exercise-diagram').length).toBe(1));
 
     fireEvent.click(screen.getByRole('button', { name: 'All' }));
     fireEvent.change(screen.getByTestId('glossary-search'), { target: { value: 'corkscrew' } });
-    expect(await screen.findByTestId('glossary-demo-athlean-x-hanging-corkscrews')).toBeInTheDocument();
+    expect(await screen.findByTestId('glossary-demo-hanging-corkscrews')).toBeInTheDocument();
   });
 });
 

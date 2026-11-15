@@ -97,7 +97,7 @@ describe('RestTimerWidget Component', () => {
   it('switches preset on click', () => {
     render(<RestTimerWidget variant="inline" />);
 
-    const presetBtn = screen.getByText('Athlean-X 20-Effective-Reps rest-pause cluster reset').closest('button')!;
+    const presetBtn = screen.getByText('20-Effective-Reps rest-pause cluster reset').closest('button')!;
     fireEvent.click(presetBtn);
 
     expect(screen.getByText('00:15')).toBeInTheDocument();
@@ -185,7 +185,7 @@ describe('RestTimerWidget Component', () => {
     render(<RestTimerWidget variant="inline" />);
 
     // Start 15s preset
-    const presetBtn = screen.getByText('Athlean-X 20-Effective-Reps rest-pause cluster reset').closest('button')!;
+    const presetBtn = screen.getByText('20-Effective-Reps rest-pause cluster reset').closest('button')!;
     act(() => {
       fireEvent.click(presetBtn);
     });

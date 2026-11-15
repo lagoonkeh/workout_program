@@ -47,7 +47,7 @@ describe('Adaptive Stretching Domain Engine', () => {
     expect(topStretch.triggerReason).toContain('patellar tendon felt slightly achy');
   });
 
-  it('boosts ATG Elephant Walks when hamstring tightness comments are logged', () => {
+  it('boosts Elephant Walks when hamstring tightness comments are logged', () => {
     const workoutLogs: Record<string, SetLogRecord[]> = {
       t1_bb_rdl: [
         {

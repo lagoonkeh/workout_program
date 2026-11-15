@@ -162,7 +162,6 @@ export function WarmupSection({ activeFocusWarmupId, activeSession, collapsedWar
                     {!isDrillCollapsed && (
                       <>
                         <div className="text-slate-400">
-                          <strong>Coach / Creator:</strong> {drill.creatorAttribution} ·{' '}
                           <strong>Equipment:</strong> {drill.equipment}
                         </div>
                         <p className="text-slate-300 leading-relaxed">

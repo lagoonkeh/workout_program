@@ -19,8 +19,7 @@ export interface GlossaryEntry {
 export const GLOSSARY_CATEGORIES: GlossaryCategory[] = ['Programming', 'Reps & tempo', 'Technique & anatomy', 'Recovery & readiness', 'Methods & drills', 'In this app'];
 
 export const GLOSSARY: GlossaryEntry[] = [
-  // Programming
-  { term: 'GZCL', category: 'Programming', definition: 'A training system by Cody Lefever that sorts every lift into three tiers: heavy main lifts (T1), moderate-weight volume lifts (T2) and light accessories (T3).', inApp: 'Every exercise card shows its tier badge.' },
+  { term: 'GZCL', category: 'Programming', definition: 'A tiered training system that sorts every lift into three tiers: heavy main lifts (T1), moderate-weight volume lifts (T2) and light accessories (T3).', inApp: 'Every exercise card shows its tier badge.' },
   { term: 'T1 (Tier 1)', aka: ['Tier 1'], category: 'Programming', definition: 'The main heavy lift of the day, done for low reps (about 1–5) with long rests. This is where strength is built.', inApp: 'Barbell squat, bench press, RDL and overhead press. Rests are 3–5 minutes.' },
   { term: 'T2 (Tier 2)', aka: ['Tier 2'], category: 'Programming', definition: 'Supporting compound lifts with moderate weight and more reps (about 6–12). Builds muscle and supports the T1 lift.', inApp: 'Split squats, rows, good mornings, pull-ups. Rests are 2–3 minutes.' },
   { term: 'T3 (Tier 3)', aka: ['Tier 3'], category: 'Programming', definition: 'Accessory and joint-health work with light weight and high reps (12+), timed holds or carries.', inApp: 'Tibialis raises, step-downs, McGill Big 3, carries, core work. Rests are 45–90 seconds.' },
@@ -45,7 +44,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   { term: 'AMRAP', category: 'Reps & tempo', definition: '"As many reps as possible" with good form, stopping when the next rep would break technique.', inApp: 'On lifts marked "AMRAP Last Set," the last set is open-ended: do as many good reps as you can.' },
   { term: 'RPE', aka: ['Rate of perceived exertion'], category: 'Reps & tempo', definition: 'How hard a set felt on a 1–10 scale. 10 = you could not have done another rep, 9 = one rep left, 8 = two left.', inApp: 'An RPE of 9.5 or higher holds the weight instead of increasing it next time. The full scale is under Rating scales.' },
   { term: 'RIR', aka: ['Reps in reserve'], category: 'Reps & tempo', definition: 'How many more reps you could have done. RIR 2 is about RPE 8.' },
-  { term: 'Effective Reps (ER)', aka: ['ER', 'Effective reps', 'Cluster sets'], category: 'Reps & tempo', definition: 'Athlean-X method: the reps close to failure are the ones that build muscle. Do a hard set, rest 15–30 s, then keep doing short mini-sets until you reach the target total, such as 20 effective reps.', inApp: 'The rest timer offers 15 s and 30 s ER presets.' },
+  { term: 'Effective Reps (ER)', aka: ['ER', 'Effective reps', 'Cluster sets'], category: 'Reps & tempo', definition: 'Rest-pause cluster method: the reps close to failure are the ones that build muscle. Do a hard set, rest 15–30 s, then keep doing short mini-sets until you reach the target total, such as 20 effective reps.', inApp: 'The rest timer offers 15 s and 30 s ER presets.' },
   { term: 'Lengthened partials', category: 'Reps & tempo', definition: 'Extra half-reps done in the stretched bottom range after a set reaches failure. Research suggests the stretched position drives a lot of muscle growth.' },
   { term: 'e1RM', aka: ['Estimated 1-rep max', '1RM'], category: 'Reps & tempo', definition: 'Estimated one-rep max: the heaviest single rep you could probably do, calculated from a set of several reps instead of tested.', inApp: 'Uses the Epley formula: weight × (1 + reps ÷ 30).' },
   { term: 'Rest interval', category: 'Reps & tempo', definition: 'Time between sets. Heavy lifts need longer (3–5 min) to restore strength. Accessories need less.', inApp: 'The rest timer starts automatically when you finish a set.' },
@@ -62,10 +61,10 @@ export const GLOSSARY: GlossaryEntry[] = [
   { term: 'Lat pack', aka: ['Packing the lats'], category: 'Technique & anatomy', definition: 'Pulling the shoulder blades down and back and squeezing the armpits, which stiffens the upper back and keeps the bar close.' },
   { term: 'Scapular retraction', aka: ['Retraction', 'Depression'], category: 'Technique & anatomy', definition: 'Retraction is squeezing the shoulder blades together. Depression is pulling them down away from the ears. Both protect the shoulder when pressing and pulling.' },
   { term: 'VMO', aka: ['Vastus medialis oblique'], category: 'Technique & anatomy', definition: 'The teardrop-shaped inner quad muscle just above the knee. It helps the kneecap track and works hard in deep knee bends.' },
-  { term: 'Tibialis', aka: ['Tibialis anterior', 'Tib'], category: 'Technique & anatomy', definition: 'The muscle on the front of the shin that lifts the toes. Strengthening it is a staple of knee-health programs like ATG.' },
+  { term: 'Tibialis', aka: ['Tibialis anterior', 'Tib'], category: 'Technique & anatomy', definition: 'The muscle on the front of the shin that lifts the toes. Strengthening it is a staple of knee-health and decelerative resilience programs.' },
   { term: 'Glute medius', aka: ['Glute med'], category: 'Technique & anatomy', definition: 'The side-hip muscle that keeps the pelvis level and the knee from caving when you stand on one leg.' },
   { term: 'Posterior chain', category: 'Technique & anatomy', definition: 'The muscles on the back of the body (calves, hamstrings, glutes and spinal erectors) that drive hinging, jumping and sprinting.' },
-  { term: 'Reciprocal inhibition', category: 'Technique & anatomy', definition: 'When one muscle contracts hard, the muscle opposite it relaxes. For example, squeezing the quad lets the hamstring lengthen.', inApp: 'The basis of ATG elephant walks.' },
+  { term: 'Reciprocal inhibition', category: 'Technique & anatomy', definition: 'When one muscle contracts hard, the muscle opposite it relaxes. For example, squeezing the quad lets the hamstring lengthen.', inApp: 'The basis of active elephant walks.' },
   { term: 'Synovial fluid', category: 'Technique & anatomy', definition: 'The lubricating fluid inside joints. Moving a joint through its range warms and circulates it, which is why warmups reduce stiffness.' },
 
   // Recovery & readiness
@@ -78,8 +77,8 @@ export const GLOSSARY: GlossaryEntry[] = [
   { term: 'Recovery status', aka: ['Fresh', 'Recovering', 'Fatigued'], category: 'Recovery & readiness', definition: 'How ready a muscle is to be trained hard again.', inApp: 'Heatmap: Fatigued = trained under 24 h ago or 14+ sets this week. Recovering = 24–48 h or 8–13 sets. Fresh = 48 h+ with manageable volume.' },
 
   // Methods & drills
-  { term: 'ATG', aka: ['Knees Over Toes', 'KOT'], category: 'Methods & drills', definition: '"Ass to grass," Ben Patrick\'s knee-resilience method: train the knee through its full range (knee past toes) with progressive load, starting very light.' },
-  { term: 'McGill Big 3', category: 'Methods & drills', definition: 'Dr. Stuart McGill\'s spine-sparing core trio: modified curl-up, side plank and bird-dog, done as short holds to build core endurance without bending the spine under load.' },
+  { term: 'ATG', aka: ['Knees Over Toes', 'KOT'], category: 'Methods & drills', definition: 'Knee-resilience training method: train the knee through its full range (knee past toes) with progressive load, starting very light.' },
+  { term: 'McGill Big 3', category: 'Methods & drills', definition: 'Spine-sparing core trio: modified curl-up, side plank and bird-dog, done as short holds to build core endurance without bending the spine under load.' },
   { term: 'Biering-Sorensen hold', aka: ['Biering-Sorensen'], category: 'Methods & drills', definition: 'Holding the torso horizontal off the end of a bench, face-down, to test and build lower-back endurance.' },
   { term: 'Jefferson curl', category: 'Methods & drills', definition: 'Slowly rolling the spine down one segment at a time while holding a light weight, to build strength at the end of the hamstrings\' and spine\'s range. Start very light.' },
   { term: 'Elephant walk', category: 'Methods & drills', definition: 'Hands on the floor or a bench, alternately locking out one knee with a hard quad squeeze to lengthen the hamstrings actively.' },

@@ -541,7 +541,7 @@ export const MobilityTrackerWidget: React.FC = () => {
               </h2>
             </button>
             <p className="text-xs text-slate-400 mt-1">
-              Standardized active assessment protocols from elite biomechanics creators.
+              Standardized active mobility and flexibility assessment protocols.
             </p>
           </div>
         </div>
@@ -629,7 +629,7 @@ export const MobilityTrackerWidget: React.FC = () => {
               }`}
             >
               <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/80">
-                {protocol.creator.split('(')[0].trim()}
+                {protocol.targetTissue}
               </span>
               <span className="text-xs font-semibold mt-0.5 line-clamp-1">
                 {protocol.name.split('(')[0].trim()}
@@ -654,9 +654,6 @@ export const MobilityTrackerWidget: React.FC = () => {
               >
                 {activeProtocol.name}
               </button>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                {activeProtocol.creator}
-              </span>
             </div>
             <div className="text-xs text-slate-400 mt-1">
               <span className="text-slate-500">Target Tissue:</span> {activeProtocol.targetTissue} •{' '}

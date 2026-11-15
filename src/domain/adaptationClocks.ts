@@ -46,7 +46,7 @@ export const FIVE_CLOCKS_OF_ADAPTATION: AdaptationClock[] = [
       'Most early strength gains come from the nervous system: better motor-unit recruitment and firing, better coordination, and less antagonist co-activation.',
     athleteWarning:
       'Fast early strength jumps are mostly skill and coordination, not new muscle. Your joints and tendons have not caught up yet.',
-    creatorAttribution: 'Yellow Dude (@yellowdude_co)',
+    creatorAttribution: 'Exercise Physiology',
     evidence: 'Kubo et al. 2010: strength and neural activation rose by month 2, before muscle size or tendon stiffness changed.',
   },
   {
@@ -59,7 +59,7 @@ export const FIVE_CLOCKS_OF_ADAPTATION: AdaptationClock[] = [
       'Delayed-onset muscle soreness follows unaccustomed (especially eccentric) work and is linked to muscle damage and inflammation, not lactic acid. After one bout, the same exercise causes much less soreness (the repeated bout effect).',
     athleteWarning:
       'Soreness is a poor measure of a good workout. Less soreness on a familiar movement is normal adaptation, not wasted effort.',
-    creatorAttribution: 'Yellow Dude (@yellowdude_co)',
+    creatorAttribution: 'Exercise Physiology',
     evidence: 'Repeated bout effect: a well-replicated finding in eccentric-exercise research.',
   },
   {
@@ -72,7 +72,7 @@ export const FIVE_CLOCKS_OF_ADAPTATION: AdaptationClock[] = [
       'Blood plasma volume expands within days to about two weeks of endurance training, lowering heart rate at the same effort. VO2max, capillary and mitochondrial gains build more gradually over weeks to months.',
     athleteWarning:
       'Cardio feels easier quickly, partly from the plasma increase. Keep progressing gradually; the deeper aerobic changes take longer.',
-    creatorAttribution: 'Yellow Dude (@yellowdude_co)',
+    creatorAttribution: 'Exercise Physiology',
     evidence: 'Endurance-training physiology: rapid plasma volume expansion is a classic, well-replicated finding.',
   },
   {
@@ -85,7 +85,7 @@ export const FIVE_CLOCKS_OF_ADAPTATION: AdaptationClock[] = [
       'Muscle size increases take weeks of training to measure reliably. Some apparent early growth is temporary swelling from muscle damage rather than new tissue.',
     athleteWarning:
       'The mirror lags behind the work. Judge the first couple of months by performance and consistency, not looks.',
-    creatorAttribution: 'Yellow Dude (@yellowdude_co)',
+    creatorAttribution: 'Exercise Physiology',
     evidence: 'Kubo et al. 2010: muscle cross-sectional area did not change until after 2 months of training.',
   },
   {
@@ -98,7 +98,7 @@ export const FIVE_CLOCKS_OF_ADAPTATION: AdaptationClock[] = [
       'Tendons are collagen-dense and adapt slowly: measurable stiffness changes take a couple of months or more, and tendon size changes little even after years of training.',
     athleteWarning:
       'Strength can outpace your tendons. Raising load faster than they adapt increases the risk of overload tendon pain (e.g. patellar, elbow, shoulder).',
-    creatorAttribution: 'Yellow Dude (@yellowdude_co)',
+    creatorAttribution: 'Exercise Physiology',
     evidence: 'Kubo et al. 2010 (tendon stiffness changed only after 2 months); Massey et al. 2018 (no tendon hypertrophy after 4 years of training).',
   },
 ];
@@ -146,11 +146,11 @@ export const FIVE_RUNG_GATE_LADDERS: GateLadder[] = [
 ];
 
 export const NIPPARD_LLP_STUDY_SYNTHESIS = {
-  title: 'Lengthened Partials (LLPs), as popularized by Jeff Nippard',
-  leadResearcher: 'Jeff Nippard (co-author, Wolf et al. 2025) & peer-reviewed literature',
+  title: 'Lengthened Partials (LLPs) & Hypertrophy',
+  leadResearcher: 'Wolf et al. (2025) & peer-reviewed literature',
   coreMechanism: 'Not settled: thought to relate to high tension at long muscle lengths',
   summary:
-    'Training a muscle at long lengths tends to grow it more than training at short lengths (e.g. Maeo et al. 2021 and 2023, Pedrosa et al. 2022, Kassiano et al. 2023). But compared with full range of motion, lengthened partials gave similar growth in trained lifters (Wolf et al. 2025, co-authored by Nippard; Gschneidner et al. 2025). Use LLPs to extend a set, not as something that beats full reps. Calves are where the studies favor them most.',
+    'Training a muscle at long lengths tends to grow it more than training at short lengths (e.g. Maeo et al. 2021 and 2023, Pedrosa et al. 2022, Kassiano et al. 2023). But compared with full range of motion, lengthened partials gave similar growth in trained lifters (Wolf et al. 2025; Gschneidner et al. 2025). Use LLPs to extend a set, not as something that beats full reps. Calves are where the studies favor them most.',
   protocolRules: [
     'Do full-range reps first, taken close to failure.',
     'On the final set only, when full reps run out, add a few partial reps in the stretched half of the range.',
@@ -160,8 +160,8 @@ export const NIPPARD_LLP_STUDY_SYNTHESIS = {
 };
 
 export const LUCAS_HARDIE_RANGE_OF_STRENGTH_SYNTHESIS = {
-  title: 'Active Loaded End-Range Strength (Lucas Hardie / Range of Strength)',
-  creator: 'Lucas Hardie (Range of Strength)',
+  title: 'Active Loaded End-Range Strength (Feats of Range)',
+  creator: 'Biomechanics Standard',
   corePrinciple: 'Flexibility is an active feat of strength, not a passive relaxation drill.',
   guidelines: [
     'Loaded stretching: external load (kettlebells, plates) helps you into deep ranges while you control the position. Full-range strength training improves flexibility about as much as stretching does (Afonso et al. 2021 meta-analysis).',

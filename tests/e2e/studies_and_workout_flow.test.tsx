@@ -67,15 +67,15 @@ describe('Comprehensive End-to-End Test: Workout Studies & Complete Flow', () =>
     const mobilityNavBtn = screen.getByRole('button', { name: /Quick switch to Mobility view/i });
     fireEvent.click(mobilityNavBtn);
 
-    // Filter to Lucas Hardie Feats of Range
-    const featsFilterBtn = await screen.findByRole('button', { name: /Lucas Hardie Feats of Range/i });
+    // Filter to Feats of Range
+    const featsFilterBtn = await screen.findByRole('button', { name: /Feats of Range/i });
     fireEvent.click(featsFilterBtn);
 
     // Click German Hang tab
     const germanHangTab = screen.getByRole('tab', { name: /German Hang/i });
     fireEvent.click(germanHangTab);
 
-    expect(screen.getAllByText(/Lucas Hardie German Hang/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/German Hang/i).length).toBeGreaterThanOrEqual(1);
 
     // Enter 45 seconds measurement
     const valueInput = screen.getByPlaceholderText(/Enter seconds/i);

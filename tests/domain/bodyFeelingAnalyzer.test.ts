@@ -113,7 +113,7 @@ describe('bodyFeelingAnalyzer domain', () => {
       expect(tempoAdaptation?.proposedValue).toBe('3210');
     });
 
-    it('diagnoses lower back stiffness and auto-swaps Jefferson Curl to McGill Big 3', () => {
+    it('diagnoses lower back stiffness and auto-swaps Jefferson Curl to Big 3 Spinal Stabilization', () => {
       const result = analyzeBodyFeelingAndHistory(
         'Lower back feels stiff and fatigued today',
         ['🪵 Stiff Lower Back'],
@@ -128,7 +128,7 @@ describe('bodyFeelingAnalyzer domain', () => {
         (a) => a.exerciseId === 't3_jefferson_curl' && a.parameter === 'regression'
       );
       expect(jeffersonAdaptation).toBeDefined();
-      expect(jeffersonAdaptation?.proposedValue).toContain('McGill Big 3');
+      expect(jeffersonAdaptation?.proposedValue).toContain('Big 3 Spinal Stabilization');
     });
 
     it('diagnoses shoulder impingement and swaps pressing movements to neutral grip regression', () => {

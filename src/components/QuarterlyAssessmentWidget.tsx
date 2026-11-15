@@ -259,7 +259,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
           </div>
 
           <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
-            <div className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Dr. McGill Disc Standard</div>
+            <div className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Spinal Protection Standard</div>
             <div className={`font-bold mt-0.5 ${mcgillAnalysis.isSpineProtected ? 'text-emerald-400' : 'text-amber-400'}`}>
               {mcgillAnalysis.isSpineProtected ? 'Protected Spine' : 'Balance Alert'}
             </div>
@@ -269,7 +269,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
           <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
             <div className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Longevity Benchmark</div>
             <div className="font-bold text-cyan-400 mt-0.5">120s Dead Hang</div>
-            <div className="text-[10px] text-slate-400">Peter Attia Grip Criterion</div>
+            <div className="text-[10px] text-slate-400">Grip Endurance Criterion</div>
           </div>
         </div>
       </section>
@@ -502,7 +502,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                 <ShieldCheck className="w-4 h-4" />
               </span>
               <div>
-                <h3 className="font-bold text-sm sm:text-base text-white">4. Dr. Stuart McGill Core Balance Ratios</h3>
+                <h3 className="font-bold text-sm sm:text-base text-white">4. Core Balance & Endurance Ratios</h3>
                 <p className="text-[11px] text-slate-400">Clinical endurance times & injury prevention invariants</p>
               </div>
             </div>
@@ -537,7 +537,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
 
               {/* Live McGill Ratios Bar */}
               <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
-                <div className="text-xs font-bold text-slate-200">McGill Clinical Ratios Analysis:</div>
+                <div className="text-xs font-bold text-slate-200">Core Balance Ratios Analysis:</div>
 
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-300">Flexion / Extension:</span>
@@ -597,7 +597,7 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
               </span>
               <div>
                 <h3 className="font-bold text-sm sm:text-base text-white">5. Longevity Biomarkers & Grip</h3>
-                <p className="text-[11px] text-slate-400">Dr. Peter Attia 2-minute dead hang & suitcase carry</p>
+                <p className="text-[11px] text-slate-400">2-minute dead hang & suitcase carry benchmarks</p>
               </div>
             </div>
             {expandedCategories.longevity ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -888,9 +888,9 @@ export const QuarterlyAssessmentWidget: React.FC<QuarterlyAssessmentWidgetProps>
                 </div>
               </div>
 
-              {/* Category 4: McGill Core Holds */}
+              {/* Category 4: Core Holds */}
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">4. McGill Core Endurance (Seconds)</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">4. Core Endurance Holds (Seconds)</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                   <div>
                     <label htmlFor="input-mcgill-ext" className="text-slate-400 block mb-1">Extension Hold</label>

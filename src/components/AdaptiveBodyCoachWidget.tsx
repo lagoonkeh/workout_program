@@ -453,9 +453,6 @@ export const AdaptiveBodyCoachWidget: React.FC<AdaptiveBodyCoachWidgetProps> = (
                       >
                         <strong className="text-amber-200 block text-xs">{w.name}</strong>
                         <span className="text-[11px] text-slate-400 block mt-0.5">{w.rationale}</span>
-                        <span className="text-[10px] text-amber-400/80 font-mono mt-1 block">
-                          Source: {w.creatorInfluence}
-                        </span>
                       </div>
                     ))}
                   </div>
@@ -481,9 +478,6 @@ export const AdaptiveBodyCoachWidget: React.FC<AdaptiveBodyCoachWidgetProps> = (
                           </div>
                           <p className="text-[11px] text-slate-400 mt-0.5">{adapt.rationale}</p>
                         </div>
-                        <span className="text-[10px] font-mono text-emerald-300 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 shrink-0">
-                          {adapt.creatorInfluence}
-                        </span>
                       </div>
                     ))}
                   </div>

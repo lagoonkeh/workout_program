@@ -39,7 +39,6 @@ import { getExerciseVariations, ExerciseVariation, saveCustomVariation, WorkoutC
 import { ExerciseVariationModal } from './ExerciseVariationModal';
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { TempoMetronome, MetronomeSnapshot } from '../timer/tempoMetronome';
-import { useRestTimer } from '../hooks/useRestTimer';
 import { audioSynthesizer } from '../audio/audioSynthesizer';
 import { PlateLoadStrip, platesPerSideText } from './PlateLoadStrip';
 import type { RatingCategoryTab } from './RatingDefinitionsModal';
@@ -703,11 +702,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   // Tempo / hold timers only on exercises prescribed by time; rep-based lifts keep just the rest timer
   const needsTimer = useMemo(() => isTimedPrescription(exercise.targetReps, effectiveTempo), [exercise.targetReps, effectiveTempo]);
 
-  // Synchronized rest timer state connected to global restTimerSingleton
-  const { snapshot: restSnapshot, pause: pauseRest, resume: resumeRest } = useRestTimer();
-  const isRestRunning = restSnapshot.state === 'RUNNING';
-  const isRestPaused = restSnapshot.state === 'PAUSED';
-
   const handleStartInlineTempo = useCallback(
     (targetSetIdx?: number) => {
       const setIdx =
@@ -1320,14 +1314,14 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               {exercise.equipment.replaceAll('_', ' ')}
             </span>
 
-            {/* Athlean-X Daily Core Finisher Badge */}
+            {/* Daily Core Finisher Badge */}
             {isDailyAbsFinisher && (
               <span
                 data-testid="daily-core-badge"
                 className="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold tracking-wide flex items-center gap-1"
               >
                 <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>Athlean-X Daily Core Finisher</span>
+                <span>Daily Core Finisher</span>
               </span>
             )}
 
@@ -1705,8 +1699,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               type="button"
               onClick={() => onQuickStartTempo(effectiveTempo, exercise.id)}
               className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[44px] sm:min-h-[38px] min-w-[44px] rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-mono font-medium transition-colors cursor-pointer"
-              title={`Launch Marcus Filly metronome for ${effectiveTempo}`}
-              aria-label={`Launch Marcus Filly metronome for ${effectiveTempo}`}
+              title={`Launch tempo metronome for ${effectiveTempo}`}
+              aria-label={`Launch tempo metronome for ${effectiveTempo}`}
             >
               <Activity className="w-3.5 h-3.5 text-sky-400" />
               <span className="hidden sm:inline">Visualizer</span>
@@ -1714,44 +1708,16 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           </div>
           )}
 
-          {/* Quick-Launch Rest Timer (Synced with App Rest Timer) */}
+          {/* Quick-Launch Rest Timer */}
           <button
             type="button"
             data-testid={`quick-start-rest-${exercise.id}`}
-            onClick={() => {
-              if (isRestRunning) {
-                pauseRest();
-              } else if (isRestPaused) {
-                resumeRest();
-              } else {
-                onQuickStartRest(exercise.restSeconds);
-              }
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-[38px] rounded-xl border text-xs font-mono font-medium transition-all cursor-pointer active:scale-95 ${
-              isRestRunning
-                ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-md shadow-emerald-950/40 animate-pulse'
-                : isRestPaused
-                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                : 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
-            }`}
-            title={
-              isRestRunning
-                ? `Resting: ${formatMMSS(restSnapshot.remainingSeconds)} remaining (click to pause)`
-                : isRestPaused
-                ? `Rest paused at ${formatMMSS(restSnapshot.remainingSeconds)} (click to resume)`
-                : `Start ${exercise.restSeconds}s rest timer`
-            }
+            onClick={() => onQuickStartRest(exercise.restSeconds)}
+            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-[38px] rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium transition-colors cursor-pointer active:scale-95"
+            title={`Start ${exercise.restSeconds}s rest timer`}
           >
-            <Clock className={`w-3.5 h-3.5 ${isRestRunning ? 'text-emerald-300 animate-spin' : 'text-emerald-400'}`} />
-            <span>
-              {isRestRunning ? (
-                <>Rest: <strong className="text-white font-bold">{formatMMSS(restSnapshot.remainingSeconds)}</strong></>
-              ) : isRestPaused ? (
-                <>Paused: <strong className="text-amber-200 font-bold">{formatMMSS(restSnapshot.remainingSeconds)}</strong></>
-              ) : (
-                <>Rest: <strong className="text-white">{exercise.restSeconds}s ({formatMMSS(exercise.restSeconds)})</strong></>
-              )}
-            </span>
+            <Clock className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Rest: <strong className="text-white">{exercise.restSeconds}s ({formatMMSS(exercise.restSeconds)})</strong></span>
           </button>
         </div>
       </div>
@@ -1777,7 +1743,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </div>
       )}
 
-      {/* Jeff Nippard Long-Length Partials (LLP) Protocol Banner */}
+      {/* Long-Length Partials (LLP) Protocol Banner */}
       {isLLP && (
         <div
           data-testid="llp-protocol-banner"
@@ -1786,7 +1752,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 font-bold text-purple-300">
               <Flame className="w-4 h-4 text-purple-400 shrink-0" />
-              <span>Lengthened Partials (LLPs, Jeff Nippard)</span>
+              <span>Lengthened Partials (LLPs)</span>
             </div>
             <button
               type="button"
@@ -1803,7 +1769,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           {showLLPGuide && (
             <div className="pt-2 border-t border-purple-800/40 text-[11px] text-purple-200 space-y-1.5 animate-in fade-in duration-150">
               <p>
-                <strong>What the research shows:</strong> Training at long muscle lengths tends to beat training at short lengths. Compared with full reps, lengthened partials give similar growth in trained lifters (Wolf et al. 2025, co-authored by Nippard). They extend a set; they don&apos;t beat full reps.
+                <strong>What the research shows:</strong> Training at long muscle lengths tends to beat training at short lengths. Compared with full reps, lengthened partials give similar growth in trained lifters (Wolf et al. 2025). They extend a set; they don&apos;t beat full reps.
               </p>
               <p>
                 <strong>How:</strong> No bouncing; control the bottom. Log them with the <span className="font-mono bg-purple-900/60 px-1 py-0.5 rounded border border-purple-400/50">+LLPs</span> button on your last set.
@@ -2210,7 +2176,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               </span>
               <div>
                 <h4 className="font-bold text-white text-sm sm:text-base flex items-center gap-2">
-                  <span>Dr. McGill Big 3 Core Endurance Protocol</span>
+                  <span>Big 3 Core Endurance Protocol</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                     Tri-Set
                   </span>
@@ -3158,16 +3124,16 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                           const currentNotes = set.notes || '';
                           let updatedNotes = currentNotes;
                           if (nextState && !currentNotes.includes('LLP')) {
-                            updatedNotes = currentNotes ? `${currentNotes} · +3–5 LLPs` : '+3–5 LLPs (Nippard)';
+                            updatedNotes = currentNotes ? `${currentNotes} · +3–5 LLPs` : '+3–5 LLPs';
                           } else if (!nextState && currentNotes.includes('+3–5 LLPs')) {
-                            updatedNotes = currentNotes.replace(/(\s*·\s*)?\+3–5 LLPs(\s*\(Nippard\))?/, '').trim();
+                            updatedNotes = currentNotes.replace(/(\s*·\s*)?\+3–5 LLPs/, '').trim();
                           }
                           onUpdateSetLog(exercise.id, idx, {
                             llpPerformed: nextState,
                             notes: updatedNotes,
                           });
                         }}
-                        title={set.llpPerformed ? 'Lengthened partials logged on this set' : 'Mark 3–5 lengthened partials performed (Nippard stretch protocol)'}
+                        title={set.llpPerformed ? 'Lengthened partials logged on this set' : 'Mark 3–5 lengthened partials performed (stretch protocol)'}
                         aria-label={`Toggle lengthened partials for set ${set.setNumber}`}
                         className={`px-1.5 py-1 rounded min-h-[36px] text-[10px] font-mono font-bold whitespace-nowrap border transition-all cursor-pointer ${
                           set.llpPerformed
@@ -3285,7 +3251,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-semibold text-xs transition-colors border border-slate-700/80 shadow-sm cursor-pointer"
         >
           <BookOpen className="w-4 h-4 text-emerald-400" />
-          <span>View Creator Cues & Science</span>
+          <span>View Form Cues & Science</span>
         </button>
 
         <div className="flex flex-wrap items-center gap-3">

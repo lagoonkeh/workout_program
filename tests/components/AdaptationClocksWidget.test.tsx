@@ -9,7 +9,7 @@ describe('AdaptationClocksWidget Component', () => {
 
   it('renders widget header with science studies subtitle', () => {
     render(<AdaptationClocksWidget />);
-    expect(screen.getByText(/Exercise Science & Creator Studies/i)).toBeInTheDocument();
+    expect(screen.getByText(/Exercise Science & Clinical Studies/i)).toBeInTheDocument();
     expect(screen.getByText(/Research-checked/i)).toBeInTheDocument();
   });
 
@@ -43,7 +43,7 @@ describe('AdaptationClocksWidget Component', () => {
     fireEvent.click(screen.getByTestId('tab-llp'));
 
     expect(screen.getByTestId('llp-content')).toBeInTheDocument();
-    expect(screen.getByText(/Lengthened Partials \(LLPs\), as popularized by Jeff Nippard/i)).toBeInTheDocument();
+    expect(screen.getByText(/Lengthened Partials \(LLPs\) & Hypertrophy/i)).toBeInTheDocument();
     expect(screen.getByText(/Not settled/i)).toBeInTheDocument();
   });
 

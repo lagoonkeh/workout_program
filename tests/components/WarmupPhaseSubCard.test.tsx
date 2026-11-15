@@ -26,7 +26,7 @@ describe('WarmupPhaseSubCard Component', () => {
     render(
       <WarmupPhaseSubCard
         drillId="w_lower_a_2"
-        drillName="Alyssa Lu 90/90 Positional Breathing + Bridge"
+        drillName="90/90 Positional Breathing + Bridge"
         phaseIndex={2}
         totalPhases={6}
         instruction={mockInstruction}
@@ -53,7 +53,7 @@ describe('WarmupPhaseSubCard Component', () => {
     render(
       <WarmupPhaseSubCard
         drillId="w_lower_a_2"
-        drillName="Alyssa Lu 90/90 Positional Breathing + Bridge"
+        drillName="90/90 Positional Breathing + Bridge"
         phaseIndex={2}
         totalPhases={6}
         instruction={mockInstruction}
@@ -78,7 +78,7 @@ describe('WarmupPhaseSubCard Component', () => {
     render(
       <WarmupPhaseSubCard
         drillId="w_lower_a_2"
-        drillName="Alyssa Lu 90/90 Positional Breathing + Bridge"
+        drillName="90/90 Positional Breathing + Bridge"
         phaseIndex={2}
         totalPhases={6}
         instruction={mockInstruction}
@@ -103,7 +103,7 @@ describe('WarmupPhaseSubCard Component', () => {
     render(
       <WarmupPhaseSubCard
         drillId="w_lower_a_2"
-        drillName="Alyssa Lu 90/90 Positional Breathing + Bridge"
+        drillName="90/90 Positional Breathing + Bridge"
         phaseIndex={2}
         totalPhases={6}
         instruction={mockInstruction}
@@ -128,7 +128,7 @@ describe('WarmupPhaseSubCard Component', () => {
     render(
       <WarmupPhaseSubCard
         drillId="w_lower_a_2"
-        drillName="Alyssa Lu 90/90 Positional Breathing + Bridge"
+        drillName="90/90 Positional Breathing + Bridge"
         phaseIndex={2}
         totalPhases={6}
         instruction={mockInstruction}

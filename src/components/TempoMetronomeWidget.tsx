@@ -19,15 +19,15 @@ export interface TempoMetronomeWidgetProps {
 }
 
 const TEMPO_PRESETS = [
-  { tempo: '30X1', name: 'Marcus Filly Standard', desc: '3s Lower, Explode Up, 1s Squeeze' },
+  { tempo: '30X1', name: 'Standard Controlled', desc: '3s Lower, Explode Up, 1s Squeeze' },
   { tempo: '31X1', name: 'Knee & Tendon Rehab', desc: '3s Lower, 1s Bottom Pause, Explode Up' },
-  { tempo: '5083', name: 'Alyssa Lu 90/90 Breathing', desc: '5s Inhale, 0s, 8s Exhale, 3s Hold' },
+  { tempo: '5083', name: '90/90 Diaphragmatic Breathing', desc: '5s Inhale, 0s, 8s Exhale, 3s Hold' },
   { tempo: '4010', name: 'Eccentric Hypertrophy', desc: '4s Slow Lower, 1s Controlled Up' },
   { tempo: '2011', name: 'Fluid Hypertrophy', desc: '2s Lower, 1s Up, 1s Top Hold' },
   { tempo: '3012', name: 'Peak Contraction', desc: '3s Lower, 1s Up, 2s Peak Squeeze' },
-  { tempo: 'HOLD-10', name: 'McGill 10s Hold', desc: 'Bird-Dog & Core Stiffness (10s)' },
-  { tempo: 'HOLD-25', name: 'Yellow Dude L-Sit', desc: '15–25s Core Compression Hold' },
-  { tempo: 'HOLD-45', name: 'TNT Isometric Analgesia', desc: '5x45s Holds (Dr. Ebonie Rio) — Auditory Paced Tendon Pain Relief' },
+  { tempo: 'HOLD-10', name: '10s Isometric Hold', desc: 'Bird-Dog & Core Stiffness (10s)' },
+  { tempo: 'HOLD-25', name: 'L-Sit Compression', desc: '15–25s Core Compression Hold' },
+  { tempo: 'HOLD-45', name: 'TNT Isometric Analgesia', desc: '5x45s Holds — Auditory Paced Tendon Pain Relief' },
   { tempo: 'HOLD-60', name: 'Biering-Sørensen Extensor', desc: '45–60s Back Extensor Endurance' },
 ];
 
@@ -165,12 +165,12 @@ export const TempoMetronomeWidget: React.FC<TempoMetronomeWidgetProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-              {snapshot.parsedTempo.isIsometricHold ? 'Isometric Tension Metronome' : 'Marcus Filly Tempo Metronome'}
+              {snapshot.parsedTempo.isIsometricHold ? 'Isometric Tension Metronome' : 'Tempo Metronome'}
             </h3>
             <p className="text-xs text-slate-400">
               {snapshot.parsedTempo.isIsometricHold
-                ? `Dr. Stuart McGill & FBB Static Hold (${snapshot.parsedTempo.holdDurationSeconds}s)`
-                : 'Functional Bodybuilding 4-Digit Cadence'}
+                ? `Static Isometric Hold (${snapshot.parsedTempo.holdDurationSeconds}s)`
+                : 'Prescribed 4-Digit Cadence'}
             </p>
           </div>
         </div>

@@ -304,15 +304,15 @@ export interface RestPreset {
 }
 
 export const REST_PRESETS: RestPreset[] = [
-  { id: 'er_15', label: '15s (ER Cluster)', durationSeconds: 15, creatorAttribution: 'Athlean-X', tierMapping: 'EffectiveReps' },
-  { id: 'er_30', label: '30s (ER Cluster)', durationSeconds: 30, creatorAttribution: 'Athlean-X', tierMapping: 'EffectiveReps' },
-  { id: 't3_45', label: '45s (Daily Abs / Reset)', durationSeconds: 45, creatorAttribution: 'Athlean-X', tierMapping: 'T3' },
-  { id: 't3_60', label: '60s (Accessory)', durationSeconds: 60, creatorAttribution: 'Marcus Filly', tierMapping: 'T3' },
-  { id: 't3_90', label: '90s (Isolation)', durationSeconds: 90, creatorAttribution: 'Jeff Nippard', tierMapping: 'T3' },
-  { id: 't2_120', label: '2 min (Hypertrophy)', durationSeconds: 120, creatorAttribution: 'GZCL Tier 2', tierMapping: 'T2' },
-  { id: 't2_180', label: '3 min (Heavy Compound)', durationSeconds: 180, creatorAttribution: 'GZCL Tier 2', tierMapping: 'T2' },
-  { id: 't1_240', label: '4 min (Heavy Strength)', durationSeconds: 240, creatorAttribution: 'GZCL Tier 1', tierMapping: 'T1' },
-  { id: 't1_300', label: '5 min (Maximal 1RM/T1)', durationSeconds: 300, creatorAttribution: 'GZCL Tier 1', tierMapping: 'T1' },
+  { id: 'er_15', label: '15s (ER Cluster)', durationSeconds: 15, creatorAttribution: 'Core', tierMapping: 'EffectiveReps' },
+  { id: 'er_30', label: '30s (ER Cluster)', durationSeconds: 30, creatorAttribution: 'Core', tierMapping: 'EffectiveReps' },
+  { id: 't3_45', label: '45s (Daily Abs / Reset)', durationSeconds: 45, creatorAttribution: 'Core', tierMapping: 'T3' },
+  { id: 't3_60', label: '60s (Accessory)', durationSeconds: 60, creatorAttribution: 'Accessory', tierMapping: 'T3' },
+  { id: 't3_90', label: '90s (Isolation)', durationSeconds: 90, creatorAttribution: 'Isolation', tierMapping: 'T3' },
+  { id: 't2_120', label: '2 min (Hypertrophy)', durationSeconds: 120, creatorAttribution: 'Tier 2', tierMapping: 'T2' },
+  { id: 't2_180', label: '3 min (Heavy Compound)', durationSeconds: 180, creatorAttribution: 'Tier 2', tierMapping: 'T2' },
+  { id: 't1_240', label: '4 min (Heavy Strength)', durationSeconds: 240, creatorAttribution: 'Tier 1', tierMapping: 'T1' },
+  { id: 't1_300', label: '5 min (Maximal 1RM/T1)', durationSeconds: 300, creatorAttribution: 'Tier 1', tierMapping: 'T1' },
 ];
 
 const LOWER_A_WARMUP: WarmupExercise[] = [
@@ -320,7 +320,7 @@ const LOWER_A_WARMUP: WarmupExercise[] = [
     id: 'w_lower_a_1',
     name: 'Rowing Machine Reverse Leg-Drive',
     targetDurationOrReps: '4–5 minutes (18–20 SPM)',
-    creatorAttribution: 'Ben Patrick (ATG)',
+    creatorAttribution: 'Movement Prep',
     equipment: 'rowing_machine',
     biomechanicalPurpose: 'Simulates backward sled pulling at home. Drives through the ball of the foot with resistance, flushing synovial fluid and blood into the vastus medialis oblique (VMO) with zero knee joint shear.',
     coachingNotes: 'Push backward through the forefoot. Keep torso upright and smooth cadence.',
@@ -334,9 +334,9 @@ const LOWER_A_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_lower_a_2',
-    name: 'Alyssa Lu 90/90 Positional Breathing + Bridge',
+    name: '90/90 Positional Breathing + Bridge',
     targetDurationOrReps: '2 sets x 5 deep breath cycles',
-    creatorAttribution: 'Dr. Alyssa Lu (Proformance)',
+    creatorAttribution: 'Physical Therapy',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Digging heels into bench/wall activates hamstrings and rectus abdominis, reflexively shifting anterior pelvic tilt to neutral and releasing overactive psoas.',
     coachingNotes: 'Inhale 5s through nose (360° belly expansion), exhale 8s through mouth, hold 3s.',
@@ -351,10 +351,10 @@ const LOWER_A_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_lower_a_3',
-    name: 'Eugene Teo Standing Calf Raise (Pre-Fatigue)',
+    name: 'Standing Calf Raise (Pre-Fatigue)',
     targetDurationOrReps: '2 sets x 15 reps',
     tempo: '3012',
-    creatorAttribution: 'Coach Eugene Teo',
+    creatorAttribution: 'Movement Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Stabilizes the talocrural joint and knee capsule. Pre-activating the triceps surae eliminates compensatory forward tibial shear during squats.',
     coachingNotes: 'Stand on a 2" plate or block. 3s eccentric stretch at bottom, 2s hard squeeze at the peak.',
@@ -368,10 +368,10 @@ const LOWER_A_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_lower_a_4',
-    name: 'Eugene Teo Light KB Romanian Hinge (Pre-Fatigue)',
+    name: 'Light KB Romanian Hinge (Pre-Fatigue)',
     targetDurationOrReps: '2 sets x 10 reps',
     tempo: '3110',
-    creatorAttribution: 'Coach Eugene Teo',
+    creatorAttribution: 'Movement Prep',
     equipment: 'kettlebell',
     biomechanicalPurpose: 'Pre-activates the hamstring co-contraction mechanism at the knee joint prior to quad loading, actively pulling the tibia posteriorly to guard against patellar stress.',
     coachingNotes: 'Use 20 or 25 lb Bowflex KB. Push hips back, 3s eccentric down, 1s active hamstring stretch.',
@@ -385,9 +385,9 @@ const LOWER_A_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_lower_a_5',
-    name: 'Squat U Ankle Mobilization & Tripod Rooting',
+    name: 'Ankle Mobilization & Tripod Rooting',
     targetDurationOrReps: '1–2 sets x 10 reps/side',
-    creatorAttribution: 'Dr. Aaron Horschig (Squat University)',
+    creatorAttribution: 'Mobility Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Pre-conditions talocrural dorsiflexion and roots the three foot contact points (1st MTP, 5th MTP, calcaneus) to prevent inward knee valgus collapse.',
     coachingNotes: 'Grip floor with toes, drive knees outward in line with 2nd/3rd toe.',
@@ -404,7 +404,7 @@ const LOWER_A_WARMUP: WarmupExercise[] = [
 export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
   {
     id: 't3_athlean_hanging_knee_raise',
-    name: 'Athlean-X Hanging Knee Raise with Posterior Pelvic Tilt',
+    name: 'Hanging Knee Raise with Posterior Pelvic Tilt',
     tier: 'T3',
     targetSets: 3,
     targetReps: '10–12',
@@ -413,12 +413,12 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
     restSeconds: 45,
     equipment: 'pull_up_bar',
     muscleGroups: ['Lower Rectus Abdominis', 'Iliopsoas', 'Transversus Abdominis', 'Forearms'],
-    biomechanicalRationale: 'Jeff Cavaliere Kinetic Sequence Step 1: Bottom-Up vector. Tackled first when core fibers are fresh. Curling the pelvis upward into posterior tilt engages the lower rectus abdominis without allowing the psoas to hyperextend the lumbar spine into lordotic shear.',
+    biomechanicalRationale: 'Kinetic Sequence Step 1: Bottom-Up vector. Tackled first when core fibers are fresh. Curling the pelvis upward into posterior tilt engages the lower rectus abdominis without allowing the psoas to hyperextend the lumbar spine into lordotic shear.',
     progressionRule: 'Master 3x12 knees-to-chest with 2s hold at peak posterior pelvic tilt before progressing to straight-leg hanging raises.',
     regression: {
       condition: 'Grip fatigue, shoulder discomfort, or lower back arching',
       exerciseId: 't3_athlean_reverse_pelvic_curl',
-      name: 'Athlean-X Lying Reverse Pelvic Curls on Floor',
+      name: 'Lying Reverse Pelvic Curls on Floor',
       instructions: 'Lie supine on floor, hands flat or gripping rack base. Curl knees toward chest and actively elevate pelvis 2–3 inches off floor. Do NOT swing legs.',
       tempo: '2112',
       targetReps: '12–15',
@@ -427,7 +427,7 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
   },
   {
     id: 't3_athlean_hanging_corkscrew',
-    name: 'Athlean-X Hanging Corkscrews (Bottom-Up Oblique Drive)',
+    name: 'Hanging Corkscrews (Bottom-Up Oblique Drive)',
     tier: 'T3',
     targetSets: 3,
     targetReps: '8–10 / side',
@@ -436,12 +436,12 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
     restSeconds: 45,
     equipment: 'pull_up_bar',
     muscleGroups: ['Internal Obliques', 'External Obliques', 'Lower Rectus Abdominis', 'Serratus Anterior'],
-    biomechanicalRationale: 'Jeff Cavaliere Kinetic Sequence Step 2: Bottom-Up Rotational. Rotating the pelvis diagonally as knees rise activates the internal and external obliques in synchrony with lower abs while fresh.',
+    biomechanicalRationale: 'Kinetic Sequence Step 2: Bottom-Up Rotational. Rotating the pelvis diagonally as knees rise activates the internal and external obliques in synchrony with lower abs while fresh.',
     progressionRule: 'Alternate sides smoothly. Once 3x10/side completed with zero swinging momentum, progress to straight-leg hanging corkscrew twists.',
     regression: {
       condition: 'Pull-up bar grip limitation or shoulder fatigue',
       exerciseId: 't3_athlean_lying_corkscrew',
-      name: 'Athlean-X Supine Twisting Reverse Crunches',
+      name: 'Supine Twisting Reverse Crunches',
       instructions: 'Lie supine with arms braced out. Curl pelvis up and rotate hips diagonally to one side, alternating left and right with strict control.',
       tempo: '2111',
       targetReps: '10–12 / side',
@@ -450,7 +450,7 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
   },
   {
     id: 't3_athlean_hollow_body_hold',
-    name: 'Athlean-X Hollow Body Core Compression Hold',
+    name: 'Hollow Body Core Compression Hold',
     tier: 'T3',
     targetSets: 3,
     targetReps: '25–35s',
@@ -459,12 +459,12 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
     restSeconds: 45,
     equipment: 'bodyweight',
     muscleGroups: ['Rectus Abdominis', 'Transversus Abdominis', 'Hip Flexors', 'Quadriceps'],
-    biomechanicalRationale: 'Jeff Cavaliere & Yellow Dude Core Compression: Mid-Range Anti-Extension. Clamps the lumbar spine flush against the floor with zero air gap, forcing deep core endurance without lumbar shear.',
+    biomechanicalRationale: 'Core Compression: Mid-Range Anti-Extension. Clamps the lumbar spine flush against the floor with zero air gap, forcing deep core endurance without lumbar shear.',
     progressionRule: 'Build from bent-knee tuck hollow hold (20s) to full straight-arm, straight-leg hollow hold (45s).'
   },
   {
     id: 't3_athlean_iso_crunch',
-    name: 'Athlean-X 2-Second Peak Squeeze Floor Curl-Up',
+    name: '2-Second Peak Squeeze Floor Curl-Up',
     tier: 'T3',
     targetSets: 3,
     targetReps: '12–15',
@@ -473,12 +473,12 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
     restSeconds: 45,
     equipment: 'bodyweight',
     muscleGroups: ['Upper Rectus Abdominis', 'Transversus Abdominis'],
-    biomechanicalRationale: 'Jeff Cavaliere Kinetic Sequence Step 5: Top-Down Flexion. Upper rectus abdominis has the lightest lever arm (torso only, with legs grounded) and can reach fatigue safely at the end of the circuit without hip flexor dominance.',
+    biomechanicalRationale: 'Kinetic Sequence Step 4: Top-Down Flexion. Upper rectus abdominis has the lightest lever arm (torso only, with legs grounded) and can reach fatigue safely at the end of the circuit without hip flexor dominance.',
     progressionRule: 'Hold an 8 or 12 lb Bowflex kettlebell or weight plate at chest once 3x15 bodyweight reps are executed with complete exhalation.',
     regression: {
       condition: 'Neck discomfort or cervical strain',
       exerciseId: 't3_athlean_supported_curlup',
-      name: 'Dr. Stuart McGill Supported Curl-Up with Head Neutral',
+      name: 'Supported Curl-Up with Head Neutral',
       instructions: 'Place hands under lumbar curve to preserve lordosis. Raise head and upper chest only 1 inch off floor without bending neck. Hold 3s per rep.',
       tempo: '2112',
       targetReps: '10–12',
@@ -487,7 +487,7 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
   },
   {
     id: 't3_athlean_serratus_plank',
-    name: 'Athlean-X Serratus Elbow-to-Knee Plank + Vacuum Brace',
+    name: 'Serratus Elbow-to-Knee Plank + Vacuum Brace',
     tier: 'T3',
     targetSets: 3,
     targetReps: '30–45s',
@@ -496,7 +496,7 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
     restSeconds: 45,
     equipment: 'bodyweight',
     muscleGroups: ['Transversus Abdominis', 'Serratus Anterior', 'Internal Obliques', 'Pelvic Floor'],
-    biomechanicalRationale: 'Jeff Cavaliere & Dr. Stuart McGill Core Cylinder Finisher: While in a forearm plank, actively protract shoulder blades (pushing ground away) and isometrically pull elbows toward toes. Locks in 360° intra-abdominal pressure.',
+    biomechanicalRationale: 'Core Cylinder Finisher: While in a forearm plank, actively protract shoulder blades (pushing ground away) and isometrically pull elbows toward toes. Locks in 360° intra-abdominal pressure.',
     progressionRule: 'Advance hold duration from 30s to 45–60s while maintaining rhythmic diaphragmatic nasal breathing.'
   }
 ];
@@ -510,7 +510,7 @@ export function createDailyAbsExercises(sessionId: string): WorkoutExercise[] {
     restSeconds: 30,
     regression: undefined,
     tempo: baseEx.tempo,
-    biomechanicalRationale: `Athlean-X Daily Core Finisher: ${baseEx.biomechanicalRationale}`,
+    biomechanicalRationale: `Daily Core Finisher: ${baseEx.biomechanicalRationale}`,
   }));
 }
 
@@ -520,7 +520,7 @@ export const SESSION_LOWER_A: WorkoutSession = {
   subtitle: 'Quad & Knee Bulletproofing Focus',
   focus: 'VMO tendon remodeling, knee joint decompression, quad hypertrophy without patellar shear, and core stability.',
   estimatedDurationMinutes: 55,
-  creatorInfluences: ['Ben Patrick (ATG)', 'Coach Eugene Teo', 'Dr. Aaron Horschig', 'Dr. Alyssa Lu', 'Dr. Stuart McGill', 'Lucas Hardie (Range of Strength)', 'Jeff Cavaliere (ATHLEAN-X)', 'Derek (More Plates More Dates)', 'Dr. Mike Israetel (Renaissance Periodization)', 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)', 'House of Hypertrophy'],
+  creatorInfluences: [],
   equipmentRequired: ['rowing_machine', 'barbell', 'rack', 'kettlebell', 'pull_up_bar', 'bodyweight'],
   warmup: LOWER_A_WARMUP,
   warmupSequence: LOWER_A_WARMUP,
@@ -563,7 +563,7 @@ export const SESSION_LOWER_A: WorkoutSession = {
       defaultWeight: 20,
       defaultWeightLbs: 20,
       muscleGroups: ['Quadriceps (VMO focus)', 'Psoas / Hip Flexors', 'Glutes', 'Calves'],
-      biomechanicalRationale: 'Ben Patrick tendinopathy rehabilitation cornerstone. Promotes full hamstring-to-calf coverage under slow, controlled loading to remodel patellar collagen and elongate the rear-leg psoas.',
+      biomechanicalRationale: 'Tendinopathy rehabilitation cornerstone. Promotes full hamstring-to-calf coverage under slow, controlled loading to remodel patellar collagen and elongate the rear-leg psoas.',
       progressionRule: 'Double progression: achieve 10 reps/leg across all 3 sets with 0/10 pain before increasing kettlebell load by 5 lbs.',
       llpEligible: false,
       regression: {
@@ -592,7 +592,7 @@ export const SESSION_LOWER_A: WorkoutSession = {
     },
     {
       id: 't3_patrick_step_down',
-      name: 'Single-Leg Patrick Step-Downs',
+      name: 'Single-Leg Step-Downs',
       tier: 'T3',
       targetSets: 3,
       targetReps: '12–15',
@@ -606,7 +606,7 @@ export const SESSION_LOWER_A: WorkoutSession = {
     },
     {
       id: 't3_mcgill_big_3',
-      name: 'Dr. Stuart McGill Big 3 Endurance Tri-Set',
+      name: 'Big 3 Core Endurance Tri-Set',
       tier: 'T3',
       targetSets: 3,
       targetReps: '3 rounds',
@@ -620,7 +620,7 @@ export const SESSION_LOWER_A: WorkoutSession = {
     },
     {
       id: 't3_loaded_horse_stance',
-      name: 'Range of Strength Loaded Horse Stance Pulses',
+      name: 'Loaded Horse Stance Pulses',
       tier: 'T3',
       targetSets: 3,
       targetReps: '8–10 pulses (30–45s)',
@@ -631,7 +631,7 @@ export const SESSION_LOWER_A: WorkoutSession = {
       defaultWeight: 20,
       defaultWeightLbs: 20,
       muscleGroups: ['Adductor Magnus', 'Adductor Longus', 'Gluteus Medius', 'Pelvic Floor'],
-      biomechanicalRationale: 'Lucas Hardie loaded end-range stimulus. Holding kettlebell low in a 3-step horse stance with slight anterior pelvic tilt overrides femoral neck impingement and exposes the adductor complex to extreme loaded stretch, maximizing stretch-mediated adductor hypertrophy and pelvic stability.',
+      biomechanicalRationale: 'Loaded end-range stimulus. Holding kettlebell low in a 3-step horse stance with slight anterior pelvic tilt overrides femoral neck impingement and exposes the adductor complex to extreme loaded stretch, maximizing stretch-mediated adductor hypertrophy and pelvic stability.',
       progressionRule: 'Double progression: build from 3x30s to 3x45s holds before stepping up to the next Bowflex kettlebell notch (20 → 25 → 35 lbs).'
     }
   ],
@@ -643,7 +643,7 @@ const UPPER_A_WARMUP: WarmupExercise[] = [
     id: 'w_upper_a_1',
     name: 'Indian Club Rotational Circles & Casts',
     targetDurationOrReps: '2 sets x 10 circles each direction',
-    creatorAttribution: 'Marcus Filly & Athlean-X Priming',
+    creatorAttribution: 'Movement Prep',
     equipment: 'indian_clubs',
     biomechanicalPurpose: 'Uses 2 lb or 5 lb Indian clubs to lubricate the glenohumeral joint capsule, stimulate rotator cuff stabilizers, and dynamically mobilize the scapulothoracic rhythm.',
     coachingNotes: 'Smooth wrist circles, outward shoulder casts, and transverse spirals without forcing range.',
@@ -656,10 +656,10 @@ const UPPER_A_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_upper_a_2',
-    name: 'Athlean-X Scapular Retractions & Depressions',
+    name: 'Scapular Retractions & Depressions',
     targetDurationOrReps: '2 sets x 12 reps',
     tempo: '2012',
-    creatorAttribution: 'Jeff Cavaliere (ATHLEAN-X)',
+    creatorAttribution: 'Movement Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Activates the lower traps and serratus anterior to seat the humeral head properly in the glenoid fossa before horizontal loading.',
     coachingNotes: 'Pinch shoulder blades down and back. Hold 2s squeeze at end range.',
@@ -672,10 +672,10 @@ const UPPER_A_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_upper_a_3',
-    name: 'McGill Bird-Dog Core & Lat Tension Priming',
+    name: 'Bird-Dog Core & Lat Tension Priming',
     targetDurationOrReps: '2 sets x 4 reps / side (10s hold)',
     tempo: '0010',
-    creatorAttribution: 'Dr. Stuart McGill',
+    creatorAttribution: 'Spine Health',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Locks the core cylinder and lat-lumbar fascia, preventing unwanted spinal twisting under unilateral rowing.',
     coachingNotes: 'Clench fist, drive opposite heel back, brace core as if taking a punch.',
@@ -694,7 +694,7 @@ export const SESSION_UPPER_A: WorkoutSession = {
   subtitle: 'Horizontal Push/Pull & Shoulder Health',
   focus: 'Subacromial joint spacing, scapular retraction/depression, balanced horizontal press and row mechanics.',
   estimatedDurationMinutes: 50,
-  creatorInfluences: ['Jeff Cavaliere (ATHLEAN-X)', 'Jeff Nippard', 'Coach Eugene Teo', 'Dr. Stuart McGill', 'Lucas Hardie (Range of Strength)', 'Derek (More Plates More Dates)', 'Dr. Mike Israetel (Renaissance Periodization)', 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)', 'House of Hypertrophy'],
+  creatorInfluences: [],
   equipmentRequired: ['indian_clubs', 'barbell', 'rack', 'bench', 'kettlebell', 'pull_up_bar'],
   warmup: UPPER_A_WARMUP,
   warmupSequence: UPPER_A_WARMUP,
@@ -753,7 +753,7 @@ export const SESSION_UPPER_A: WorkoutSession = {
     },
     {
       id: 't3_kb_floor_press_er',
-      name: 'Athlean-X 20 Effective Reps (ER) Kettlebell Floor Press',
+      name: '20 Effective Reps (ER) Kettlebell Floor Press',
       tier: 'T3',
       targetSets: 1,
       targetReps: '20 Effective Reps',
@@ -769,7 +769,7 @@ export const SESSION_UPPER_A: WorkoutSession = {
     },
     {
       id: 't3_athlean_face_pull',
-      name: 'Athlean-X Non-Negotiable Face Pull Alternative (Kettlebell High Pull & External Rotation)',
+      name: 'Kettlebell High Pull & External Rotation (Face Pull Alternative)',
       tier: 'T3',
       targetSets: 3,
       targetReps: '15–20',
@@ -780,7 +780,7 @@ export const SESSION_UPPER_A: WorkoutSession = {
       defaultWeight: 12,
       defaultWeightLbs: 12,
       muscleGroups: ['Infraspinatus', 'Teres Minor', 'Rear Deltoid', 'Mid/Lower Trapezius', 'Rhomboids'],
-      biomechanicalRationale: 'Zero-cable, zero-device Athlean-X face pull alternative using your BowFlex 840 kettlebell (8–12 lbs) or Indian clubs. From a 30° hip hinge, pull the load vertically with elbows wide, then actively externally rotate at the shoulder until hands/knuckles are higher than elbows. Hits the rotator cuff external rotators and scapular retractors without cables, bands, or anchors.',
+      biomechanicalRationale: 'Zero-cable, zero-device face pull alternative using your BowFlex 840 kettlebell (8–12 lbs) or Indian clubs. From a 30° hip hinge, pull the load vertically with elbows wide, then actively externally rotate at the shoulder until hands/knuckles are higher than elbows. Hits the rotator cuff external rotators and scapular retractors without cables, bands, or anchors.',
       progressionRule: 'Increase kettlebell load or add 2-second isometric holds at peak external rotation once 3x20 reps mastered.'
     },
     {
@@ -804,9 +804,9 @@ export const SESSION_UPPER_A: WorkoutSession = {
 const LOWER_B_WARMUP: WarmupExercise[] = [
   {
     id: 'w_lower_b_1',
-    name: 'Alyssa Lu 10-Minute Active Hip Reset Protocol',
+    name: '10-Minute Active Hip Reset Protocol',
     targetDurationOrReps: '5–6 minutes',
-    creatorAttribution: 'Dr. Alyssa Lu (Proformance)',
+    creatorAttribution: 'Physical Therapy',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Combines 90/90 positional breathing with hamstring heel digs and adductor bridge squeezes to restore pelvic symmetry and inhibit chronic hip flexor hypertonicity.',
     coachingNotes: '2 sets of 5 breaths 90/90 heel dig + 2 sets of 10 adductor squeeze glute bridges.',
@@ -820,9 +820,9 @@ const LOWER_B_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_lower_b_2',
-    name: 'ATG Elephant Walks (Active Reciprocal Lengthening)',
+    name: 'Elephant Walks (Active Reciprocal Lengthening)',
     targetDurationOrReps: '2 sets x 20 reps / leg',
-    creatorAttribution: 'Ben Patrick (ATG)',
+    creatorAttribution: 'Movement Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Alternating active quadriceps contraction forces reciprocal inhibition of the ipsilateral hamstring, restoring deep posterior chain elasticity without damaging passive stretching.',
     coachingNotes: 'Place hands on bench or floor. Lock out knee with strong quad squeeze on each step.',
@@ -837,7 +837,7 @@ const LOWER_B_WARMUP: WarmupExercise[] = [
     id: 'w_lower_b_3',
     name: 'Rowing Machine Steady Rhythm Flush',
     targetDurationOrReps: '3–4 minutes low resistance',
-    creatorAttribution: 'Eugene Teo & Conditioning Base',
+    creatorAttribution: 'Conditioning',
     equipment: 'rowing_machine',
     biomechanicalPurpose: 'Lubricates the hip joints and lumbar facet joints through rhythmic low-impact hip hinge motion.',
     coachingNotes: 'Keep stroke rate relaxed (18–20 SPM). Drive smoothly from hips and legs.',
@@ -850,9 +850,9 @@ const LOWER_B_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_lower_b_4',
-    name: 'Squat U Single-Leg Kettlebell Around-the-Worlds',
+    name: 'Single-Leg Kettlebell Around-the-Worlds',
     targetDurationOrReps: '2 sets x 5 passes each direction / leg',
-    creatorAttribution: 'Dr. Aaron Horschig (Squat University)',
+    creatorAttribution: 'Mobility Prep',
     equipment: 'kettlebell',
     biomechanicalPurpose: 'Passing a light kettlebell around the body while balancing on one leg forces the stance-side glute medius, deep hip rotators and foot tripod to resist a constantly moving rotational load. Primes single-leg hip and knee control for step-downs and suitcase carries.',
     coachingNotes: 'Use the 8 or 12 lb Bowflex setting; it is far harder on one leg than it looks. Keep hips level and knee over 2nd/3rd toe. Touch the free foot down if you lose balance rather than twisting.',
@@ -872,7 +872,7 @@ export const SESSION_LOWER_B: WorkoutSession = {
   subtitle: 'Posterior Chain & Hamstring Restoration Focus',
   focus: 'Active hamstring lengthening under reciprocal inhibition, hip hinge dominance, spinal sparing, and unilateral knee resilience.',
   estimatedDurationMinutes: 55,
-  creatorInfluences: ['Dr. Alyssa Lu', 'Ben Patrick (ATG)', 'Jeff Nippard', 'Dr. Stuart McGill', 'Coach Eugene Teo', 'Lucas Hardie (Range of Strength)', 'Jeff Cavaliere (ATHLEAN-X)', 'Derek (More Plates More Dates)', 'Dr. Mike Israetel (Renaissance Periodization)', 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)', 'House of Hypertrophy'],
+  creatorInfluences: [],
   equipmentRequired: ['pull_up_bar', 'bodyweight', 'rowing_machine', 'barbell', 'rack', 'kettlebell'],
   warmup: LOWER_B_WARMUP,
   warmupSequence: LOWER_B_WARMUP,
@@ -931,7 +931,7 @@ export const SESSION_LOWER_B: WorkoutSession = {
     },
     {
       id: 't3_patrick_step_down_b',
-      name: 'Single-Leg Patrick Step-Downs',
+      name: 'Single-Leg Step-Downs',
       tier: 'T3',
       targetSets: 3,
       targetReps: '15',
@@ -954,7 +954,7 @@ export const SESSION_LOWER_B: WorkoutSession = {
       restSeconds: 60,
       equipment: 'bodyweight',
       muscleGroups: ['Lumbar Erectors', 'Multifidus', 'Glutes', 'Hamstrings'],
-      biomechanicalRationale: 'Clinically validated by Dr. Stuart McGill: extensor muscle endurance is the single greatest statistical predictor of lumbar spine injury resistance.',
+      biomechanicalRationale: 'Extensor muscle endurance is the single greatest statistical predictor of lumbar spine injury resistance.',
       progressionRule: 'Increase hold duration towards 90–120 seconds.'
     },
     {
@@ -975,7 +975,7 @@ export const SESSION_LOWER_B: WorkoutSession = {
     },
     {
       id: 't3_jefferson_curl',
-      name: 'Range of Strength Jefferson Curl (Progressive Deficit)',
+      name: 'Jefferson Curl (Progressive Deficit)',
       tier: 'T3',
       targetSets: 3,
       targetReps: '5–6',
@@ -986,12 +986,12 @@ export const SESSION_LOWER_B: WorkoutSession = {
       defaultWeight: 12,
       defaultWeightLbs: 12,
       muscleGroups: ['Hamstrings (Distal Tendon Focus)', 'Multifidus', 'Erector Spinae', 'Thoracolumbar Fascia'],
-      biomechanicalRationale: 'Lucas Hardie & Ben Patrick posterior chain mobility drill. Light progressive loaded flexion at long muscle lengths. NOTE: Strictly capped at 8–12 lbs on the Bowflex kettlebell as a mobility drill, not an ego lift.',
+      biomechanicalRationale: 'Posterior chain mobility drill. Light progressive loaded flexion at long muscle lengths. NOTE: Strictly capped at 8–12 lbs on the Bowflex kettlebell as a mobility drill, not an ego lift.',
       progressionRule: 'Strictly capped at 8–12 lbs on the Bowflex kettlebell for spinal longevity. If lower back fatigue, disc sensitivity, or stiffness is present, swap to McGill Big 3 spinal stabilization regression.',
       regression: {
         condition: 'Lumbar spine stiffness, disc sensitivity, or back fatigue',
         exerciseId: 't3_mcgill_big_3_regression',
-        name: 'Dr. Stuart McGill Big 3 Spinal Stabilization',
+        name: 'Big 3 Spinal Stabilization',
         instructions: 'Perform 3 rounds of 10s Bird-Dog, 10s Side Plank per side, and 10s Modified Curl-Up. Eliminates loaded spinal flexion and establishes a 360-degree rigid torso cylinder.',
         tempo: '10s hold',
         targetReps: '3 rounds x 10s',
@@ -1005,10 +1005,10 @@ export const SESSION_LOWER_B: WorkoutSession = {
 const UPPER_B_WARMUP: WarmupExercise[] = [
   {
     id: 'w_upper_b_1',
-    name: 'Athlean-X Active Scapular Dead Hang Pulls',
+    name: 'Active Scapular Dead Hang Pulls',
     targetDurationOrReps: '2 sets x 8 reps (2s hold at top)',
     tempo: '2112',
-    creatorAttribution: 'Jeff Cavaliere (ATHLEAN-X)',
+    creatorAttribution: 'Movement Prep',
     equipment: 'pull_up_bar',
     biomechanicalPurpose: 'Hanging with relaxed shoulders, then actively pulling scapulae down and together to elevate torso without bending elbows. Primes lower trap / serratus engagement.',
     coachingNotes: 'Think of pulling your shoulder blades into your back pockets without bending elbows.',
@@ -1023,7 +1023,7 @@ const UPPER_B_WARMUP: WarmupExercise[] = [
     id: 'w_upper_b_2',
     name: 'Indian Club Shoulder Spirals & Casts',
     targetDurationOrReps: '2 sets x 10 circles / side',
-    creatorAttribution: 'Marcus Filly & Athlean-X Priming',
+    creatorAttribution: 'Movement Prep',
     equipment: 'indian_clubs',
     biomechanicalPurpose: 'Prime rotational mobility and warm up rotator cuff musculature with 2 lb or 5 lb clubs.',
     coachingNotes: 'Large, fluid circles moving over and behind the head.',
@@ -1038,7 +1038,7 @@ const UPPER_B_WARMUP: WarmupExercise[] = [
     id: 'w_upper_b_3',
     name: 'Scapular Wall Slides + 360 Brace',
     targetDurationOrReps: '2 sets x 10 reps',
-    creatorAttribution: 'Dr. Aaron Horschig (Squat University)',
+    creatorAttribution: 'Mobility Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Back flat against wall, slide arms from "W" to "Y" while maintaining contact and core brace, testing thoracic extension without lumbar arching.',
     coachingNotes: 'Do not allow ribs to flare up or lower back to leave wall.',
@@ -1058,7 +1058,7 @@ export const SESSION_UPPER_B: WorkoutSession = {
   subtitle: 'Vertical Push/Pull & Functional Calisthenics',
   focus: 'Scapular plane vertical pressing, strict calisthenic pulling progressions, tendon collagen remodeling, and core compression.',
   estimatedDurationMinutes: 50,
-  creatorInfluences: ['Yellow Dude', 'Marcus Filly', 'Jeff Cavaliere (ATHLEAN-X)', 'Dr. Aaron Horschig', 'Lucas Hardie (Range of Strength)', 'Derek (More Plates More Dates)', 'Dr. Mike Israetel (Renaissance Periodization)', 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)', 'House of Hypertrophy'],
+  creatorInfluences: [],
   equipmentRequired: ['pull_up_bar', 'indian_clubs', 'barbell', 'rack', 'kettlebell'],
   warmup: UPPER_B_WARMUP,
   warmupSequence: UPPER_B_WARMUP,
@@ -1099,7 +1099,7 @@ export const SESSION_UPPER_B: WorkoutSession = {
       restSeconds: 120,
       equipment: 'pull_up_bar',
       muscleGroups: ['Latissimus Dorsi', 'Biceps Brachii', 'Brachialis', 'Lower Trapezius'],
-      biomechanicalRationale: 'Yellow Dude tendon remodeling protocol: submaximal volume ladders avoid CNS failure, while strict 4-second eccentric negatives trigger tenocyte collagen synthesis.',
+      biomechanicalRationale: 'Tendon remodeling protocol: submaximal volume ladders avoid CNS failure, while strict 4-second eccentric negatives trigger tenocyte collagen synthesis.',
       progressionRule: 'Master Gate 3 (3x5 4s negatives) before unassisted Gate 4 ladders (1-2-3 rounds). When 4 rounds complete with 0 form breakdown, add kettlebell dip belt.',
       regression: {
         condition: 'Unable to perform 1 strict unassisted pull-up',
@@ -1113,7 +1113,7 @@ export const SESSION_UPPER_B: WorkoutSession = {
     },
     {
       id: 't3_filly_kb_z_press',
-      name: 'Marcus Filly Single-Arm Kettlebell Z-Press',
+      name: 'Single-Arm Kettlebell Z-Press',
       tier: 'T3',
       targetSets: 3,
       targetReps: '8–10',
@@ -1129,7 +1129,7 @@ export const SESSION_UPPER_B: WorkoutSession = {
     },
     {
       id: 't3_yellow_dude_lsit',
-      name: 'Yellow Dude L-Sit Compression Holds',
+      name: 'L-Sit Compression Holds',
       tier: 'T3',
       targetSets: 3,
       targetReps: '15–25s',
@@ -1159,7 +1159,7 @@ export const SESSION_UPPER_B: WorkoutSession = {
     },
     {
       id: 't3_german_hang_prep',
-      name: 'Range of Strength Active Shoulder Extension Hang (German Hang Prep)',
+      name: 'Active Shoulder Extension Hang (German Hang Prep)',
       tier: 'T3',
       targetSets: 2,
       targetReps: '20–30s hold',
@@ -1185,9 +1185,9 @@ export const WORKOUT_SESSIONS: WorkoutSession[] = [
 const RUN_WARMUP: WarmupExercise[] = [
   {
     id: 'w_run_1',
-    name: 'Squat U Ankle Mobilization & Tripod Rooting',
+    name: 'Ankle Mobilization & Tripod Rooting',
     targetDurationOrReps: '2 sets x 10 reps / side',
-    creatorAttribution: 'Dr. Aaron Horschig (Squat University)',
+    creatorAttribution: 'Mobility Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Pre-Run Primer: Restores talocrural dorsiflexion and roots the 3-point foot tripod to prevent excessive pronation and knee valgus collapse during ground strike.',
     coachingNotes: 'Drive knee tracking over 2nd toe while keeping heel glued to floor. 2s hold at peak stretch.',
@@ -1200,10 +1200,10 @@ const RUN_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_run_2',
-    name: 'ATG Tibialis Wall Raises',
+    name: 'Tibialis Wall Raises',
     targetDurationOrReps: '2 sets x 15 reps',
     tempo: '2011',
-    creatorAttribution: 'Ben Patrick (ATG)',
+    creatorAttribution: 'Movement Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Pre-Run Primer: Pre-activates the primary anterior decelerator of the lower leg to absorb 3–4x bodyweight ground impact forces and protect the patellar tendon.',
     coachingNotes: 'Keep knees straight against wall, flex toes up hard, pause 1s at top.',
@@ -1216,9 +1216,9 @@ const RUN_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_run_3',
-    name: 'Dr. Alyssa Lu Glute Medius & Pelvic Leveling',
+    name: 'Glute Medius & Pelvic Leveling',
     targetDurationOrReps: '2 sets x 10 reps / side',
-    creatorAttribution: 'Dr. Alyssa Lu (Proformance)',
+    creatorAttribution: 'Physical Therapy',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Pre-Run Primer: Stabilizes the pelvis in single-leg stance, eliminating Trendelenburg hip drop and IT band friction syndrome during running gait.',
     coachingNotes: 'Hinge slightly, drive knee outward against isometric hold, squeeze side glute.',
@@ -1237,7 +1237,7 @@ export const SESSION_RUN: WorkoutSession = {
   subtitle: 'Knee-Friendly Aerobic Base & Recovery Flush',
   focus: 'Zone 2 aerobic base building, patellar tendon protection, backward running, and post-run kinetic chain restoration.',
   estimatedDurationMinutes: 45,
-  creatorInfluences: ['Ben Patrick (ATG)', 'Dr. Aaron Horschig', 'Coach Eugene Teo', 'Dr. Alyssa Lu', 'Derek (More Plates More Dates)'],
+  creatorInfluences: [],
   equipmentRequired: ['bodyweight', 'rowing_machine'],
   warmup: RUN_WARMUP,
   warmupSequence: RUN_WARMUP,
@@ -1258,7 +1258,7 @@ export const SESSION_RUN: WorkoutSession = {
     },
     {
       id: 't2_backward_locomotion',
-      name: 'Ben Patrick Backward Locomotion / Backward Running',
+      name: 'Backward Locomotion / Backward Running',
       tier: 'T2',
       targetSets: 3,
       targetReps: '3 minutes',
@@ -1267,7 +1267,7 @@ export const SESSION_RUN: WorkoutSession = {
       restSeconds: 120,
       equipment: 'bodyweight',
       muscleGroups: ['Vastus Medialis Oblique (VMO)', 'Patellar Tendon', 'Tibialis Anterior'],
-      biomechanicalRationale: 'Ben Patrick ATG cornerstone: Backward walking and jogging eliminates decelerative braking shear on the patellar tendon while pumping rich blood supply directly into the VMO.',
+      biomechanicalRationale: 'Tendon health cornerstone: Backward walking and jogging eliminates decelerative braking shear on the patellar tendon while pumping rich blood supply directly into the VMO.',
       progressionRule: 'Increase incline or add 1 minute per set as knee tendon resilience improves.'
     },
     {
@@ -1286,7 +1286,7 @@ export const SESSION_RUN: WorkoutSession = {
     },
     {
       id: 't3_atg_couch_stretch_run',
-      name: 'Ben Patrick ATG Couch Stretch',
+      name: 'Couch Stretch',
       tier: 'T3',
       targetSets: 2,
       targetReps: '45–60s / side',
@@ -1300,7 +1300,7 @@ export const SESSION_RUN: WorkoutSession = {
     },
     {
       id: 't3_atg_elephant_walk_run',
-      name: 'ATG Elephant Walks (Active Reciprocal Lengthening)',
+      name: 'Elephant Walks (Active Reciprocal Lengthening)',
       tier: 'T3',
       targetSets: 2,
       targetReps: '20 reps / leg',
@@ -1318,9 +1318,9 @@ export const SESSION_RUN: WorkoutSession = {
 const BJJ_WARMUP: WarmupExercise[] = [
   {
     id: 'w_bjj_1',
-    name: 'McGill Down-Regulation Diaphragmatic Breathing',
+    name: 'Down-Regulation Diaphragmatic Breathing',
     targetDurationOrReps: '3 minutes (4s Inhale, 7s Exhale)',
-    creatorAttribution: 'Dr. Stuart McGill',
+    creatorAttribution: 'Spine Health',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Down-regulates high sympathetic nervous system tone and resets ribcage positioning following intense 1-hour grappling.',
     coachingNotes: 'Lie supine with feet elevated. Inhale 4s through nose, exhale 7s through mouth, releasing all spinal tension.',
@@ -1339,14 +1339,14 @@ export const SESSION_POST_BJJ: WorkoutSession = {
   subtitle: 'Spinal Decompression, Cervical Realignment, Grip & Grappler Ab Reset',
   focus: 'Post-grappling cervical retraction, spinal disc decompression, groin/hip opener, forearm synovial flush, and restorative core compression.',
   estimatedDurationMinutes: 20,
-  creatorInfluences: ['Dr. Stuart McGill', 'Dr. Alyssa Lu', 'Jeff Cavaliere (ATHLEAN-X)', 'Marcus Filly', 'Lucas Hardie (Range of Strength)', 'Derek (More Plates More Dates)', 'Dr. Mike Israetel (Renaissance Periodization)', 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)', 'House of Hypertrophy'],
+  creatorInfluences: [],
   equipmentRequired: ['pull_up_bar', 'indian_clubs', 'bodyweight'],
   warmup: BJJ_WARMUP,
   warmupSequence: BJJ_WARMUP,
   exercises: [
     {
       id: 't3_bjj_cervical_retraction',
-      name: 'Dr. Stuart McGill Cervical Retraction & Chin Tuck',
+      name: 'Cervical Retraction & Chin Tuck',
       tier: 'T3',
       targetSets: 2,
       targetReps: '10 reps (5s hold)',
@@ -1388,7 +1388,7 @@ export const SESSION_POST_BJJ: WorkoutSession = {
     },
     {
       id: 't3_bjj_hip_reset',
-      name: 'Dr. Alyssa Lu 90/90 Hip Reset & Groin Adductor Release',
+      name: '90/90 Hip Reset & Groin Adductor Release',
       tier: 'T3',
       targetSets: 2,
       targetReps: '5 deep breath cycles / side',
@@ -1417,7 +1417,7 @@ export const SESSION_POST_BJJ: WorkoutSession = {
     {
       id: 't3_bjj_hanging_knee_raise',
       baseExerciseId: 't3_athlean_hanging_knee_raise',
-      name: 'Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression',
+      name: 'Post-Grappling Hanging Knee Raise & Pelvic Decompression',
       tier: 'T3',
       targetSets: 3,
       targetReps: '10–12',
@@ -1426,12 +1426,12 @@ export const SESSION_POST_BJJ: WorkoutSession = {
       restSeconds: 45,
       equipment: 'pull_up_bar',
       muscleGroups: ['Lower Rectus Abdominis', 'Iliopsoas', 'Transversus Abdominis', 'Forearms'],
-      biomechanicalRationale: 'Jeff Cavaliere Kinetic Sequence Step 1: Bottom-Up vector combined with gravitational overhead traction. Curling the pelvis upward into posterior tilt engages the lower rectus abdominis while opening compressed lumbar discs from ground guard play, without allowing the psoas to hyperextend the lumbar spine.',
+      biomechanicalRationale: 'Kinetic Sequence Step 1: Bottom-Up vector combined with gravitational overhead traction. Curling the pelvis upward into posterior tilt engages the lower rectus abdominis while opening compressed lumbar discs from ground guard play, without allowing the psoas to hyperextend the lumbar spine.',
       progressionRule: 'Master 3x12 knees-to-chest with 2s hold at peak posterior pelvic tilt before progressing to straight-leg hanging raises.',
       regression: {
         condition: 'Grip fatigue, shoulder discomfort, or lower back arching',
         exerciseId: 't3_bjj_reverse_pelvic_curl',
-        name: 'Athlean-X Lying Reverse Pelvic Curls on Floor',
+        name: 'Lying Reverse Pelvic Curls on Floor',
         instructions: 'Lie supine on floor, hands flat or gripping rack base. Curl knees toward chest and actively elevate pelvis 2–3 inches off floor. Do NOT swing legs.',
         tempo: '2112',
         targetReps: '12–15',
@@ -1441,7 +1441,7 @@ export const SESSION_POST_BJJ: WorkoutSession = {
     {
       id: 't3_bjj_hollow_body_hold',
       baseExerciseId: 't3_athlean_hollow_body_hold',
-      name: 'Athlean-X Grappler Hollow Body Core Compression Hold',
+      name: 'Grappler Hollow Body Core Compression Hold',
       tier: 'T3',
       targetSets: 3,
       targetReps: '25–35s',
@@ -1450,13 +1450,13 @@ export const SESSION_POST_BJJ: WorkoutSession = {
       restSeconds: 45,
       equipment: 'bodyweight',
       muscleGroups: ['Rectus Abdominis', 'Transversus Abdominis', 'Hip Flexors', 'Quadriceps'],
-      biomechanicalRationale: 'Jeff Cavaliere & Yellow Dude Core Compression: Mid-Range Anti-Extension. Clamps the lumbar spine flush against the floor with zero air gap, re-centering pelvic alignment and rebuilding 360-degree cylindrical intra-abdominal pressure after ground fighting.',
+      biomechanicalRationale: 'Core Compression: Mid-Range Anti-Extension. Clamps the lumbar spine flush against the floor with zero air gap, re-centering pelvic alignment and rebuilding 360-degree cylindrical intra-abdominal pressure after ground fighting.',
       progressionRule: 'Build from bent-knee tuck hollow hold (20s) to full straight-arm, straight-leg hollow hold (45s).'
     },
     {
       id: 't3_bjj_mcgill_curl_up',
       baseExerciseId: 't3_athlean_iso_crunch',
-      name: 'Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace',
+      name: 'Post-Grappling Isometric Curl-Up & Vacuum Brace',
       tier: 'T3',
       targetSets: 3,
       targetReps: '10–12 (3s hold)',
@@ -1465,12 +1465,12 @@ export const SESSION_POST_BJJ: WorkoutSession = {
       restSeconds: 45,
       equipment: 'bodyweight',
       muscleGroups: ['Upper Rectus Abdominis', 'Transversus Abdominis', 'Deep Core Cylinder'],
-      biomechanicalRationale: 'Dr. Stuart McGill spinal-sparing gold standard. One knee bent, hands supporting under the lumbar lordosis to preserve neutral spine while elevating the head and shoulders as a single rigid unit. Delivers maximum rectus abdominis motor recruitment with zero disc shear force.',
+      biomechanicalRationale: 'Spinal-sparing gold standard. One knee bent, hands supporting under the lumbar lordosis to preserve neutral spine while elevating the head and shoulders as a single rigid unit. Delivers maximum rectus abdominis motor recruitment with zero disc shear force.',
       progressionRule: 'Hold each rep for 3–5 seconds with full diaphragmatic exhalation and abdominal bracing.'
     },
     {
       id: 't3_bjj_back_bridge_extension',
-      name: 'Range of Strength Back Bridge & Thoracic Extension Arc',
+      name: 'Back Bridge & Thoracic Extension Arc',
       tier: 'T3',
       targetSets: 2,
       targetReps: '20–30s hold',
@@ -1479,12 +1479,12 @@ export const SESSION_POST_BJJ: WorkoutSession = {
       restSeconds: 45,
       equipment: 'bodyweight',
       muscleGroups: ['Spinal Extensors (Erector Spinae)', 'Thoracic Spine', 'Gluteus Maximus', 'Pectorals & Anterior Deltoids'],
-      biomechanicalRationale: 'Lucas Hardie Range of Strength "Knees-over-toes for the lower back". Counterbalances violent spinal flexion from hours of grappling by smoothly distributing active spinal extension across the entire vertebral column, expanding the ribcage and restoring hip extension.',
+      biomechanicalRationale: 'Counterbalances violent spinal flexion from hours of grappling by smoothly distributing active spinal extension across the entire vertebral column, expanding the ribcage and restoring hip extension.',
       progressionRule: 'Master feet-elevated or tabletop bridge before progressing to full floor wheel back bridge.',
       regression: {
         condition: 'Wrist discomfort, excessive lumbar pinching, or tight shoulders',
         exerciseId: 't3_bjj_tabletop_bridge',
-        name: 'Range of Strength Reverse Tabletop Glute Bridge',
+        name: 'Reverse Tabletop Glute Bridge',
         instructions: 'Hands behind hips on floor, fingers pointing backward. Press through heels and hands to drive hips toward ceiling, creating a flat tabletop torso with neutral neck.',
         tempo: 'Isometric Arc',
         targetReps: '20–30s hold',
@@ -1493,7 +1493,7 @@ export const SESSION_POST_BJJ: WorkoutSession = {
     },
     {
       id: 't3_bjj_downregulation_electrolytes',
-      name: 'Derek (MPMD) Down-Regulation Breathing & Electrolyte Hydration Protocol',
+      name: 'Down-Regulation Breathing & Electrolyte Hydration Protocol',
       tier: 'T3',
       targetSets: 1,
       targetReps: '3–5 min nasal box breathing',
@@ -1507,7 +1507,7 @@ export const SESSION_POST_BJJ: WorkoutSession = {
     },
     {
       id: 't3_bjj_rp_sfr_loaded_stretch',
-      name: 'Dr. Mike Israetel (RP) High-SFR Loaded Stretched-Position Hang',
+      name: 'High-SFR Loaded Stretched-Position Hang',
       tier: 'T3',
       targetSets: 1,
       targetReps: '45–60s hold',
@@ -1516,12 +1516,12 @@ export const SESSION_POST_BJJ: WorkoutSession = {
       restSeconds: 30,
       equipment: 'pull_up_bar',
       muscleGroups: ['Latissimus Dorsi', 'Pectoralis Major', 'Thoracolumbar Fascia', 'Subacromial Space'],
-      biomechanicalRationale: 'Dr. Mike Israetel (Renaissance Periodization) loaded stretch-mediated hypertrophy & high Stimulus-to-Fatigue Ratio (SFR). Hanging under controlled tension in deep lengthened ranges triggers potent local muscle remodeling with zero axial lumbar compression or systemic CNS exhaustion.',
+      biomechanicalRationale: 'Loaded stretch-mediated hypertrophy & high Stimulus-to-Fatigue Ratio (SFR). Hanging under controlled tension in deep lengthened ranges triggers potent local muscle remodeling with zero axial lumbar compression or systemic CNS exhaustion.',
       progressionRule: 'Advance from foot-assisted hang to full bodyweight 60s passive/active stretch; relax into belly breathing.'
     },
     {
       id: 't3_bjj_sbs_autoreg_recovery_check',
-      name: 'Stronger By Science (SBS) Autoregulated Velocity & Reactive Recovery Check',
+      name: 'Autoregulated Velocity & Reactive Recovery Check',
       tier: 'T3',
       targetSets: 1,
       targetReps: '2–3 min flow',
@@ -1539,10 +1539,10 @@ export const SESSION_POST_BJJ: WorkoutSession = {
 const DAILY_ABS_WARMUP: WarmupExercise[] = [
   {
     id: 'w_abs_1',
-    name: 'Dr. Stuart McGill Cat-Camel Spinal Wave',
+    name: 'Cat-Camel Spinal Wave',
     targetDurationOrReps: '2 sets x 6 slow cycles',
     tempo: '4040',
-    creatorAttribution: 'Dr. Stuart McGill',
+    creatorAttribution: 'Spine Health',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Gently articulates the entire spinal column through flexion and extension without external load. Flushes synovial fluid across intervertebral disc spaces, reducing internal disc shear before core contraction.',
     coachingNotes: 'Slow, fluid motion: 4s gentle arch up, 4s smooth sag down. Move only within pain-free active range without forcing end ranges.',
@@ -1555,9 +1555,9 @@ const DAILY_ABS_WARMUP: WarmupExercise[] = [
   },
   {
     id: 'w_abs_2',
-    name: 'Athlean-X 90/90 Diaphragmatic Vacuum Breath',
+    name: '90/90 Diaphragmatic Vacuum Breath',
     targetDurationOrReps: '2 sets x 5 deep breath cycles',
-    creatorAttribution: 'Jeff Cavaliere (ATHLEAN-X)',
+    creatorAttribution: 'Movement Prep',
     equipment: 'bodyweight',
     biomechanicalPurpose: 'Forces full, active exhalation to recruit the deep transversus abdominis. Establishing 360° intra-abdominal pressure (IAP) creates the natural weight-belt cylinder needed for safe daily core training.',
     coachingNotes: 'Inhale 4s through nose expanding belly 360°. Exhale forcefully through mouth for 7–8s until lungs are completely empty. Pull belly button toward spine and hold 3s.',
@@ -1572,11 +1572,11 @@ const DAILY_ABS_WARMUP: WarmupExercise[] = [
 
 export const SESSION_DAILY_ABS: WorkoutSession = {
   id: 'daily_abs',
-  title: 'Athlean-X Daily Abs',
+  title: 'Daily Core Routine',
   subtitle: 'Kinetic Chain 6-Minute Core Progression',
   focus: 'Daily bottom-up, rotational, top-down, and transverse abdominis core sequence based on Jeff Cavaliere\'s biomechanical ordering and Dr. Stuart McGill\'s spinal sparing principles.',
   estimatedDurationMinutes: 10,
-  creatorInfluences: ['Jeff Cavaliere (ATHLEAN-X)', 'Dr. Stuart McGill', 'Yellow Dude'],
+  creatorInfluences: [],
   equipmentRequired: ['pull_up_bar', 'bodyweight', 'kettlebell'],
   warmup: DAILY_ABS_WARMUP,
   warmupSequence: DAILY_ABS_WARMUP,

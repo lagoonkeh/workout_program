@@ -131,7 +131,7 @@ export function analyzeDailyReadiness(
         proposedValue: squatEx.regression.name,
         proposedLabel: `Swap to ${squatEx.regression.name}`,
         rationale: `Pain rating ${entry.kneePainScore}/10 triggers pain-free box regression to offload patellar tendon shear and enforce a 90° shin angle.`,
-        creatorInfluence: 'Ben Patrick (ATG) & Yellow Dude',
+        creatorInfluence: 'Auto-Regulation & Recovery',
         applied: false,
       });
 
@@ -146,7 +146,7 @@ export function analyzeDailyReadiness(
         proposedValue: '3210',
         proposedLabel: '3210 (3s slow descent, 2s pause, 1s up)',
         rationale: 'Slow eccentric loading stimulates tenocyte mechanotransduction without compressive tendon spikes.',
-        creatorInfluence: 'Yellow Dude & Dr. Aaron Horschig',
+        creatorInfluence: 'Auto-Regulation & Recovery',
         applied: false,
       });
     }
@@ -179,7 +179,7 @@ export function analyzeDailyReadiness(
         proposedValue: '3111',
         proposedLabel: '3111 (Controlled hinge, 1s pause above knee)',
         rationale: 'Limits end-range stretch reflex on guarded hamstrings while maintaining strict lat & spinal tension.',
-        creatorInfluence: 'Eugene Teo & Dr. Alyssa Lu',
+        creatorInfluence: 'Auto-Regulation & Recovery',
         applied: false,
       });
     }
@@ -207,7 +207,7 @@ export function analyzeDailyReadiness(
           proposedValue: reducedLoad,
           proposedLabel: `${reducedLoad} lbs (-10% Autoregulation Load)`,
           rationale: 'Preserves neuromuscular bar speed and motor groove without accumulating deep central nervous system fatigue on low-energy days.',
-          creatorInfluence: 'GZCL Method Autoregulation',
+          creatorInfluence: 'Auto-Regulation & Recovery',
           applied: false,
         });
       }
@@ -239,7 +239,7 @@ export function analyzeDailyReadiness(
         proposedValue: pressEx.regression.name,
         proposedLabel: `Swap to ${pressEx.regression.name}`,
         rationale: 'Reduces subacromial friction and allows natural scapulohumeral rotation under load.',
-        creatorInfluence: 'Athlean-X & Indian Club Rotational Prep',
+        creatorInfluence: 'Auto-Regulation & Recovery',
         applied: false,
       });
     }
@@ -252,7 +252,7 @@ export function analyzeDailyReadiness(
     );
   } else if (findings.length === 0) {
     findings.push(
-      'Standard readiness profile confirmed. Follow normal prescribed sets, weights, and Marcus Filly tempos.'
+      'Standard readiness profile confirmed. Follow normal prescribed sets, weights, and prescribed tempos.'
     );
   }
 

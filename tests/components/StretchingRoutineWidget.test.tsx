@@ -39,7 +39,7 @@ describe('StretchingRoutineWidget Component', () => {
     expect(screen.getByText(/Evidence-Based Stretching Routine/i)).toBeInTheDocument();
     expect(screen.getByText(/Diagnostic Insights from Past 2 Weeks/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Patellar tendon felt tight after 3rd set/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(/Alyssa Lu Couch Stretch & Psoas Contract-Relax/i)).toBeInTheDocument();
+    expect(screen.getByText(/Couch Stretch & Psoas Contract-Relax/i)).toBeInTheDocument();
   });
 
   it('toggles completion checkboxes and updates progress percentage', () => {
@@ -193,12 +193,12 @@ describe('StretchingRoutineWidget Component', () => {
     expect(screen.getByText(/Dance Frame Anterior Chain Contracture/i)).toBeInTheDocument();
 
     // All 7 Bachata stretches are present
-    expect(screen.getByText(/Ben Patrick \(ATG\) Dual-Angle Calf & Plantar Fascia Decompression/i)).toBeInTheDocument();
-    expect(screen.getByText(/Dr\. Alyssa Lu Couch Stretch & Psoas-QL Lateral Reach \(Hip Pop Reset\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Coach Eugene Teo 90\/90 Cuban Motion Hip Rotator & Piriformis Reset/i)).toBeInTheDocument();
-    expect(screen.getByText(/Dr\. Stuart McGill Sensual Wave Decompression & Lateral Child's Pose/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dual-Angle Calf & Plantar Fascia Decompression/i)).toBeInTheDocument();
+    expect(screen.getByText(/Couch Stretch & Psoas-QL Lateral Reach \(Hip Pop Reset\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/90\/90 Cuban Motion Hip Rotator & Piriformis Reset/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sensual Wave Decompression & Lateral Child's Pose/i)).toBeInTheDocument();
     expect(screen.getByText(/Side-Lying Thoracic Windmill & Ribcage Decompression/i)).toBeInTheDocument();
-    expect(screen.getByText(/Jeff Cavaliere \(ATHLEAN-X\) Dance Frame Reset & Pec Minor Distraction/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dance Frame Reset & Pec Minor Distraction/i)).toBeInTheDocument();
     expect(screen.getByText(/Viparita Karani \(Legs-Up-The-Wall\) & Autonomic Parasympathetic Sigh/i)).toBeInTheDocument();
 
     // Progress shows 0 / 7 Completed (0%)

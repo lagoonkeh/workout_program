@@ -42,7 +42,7 @@ describe('ExerciseCard - Jeff Nippard Long-Length Partials (LLP) Protocol', () =
 
     expect(screen.getByTestId('expanded-llp-badge')).toBeInTheDocument();
     expect(screen.getByTestId('llp-protocol-banner')).toBeInTheDocument();
-    expect(screen.getByText(/Lengthened Partials \(LLPs, Jeff Nippard\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Lengthened Partials \(LLPs\)/i)).toBeInTheDocument();
   });
 
   it('toggles the scientific rationale explanation when clicking science cue button', () => {

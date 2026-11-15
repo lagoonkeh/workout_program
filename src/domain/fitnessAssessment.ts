@@ -283,7 +283,7 @@ export function calculateMcGillRatios(
 
   const clinicalFeedback: string[] = [];
   if (extSec < 160) {
-    clinicalFeedback.push(`Biering-Sørensen extension hold (${extSec}s) is below Dr. McGill's 160s disc protection standard.`);
+    clinicalFeedback.push(`Biering-Sørensen extension hold (${extSec}s) is below the 160s disc protection standard.`);
   }
   if (flexionToExtensionStatus !== 'optimal') {
     clinicalFeedback.push(`Flexion-to-Extension ratio (${flexionToExtensionRatio}) exceeds 1.0. Back extensor endurance must exceed abdominal wall endurance to prevent flexion-induced disc herniation.`);
@@ -313,7 +313,7 @@ export function calculateMcGillRatios(
  */
 export function evaluateDeadHang(seconds: number): ScoreTierInfo {
   if (seconds >= 120) {
-    return { tier: 'Elite', badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400', description: '2-Minute Peter Attia Longevity Gold Standard', percentileRank: 'Top 5%' };
+    return { tier: 'Elite', badgeClass: 'bg-emerald-950/70 border-emerald-500 text-emerald-300', dotClass: 'bg-emerald-400', description: '2-Minute Longevity Gold Standard', percentileRank: 'Top 5%' };
   }
   if (seconds >= 90) {
     return { tier: 'Advanced', badgeClass: 'bg-blue-950/70 border-blue-500 text-blue-300', dotClass: 'bg-blue-400', description: 'Exceptional Shoulder Decompression & Grip', percentileRank: 'Top 15%' };
@@ -471,5 +471,5 @@ export const DEFAULT_BASELINE_ASSESSMENT: QuarterlyAssessmentRecord = {
     atgSplitSquatWeightLbs: 40,
     pancakeSplitInches: 3.5,
   },
-  notes: 'Quarterly fitness assessment battery initialized. Targeting Peter Attia 2-min hang and McGill core balance ratio integrity.',
+  notes: 'Quarterly fitness assessment battery initialized. Targeting 2-min hang and core balance ratio integrity.',
 };

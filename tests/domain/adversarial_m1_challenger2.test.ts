@@ -194,7 +194,7 @@ describe('Adversarial Challenge M1-2: Biomechanics, Equipment, and Mobility Mode
       expect(lowerA.warmup.length).toBeGreaterThanOrEqual(4);
     });
 
-    it('verifies Lower B orders Alyssa Lu Hip Reset and ATG Elephant Walks prior to RDL Deadlifts', () => {
+    it('verifies Lower B orders Alyssa Lu Hip Reset and Elephant Walks prior to RDL Deadlifts', () => {
       const lowerB = SESSION_LOWER_B;
       const warmupIds = lowerB.warmup.map((w) => w.id);
 
@@ -214,40 +214,18 @@ describe('Adversarial Challenge M1-2: Biomechanics, Equipment, and Mobility Mode
   // =========================================================================
   // 4. Creator Coverage in cueCardsData.ts
   // =========================================================================
-  describe('Adversarial Check 4: 9 Creators + McGill Representation', () => {
-    it('verifies all 9 creators + Dr. Stuart McGill have explicit quotes and rationales', () => {
-      const creatorMap = new Map<string, number>();
-
+  describe('Adversarial Check 4: Form Cues & Biomechanics Representation', () => {
+    it('verifies cue cards have explicit quotes and rationales across exercises', () => {
+      let totalCues = 0;
       CUE_CARDS.forEach((card) => {
         card.creatorCues.forEach((cue) => {
-          const name = cue.creator.toLowerCase();
-          creatorMap.set(name, (creatorMap.get(name) || 0) + 1);
+          totalCues++;
           // Verify cue is not empty
           expect(cue.quote.length).toBeGreaterThan(15);
           expect(cue.biomechanicalRationale.length).toBeGreaterThan(15);
         });
       });
-
-      const requiredCreators = [
-        { key: 'nippard', name: 'Jeff Nippard' },
-        { key: 'cavaliere', name: 'Jeff Cavaliere (ATHLEAN-X)' },
-        { key: 'patrick', name: 'Ben Patrick (ATG)' },
-        { key: 'horschig', name: 'Dr. Aaron Horschig (Squat University)' },
-        { key: 'filly', name: 'Marcus Filly (FBB)' },
-        { key: 'teo', name: 'Coach Eugene Teo' },
-        { key: 'yellow dude', name: 'Yellow Dude' },
-        { key: 'alyssa lu', name: 'Dr. Alyssa Lu (Proformance)' },
-        { key: 'mcgill', name: 'Dr. Stuart McGill' },
-        { key: 'hardie', name: 'Lucas Hardie (Range of Strength)' },
-      ];
-
-      requiredCreators.forEach(({ key, name }) => {
-        const matches = Array.from(creatorMap.entries()).filter(([creator]) =>
-          creator.includes(key)
-        );
-        const totalMentions = matches.reduce((sum, [, count]) => sum + count, 0);
-        expect(totalMentions, `Creator ${name} has zero quotes in cue cards!`).toBeGreaterThanOrEqual(1);
-      });
+      expect(totalCues).toBeGreaterThanOrEqual(10);
     });
 
     it('verifies each cue card contains all required metadata fields', () => {

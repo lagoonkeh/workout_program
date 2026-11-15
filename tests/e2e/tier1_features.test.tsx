@@ -40,12 +40,10 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       expect(screen.getByRole('button', { name: /Upper B/i })).toBeInTheDocument();
     });
 
-    it('F1.2: displays creator attribution badges for elite fitness creators and McGill', () => {
+    it('F1.2: displays program philosophy and strength badges', () => {
       render(<App />);
-      expect(screen.getByText(/GZCL \+ 9 Creators/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/Ben Patrick \(ATG\)/i).length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText(/Coach Eugene Teo/i).length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText(/Dr. Stuart McGill/i).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText(/Strength & Hypertrophy/i)).toBeInTheDocument();
+      expect(screen.getByText(/4-Day Upper\/Lower/i)).toBeInTheDocument();
     });
 
     it('F1.3: enforces GZCL tier hierarchy (T1 Strength, T2 Hypertrophy, T3 Accessory) on exercises', () => {
@@ -111,9 +109,9 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       expect(screen.getByText(/Strengthens the primary lower-leg decelerator/i)).toBeInTheDocument();
     });
 
-    it('F2.5: includes Single-Leg Patrick Step-Downs to isolate VMO at early knee flexion', () => {
+    it('F2.5: includes Single-Leg Step-Downs to isolate VMO at early knee flexion', () => {
       render(<App />);
-      expect(screen.getByText(/Single-Leg Patrick Step-Downs/i)).toBeInTheDocument();
+      expect(screen.getByText(/Single-Leg Step-Downs/i)).toBeInTheDocument();
       // Expand rationale for Patrick Step-Downs (exercise index 3)
       const rationaleBtns = screen.getAllByRole('button', { name: /Biomechanical Rationale/i });
       fireEvent.click(rationaleBtns[3]);
@@ -135,60 +133,59 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       expect(warmupBtn).toHaveAttribute('aria-expanded', 'false');
     });
 
-    it('F3.2: includes Eugene Teo standing calf raise pre-fatigue in Lower A warm-up', () => {
+    it('F3.2: includes standing calf raise pre-fatigue in Lower A warm-up', () => {
       render(<App />);
-      expect(screen.getByText(/Eugene Teo Standing Calf Raise \(Pre-Fatigue\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Standing Calf Raise \(Pre-Fatigue\)/i)).toBeInTheDocument();
       expect(screen.getByText(/Pre-activating the triceps surae eliminates compensatory forward tibial shear/i)).toBeInTheDocument();
     });
 
-    it('F3.3: includes Eugene Teo light KB Romanian hinge pre-fatigue in Lower A warm-up', () => {
+    it('F3.3: includes light KB Romanian hinge pre-fatigue in Lower A warm-up', () => {
       render(<App />);
-      expect(screen.getByText(/Eugene Teo Light KB Romanian Hinge \(Pre-Fatigue\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Light KB Romanian Hinge \(Pre-Fatigue\)/i)).toBeInTheDocument();
       expect(screen.getByText(/Pre-activates the hamstring co-contraction mechanism at the knee joint/i)).toBeInTheDocument();
     });
 
-    it('F3.4: includes Dr. Alyssa Lu 90/90 positional breathing in Lower A warm-up', () => {
+    it('F3.4: includes 90/90 positional breathing in Lower A warm-up', () => {
       render(<App />);
-      expect(screen.getByText(/Alyssa Lu 90\/90 Positional Breathing \+ Bridge/i)).toBeInTheDocument();
-      expect(screen.getByText(/Dr. Alyssa Lu \(Proformance\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/90\/90 Positional Breathing \+ Bridge/i)).toBeInTheDocument();
     });
 
-    it('F3.5: incorporates ATG Elephant Walks in Lower B warm-up', () => {
+    it('F3.5: incorporates Elephant Walks in Lower B warm-up', () => {
       render(<App />);
       fireEvent.click(screen.getByRole('button', { name: /Lower B/i }));
-      expect(screen.getByText(/ATG Elephant Walks \(Active Reciprocal Lengthening\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Elephant Walks \(Active Reciprocal Lengthening\)/i)).toBeInTheDocument();
       expect(screen.getByText(/Alternating active quadriceps contraction forces reciprocal inhibition/i)).toBeInTheDocument();
     });
   });
 
   // =========================================================================
-  // F4: Creator Cue Cards Encyclopedia
+  // F4: Form Cue Cards Encyclopedia
   // =========================================================================
-  describe('F4: Creator Cue Cards Encyclopedia', () => {
-    it('F4.1: opens Creator Cue Card modal when clicking "View Creator Cues & Science"', () => {
+  describe('F4: Form Cue Cards Encyclopedia', () => {
+    it('F4.1: opens Form Cue Card modal when clicking "View Form Cues & Science"', () => {
       render(<App />);
-      const cueBtns = screen.getAllByRole('button', { name: /View Creator Cues & Science/i });
+      const cueBtns = screen.getAllByRole('button', { name: /View Form Cues & Science/i });
       fireEvent.click(cueBtns[0]);
 
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
-      expect(within(dialog).getByText(/Elite Creator Cues & Biomechanics/i)).toBeInTheDocument();
+      expect(within(dialog).getByText(/Form Cues & Biomechanics/i)).toBeInTheDocument();
       expect(within(dialog).getByText(/Barbell Back Squat/i)).toBeInTheDocument();
     });
 
-    it('F4.2: displays creator quotes, biomechanical purpose, setup instructions, and common faults', () => {
+    it('F4.2: displays cues, biomechanical purpose, setup instructions, and common faults', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByText(/Dr. Aaron Horschig \(Squat University\)/i)).toBeInTheDocument();
+      expect(within(dialog).getByText(/Form Cue 1/i)).toBeInTheDocument();
       expect(within(dialog).getByText(/Common Faults to Avoid/i)).toBeInTheDocument();
       expect(within(dialog).getByText(/Setup & Equipment/i)).toBeInTheDocument();
     });
 
     it('F4.3: closes Cue Card modal on Close button click', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', { name: /Close Cue Card Modal/i }));
@@ -197,7 +194,7 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
 
     it('F4.4: closes Cue Card modal when pressing the Escape key', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
 
       fireEvent.keyDown(window, { key: 'Escape' });
@@ -411,22 +408,22 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
   });
 
   // =========================================================================
-  // F8: Marcus Filly Tempo Metronome
+  // F8: Tempo Metronome
   // =========================================================================
-  describe('F8: Marcus Filly Tempo Metronome', () => {
+  describe('F8: Tempo Metronome', () => {
     it('F8.1: launches Tempo Metronome modal from Exercise Card tempo pill', () => {
       render(<App />);
-      const tempoBtn = screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0];
+      const tempoBtn = screen.getAllByTitle(/Launch tempo metronome for/i)[0];
       fireEvent.click(tempoBtn);
 
-      expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
       // only timed exercises (holds, planks...) offer it; the barbell squat has no tempo launcher
-      expect(screen.queryByTitle(/Launch Marcus Filly metronome for 31X1/i)).not.toBeInTheDocument();
+      expect(screen.queryByTitle(/Launch tempo metronome for 31X1/i)).not.toBeInTheDocument();
     });
 
     it('F8.2: visualizes 4-digit tempo cadence strip (Eccentric, Bottom, Concentric, Top)', () => {
       render(<TempoMetronomeWidget initialTempo="31X1" />);
-      expect(screen.getByText(/Functional Bodybuilding 4-Digit Cadence/i)).toBeInTheDocument();
+      expect(screen.getByText(/4-Digit Cadence/i)).toBeInTheDocument();
 
       expect(screen.getByText(/^Eccentric$/i)).toBeInTheDocument();
       expect(screen.getByText(/^Bottom$/i)).toBeInTheDocument();
@@ -436,7 +433,7 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
 
     it('F8.3: allows selecting target reps (5, 8, 10, 12, 15, Continuous)', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0]);
+      fireEvent.click(screen.getAllByTitle(/Launch tempo metronome for/i)[0]);
 
       const rep10Btn = screen.getByRole('button', { name: '10' });
       fireEvent.click(rep10Btn);
@@ -447,9 +444,9 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       expect(screen.getByText(/\(Cont\.\)/i)).toBeInTheDocument();
     });
 
-    it('F8.4: applies standard presets (Marcus Filly Standard, Knee Rehab, Eccentric Hypertrophy)', () => {
+    it('F8.4: applies standard presets (Standard Controlled, Knee Rehab, Eccentric Hypertrophy)', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0]);
+      fireEvent.click(screen.getAllByTitle(/Launch tempo metronome for/i)[0]);
 
       const kneeRehabPreset = screen.getByRole('button', { name: /Knee & Tendon Rehab/i });
       fireEvent.click(kneeRehabPreset);
@@ -459,11 +456,11 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
 
     it('F8.5: closes Tempo Metronome modal cleanly', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0]);
-      expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+      fireEvent.click(screen.getAllByTitle(/Launch tempo metronome for/i)[0]);
+      expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', { name: /Close Metronome/i }));
-      expect(screen.queryByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: /Tempo Metronome/i })).not.toBeInTheDocument();
     });
   });
 
@@ -584,9 +581,9 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       fireEvent.click(screen.getByRole('tab', { name: /Mobility/i }));
 
       expect(screen.getByText(/Mobility & Flexibility Tracker/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/ATG Elephant Walks/i).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/Elephant Walks/i).length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText(/Knee-to-Wall/i).length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText(/ATG Split Squat Elevation/i).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/Split Squat Elevation/i).length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText(/Biering-Sørensen/i).length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText(/Dead Hang/i).length).toBeGreaterThanOrEqual(1);
     });
@@ -598,7 +595,7 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
       const k2wTab = screen.getAllByText(/Knee-to-Wall/i)[0];
       fireEvent.click(k2wTab);
 
-      expect(screen.getByText(/Dr. Aaron Horschig \(Squat University\)/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Talocrural Joint & Soleus Muscle/i).length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/4\.0–5\.0 inches/i)).toBeInTheDocument();
     });
 
@@ -793,7 +790,7 @@ describe('Tier 1: Feature Coverage (F1 to F14)', () => {
 
     it('F14.5: renders modal dialogs with backdrop blur and responsive centering', () => {
       render(<App />);
-      fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+      fireEvent.click(screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
 
       const dialog = screen.getByRole('dialog');
       expect(dialog).toHaveClass('fixed');

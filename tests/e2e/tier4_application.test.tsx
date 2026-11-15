@@ -44,8 +44,8 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
 
     // 2. Warm-up sequence is automatically expanded
     expect(screen.getByText(/Rowing Machine Reverse Leg-Drive/i)).toBeInTheDocument();
-    expect(screen.getByText(/Eugene Teo Standing Calf Raise \(Pre-Fatigue\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Eugene Teo Light KB Romanian Hinge \(Pre-Fatigue\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Standing Calf Raise \(Pre-Fatigue\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Light KB Romanian Hinge \(Pre-Fatigue\)/i)).toBeInTheDocument();
 
     // 3. View Technique cues for warm-up drill
     const warmupCueBtn = screen.getAllByRole('button', { name: /View Technique Cues/i })[0];
@@ -80,9 +80,9 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
     expect(restTimerSingleton.getSnapshot().durationSeconds).toBe(180);
 
     // 6. T2 ATG Split Squats: Launch Marcus Filly tempo metronome for 31X1 cadence
-    const atgTempoBtn = screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[1];
+    const atgTempoBtn = screen.getAllByTitle(/Launch tempo metronome for/i)[1];
     fireEvent.click(atgTempoBtn);
-    expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
     expect(screen.getAllByText(/31X1/i).length).toBeGreaterThanOrEqual(1);
     fireEvent.click(screen.getByRole('button', { name: /Close Metronome/i }));
 
@@ -118,12 +118,12 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
 
     // 2. Warm-Up sequence is automatically expanded: Indian clubs, Athlean-X scapular retractions, McGill Bird-Dog
     expect(screen.getByText(/Indian Club Rotational Circles & Casts/i)).toBeInTheDocument();
-    expect(screen.getByText(/Athlean-X Scapular Retractions & Depressions/i)).toBeInTheDocument();
-    expect(screen.getByText(/McGill Bird-Dog Core & Lat Tension Priming/i)).toBeInTheDocument();
+    expect(screen.getByText(/Scapular Retractions & Depressions/i)).toBeInTheDocument();
+    expect(screen.getByText(/Bird-Dog Core & Lat Tension Priming/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Start 10s Hold Clock/i })).toBeInTheDocument();
 
     // 3. T1 Barbell Bench Press: Open cue card modal to view 45-degree elbow tuck & scapular depression cues
-    const benchCueBtn = screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0];
+    const benchCueBtn = screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0];
     fireEvent.click(benchCueBtn);
     const cueModal = screen.getByRole('dialog');
     expect(cueModal).toBeInTheDocument();
@@ -146,14 +146,15 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
     fireEvent.click(rowRationaleBtn);
     expect(screen.getByText(/Driving the elbow back toward the hip pocket/i)).toBeInTheDocument();
 
-    // 7. T3 Athlean-X 20 Effective Reps (ER) Floor Press: test short rest-pause cluster preset
-    const floorPressRestBtn = screen.getAllByTitle(/Start \d+s rest timer/i)[2];
+    // 7. T3 20 Effective Reps (ER) Kettlebell Floor Press: test short rest-pause cluster preset
+    const floorPressCard = document.getElementById('exercise-card-t3_kb_floor_press_er')!;
+    const floorPressRestBtn = within(floorPressCard).getByTitle(/Start \d+s rest timer/i);
     fireEvent.click(floorPressRestBtn);
     expect(restTimerSingleton.getSnapshot().state).toBe('RUNNING');
     expect(restTimerSingleton.getSnapshot().durationSeconds).toBe(20);
 
-    // 8. T3 Athlean-X Non-Negotiable Face Pulls: verify presence
-    expect(screen.getByText(/Athlean-X Non-Negotiable Face Pull/i)).toBeInTheDocument();
+    // 8. T3 Kettlebell High Pull & External Rotations: verify presence
+    expect(screen.getByText(/Kettlebell High Pull & External Rotation/i)).toBeInTheDocument();
 
     // 9. Verify state persisted
     expect(localStorage.getItem('workout_app_active_session_v1')).toBe('upper_a');
@@ -169,9 +170,9 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
     fireEvent.click(screen.getByRole('button', { name: /Lower B/i }));
     expect(screen.getAllByText(/Posterior Chain & Hamstring Restoration Focus/i).length).toBeGreaterThanOrEqual(1);
 
-    // 2. Warmup drills are automatically expanded: Alyssa Lu hip reset, ATG Elephant Walks
-    expect(screen.getByText(/Alyssa Lu 10-Minute Active Hip Reset Protocol/i)).toBeInTheDocument();
-    expect(screen.getByText(/ATG Elephant Walks \(Active Reciprocal Lengthening\)/i)).toBeInTheDocument();
+    // 2. Warmup drills are automatically expanded: Alyssa Lu hip reset, Elephant Walks
+    expect(screen.getByText(/10-Minute Active Hip Reset Protocol/i)).toBeInTheDocument();
+    expect(screen.getByText(/Elephant Walks \(Active Reciprocal Lengthening\)/i)).toBeInTheDocument();
 
     // 3. Navigate to Mobility Tracker and log Elephant Walk assessment (Level 4: Knuckles)
     fireEvent.click(screen.getByRole('tab', { name: /Mobility/i }));
@@ -232,7 +233,7 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
     expect(screen.getAllByText(/Vertical Push\/Pull & Functional Calisthenics/i).length).toBeGreaterThanOrEqual(1);
 
     // 2. Warm-Up sequence is automatically expanded: Active scapular dead hang pulls & Scapular wall slides
-    expect(screen.getByText(/Athlean-X Active Scapular Dead Hang Pulls/i)).toBeInTheDocument();
+    expect(screen.getByText(/Active Scapular Dead Hang Pulls/i)).toBeInTheDocument();
     expect(screen.getByText(/Scapular Wall Slides \+ 360 Brace/i)).toBeInTheDocument();
 
     // 3. Log Dead Hang assessment in Mobility tab (50s hold)
@@ -259,15 +260,15 @@ describe('Tier 4: Real-World Application Workload Scenarios', () => {
     const ohpDone1 = screen.getAllByRole('button', { name: /Mark set 1 as completed/i })[0];
     fireEvent.click(ohpDone1);
 
-    // 5. T2 Pull-Up Ladder Progression: check Yellow Dude tenocyte remodeling rationale
+    // 5. T2 Pull-Up Ladder Progression: check tenocyte remodeling rationale
     const pullupRationaleBtn = screen.getAllByRole('button', { name: /Biomechanical Rationale/i })[1];
     fireEvent.click(pullupRationaleBtn);
-    expect(screen.getByText(/Yellow Dude tendon remodeling protocol/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tendon remodeling protocol: submaximal volume ladders/i)).toBeInTheDocument();
 
-    // 6. T3 Marcus Filly Single-Arm Kettlebell Z-Press: launch metronome (tempo: 30X1)
-    const zPressTempoBtn = screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[2];
+    // 6. T3 Single-Arm Kettlebell Z-Press: launch metronome (tempo: 30X1)
+    const zPressTempoBtn = screen.getAllByTitle(/Launch tempo metronome for/i)[2];
     fireEvent.click(zPressTempoBtn);
-    expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
     expect(screen.getAllByText(/30X1/i).length).toBeGreaterThanOrEqual(1);
     fireEvent.click(screen.getByRole('button', { name: /Close Metronome/i }));
 

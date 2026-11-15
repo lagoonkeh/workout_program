@@ -186,7 +186,7 @@ describe('Workout Program Data & Biomechanical Architecture', () => {
       expect(splitSquat.regression?.condition).toMatch(/pain/i);
     });
 
-    it('verifies Lower B includes Alyssa Lu hip reset and ATG Elephant Walks', () => {
+    it('verifies Lower B includes Alyssa Lu hip reset and Elephant Walks', () => {
       const lowerB = WORKOUT_SESSIONS.find((s) => s.id === 'lower_b')!;
       const warmupNames = lowerB.warmup.map((w) => w.name.toLowerCase());
 
@@ -208,7 +208,7 @@ describe('Workout Program Data & Biomechanical Architecture', () => {
       expect(hasIndianClubs).toBe(true);
     });
 
-    it('verifies Upper A T3 contains Athlean-X Non-Negotiable Face Pulls', () => {
+    it('verifies Upper A T3 contains Kettlebell High Pull & External Rotations', () => {
       const upperA = WORKOUT_SESSIONS.find((s) => s.id === 'upper_a')!;
       const facePull = upperA.exercises.find((e) => e.name.toLowerCase().includes('face pull'));
       expect(facePull).toBeDefined();
@@ -227,39 +227,21 @@ describe('Workout Program Data & Biomechanical Architecture', () => {
     });
   });
 
-  describe('Creator Cue Cards Encyclopedia Integrity', () => {
+  describe('Form Cue Cards Encyclopedia Integrity', () => {
     it('contains at least 13 detailed creator cue cards', () => {
       expect(CUE_CARDS.length).toBeGreaterThanOrEqual(13);
     });
 
-    it('represents all 9 creators + Dr. Stuart McGill across the cue encyclopedia', () => {
-      const allCreatorMentions = new Set<string>();
-
+    it('provides rich form cues and quotes across the cue encyclopedia', () => {
+      let totalCues = 0;
       CUE_CARDS.forEach((card) => {
         card.creatorCues.forEach((cue) => {
-          allCreatorMentions.add(cue.creator.toLowerCase());
+          totalCues++;
+          expect(cue.quote.length).toBeGreaterThan(15);
+          expect(cue.biomechanicalRationale.length).toBeGreaterThan(15);
         });
       });
-
-      const requiredCreators = [
-        'jeff nippard',
-        'jeff cavaliere',
-        'ben patrick',
-        'dr. aaron horschig',
-        'marcus filly',
-        'coach eugene teo',
-        'yellow dude',
-        'dr. alyssa lu',
-        'dr. stuart mcgill',
-        'lucas hardie',
-      ];
-
-      requiredCreators.forEach((creator) => {
-        const found = Array.from(allCreatorMentions).some((mention) =>
-          mention.includes(creator.split(' ')[1]) // match surname
-        );
-        expect(found).toBe(true);
-      });
+      expect(totalCues).toBeGreaterThanOrEqual(13);
     });
 
     it('validates every cue card contains setup, creator cues, common faults, and tempo', () => {

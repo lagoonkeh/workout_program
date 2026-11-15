@@ -15,7 +15,7 @@ import { SessionNav } from '../../src/components/SessionNav';
 import { storageManager } from '../../src/storage/storageManager';
 import App from '../../src/App';
 
-describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
+describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
   beforeEach(() => {
     localStorage.clear();
     storageManager.clear();
@@ -26,11 +26,10 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
     it('implements the exact 6-stage kinetic sequence in SESSION_DAILY_ABS', () => {
       expect(SESSION_DAILY_ABS).toBeDefined();
       expect(SESSION_DAILY_ABS.id).toBe('daily_abs');
-      expect(SESSION_DAILY_ABS.title).toBe('Athlean-X Daily Abs');
+      expect(SESSION_DAILY_ABS.title).toBe('Daily Core Routine');
       expect(SESSION_DAILY_ABS.subtitle).toContain('Kinetic Chain 6-Minute Core Progression');
       expect(SESSION_DAILY_ABS.estimatedDurationMinutes).toBe(10);
-      expect(SESSION_DAILY_ABS.creatorInfluences).toContain('Jeff Cavaliere (ATHLEAN-X)');
-      expect(SESSION_DAILY_ABS.creatorInfluences).toContain('Dr. Stuart McGill');
+      expect(Array.isArray(SESSION_DAILY_ABS.creatorInfluences)).toBe(true);
 
       const exercises = SESSION_DAILY_ABS.exercises;
       expect(exercises).toHaveLength(5);
@@ -68,11 +67,11 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
 
       expect(warmups[0].id).toBe('w_abs_1');
       expect(warmups[0].name).toContain('Cat-Camel');
-      expect(warmups[0].creatorAttribution).toContain('Dr. Stuart McGill');
+      expect(warmups[0].creatorAttribution).toBeDefined();
 
       expect(warmups[1].id).toBe('w_abs_2');
       expect(warmups[1].name).toContain('90/90 Diaphragmatic Vacuum Breath');
-      expect(warmups[1].creatorAttribution).toContain('Jeff Cavaliere (ATHLEAN-X)');
+      expect(warmups[1].creatorAttribution).toBeDefined();
     });
 
     it('strictly adheres to user home gym equipment (pull-up bar, bodyweight, kettlebell)', () => {
@@ -96,7 +95,7 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
       expect(WORKOUT_PROGRAM.daily_abs.id).toBe('daily_abs');
     });
 
-    it('renders Athlean-X Daily Abs in SessionNav expanded card view', () => {
+    it('renders Daily Core Routine in SessionNav expanded card view', () => {
       const selectMock = vi.fn();
       const dummyStats = {
         daily_abs: { completedSets: 0, totalSets: 18, completedExercises: 0, totalExercises: 6, isComplete: false },
@@ -114,14 +113,14 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
 
       const dailyAbsCard = screen.getByTestId('session-nav-card-daily_abs');
       expect(dailyAbsCard).toBeInTheDocument();
-      expect(dailyAbsCard).toHaveTextContent(/Athlean-X Daily Abs/i);
+      expect(dailyAbsCard).toHaveTextContent(/Daily Core Routine/i);
       expect(dailyAbsCard).toHaveTextContent(/Bottom-Up ➔ Rotational ➔ Top-Down ➔ Plank/i);
 
       fireEvent.click(dailyAbsCard);
       expect(selectMock).toHaveBeenCalledWith('daily_abs');
     });
 
-    it('renders Athlean-X Daily Abs in SessionNav collapsed pill bar', () => {
+    it('renders Daily Core Routine in SessionNav collapsed pill bar', () => {
       const selectMock = vi.fn();
       localStorage.setItem('workout_session_nav_collapsed_v1', 'true');
 
@@ -137,7 +136,7 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
 
       const dailyAbsPill = screen.getByTestId('session-nav-pill-daily_abs');
       expect(dailyAbsPill).toBeInTheDocument();
-      expect(dailyAbsPill).toHaveTextContent(/Athlean-X Daily Abs/i);
+      expect(dailyAbsPill).toHaveTextContent(/Daily Core Routine/i);
 
       fireEvent.click(dailyAbsPill);
       expect(selectMock).toHaveBeenCalledWith('daily_abs');
@@ -188,7 +187,7 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
   });
 
   describe('4. Full App Integration & Post-BJJ Ab Workout', () => {
-    it('verifies Athlean-X Daily Abs is removed from conditioning & recovery nav in App and integrated into Post-BJJ 1-Hr Reset', () => {
+    it('verifies Daily Core Routine is removed from conditioning & recovery nav in App and integrated into Post-BJJ 1-Hr Reset', () => {
       render(<App />);
 
       // Daily Abs card is removed from conditioning & recovery protocols section
@@ -204,10 +203,10 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
       expect(screen.getAllByText(/Grappler Ab Reset/i).length).toBeGreaterThan(0);
 
       // Verify integrated ab workout exercises in Post-BJJ Reset
-      expect(screen.getByText(/Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression/i)).toBeInTheDocument();
-      expect(screen.getByText(/Athlean-X Grappler Hollow Body Core Compression Hold/i)).toBeInTheDocument();
-      expect(screen.queryByText(/Athlean-X Cross-Body Oblique Climbers & Serratus Punch/i)).toBeNull();
-      expect(screen.getByText(/Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace/i)).toBeInTheDocument();
+      expect(screen.getByText(/Post-Grappling Hanging Knee Raise & Pelvic Decompression/i)).toBeInTheDocument();
+      expect(screen.getByText(/Grappler Hollow Body Core Compression Hold/i)).toBeInTheDocument();
+      expect(screen.queryByText(/Cross-Body Oblique Climbers & Serratus Punch/i)).toBeNull();
+      expect(screen.getByText(/Post-Grappling Isometric Curl-Up & Vacuum Brace/i)).toBeInTheDocument();
     });
 
     it('does not offer a separate Daily Abs session after a workout: the finisher is already in every workout', () => {
@@ -275,8 +274,8 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
       render(<App />);
 
       // Lower A is active by default; expand Tier 3 or check presence of ab exercises
-      expect(screen.getByText(/Athlean-X Hanging Knee Raise with Posterior Pelvic Tilt/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/Athlean-X Daily Core Finisher/i).length).toBeGreaterThan(0);
+      expect(screen.getByText(/Hanging Knee Raise with Posterior Pelvic Tilt/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Daily Core Finisher/i).length).toBeGreaterThan(0);
     });
 
     it('allows 1-tap completion and toggling of all 6 core sets in Lower A', () => {

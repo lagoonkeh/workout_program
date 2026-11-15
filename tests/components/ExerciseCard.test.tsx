@@ -111,7 +111,7 @@ describe('ExerciseCard Component', () => {
         onQuickStartTempo={onTempoMock}
       />
     );
-    fireEvent.click(screen.getByTitle(/Launch Marcus Filly metronome for 31X1/i));
+    fireEvent.click(screen.getByTitle(/Launch tempo metronome for 31X1/i));
     expect(onTempoMock).toHaveBeenCalledWith('31X1', 't1_bb_squat');
     expect(screen.getByTestId('start-tempo-set-1')).toBeInTheDocument();
   });
@@ -207,7 +207,7 @@ describe('ExerciseCard Component', () => {
     expect(screen.getByText(/Add 10 lbs weekly/i)).toBeInTheDocument();
   });
 
-  it('calls onOpenCueCard when View Creator Cues is clicked', () => {
+  it('calls onOpenCueCard when View Form Cues is clicked', () => {
     const openCueCardMock = vi.fn();
 
     render(
@@ -221,7 +221,7 @@ describe('ExerciseCard Component', () => {
       />
     );
 
-    const cuesBtn = screen.getByRole('button', { name: /View Creator Cues & Science/i });
+    const cuesBtn = screen.getByRole('button', { name: /View Form Cues & Science/i });
     fireEvent.click(cuesBtn);
     expect(openCueCardMock).toHaveBeenCalledWith('t1_bb_squat');
   });
@@ -599,7 +599,7 @@ describe('ExerciseCard Component', () => {
     expect(screen.getByTestId('active-regression-badge')).toHaveTextContent(/Swapped: Barbell Box Squat to Parallel/i);
 
     // Clicking Tempo Pacer now uses regression tempo ('3210') instead of primary tempo ('31X1')
-    const tempoBtn = screen.getByTitle(/Launch Marcus Filly metronome for 3210/i);
+    const tempoBtn = screen.getByTitle(/Launch tempo metronome for 3210/i);
     fireEvent.click(tempoBtn);
     expect(tempoMock).toHaveBeenCalledWith('3210', 't1_bb_squat');
   });
@@ -862,7 +862,7 @@ describe('ExerciseCard Component', () => {
   describe('Dr. Stuart McGill Big 3 Tri-Set Protocol & Time Formatting', () => {
     const mcgillExercise: WorkoutExercise = {
       id: 't3_mcgill_big_3',
-      name: 'Dr. Stuart McGill Big 3 Endurance Tri-Set',
+      name: 'Big 3 Core Endurance Tri-Set',
       tier: 'T3',
       targetSets: 3,
       targetReps: '3 rounds',
@@ -895,7 +895,7 @@ describe('ExerciseCard Component', () => {
 
       // Protocol panel is rendered
       expect(screen.getByTestId('mcgill-big3-protocol')).toBeInTheDocument();
-      expect(screen.getByText(/Dr. McGill Big 3 Core Endurance Protocol/i)).toBeInTheDocument();
+      expect(screen.getByText(/Big 3 Core Endurance Protocol/i)).toBeInTheDocument();
 
       // Round tabs
       expect(screen.getByTestId('mcgill-round-tab-1')).toBeInTheDocument();
@@ -1240,7 +1240,7 @@ describe('ExerciseCard Component', () => {
       expect(screen.getByText(/HOLD-35/i)).toBeInTheDocument();
 
       // Quick visualizer launcher passes resolved tempo
-      const visualizerBtn = screen.getByTitle(/Launch Marcus Filly metronome for HOLD-35/i);
+      const visualizerBtn = screen.getByTitle(/Launch tempo metronome for HOLD-35/i);
       fireEvent.click(visualizerBtn);
       expect(onTempoMock).toHaveBeenCalledWith('HOLD-35', 't3_horse_stance');
     });
@@ -1579,7 +1579,7 @@ describe('ExerciseCard Component', () => {
     it('renders McGill Big 3 animations and separate Left and Right drill checkboxes for side bridge and bird-dog', () => {
       const mcgillExercise: WorkoutExercise = {
         id: 't3_mcgill_big_3',
-        name: 'Dr. Stuart McGill Big 3 Endurance Tri-Set',
+        name: 'Big 3 Core Endurance Tri-Set',
         tier: 'T3',
         targetSets: 3,
         targetReps: '3 rounds',

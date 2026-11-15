@@ -125,14 +125,14 @@ describe('Dead Hang Protocol, Zero-Device Face Pull, Run & BJJ Recovery Workouts
     });
   });
 
-  describe('2. Athlean-X Non-Negotiable Face Pull Alternative (Zero Device Needed)', () => {
+  describe('2. Kettlebell High Pull & External Rotation (Face Pull Alternative) (Zero Device Needed)', () => {
     it('uses user BowFlex kettlebell or Indian clubs with zero cables or anchors', () => {
       const facePull = WORKOUT_PROGRAM.upper_a.exercises.find((e) =>
         e.id === 't3_athlean_face_pull'
       );
       expect(facePull).toBeDefined();
       expect(facePull?.name.toLowerCase()).toContain('face pull');
-      expect(facePull?.name).toMatch(/Athlean-X Non-Negotiable Face Pull/i);
+      expect(facePull?.name).toMatch(/Kettlebell High Pull & External Rotation/i);
       expect(facePull?.equipment).toBe('kettlebell');
       expect(facePull?.defaultWeight).toBe(12);
       expect(facePull?.biomechanicalRationale).toContain('BowFlex 840 kettlebell');
@@ -188,17 +188,17 @@ describe('Dead Hang Protocol, Zero-Device Face Pull, Run & BJJ Recovery Workouts
 
       // Pre-Run Priming in warmup
       const warmupDrills = SESSION_RUN.warmup.map((w) => w.name);
-      expect(warmupDrills).toContain('Squat U Ankle Mobilization & Tripod Rooting');
-      expect(warmupDrills).toContain('ATG Tibialis Wall Raises');
-      expect(warmupDrills).toContain('Dr. Alyssa Lu Glute Medius & Pelvic Leveling');
+      expect(warmupDrills).toContain('Ankle Mobilization & Tripod Rooting');
+      expect(warmupDrills).toContain('Tibialis Wall Raises');
+      expect(warmupDrills).toContain('Glute Medius & Pelvic Leveling');
 
       // Working exercises: Aerobic base run, backward locomotion, rowing flush, couch stretch, elephant walks
       const exerciseNames = SESSION_RUN.exercises.map((e) => e.name);
       expect(exerciseNames).toContain('Zone 2 Aerobic Base Run (Mitochondrial Building)');
-      expect(exerciseNames).toContain('Ben Patrick Backward Locomotion / Backward Running');
+      expect(exerciseNames).toContain('Backward Locomotion / Backward Running');
       expect(exerciseNames).toContain('Rowing Machine Active Metabolic Flush');
-      expect(exerciseNames).toContain('Ben Patrick ATG Couch Stretch');
-      expect(exerciseNames).toContain('ATG Elephant Walks (Active Reciprocal Lengthening)');
+      expect(exerciseNames).toContain('Couch Stretch');
+      expect(exerciseNames).toContain('Elephant Walks (Active Reciprocal Lengthening)');
     });
   });
 
@@ -209,15 +209,14 @@ describe('Dead Hang Protocol, Zero-Device Face Pull, Run & BJJ Recovery Workouts
       expect(SESSION_POST_BJJ.estimatedDurationMinutes).toBe(20);
 
       const exerciseNames = SESSION_POST_BJJ.exercises.map((e) => e.name);
-      expect(exerciseNames).toContain('Dr. Stuart McGill Cervical Retraction & Chin Tuck');
+      expect(exerciseNames).toContain('Cervical Retraction & Chin Tuck');
       expect(exerciseNames).toContain('Active Scapular Overhead Dead Hang Traction');
       expect(exerciseNames).toContain('Thoracic Spine Open-Book Rotations with Positional Reach');
-      expect(exerciseNames).toContain('Dr. Alyssa Lu 90/90 Hip Reset & Groin Adductor Release');
+      expect(exerciseNames).toContain('90/90 Hip Reset & Groin Adductor Release');
       expect(exerciseNames).toContain('Indian Club Synovial Wrist & Forearm Flush');
-      expect(exerciseNames).toContain('Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression');
-      expect(exerciseNames).toContain('Athlean-X Grappler Hollow Body Core Compression Hold');
-      expect(exerciseNames).toContain('Athlean-X Cross-Body Oblique Climbers & Serratus Punch');
-      expect(exerciseNames).toContain('Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace');
+      expect(exerciseNames).toContain('Post-Grappling Hanging Knee Raise & Pelvic Decompression');
+      expect(exerciseNames).toContain('Grappler Hollow Body Core Compression Hold');
+      expect(exerciseNames).toContain('Post-Grappling Isometric Curl-Up & Vacuum Brace');
     });
   });
 

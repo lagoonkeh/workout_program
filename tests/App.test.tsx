@@ -18,10 +18,10 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     });
   });
 
-  it('renders application header, title, and GZCL + 9 Creators badge', () => {
+  it('renders application header, title, and Strength & Hypertrophy badge', () => {
     render(<App />);
     expect(screen.getByText(/4-Day Upper\/Lower/i)).toBeInTheDocument();
-    expect(screen.getByText(/GZCL \+ 9 Creators/i)).toBeInTheDocument();
+    expect(screen.getByText(/Strength & Hypertrophy/i)).toBeInTheDocument();
     expect(screen.getByText(/Lower A:/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Quad & Knee Bulletproofing Focus/i).length).toBeGreaterThanOrEqual(1);
   });
@@ -76,7 +76,7 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     fireEvent.click(mobilityTab);
 
     expect(screen.getByText(/Mobility & Flexibility Tracker/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/ATG Elephant Walks/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Elephant Walks/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Knee-to-Wall/i).length).toBeGreaterThanOrEqual(1);
   });
 
@@ -102,16 +102,16 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     expect(screen.getByText(/\d+%/)).toBeInTheDocument();
   });
 
-  it('opens and closes the Creator Cue Card Modal', () => {
+  it('opens and closes the Form Cue Card Modal', () => {
     render(<App />);
 
     // Open cue card for the first exercise
-    const openCueCardButtons = screen.getAllByRole('button', { name: /View Creator Cues & Science/i });
+    const openCueCardButtons = screen.getAllByRole('button', { name: /View Form Cues & Science/i });
     fireEvent.click(openCueCardButtons[0]);
 
     // Modal should be visible
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText(/Elite Creator Cues & Biomechanics/i)).toBeInTheDocument();
+    expect(screen.getByText(/Form Cues & Biomechanics/i)).toBeInTheDocument();
 
     // Close the modal
     const closeBtn = screen.getByRole('button', { name: /Close Cue Card Modal/i });
@@ -120,21 +120,21 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('opens and closes the Marcus Filly Tempo Metronome modal', () => {
+  it('opens and closes the Tempo Metronome modal', () => {
     render(<App />);
 
     // Launch metronome for first exercise
-    const tempoBtn = screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0];
+    const tempoBtn = screen.getAllByTitle(/Launch tempo metronome for/i)[0];
     fireEvent.click(tempoBtn);
 
     // Modal with Tempo Metronome should appear (the first timed exercise is a hold, so it shows the isometric clock)
-    expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
 
     // Close metronome
     const closeBtn = screen.getByRole('button', { name: /Close Metronome/i });
     fireEvent.click(closeBtn);
 
-    expect(screen.queryByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: /Tempo Metronome/i })).not.toBeInTheDocument();
   });
 
   it('renders docked Rest Timer Widget at bottom of screen', () => {
@@ -313,14 +313,14 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     render(<App />);
 
     // Rep-based bodyweight work (Tibialis Wall Raises, 15-20 reps) has no tempo timer
-    expect(screen.queryByTitle(/Launch Marcus Filly metronome for 2011/i)).not.toBeInTheDocument();
+    expect(screen.queryByTitle(/Launch tempo metronome for 2011/i)).not.toBeInTheDocument();
 
     // In Lower A, the Serratus Plank finisher is a timed bodyweight hold (30-45s)
     const plank = document.getElementById('exercise-card-t3_athlean_serratus_plank_lower_a')!;
-    fireEvent.click(within(plank).getByTitle(/Launch Marcus Filly metronome for HOLD-45/i));
+    fireEvent.click(within(plank).getByTitle(/Launch tempo metronome for HOLD-45/i));
 
     // Metronome modal opens
-    expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
 
     // Click "Log Set Complete" in metronome
     const logCompleteBtn = screen.getByRole('button', { name: /Mark set complete/i });
@@ -383,17 +383,17 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     // Click split all
     fireEvent.click(splitAllBtn);
 
-    // Unilateral exercises in Lower A are split (ATG Split Squat, Single-Leg Patrick Step-Downs)
+    // Unilateral exercises in Lower A are split (ATG Split Squat, Single-Leg Step-Downs)
     expect(screen.getByText('ATG Split Squat (Left Leg)')).toBeInTheDocument();
     expect(screen.getByText('ATG Split Squat (Right Leg)')).toBeInTheDocument();
-    expect(screen.getByText('Single-Leg Patrick Step-Downs (Left Leg)')).toBeInTheDocument();
-    expect(screen.getByText('Single-Leg Patrick Step-Downs (Right Leg)')).toBeInTheDocument();
+    expect(screen.getByText('Single-Leg Step-Downs (Left Leg)')).toBeInTheDocument();
+    expect(screen.getByText('Single-Leg Step-Downs (Right Leg)')).toBeInTheDocument();
 
     // Click again to merge all back
     fireEvent.click(splitAllBtn);
 
     expect(screen.getByText('ATG Split Squat')).toBeInTheDocument();
-    expect(screen.getByText('Single-Leg Patrick Step-Downs')).toBeInTheDocument();
+    expect(screen.getByText('Single-Leg Step-Downs')).toBeInTheDocument();
     expect(screen.queryByText('ATG Split Squat (Left Leg)')).not.toBeInTheDocument();
   });
 

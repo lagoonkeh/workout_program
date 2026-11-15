@@ -40,8 +40,8 @@ export interface AdaptiveStretchingResult {
 export const STRETCH_CATALOG: AdaptiveStretch[] = [
   {
     id: 'stretch_couch_psoas',
-    name: 'Alyssa Lu Couch Stretch & Psoas Contract-Relax',
-    creator: 'Dr. Alyssa Lu (Proformance Sports Therapy)',
+    name: 'Couch Stretch & Psoas Contract-Relax',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Quadriceps, Patellar Tendon & Hip Flexors',
     targetMuscles: ['Rectus Femoris', 'Psoas Major', 'Iliacus', 'Vastus Medialis'],
     durationSeconds: 90,
@@ -66,8 +66,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_atg_elephant_walks',
-    name: 'Ben Patrick (ATG) Dynamic Elephant Walks',
-    creator: 'Ben Patrick (Athletic Truth Group)',
+    name: 'Dynamic Elephant Walks',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Hamstrings, Calves & Sciatic Nerve Flossing',
     targetMuscles: ['Biceps Femoris', 'Semimembranosus', 'Gastrocnemius', 'Soleus'],
     durationSeconds: 90,
@@ -92,8 +92,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_wall_ankle_mob',
-    name: 'Dr. Aaron Horschig Wall Ankle Dorsiflexion Mobilization',
-    creator: 'Dr. Aaron Horschig (Squat University)',
+    name: 'Wall Ankle Dorsiflexion Mobilization',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Talocrural Ankle Joint & Achilles Tendon',
     targetMuscles: ['Soleus', 'Gastrocnemius', 'Anterior Talofibular Capsule'],
     durationSeconds: 90,
@@ -119,7 +119,7 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   {
     id: 'stretch_mcgill_cat_camel',
     name: 'Dr. Stuart McGill Spinal Decompression & Lateral Child\'s Pose',
-    creator: 'Dr. Stuart McGill (Spine Biomechanics)',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Thoracolumbar Spine & Quadratus Lumborum Decompression',
     targetMuscles: ['Erector Spinae', 'Quadratus Lumborum', 'Latissimus Dorsi', 'Thoracolumbar Fascia'],
     durationSeconds: 90,
@@ -144,8 +144,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_doorway_pec_minor',
-    name: 'Jeff Cavaliere (ATHLEAN-X) Doorway Pec Minor & Cross-Body Scapular Distraction',
-    creator: 'Jeff Cavaliere (ATHLEAN-X)',
+    name: 'Doorway Pec Minor & Cross-Body Scapular Distraction',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Pectoralis Minor, Anterior Deltoid & Posterior Shoulder Capsule',
     targetMuscles: ['Pectoralis Minor', 'Infraspinatus', 'Teres Minor', 'Subscapularis'],
     durationSeconds: 60,
@@ -170,8 +170,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_90_90_hip_capsule',
-    name: 'Eugene Teo 90/90 Hip Internal & External Rotation Reset',
-    creator: 'Eugene Teo & Yellow Dude',
+    name: '90/90 Hip Internal & External Rotation Reset',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Femoral-Acetabular Joint & Deep Hip Rotators',
     targetMuscles: ['Gluteus Medius', 'Piriformis', 'Obturator Internus', 'Adductor Magnus'],
     durationSeconds: 90,
@@ -195,8 +195,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_tibialis_calves_slant',
-    name: 'ATG Tibialis & Plantar Fascia Slant Stretch',
-    creator: 'Ben Patrick (ATG) & Yellow Dude',
+    name: 'Tibialis & Plantar Fascia Slant Stretch',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Anterior & Posterior Lower Leg Chain',
     targetMuscles: ['Tibialis Anterior', 'Gastrocnemius', 'Soleus', 'Plantar Fascia'],
     durationSeconds: 60,
@@ -220,8 +220,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_ros_back_bridge',
-    name: 'Lucas Hardie (Range of Strength) Back Bridge & Thoracic Arc',
-    creator: 'Lucas Hardie (Range of Strength)',
+    name: 'Back Bridge & Thoracic Arc',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Full Spinal Column, Anterior Chest & Hip Flexors',
     targetMuscles: ['Erector Spinae', 'Thoracic Spine', 'Rectus Abdominis', 'Iliopsoas', 'Anterior Deltoids', 'Pectoralis Major'],
     durationSeconds: 60,
@@ -246,8 +246,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_mpmd_parasympathetic_electrolytes',
-    name: 'Derek (More Plates More Dates) Down-Regulation Box Breathing & Recovery Flush',
-    creator: 'Derek (More Plates More Dates)',
+    name: 'Down-Regulation Box Breathing & Recovery Flush',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Autonomic Nervous System & Endocrine Recovery',
     targetMuscles: ['Diaphragm', 'Vagus Nerve Tone', 'Heart Rate Variability (HRV)', 'Intercostals'],
     durationSeconds: 120,
@@ -272,8 +272,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_rp_loaded_sfr_stretch',
-    name: 'Dr. Mike Israetel (Renaissance Periodization) High-SFR Loaded Stretched-Position Hang',
-    creator: 'Dr. Mike Israetel (Renaissance Periodization)',
+    name: 'High-SFR Loaded Stretched-Position Hang',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Pectorals, Lats & Stretched Connective Tissue',
     targetMuscles: ['Pectoralis Major', 'Latissimus Dorsi', 'Anterior Deltoids', 'Thoracolumbar Fascia'],
     durationSeconds: 60,
@@ -298,8 +298,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_sbs_reactive_velocity_flush',
-    name: 'Stronger By Science (Greg Nuckols & Dr. Eric Trexler) Reactive Deload & Joint Flush',
-    creator: 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)',
+    name: 'Reactive Deload & Joint Flush',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Systemic Kinetic Chain & Neuromuscular Recovery',
     targetMuscles: ['Erector Spinae', 'Quadriceps', 'Hamstrings', 'Glenohumeral Joint'],
     durationSeconds: 90,
@@ -322,8 +322,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_hoh_long_length_decompression',
-    name: 'House of Hypertrophy Lengthened-Position Posterior Chain Decompression',
-    creator: 'House of Hypertrophy',
+    name: 'Lengthened-Position Posterior Chain Decompression',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Hamstrings, Posterior Knee Capsule & Gluteals',
     targetMuscles: ['Biceps Femoris', 'Semitendinosus', 'Semimembranosus', 'Gluteus Maximus'],
     durationSeconds: 60,
@@ -361,8 +361,8 @@ export const STRETCH_CATALOG: AdaptiveStretch[] = [
 export const BACHATA_RECOVERY_ROUTINE: AdaptiveStretch[] = [
   {
     id: 'stretch_bachata_wall_calf_plantar',
-    name: 'Ben Patrick (ATG) Dual-Angle Calf & Plantar Fascia Decompression (Soleus Focus)',
-    creator: 'Ben Patrick (ATG) & Dr. Aaron Horschig',
+    name: 'Dual-Angle Calf & Plantar Fascia Decompression (Soleus Focus)',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Soleus (Primary Decelerator), Gastrocnemius, Achilles & Plantar Fascia',
     targetMuscles: ['Soleus (6–8x BW Dance Decelerator)', 'Gastrocnemius (Lateral & Medial Heads)', 'Achilles Tendon', 'Plantar Fascia', 'Peroneus Longus/Brevis'],
     durationSeconds: 60,
@@ -388,8 +388,8 @@ export const BACHATA_RECOVERY_ROUTINE: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_bachata_couch_psoas_ql',
-    name: 'Dr. Alyssa Lu Couch Stretch & Psoas-QL Lateral Reach (Hip Pop Reset)',
-    creator: 'Dr. Alyssa Lu & Dr. Stuart McGill',
+    name: 'Couch Stretch & Psoas-QL Lateral Reach (Hip Pop Reset)',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Psoas Major, Rectus Femoris, Iliacus & Quadratus Lumborum (QL)',
     targetMuscles: ['Psoas Major', 'Rectus Femoris', 'Iliacus', 'Quadratus Lumborum (QL)', 'Tensor Fasciae Latae'],
     durationSeconds: 75,
@@ -414,8 +414,8 @@ export const BACHATA_RECOVERY_ROUTINE: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_bachata_90_90_piriformis',
-    name: 'Coach Eugene Teo 90/90 Cuban Motion Hip Rotator & Piriformis Reset (Deep-6 Focus)',
-    creator: 'Coach Eugene Teo & Yellow Dude',
+    name: '90/90 Cuban Motion Hip Rotator & Piriformis Reset (Deep-6 Focus)',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Deep Six Lateral Rotators, Piriformis, Gluteus Medius & Pelvic Capsule',
     targetMuscles: ['Deep Six Rotators (Piriformis, Obturators, Gemelli, Quadratus Femoris)', 'Gluteus Medius', 'Tensor Fasciae Latae (TFL)', 'Adductor Longus'],
     durationSeconds: 60,
@@ -440,7 +440,7 @@ export const BACHATA_RECOVERY_ROUTINE: AdaptiveStretch[] = [
   {
     id: 'stretch_bachata_mcgill_cat_camel',
     name: 'Dr. Stuart McGill Sensual Wave Decompression & Lateral Child\'s Pose',
-    creator: 'Dr. Stuart McGill (Spine Biomechanics)',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Thoracolumbar Spine, Facet Joints, Erector Spinae & Intervertebral Discs',
     targetMuscles: ['Erector Spinae', 'Thoracolumbar Fascia', 'Quadratus Lumborum', 'Multifidus', 'Latissimus Dorsi'],
     durationSeconds: 90,
@@ -466,7 +466,7 @@ export const BACHATA_RECOVERY_ROUTINE: AdaptiveStretch[] = [
   {
     id: 'stretch_bachata_thoracic_open_book',
     name: 'Side-Lying Thoracic Windmill & Ribcage Decompression',
-    creator: 'Dr. Aaron Horschig & Coach Eugene Teo',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Thoracic Spine, Intercostal Muscles, Pectoralis Major & Scapula',
     targetMuscles: ['Thoracic Erector Spinae', 'Pectoralis Major/Minor', 'Intercostals', 'Anterior Shoulder Capsule', 'Rhomboids'],
     durationSeconds: 60,
@@ -491,8 +491,8 @@ export const BACHATA_RECOVERY_ROUTINE: AdaptiveStretch[] = [
   },
   {
     id: 'stretch_bachata_doorway_frame_reset',
-    name: 'Jeff Cavaliere (ATHLEAN-X) Dance Frame Reset & Pec Minor Distraction',
-    creator: 'Jeff Cavaliere (ATHLEAN-X)',
+    name: 'Dance Frame Reset & Pec Minor Distraction',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Pectoralis Minor, Anterior Deltoid, Biceps Short Head & Posterior Capsule',
     targetMuscles: ['Pectoralis Minor', 'Pectoralis Major (Clavicular)', 'Anterior Deltoid', 'Infraspinatus', 'Upper Trapezius'],
     durationSeconds: 60,
@@ -518,7 +518,7 @@ export const BACHATA_RECOVERY_ROUTINE: AdaptiveStretch[] = [
   {
     id: 'stretch_bachata_venous_drainage_parasympathetic',
     name: 'Viparita Karani (Legs-Up-The-Wall) & Autonomic Parasympathetic Sigh',
-    creator: 'Dr. Andrew Huberman & Sports Medicine Recovery',
+    creator: 'Physical Therapy & Recovery',
     targetArea: 'Venous Circulation, Lymphatic Drainage, Diaphragm & Vagus Nerve',
     targetMuscles: ['Soleus / Plantar Fascia (Venous Pump)', 'Hamstrings', 'Pelvic Floor', 'Diaphragm'],
     durationSeconds: 120,

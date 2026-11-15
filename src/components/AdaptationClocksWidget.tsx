@@ -109,7 +109,7 @@ export const AdaptationClocksWidget: React.FC<AdaptationClocksWidgetProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <span>Exercise Science &amp; Creator Studies</span>
+              <span>Exercise Science &amp; Clinical Studies</span>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300">
                 Research-checked
               </span>

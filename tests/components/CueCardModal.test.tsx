@@ -55,7 +55,7 @@ describe('CueCardModal Component', () => {
     expect(screen.getByText('Barbell Back Squat')).toBeInTheDocument();
     expect(screen.getByText('Tempo: 31X1')).toBeInTheDocument();
     expect(screen.getByText(/Setup & Equipment/i)).toBeInTheDocument();
-    expect(screen.getByText(/Dr. Aaron Horschig \(Squat University\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Form Cue 1/i)).toBeInTheDocument();
     expect(screen.getByText(/"Establish your foot tripod\. Screw your feet into the floor\."/i)).toBeInTheDocument();
     expect(screen.getByText(/Common Faults to Avoid/i)).toBeInTheDocument();
     expect(screen.getByText(/Inward knee cave \(valgus collapse\)/i)).toBeInTheDocument();

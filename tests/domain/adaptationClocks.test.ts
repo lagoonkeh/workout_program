@@ -33,7 +33,7 @@ describe('Adaptation Clocks & Exercise Science Studies Domain', () => {
   });
 
   it('describes lengthened partials as comparable to full range, not superior', () => {
-    expect(NIPPARD_LLP_STUDY_SYNTHESIS.title).toContain('Jeff Nippard');
+    expect(NIPPARD_LLP_STUDY_SYNTHESIS.title).toContain('Lengthened Partials (LLPs)');
     expect(NIPPARD_LLP_STUDY_SYNTHESIS.coreMechanism).toMatch(/not settled/i);
     expect(NIPPARD_LLP_STUDY_SYNTHESIS.summary).toContain('similar growth');
     expect(NIPPARD_LLP_STUDY_SYNTHESIS.summary).not.toMatch(/prove/i);
@@ -41,7 +41,7 @@ describe('Adaptation Clocks & Exercise Science Studies Domain', () => {
   });
 
   it('labels Range of Strength benchmarks as coaching targets', () => {
-    expect(LUCAS_HARDIE_RANGE_OF_STRENGTH_SYNTHESIS.creator).toContain('Lucas Hardie');
+    expect(LUCAS_HARDIE_RANGE_OF_STRENGTH_SYNTHESIS.creator).toBe('Biomechanics Standard');
     expect(
       LUCAS_HARDIE_RANGE_OF_STRENGTH_SYNTHESIS.guidelines.some((g) => /coaching targets/i.test(g))
     ).toBe(true);

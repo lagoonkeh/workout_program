@@ -1,7 +1,7 @@
 /**
  * tests/timer/tempoMetronome.adversarial.test.ts
  *
- * Empirical Adversarial Stress & Invariant Test Suite for Marcus Filly Tempo Metronome.
+ * Empirical Adversarial Stress & Invariant Test Suite for Tempo Metronome.
  * Designed to challenge edge cases, fuzz inputs, verify invariant guarantees,
  * and test zero-duration phase skipping, rep accumulation, and telemetry math.
  */
@@ -15,7 +15,7 @@ import {
   TempoPhase,
 } from '../../src/timer/tempoMetronome';
 
-describe('Adversarial Challenge: Marcus Filly Tempo Metronome', () => {
+describe('Adversarial Challenge: Tempo Metronome', () => {
   let mockSynth: IAudioSynthesizer;
 
   beforeEach(() => {

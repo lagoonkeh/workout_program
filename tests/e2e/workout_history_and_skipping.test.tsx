@@ -85,7 +85,7 @@ describe('Workout History & Exercise Skipping End-to-End Workflows', () => {
   it('records completed workouts with skipped reasons into history, and allows editing out / deleting past sessions', async () => {
     render(<App />);
 
-    // Skip Single-Leg Patrick Step-Downs with an equipment reason
+    // Skip Single-Leg Step-Downs with an equipment reason
     const skipStepDownBtn = screen.getByTestId('skip-exercise-btn-t3_patrick_step_down');
     fireEvent.click(skipStepDownBtn);
 

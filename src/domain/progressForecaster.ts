@@ -344,19 +344,19 @@ export function generateProgramProjections(
 
     if (exId === 't1_bb_squat') {
       biomechanicalInsight = 'Strict 3-second descent removes elastic stretch reflex shock on the patellar tendon, fostering dense quad hypertrophy and joint stability.';
-      creatorPhilosophy = 'GZCL Linear Progression & Dr. Aaron Horschig tripod stability';
+      creatorPhilosophy = 'Linear Progression & tripod foot stability';
     } else if (exId === 't1_bb_bench_press' || exId === 't1_bb_bench') {
       biomechanicalInsight = '45-degree elbow tuck with retracted, depressed scapulae protects the rotator cuff and anterior shoulder capsule.';
-      creatorPhilosophy = 'Jeff Cavaliere (Athlean-X) shoulder preservation & Jeff Nippard line of pull';
+      creatorPhilosophy = 'Shoulder preservation & optimal line of pull';
     } else if (exId === 't1_bb_rdl') {
       biomechanicalInsight = 'Controlled eccentric hip hinge maintains neutral lumbar spine while actively lengthening hamstrings under load.';
-      creatorPhilosophy = 'Dr. Stuart McGill spinal stiffness & Eugene Teo posterior chain sequence';
+      creatorPhilosophy = 'Spinal stiffness & posterior chain sequence';
     } else if (exId === 't1_bb_ohp') {
       biomechanicalInsight = 'Pressing in the scapular plane with full lockout builds bulletproof deltoid and serratus anterior function.';
-      creatorPhilosophy = 'GZCL T1 Powerbuilding & Marcus Filly functional overhead stability';
+      creatorPhilosophy = 'Powerbuilding & functional overhead stability';
     } else {
       biomechanicalInsight = 'Unilateral control eliminates left/right asymmetries and improves knee tendon load-bearing capacity.';
-      creatorPhilosophy = 'Ben Patrick (ATG) collagen remodeling';
+      creatorPhilosophy = 'Collagen remodeling & connective tissue resilience';
     }
 
     return {
@@ -399,7 +399,7 @@ export function generateProgramProjections(
     return {
       testId: protocol.id,
       name: protocol.name,
-      creator: protocol.creator,
+      creator: 'Biomechanics Standard',
       unit: protocol.unit,
       benchmarkGoal: protocol.targetBenchmark,
       benchmarkNumeric: protocol.benchmarkNumeric,

@@ -1,6 +1,6 @@
 /**
  * tests/timer/tempoMetronome.test.ts
- * Comprehensive Vitest unit test suite for Marcus Filly Tempo Metronome.
+ * Comprehensive Vitest unit test suite for Tempo Metronome.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -12,7 +12,7 @@ import {
   MetronomeSnapshot,
 } from '../../src/timer/tempoMetronome';
 
-describe('Marcus Filly Tempo Metronome Engine', () => {
+describe('Tempo Metronome Engine', () => {
   let mockSynth: IAudioSynthesizer;
 
   beforeEach(() => {

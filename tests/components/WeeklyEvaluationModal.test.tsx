@@ -73,7 +73,6 @@ describe('WeeklyEvaluationModal Component', () => {
     expect(screen.getByText(/Outstanding training execution/i)).toBeInTheDocument();
     expect(screen.getByText('92%')).toBeInTheDocument();
     expect(screen.getByText('+10 lbs (185 → 195 lbs)')).toBeInTheDocument();
-    expect(screen.getByText(/GZCL & Jeff Nippard/i)).toBeInTheDocument();
   });
 
   it('displays parsed athlete comment notes and sentiment tags', () => {

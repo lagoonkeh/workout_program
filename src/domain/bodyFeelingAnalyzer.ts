@@ -312,7 +312,7 @@ export function analyzeBodyFeelingAndHistory(
         proposedValue: squatEx.regression.name,
         proposedLabel: `Swap to ${squatEx.regression.name}`,
         rationale: `Knee strain diagnosed (severity: ${severity}). Swapping to ${squatEx.regression.name} enforces vertical shins and eliminates ballistic patellar shear forces.`,
-        creatorInfluence: 'Ben Patrick (ATG) & Yellow Dude',
+        creatorInfluence: 'Joint & Tendon Preservation',
         applied: false,
       });
 
@@ -326,7 +326,7 @@ export function analyzeBodyFeelingAndHistory(
         proposedValue: '3210',
         proposedLabel: '3210 (3s slow descent, 2s pause, 1s drive)',
         rationale: 'Slow eccentric loading triggers tenocyte mechanotransduction without compressive tendon spikes.',
-        creatorInfluence: 'Yellow Dude & Marcus Filly',
+        creatorInfluence: 'Joint & Tendon Preservation',
         applied: false,
       });
     }
@@ -335,13 +335,13 @@ export function analyzeBodyFeelingAndHistory(
       id: 'prehab_atg_drag',
       name: 'ATG Backward Drag / Locomotion (3–4 min)',
       rationale: 'Pumps rich synovial fluid into patellar cartilage with zero shear impact before squatting.',
-      creatorInfluence: 'Ben Patrick (ATG)',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
     injectedWarmups.push({
       id: 'prehab_patrick_step',
       name: 'Patrick Step-Downs on Plate (2x15/side)',
       rationale: 'Isolates and vascularizes the VMO (vastus medialis oblique) in full terminal extension.',
-      creatorInfluence: 'Ben Patrick (ATG)',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
   }
 
@@ -390,7 +390,7 @@ export function analyzeBodyFeelingAndHistory(
         proposedValue: '3111',
         proposedLabel: '3111 (Strict 3s eccentric, pause at knee, zero spinal flexion)',
         rationale: 'Reinforces 360° intra-abdominal pressure and eliminates lumbar rounding under shear.',
-        creatorInfluence: 'Dr. Stuart McGill & Squat University',
+        creatorInfluence: 'Joint & Tendon Preservation',
         applied: false,
       });
     }
@@ -407,17 +407,17 @@ export function analyzeBodyFeelingAndHistory(
         currentValue: jeffersonEx.name,
         proposedValue: jeffersonEx.regression.name,
         proposedLabel: `Swap to ${jeffersonEx.regression.name}`,
-        rationale: 'Active back tightness contraindicates loaded spinal flexion. Swapping to McGill Big 3 isometric holds spares lumbar disc fibers.',
-        creatorInfluence: 'Dr. Stuart McGill (Spinal Sparing)',
+        rationale: 'Active back tightness contraindicates loaded spinal flexion. Swapping to Big 3 isometric holds spares lumbar disc fibers.',
+        creatorInfluence: 'Joint & Tendon Preservation',
         applied: false,
       });
     }
 
     injectedWarmups.push({
       id: 'prehab_mcgill_big3',
-      name: 'McGill Big 3 Stabilization (Bird-Dog + Side Plank + Curl-Up)',
+      name: 'Big 3 Stabilization (Bird-Dog + Side Plank + Curl-Up)',
       rationale: 'Constructs a rigid 360° torso cylinder and neutralizes disc shear prior to lifting.',
-      creatorInfluence: 'Dr. Stuart McGill',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
   }
 
@@ -464,7 +464,7 @@ export function analyzeBodyFeelingAndHistory(
         proposedValue: pressEx.regression.name,
         proposedLabel: `Swap to ${pressEx.regression.name}`,
         rationale: `Shoulder impingement sensitivity detected. Swapping to ${pressEx.regression.name} allows natural scapulohumeral upward rotation in the scapular plane (30° angle).`,
-        creatorInfluence: 'Jeff Cavaliere (ATHLEAN-X)',
+        creatorInfluence: 'Joint & Tendon Preservation',
         applied: false,
       });
     }
@@ -473,13 +473,13 @@ export function analyzeBodyFeelingAndHistory(
       id: 'prehab_indian_clubs',
       name: 'Indian Club Casts & Circles (2x20 inward & outward)',
       rationale: 'Restores glenohumeral reciprocal rotation and synovial lubrication without load.',
-      creatorInfluence: 'Indian Club Shoulder Longevity',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
     injectedWarmups.push({
       id: 'prehab_dead_hang',
       name: 'Active Scapular Decompression Hang (2x30s)',
       rationale: 'Decompresses the subacromial space and stretches the tight pec minor.',
-      creatorInfluence: 'ATHLEAN-X Scapular Protocols',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
   }
 
@@ -503,14 +503,14 @@ export function analyzeBodyFeelingAndHistory(
       id: 'prehab_elephant_walks',
       name: 'ATG Elephant Walks (40 dynamic pumps)',
       rationale: 'Dynamically flushes the hamstrings through active reciprocal knee flexion without passive micro-tearing.',
-      creatorInfluence: 'Ben Patrick (ATG)',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
     injectedWarmups.push({
       id: 'prehab_hoh_long_length_activation',
       name: 'House of Hypertrophy Stretched-Position Hamstring Activation',
       rationale:
         'Applies peer-reviewed stretch-mediated hypertrophy and tension principles to lengthen guarded muscle fibers safely under controlled passive/active tension.',
-      creatorInfluence: 'House of Hypertrophy',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
   }
 
@@ -534,7 +534,7 @@ export function analyzeBodyFeelingAndHistory(
       id: 'prehab_90_90_hip_flow',
       name: '90/90 Dynamic Hip Rotations (2x10 dynamic transitions)',
       rationale: 'Mobilizes internal and external femoral acetabular rotation and clears anterior impingement.',
-      creatorInfluence: 'Squat University & Eugene Teo',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
   }
 
@@ -568,7 +568,7 @@ export function analyzeBodyFeelingAndHistory(
           proposedValue: reducedLoad,
           proposedLabel: `${reducedLoad} lbs (-10% Autoregulated Load)`,
           rationale: 'Preserves bar velocity and motor grooving without digging a deeper recovery deficit.',
-          creatorInfluence: 'GZCL Method Autoregulation & Derek (MPMD) Connective Tissue Pacing',
+          creatorInfluence: 'Joint & Tendon Preservation',
           applied: false,
         });
       }
@@ -579,21 +579,21 @@ export function analyzeBodyFeelingAndHistory(
       name: 'Derek (MPMD) Down-Regulation Box Breathing & Hydration Prehab (3-5 min)',
       rationale:
         'Shifts autonomic nervous system from sympathetic fight-or-flight to parasympathetic recovery; verify 500-1000mg sodium/potassium electrolyte replenishment and adhere to an 8-10hr caffeine curfew before bedtime.',
-      creatorInfluence: 'Derek (More Plates More Dates)',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
     injectedWarmups.push({
       id: 'prehab_rp_sfr_volume_check',
-      name: 'Dr. Mike Israetel (RP) Volume Landmark & SFR Recovery Check',
+      name: 'Volume Landmark & SFR Recovery Check',
       rationale:
         'Assesses proximity to MRV (Maximum Recoverable Volume) and shifts working accessory volume toward high Stimulus-to-Fatigue Ratio (SFR) movements while capping weekly hard sets within MEV/MAV thresholds.',
-      creatorInfluence: 'Dr. Mike Israetel (Renaissance Periodization)',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
     injectedWarmups.push({
       id: 'prehab_sbs_velocity_check',
       name: 'Stronger By Science (SBS) Autoregulated Velocity Loss Check',
       rationale:
         'Monitors movement velocity drop-offs on primary lifts; if two consecutive sessions display marked velocity loss, initiates proactive autoregulated deload.',
-      creatorInfluence: 'Greg Nuckols & Dr. Eric Trexler (Stronger By Science)',
+      creatorInfluence: 'Joint & Tendon Preservation',
     });
   }
 
@@ -618,7 +618,7 @@ export function analyzeBodyFeelingAndHistory(
       'All physiological lights are green! Full joint compliance, high systemic CNS energy, and zero residual tendon fatigue across past 2 weeks. You are fully primed for Tier 1 progressive overload and AMRAP personal records.';
   } else {
     const categoriesDiagnosed = diagnosedSymptoms.map((s) => s.label).join(', ');
-    biomechanicalSummary = `Biomechanical assessment identified: ${categoriesDiagnosed}. Adjustments have been constructed using ATG tendon remodeling, McGill spinal sparing, Range of Strength loaded mobility, Derek (MPMD) physiological recovery, and Dr. Mike Israetel (RP) SFR volume landmarks to deliver full functional training stimulus with zero joint wear.`;
+    biomechanicalSummary = `Biomechanical assessment identified: ${categoriesDiagnosed}. Adjustments have been constructed using tendon remodeling, spinal sparing, loaded mobility, physiological recovery, and SFR volume landmarks to deliver full functional training stimulus with zero joint wear.`;
   }
 
   return {

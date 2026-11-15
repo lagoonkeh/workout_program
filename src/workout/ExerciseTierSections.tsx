@@ -126,11 +126,11 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
         );
       })}
 
-      {/* Athlean-X Daily Core Finisher Section */}
+      {/* Daily Core Finisher Section */}
       {activeSession.dailyCoreFinisher && activeSession.dailyCoreFinisher.length > 0 && (
         <section
           className="rounded-2xl bg-gradient-to-b from-amber-950/20 via-slate-900/90 to-slate-900 border border-amber-500/40 overflow-hidden shadow-xl"
-          aria-label="Athlean-X Daily Core Finisher"
+          aria-label="Daily Core Finisher"
           data-testid="daily-core-finisher-section"
         >
           <button
@@ -145,10 +145,10 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
                 <span>CORE FINISHER</span>
               </span>
               <span className="text-sm sm:text-base font-bold text-white">
-                Athlean-X Daily Core Progression
+                Daily Core Progression
               </span>
               <span className="text-xs text-amber-300/80 font-mono">
-                (6-Min Kinetic Sequence · 6 Exercises)
+                (Kinetic Core Sequence)
               </span>
             </div>
             <div className="flex items-center gap-2 text-slate-400">
@@ -167,7 +167,7 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
             <div className="p-2 sm:p-4 space-y-4">
               <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200">
                 <div>
-                  <span className="font-bold text-amber-300">Jeff Cavaliere Kinetic Sequence:</span>{' '}
+                  <span className="font-bold text-amber-300">Core Kinetic Sequence:</span>{' '}
                   <span>Bottom-Up ➔ Rotational ➔ Mid-Range Hold ➔ Top-Down ➔ Flexion ➔ Core Cylinder</span>
                 </div>
                 {(() => {

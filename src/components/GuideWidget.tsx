@@ -171,7 +171,7 @@ const GuideCard: React.FC<{ item: GuideItem; index: number; open: boolean; onTog
           <blockquote className="flex items-start gap-2 text-xs text-slate-400 border-l-2 border-slate-700 pl-2">
             <Quote className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             <span>
-              "{item.quote.text}" <span className="text-slate-500">({item.quote.creator})</span>
+              "{item.quote.text}"
             </span>
           </blockquote>
         )}

@@ -24,7 +24,7 @@ describe('QuarterlyAssessmentWidget Component', () => {
     expect(screen.getByText(/1. Cardiorespiratory & VO2max/i)).toBeInTheDocument();
     expect(screen.getByText(/2. Relative Strength \(168 lbs BW\)/i)).toBeInTheDocument();
     expect(screen.getByText(/3. Calisthenics & Muscular Endurance/i)).toBeInTheDocument();
-    expect(screen.getByText(/4. Dr. Stuart McGill Core Balance Ratios/i)).toBeInTheDocument();
+    expect(screen.getByText(/4. Core Balance & Endurance Ratios/i)).toBeInTheDocument();
     expect(screen.getByText(/5. Longevity Biomarkers & Grip/i)).toBeInTheDocument();
     expect(screen.getByText(/6. Loaded Mobility & Range of Strength/i)).toBeInTheDocument();
   });
@@ -49,7 +49,7 @@ describe('QuarterlyAssessmentWidget Component', () => {
   it('displays McGill clinical ratio analysis', () => {
     render(<QuarterlyAssessmentWidget />);
 
-    expect(screen.getByText(/McGill Clinical Ratios Analysis:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Core Balance Ratios Analysis:/i)).toBeInTheDocument();
     expect(screen.getByText(/Flexion \/ Extension:/i)).toBeInTheDocument();
     expect(screen.getByText(/Side Bridge \/ Extension:/i)).toBeInTheDocument();
     expect(screen.getByText(/Right vs. Left Symmetry:/i)).toBeInTheDocument();

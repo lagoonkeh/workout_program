@@ -297,7 +297,7 @@ export const ProgressChartWidget: React.FC<ProgressChartWidgetProps> = ({
                 <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
                   {isStrength ? (activeItem as LiftProjection).exerciseName : (activeItem as MobilityProjection).name}
                   <span className="text-xs font-normal text-slate-400">
-                    {isStrength ? `(${(activeItem as LiftProjection).tier} · ${(activeItem as LiftProjection).equipment})` : `(${(activeItem as MobilityProjection).creator})`}
+                    {isStrength ? `(${(activeItem as LiftProjection).tier} · ${(activeItem as LiftProjection).equipment})` : `(Goal: ${(activeItem as MobilityProjection).benchmarkGoal})`}
                   </span>
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -565,7 +565,7 @@ export const ProgressChartWidget: React.FC<ProgressChartWidgetProps> = ({
                         >
                           <td className="py-2.5 px-3 font-medium text-slate-200">
                             <div className="font-bold">{m.name}</div>
-                            <div className="text-[10px] text-slate-400">{m.creator} · Goal: {m.benchmarkGoal}</div>
+                            <div className="text-[10px] text-slate-400">Goal: {m.benchmarkGoal}</div>
                           </td>
                           <td className="py-2.5 px-3 text-center text-slate-400 font-bold">
                             {m.currentValue} {m.unit}

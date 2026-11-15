@@ -18,7 +18,7 @@ describe('Header Component', () => {
     );
 
     expect(screen.getByText(/4-Day Upper\/Lower/i)).toBeInTheDocument();
-    expect(screen.getByText(/GZCL \+ 9 Creators/i)).toBeInTheDocument();
+    expect(screen.getByText(/Strength & Hypertrophy/i)).toBeInTheDocument();
     expect(screen.getByText(/Lower A:/i)).toBeInTheDocument();
     expect(screen.getByText(/Quad & Knee Bulletproofing Focus/i)).toBeInTheDocument();
   });

@@ -49,11 +49,11 @@ export interface RestPreset {
 }
 
 export const REST_PRESETS: readonly RestPreset[] = [
-  { id: 'er-15', label: '15s', seconds: 15, tier: 'Effective Reps', description: 'Athlean-X 20-Effective-Reps rest-pause cluster reset' },
+  { id: 'er-15', label: '15s', seconds: 15, tier: 'Effective Reps', description: '20-Effective-Reps rest-pause cluster reset' },
   { id: 'er-30', label: '30s', seconds: 30, tier: 'Effective Reps', description: 'Extended cluster reset / short accessory' },
   { id: 't3-60', label: '60s', seconds: 60, tier: 'Tier 3', description: 'Tier 3 accessory & mobility pacing' },
   { id: 't3-90', label: '90s', seconds: 90, tier: 'Tier 3', description: 'High-volume hypertrophy & core stability' },
-  { id: 'tnt-120', label: '120s (TNT Rest)', seconds: 120, tier: 'TNT Protocol', description: 'Dr. Ebonie Rio Tendon Neuroplastic Training 2-minute inter-hold recovery (5x45s protocol)' },
+  { id: 'tnt-120', label: '120s (TNT Rest)', seconds: 120, tier: 'TNT Protocol', description: 'Tendon Neuroplastic Training 2-minute inter-hold recovery (5x45s protocol)' },
   { id: 't2-120', label: '120s (2m)', seconds: 120, tier: 'Tier 2', description: 'Standard Tier 2 hypertrophy compound recovery' },
   { id: 't2-180', label: '180s (3m)', seconds: 180, tier: 'Tier 2', description: 'Heavy Tier 2 compound recovery' },
   { id: 't1-240', label: '240s (4m)', seconds: 240, tier: 'Tier 1', description: 'Sub-maximal heavy powerbuilding rest (GZCL T1)' },

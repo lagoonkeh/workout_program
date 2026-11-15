@@ -136,7 +136,7 @@ export const CueCardModal: React.FC<CueCardModalProps> = ({
     } else {
       setIsSpeaking(true);
       const title = cueCard.title || cueCard.exerciseName;
-      const cues = (cueCard.creatorCues || []).map((c) => `${c.creator} says: ${c.quote}`);
+      const cues = (cueCard.creatorCues || []).map((c) => c.quote);
       voiceAnnouncer.announceCues(title, cues, {
         onEnd: () => setIsSpeaking(false),
       });
@@ -415,7 +415,7 @@ export const CueCardModal: React.FC<CueCardModalProps> = ({
           <section className="space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Quote className="w-4 h-4 text-sky-400" />
-              Elite Creator Cues & Biomechanics
+              Form Cues & Biomechanics
             </h3>
 
             <div className="space-y-3.5">
@@ -427,7 +427,7 @@ export const CueCardModal: React.FC<CueCardModalProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
                     <span className="font-bold text-emerald-300 text-xs sm:text-sm">
-                      {cue.creator}
+                      Form Cue {idx + 1}
                     </span>
                   </div>
 

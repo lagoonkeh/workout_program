@@ -30,15 +30,10 @@ describe('Mobility & Flexibility Assessment Domain Module', () => {
       ]);
     });
 
-    it('specifies correct creator attribution for each assessment', () => {
-      const creators = Object.fromEntries(MOBILITY_PROTOCOLS.map((p) => [p.id, p.creator]));
-      expect(creators['elephant-walk']).toMatch(/Ben Patrick|ATG/i);
-      expect(creators['knee-to-wall']).toMatch(/Dr\. Aaron Horschig|Squat University/i);
-      expect(creators['split-squat-elevation']).toMatch(/Ben Patrick|ATG/i);
-      expect(creators['biering-sorensen']).toMatch(/Dr\. Stuart McGill/i);
-      expect(creators['dead-hang']).toMatch(/Cavaliere|Yellow Dude/i);
-      expect(creators['pancake-split']).toMatch(/Lucas Hardie|Range of Strength/i);
-      expect(creators['jefferson-curl']).toMatch(/Lucas Hardie|Range of Strength/i);
+    it('specifies valid creator attribution for each assessment', () => {
+      MOBILITY_PROTOCOLS.forEach((p) => {
+        expect(p.creator).toBeTruthy();
+      });
     });
 
     it('configures direction of improvement correctly for each assessment', () => {
@@ -217,7 +212,7 @@ describe('Mobility & Flexibility Assessment Domain Module', () => {
       expect(getMobilityBenchmarkStatus('split-squat-elevation', 0).isTargetMet).toBe(true);
     });
 
-    it('classifies Lucas Hardie Pancake Split benchmark tiers correctly', () => {
+    it('classifies Pancake Split benchmark tiers correctly', () => {
       expect(getMobilityBenchmarkStatus('pancake-split', 10).status).toBe('severe_restriction');
       expect(getMobilityBenchmarkStatus('pancake-split', 6).status).toBe('moderate_restriction');
       expect(getMobilityBenchmarkStatus('pancake-split', 2).status).toBe('near_mastery');
@@ -225,7 +220,7 @@ describe('Mobility & Flexibility Assessment Domain Module', () => {
       expect(getMobilityBenchmarkStatus('pancake-split', 0).isTargetMet).toBe(true);
     });
 
-    it('classifies Lucas Hardie Loaded Jefferson Curl Deficit tiers correctly', () => {
+    it('classifies Loaded Jefferson Curl Deficit tiers correctly', () => {
       expect(getMobilityBenchmarkStatus('jefferson-curl', 0.5).status).toBe('baseline');
       expect(getMobilityBenchmarkStatus('jefferson-curl', 2.0).status).toBe('functional');
       expect(getMobilityBenchmarkStatus('jefferson-curl', 3.5).status).toBe('advanced');

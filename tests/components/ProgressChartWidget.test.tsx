@@ -90,7 +90,7 @@ describe('ProgressChartWidget Component', () => {
 
     // Verify mobility metrics pills appear
     expect(screen.getByRole('button', { name: /Knee-to-Wall Ankle Dorsiflexion/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /ATG Elephant Walks/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Elephant Walks/i })).toBeInTheDocument();
 
     // Switch back to Strength Lifts
     const strengthCategoryBtn = screen.getByRole('button', { name: /Strength Lifts/i });

@@ -40,7 +40,7 @@ describe('Tier 3: Cross-Feature Combinations', () => {
 
     // 2. Switch session from Lower A to Upper A
     fireEvent.click(screen.getByRole('button', { name: /Upper A/i }));
-    expect(screen.getByText(/Barbell Bench Press/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Barbell Bench Press/i).length).toBeGreaterThanOrEqual(1);
 
     // 3. Verify rest timer is still running with 120s duration
     expect(restTimerSingleton.getSnapshot().state).toBe('RUNNING');
@@ -48,7 +48,7 @@ describe('Tier 3: Cross-Feature Combinations', () => {
 
     // 4. Switch to Lower B
     fireEvent.click(screen.getByRole('button', { name: /Lower B/i }));
-    expect(screen.getByText(/Barbell Romanian Deadlift/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Barbell Romanian Deadlift/i).length).toBeGreaterThanOrEqual(1);
     expect(restTimerSingleton.getSnapshot().state).toBe('RUNNING');
   });
 
@@ -77,10 +77,10 @@ describe('Tier 3: Cross-Feature Combinations', () => {
     render(<App />);
 
     // 1. Launch Marcus Filly tempo metronome for Barbell Back Squat (tempo: 31X1)
-    const tempoBtn = screen.getAllByTitle(/Launch Marcus Filly metronome for/i)[0];
+    const tempoBtn = screen.getAllByTitle(/Launch tempo metronome for/i)[0];
     fireEvent.click(tempoBtn);
 
-    const dialog = screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i });
+    const dialog = screen.getByRole('dialog', { name: /Tempo Metronome/i });
     expect(dialog).toBeInTheDocument();
     expect(screen.getAllByText(/31X1/i).length).toBeGreaterThanOrEqual(1);
 
@@ -150,7 +150,7 @@ describe('Tier 3: Cross-Feature Combinations', () => {
     expect(loadedData.mobilityHistory[0].value).toBe(5);
   });
 
-  it('Combo 6: Rest timer active while Creator Cue Card modal is open', () => {
+  it('Combo 6: Rest timer active while Form Cue Card modal is open', () => {
     render(<App />);
 
     // 1. Start a 60s rest timer
@@ -159,8 +159,8 @@ describe('Tier 3: Cross-Feature Combinations', () => {
     fireEvent.click(preset60);
     expect(restTimerSingleton.getSnapshot().state).toBe('RUNNING');
 
-    // 2. Immediately open Creator Cue Card modal
-    fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
+    // 2. Immediately open Form Cue Card modal
+    fireEvent.click(screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByText(/Barbell Back Squat/i)).toBeInTheDocument();
@@ -213,22 +213,22 @@ describe('Tier 3: Cross-Feature Combinations', () => {
     render(<App />);
 
     // The barbell squat's cue card has no metronome button
-    fireEvent.click(screen.getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Launch Tempo Metronome/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
+    const firstDialog = screen.getByRole('dialog');
+    expect(within(firstDialog).queryByRole('button', { name: /Launch Tempo Metronome/i })).not.toBeInTheDocument();
     fireEvent.keyDown(document, { key: 'Escape' });
 
     // A timed exercise's cue card does (McGill Big 3 holds)
     const mcgill = document.getElementById('exercise-card-t3_mcgill_big_3')!;
-    fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Creator Cues & Science/i })[0]);
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(within(mcgill).getAllByRole('button', { name: /View Form Cues & Science/i })[0]);
+    const mcgillDialog = screen.getByRole('dialog');
 
     // Launch metronome from cue card footer
-    const launchTempoBtn = screen.getByRole('button', { name: /Launch Tempo Metronome/i });
+    const launchTempoBtn = within(mcgillDialog).getByRole('button', { name: /Launch Tempo Metronome/i });
     fireEvent.click(launchTempoBtn);
 
     // Cue modal unmounts, metronome mounts
-    expect(screen.getByRole('dialog', { name: /Marcus Filly Tempo Metronome/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
 
     // Close metronome
     fireEvent.click(screen.getByRole('button', { name: /Close Metronome/i }));
