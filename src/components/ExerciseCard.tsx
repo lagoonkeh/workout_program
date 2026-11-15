@@ -1302,96 +1302,100 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         <>
       {/* Exercise Header */}
       <div className="mb-3 space-y-2">
-        {/* Row 1: Badges */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {/* GZCL Tier Badge */}
-          <span
-            className={`text-xs font-bold px-2 py-0.5 rounded-md border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
+        {/* Row 1: Badges & Top-Right Collapse Button */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-0">
+            {/* GZCL Tier Badge */}
+            <span
+              className={`text-xs font-bold px-2 py-0.5 rounded-md border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
+            >
+              {exercise.tier} · {currentTier.label}
+            </span>
+
+            {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
+            <span className="sr-only">
+              {exercise.equipment.replaceAll('_', ' ')}
+            </span>
+
+            {/* Daily Core Finisher Badge (sr-only to keep screen uncluttered while accessible) */}
+            {isDailyAbsFinisher && (
+              <span data-testid="daily-core-badge" className="sr-only">
+                Daily Core Finisher
+              </span>
+            )}
+
+            {/* AMRAP Badge */}
+            {exercise.isAmrapLastSet && (
+              <span className="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+                AMRAP Last Set
+              </span>
+            )}
+
+            {/* Live Tonnage / Volume Badge */}
+            {totalVolumeLbs > 0 && (
+              <span
+                className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono border border-slate-700"
+                title="Total Completed Volume (Weight × Reps)"
+              >
+                Vol: {totalVolumeLbs.toLocaleString()} lbs
+              </span>
+            )}
+
+            {/* Live Personal Record (PR) Badge */}
+            {isNewPR && (
+              <span
+                data-testid="pr-badge"
+                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
+              >
+                <Trophy className="w-3 h-3 text-amber-400" />
+                <span>New PR!</span>
+              </span>
+            )}
+
+            {/* High Priority Focus Badge */}
+            {(exercise.priorityBadge || exercise.missedLastSession) && (
+              <span
+                data-testid="priority-catchup-badge"
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
+              >
+                <span>⚡ High Priority</span>
+              </span>
+            )}
+
+            {/* Jeff Nippard LLP Protocol Badge */}
+            {isLLP && (
+              <span
+                data-testid="expanded-llp-badge"
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
+              >
+                <Flame className="w-3.5 h-3.5 text-purple-400" />
+                <span>LLP Protocol</span>
+              </span>
+            )}
+
+            {/* Skipped Badge */}
+            {isExerciseSkipped && (
+              <span
+                data-testid="expanded-skipped-badge"
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
+              >
+                <FastForward className="w-3.5 h-3.5 text-amber-400" />
+                <span>Skipped{skippedReason ? `: ${skippedReason}` : ''}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Card Collapse Button on top right hand corner */}
+          <button
+            type="button"
+            onClick={handleToggleCardCollapse}
+            aria-label={`Collapse ${exercise.name}`}
+            className="flex items-center gap-1 px-2.5 py-1 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors shrink-0 ml-auto select-none active:scale-95"
+            title={`Collapse ${exercise.name} card`}
           >
-            {exercise.tier} · {currentTier.label}
-          </span>
-
-          {/* Live e1RM Badge (Hevy / Strong Inspiration) - next to the tier name */}
-          {bestE1RM > 0 && (
-            <span
-              className="text-xs px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30"
-              title="Estimated 1-Rep Max (Epley Formula)"
-            >
-              e1RM: {bestE1RM} lbs
-            </span>
-          )}
-
-          {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
-          <span className="sr-only">
-            {exercise.equipment.replaceAll('_', ' ')}
-          </span>
-
-          {/* Daily Core Finisher Badge (sr-only to keep screen uncluttered while accessible) */}
-          {isDailyAbsFinisher && (
-            <span data-testid="daily-core-badge" className="sr-only">
-              Daily Core Finisher
-            </span>
-          )}
-
-          {/* AMRAP Badge */}
-          {exercise.isAmrapLastSet && (
-            <span className="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
-              AMRAP Last Set
-            </span>
-          )}
-
-          {/* Live Tonnage / Volume Badge */}
-          {totalVolumeLbs > 0 && (
-            <span
-              className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono border border-slate-700"
-              title="Total Completed Volume (Weight × Reps)"
-            >
-              Vol: {totalVolumeLbs.toLocaleString()} lbs
-            </span>
-          )}
-
-          {/* Live Personal Record (PR) Badge */}
-          {isNewPR && (
-            <span
-              data-testid="pr-badge"
-              className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
-            >
-              <Trophy className="w-3 h-3 text-amber-400" />
-              <span>New PR!</span>
-            </span>
-          )}
-
-          {/* High Priority Focus Badge */}
-          {(exercise.priorityBadge || exercise.missedLastSession) && (
-            <span
-              data-testid="priority-catchup-badge"
-              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
-            >
-              <span>⚡ High Priority</span>
-            </span>
-          )}
-
-          {/* Jeff Nippard LLP Protocol Badge */}
-          {isLLP && (
-            <span
-              data-testid="expanded-llp-badge"
-              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
-            >
-              <Flame className="w-3.5 h-3.5 text-purple-400" />
-              <span>LLP Protocol</span>
-            </span>
-          )}
-
-          {/* Skipped Badge */}
-          {isExerciseSkipped && (
-            <span
-              data-testid="expanded-skipped-badge"
-              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
-            >
-              <FastForward className="w-3.5 h-3.5 text-amber-400" />
-              <span>Skipped{skippedReason ? `: ${skippedReason}` : ''}</span>
-            </span>
-          )}
+            <span>Collapse</span>
+            <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+          </button>
         </div>
 
         {/* Row 2: Visual Thumbnail & Title */}
@@ -1584,6 +1588,18 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           </button>
         </div>
 
+        {/* Live e1RM Badge (Hevy / Strong Inspiration) directly above set / goal reps */}
+        {bestE1RM > 0 && (
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <span
+              className="text-xs px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30"
+              title="Estimated 1-Rep Max (Epley Formula)"
+            >
+              e1RM: {bestE1RM} lbs
+            </span>
+          </div>
+        )}
+
         {/* Row 3: Target Sets & Reps, Muscles */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
           <span>
@@ -1737,18 +1753,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           >
             <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             <span>Reset</span>
-          </button>
-
-          {/* Card Collapse */}
-          <button
-            type="button"
-            onClick={handleToggleCardCollapse}
-            aria-label={`Collapse ${exercise.name}`}
-            className="flex items-center gap-1 px-2.5 py-1 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-            title={`Collapse ${exercise.name} card`}
-          >
-            <span>Collapse</span>
-            <ChevronUp className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
