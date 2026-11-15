@@ -238,6 +238,16 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   const [isManuallyCollapsed, setIsManuallyCollapsed] = useState<boolean | null>(null);
   const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
 
+  const isDailyAbsFinisher = useMemo(() => {
+    const checkId = exercise.baseExerciseId || exercise.id;
+    return (
+      checkId.startsWith('t3_sp_') ||
+      (checkId.startsWith('t3_athlean_') &&
+        checkId !== 't3_athlean_face_pull' &&
+        checkId !== 't3_athlean_face_pull_alternative')
+    );
+  }, [exercise.id, exercise.baseExerciseId]);
+
   const baseExerciseKey = exercise.baseExerciseId || exercise.id;
   const availableVariations = useMemo(
     () => getExerciseVariations(baseExerciseKey),
@@ -700,7 +710,10 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     [activeTempo, exercise.targetReps]
   );
   // Tempo / hold timers only on exercises prescribed by time; rep-based lifts keep just the rest timer
-  const needsTimer = useMemo(() => isTimedPrescription(exercise.targetReps, effectiveTempo), [exercise.targetReps, effectiveTempo]);
+  const needsTimer = useMemo(
+    () => isTimedPrescription(exercise.targetReps, effectiveTempo),
+    [exercise.targetReps, effectiveTempo]
+  );
 
   const handleStartInlineTempo = useCallback(
     (targetSetIdx?: number) => {
@@ -957,16 +970,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   const activeExerciseName =
     isSwappedToRegression && exercise.regression ? exercise.regression.name : exercise.name;
 
-  const isDailyAbsFinisher = useMemo(() => {
-    const checkId = exercise.baseExerciseId || exercise.id;
-    return (
-      checkId.startsWith('t3_sp_') ||
-      (checkId.startsWith('t3_athlean_') &&
-        checkId !== 't3_athlean_face_pull' &&
-        checkId !== 't3_athlean_face_pull_alternative')
-    );
-  }, [exercise.id, exercise.baseExerciseId]);
-
   // Auto-collapse when completed or when controlled by Focus Mode / Collapse All, unless user explicitly toggled it
   const baseCollapsed = defaultCollapsed !== undefined ? defaultCollapsed : isExerciseCompleted;
   const isCollapsed = isManuallyCollapsed !== null ? isManuallyCollapsed : baseCollapsed;
@@ -1156,14 +1159,12 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 >
                   {exercise.tier}
                 </span>
+                <span className="sr-only">
+                  {exercise.equipment.replaceAll('_', ' ')}
+                </span>
                 <h3 className="text-sm sm:text-base font-bold text-white truncate">
                   {activeExerciseName}
                 </h3>
-                {isDailyAbsFinisher && (
-                  <span className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                    Daily Abs
-                  </span>
-                )}
                 {isSwappedToRegression && (
                   <span className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
                     Regression
@@ -1218,7 +1219,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 )}
               </div>
               <div className="text-[11px] text-slate-400 truncate mt-0.5">
-                Target: {exercise.targetSets} × {exercise.targetReps} · {exercise.equipment.replaceAll('_', ' ')} · Tempo {activeTempo}
+                Target: {exercise.targetSets} × {exercise.targetReps} · Tempo {activeTempo}
               </div>
             </div>
           </div>
@@ -1310,19 +1311,25 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             {exercise.tier} · {currentTier.label}
           </span>
 
-          {/* Equipment Tag */}
-          <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700/60 uppercase font-mono tracking-wider">
+          {/* Live e1RM Badge (Hevy / Strong Inspiration) - next to the tier name */}
+          {bestE1RM > 0 && (
+            <span
+              className="text-xs px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30"
+              title="Estimated 1-Rep Max (Epley Formula)"
+            >
+              e1RM: {bestE1RM} lbs
+            </span>
+          )}
+
+          {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
+          <span className="sr-only">
             {exercise.equipment.replaceAll('_', ' ')}
           </span>
 
-          {/* Daily Core Finisher Badge */}
+          {/* Daily Core Finisher Badge (sr-only to keep screen uncluttered while accessible) */}
           {isDailyAbsFinisher && (
-            <span
-              data-testid="daily-core-badge"
-              className="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold tracking-wide flex items-center gap-1"
-            >
-              <Flame className="w-3.5 h-3.5 text-amber-400" />
-              <span>Daily Core Finisher</span>
+            <span data-testid="daily-core-badge" className="sr-only">
+              Daily Core Finisher
             </span>
           )}
 
@@ -1330,16 +1337,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           {exercise.isAmrapLastSet && (
             <span className="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
               AMRAP Last Set
-            </span>
-          )}
-
-          {/* Live e1RM Badge (Hevy / Strong Inspiration) */}
-          {bestE1RM > 0 && (
-            <span
-              className="text-xs px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30"
-              title="Estimated 1-Rep Max (Epley Formula)"
-            >
-              e1RM: {bestE1RM} lbs
             </span>
           )}
 
@@ -1397,171 +1394,194 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           )}
         </div>
 
-        {/* Row 2: Visual Thumbnail, Title & Primary Completion (Mark Complete + Skip) */}
-        <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            {/* 44x44px Exercise Visual Motion Thumbnail */}
-            {visualData && (
-              <ExerciseDiagram
-                diagramType={visualData.diagramType}
-                exerciseName={activeExerciseName}
-                compact={true}
-                onOpenZoom={handleOpenDiagramZoom}
-              />
+        {/* Row 2: Visual Thumbnail & Title */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          {/* 44x44px Exercise Visual Motion Thumbnail */}
+          {visualData && (
+            <ExerciseDiagram
+              diagramType={visualData.diagramType}
+              exerciseName={activeExerciseName}
+              compact={true}
+              onOpenZoom={handleOpenDiagramZoom}
+            />
+          )}
+
+          <div className="flex flex-col min-w-0 flex-1">
+            <h2 className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words">
+              {activeExerciseName}
+            </h2>
+
+            {isSwappedToRegression && exercise.regression && (
+              <span
+                data-testid="active-regression-badge"
+                className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 w-fit mt-0.5"
+              >
+                <ArrowLeftRight className="w-3 h-3 text-amber-400" />
+                <span>Swapped: {exercise.regression.name}</span>
+              </span>
             )}
 
-            <div className="flex flex-col min-w-0 flex-1">
-              <h2 className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words">
-                {activeExerciseName}
-              </h2>
+            {isSwappedToRegression && (
+              <span className="text-xs text-amber-300/80 font-mono mt-0.5">
+                Regressed from primary: {exercise.name}
+              </span>
+            )}
 
+            {exercise.side && (
               <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-                {demoVideo && (
-                  <a
-                    href={youtubeUrl(demoVideo)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid={`demo-video-link-${exercise.id}`}
-                    title={`${demoVideo.title} (${demoVideo.channel}, YouTube)`}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-red-500/15 text-red-300 border border-red-500/40 hover:bg-red-500/25 min-h-[26px]"
-                  >
-                    <Video className="w-3.5 h-3.5" />
-                    <span>Demo · {demoVideo.channel}</span>
-                  </a>
-                )}
-                {isSwappedToRegression && exercise.regression && (
-                  <span
-                    data-testid="active-regression-badge"
-                    className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                  >
-                    <ArrowLeftRight className="w-3 h-3 text-amber-400" />
-                    <span>Swapped: {exercise.regression.name}</span>
-                  </span>
-                )}
+                <span
+                  data-testid={`side-badge-${exercise.side}`}
+                  className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border ${
+                    exercise.side === 'left'
+                      ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                      : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${exercise.side === 'left' ? 'bg-blue-400' : 'bg-purple-400'}`} />
+                  <span>{exercise.side === 'left' ? 'Left Side Workout' : 'Right Side Workout'}</span>
+                </span>
 
-                {exercise.side && (
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span
-                      data-testid={`side-badge-${exercise.side}`}
-                      className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border ${
-                        exercise.side === 'left'
-                          ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                          : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full animate-pulse ${exercise.side === 'left' ? 'bg-blue-400' : 'bg-purple-400'}`} />
-                      <span>{exercise.side === 'left' ? 'Left Side Workout' : 'Right Side Workout'}</span>
-                    </span>
-
-                    {pairedSideId && (
-                      <button
-                        type="button"
-                        data-testid="switch-to-paired-side-btn"
-                        onClick={() => {
-                          onSwitchToPairedSide?.(pairedSideId);
-                          const el = document.getElementById(`exercise-card-${pairedSideId}`);
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition-colors cursor-pointer"
-                        title={`Switch to ${exercise.side === 'left' ? 'Right Side' : 'Left Side'} Workout`}
-                        aria-label={`Switch to ${exercise.side === 'left' ? 'Right Side' : 'Left Side'} Workout`}
-                      >
-                        <span>Switch to {exercise.side === 'left' ? 'Right Side' : 'Left Side'} ➜</span>
-                      </button>
-                    )}
-
-                    {onToggleSplitSides && (
-                      <button
-                        type="button"
-                        data-testid="merge-sides-btn"
-                        onClick={() => onToggleSplitSides(baseExerciseId)}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/60 transition-colors cursor-pointer"
-                        title="Merge Left and Right workouts back into a single card"
-                        aria-label="Merge Left and Right workouts"
-                      >
-                        <span>Merge Sides</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {!exercise.side && onToggleSplitSides && (
+                {onToggleSplitSides && (
                   <button
                     type="button"
-                    data-testid="split-sides-btn"
-                    onClick={() => onToggleSplitSides(exercise.id)}
-                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 min-h-[26px] rounded-lg border transition-all cursor-pointer ${
-                      isSideSplitActive
-                        ? 'bg-blue-500/25 text-blue-200 border-blue-400 shadow-sm ring-1 ring-blue-400/40'
-                        : isUnilateral
-                        ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/40 shadow-sm'
-                        : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700/80'
-                    }`}
-                    title="If you need to switch left or right sides, create its own workout to be completed also"
-                    aria-label={`Split ${exercise.name} into separate Left and Right workouts`}
+                    data-testid="merge-sides-btn"
+                    onClick={() => onToggleSplitSides(baseExerciseId)}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/60 transition-colors cursor-pointer"
+                    title="Merge Left and Right workouts back into a single card"
+                    aria-label="Merge Left and Right workouts"
                   >
-                    <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400" />
-                    <span>{isSideSplitActive ? 'Split L/R Workouts (Active)' : isUnilateral ? 'Switch Sides: Create L/R Workouts' : 'Split L/R Workouts'}</span>
+                    <span>Merge Sides</span>
                   </button>
                 )}
               </div>
-              {isSwappedToRegression && (
-                <span className="text-xs text-amber-300/80 font-mono mt-0.5">
-                  Regressed from primary: {exercise.name}
-                </span>
-              )}
-            </div>
+            )}
           </div>
+        </div>
 
-          {/* Mark Complete + Skip stay together on one line (right-aligned) */}
-          <div className="flex items-center gap-1.5 shrink-0 ml-auto">
-            {/* Prominent Exercise-Level Completion Checkbox */}
+        {/* Row A: Demo Video & Mark Complete in same row, equal button size */}
+        <div className="grid grid-cols-2 gap-2">
+          {demoVideo ? (
+            <a
+              href={youtubeUrl(demoVideo)}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid={`demo-video-link-${exercise.id}`}
+              title={`${demoVideo.title} (${demoVideo.channel}, YouTube)`}
+              className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/40 text-xs font-bold transition-all truncate select-none active:scale-95"
+            >
+              <Video className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Demo · {demoVideo.channel}</span>
+            </a>
+          ) : (
             <button
               type="button"
-              onClick={handleToggleEntireExercise}
-              aria-label={`Mark entire exercise ${exercise.name} as ${isExerciseCompleted ? 'incomplete' : 'complete'}`}
-              className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
+              disabled
+              className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg bg-slate-900/50 text-slate-500 border border-slate-800 text-xs font-medium cursor-not-allowed opacity-50 select-none"
+            >
+              <Video className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">No Demo Video</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleToggleEntireExercise}
+            aria-label={`Mark entire exercise ${exercise.name} as ${isExerciseCompleted ? 'incomplete' : 'complete'}`}
+            className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
+              isExerciseCompleted
+                ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-sm shadow-emerald-950/60'
+                : 'bg-slate-800/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+            }`}
+          >
+            <div
+              className={`w-4 h-4 rounded flex items-center justify-center border transition-all shrink-0 ${
                 isExerciseCompleted
-                  ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-sm shadow-emerald-950/60'
-                  : 'bg-slate-800/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+                  ? 'bg-emerald-500 border-emerald-400 text-slate-950'
+                  : 'border-slate-500 bg-slate-950'
               }`}
             >
-              <div
-                className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
-                  isExerciseCompleted
-                    ? 'bg-emerald-500 border-emerald-400 text-slate-950'
-                    : 'border-slate-500 bg-slate-950'
-                }`}
-              >
-                {isExerciseCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-              </div>
-              <span>
-                {isExerciseCompleted
-                  ? 'Completed ✓'
-                  : `Mark Complete (${completedSetsCount}/${exercise.targetSets})`}
-              </span>
-            </button>
+              {isExerciseCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+            </div>
+            <span className="truncate">
+              {isExerciseCompleted
+                ? 'Completed ✓'
+                : `Mark Complete (${completedSetsCount}/${exercise.targetSets})`}
+            </span>
+          </button>
+        </div>
 
-            {/* Skip Exercise Button */}
+        {/* Row B: Split L/R Workouts & Skip in same row, equal button size */}
+        <div className="grid grid-cols-2 gap-2">
+          {exercise.side && pairedSideId ? (
             <button
               type="button"
-              data-testid={`skip-exercise-btn-${exercise.id}`}
-              onClick={() => setIsSkipModalOpen(true)}
-              aria-label={isExerciseSkipped ? `Edit skip reason for ${activeExerciseName}` : `Mark ${activeExerciseName} as skipped`}
-              className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
-                isExerciseSkipped
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-950/40'
-                  : 'bg-slate-800/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
-              }`}
+              data-testid="switch-to-paired-side-btn"
+              onClick={() => {
+                onSwitchToPairedSide?.(pairedSideId);
+                const el = document.getElementById(`exercise-card-${pairedSideId}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition-colors cursor-pointer text-xs font-bold active:scale-95"
+              title={`Switch to ${exercise.side === 'left' ? 'Right Side' : 'Left Side'} Workout`}
+              aria-label={`Switch to ${exercise.side === 'left' ? 'Right Side' : 'Left Side'} Workout`}
             >
-              <FastForward className={`w-3.5 h-3.5 ${isExerciseSkipped ? 'text-amber-400' : 'text-slate-400'}`} />
-              <span>
-                {isExerciseSkipped
-                  ? (skippedReason ? `Skipped: ${skippedReason}` : 'Skipped ⏭️')
-                  : 'Skip'}
+              <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <span className="truncate">Switch to {exercise.side === 'left' ? 'Right Side' : 'Left Side'} ➜</span>
+            </button>
+          ) : onToggleSplitSides ? (
+            <button
+              type="button"
+              data-testid="split-sides-btn"
+              onClick={() => onToggleSplitSides(exercise.id)}
+              className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg border text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
+                isSideSplitActive
+                  ? 'bg-blue-500/25 text-blue-200 border-blue-400 shadow-sm ring-1 ring-blue-400/40'
+                  : isUnilateral
+                  ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/40 shadow-sm'
+                  : 'bg-slate-800/90 hover:bg-slate-700 text-slate-300 border-slate-700/80'
+              }`}
+              title="If you need to switch left or right sides, create its own workout to be completed also"
+              aria-label={`Split ${exercise.name} into separate Left and Right workouts`}
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <span className="truncate">
+                {isSideSplitActive
+                  ? 'Split L/R (Active)'
+                  : isUnilateral
+                  ? 'Switch Sides: Create L/R Workouts'
+                  : 'Split L/R Workouts'}
               </span>
             </button>
-          </div>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg bg-slate-900/50 text-slate-500 border border-slate-800 text-xs font-medium cursor-not-allowed opacity-50 select-none"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+              <span className="truncate">Split L/R</span>
+            </button>
+          )}
+
+          {/* Skip Exercise Button */}
+          <button
+            type="button"
+            data-testid={`skip-exercise-btn-${exercise.id}`}
+            onClick={() => setIsSkipModalOpen(true)}
+            aria-label={isExerciseSkipped ? `Edit skip reason for ${activeExerciseName}` : `Mark ${activeExerciseName} as skipped`}
+            className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
+              isExerciseSkipped
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-950/40'
+                : 'bg-slate-800/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+            }`}
+          >
+            <FastForward className={`w-3.5 h-3.5 shrink-0 ${isExerciseSkipped ? 'text-amber-400' : 'text-slate-400'}`} />
+            <span className="truncate">
+              {isExerciseSkipped
+                ? (skippedReason ? `Skipped: ${skippedReason}` : 'Skipped ⏭️')
+                : 'Skip'}
+            </span>
+          </button>
         </div>
 
         {/* Row 3: Target Sets & Reps, Muscles */}
@@ -1582,16 +1602,18 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         {/* Row 4: Uniform Action Buttons in 1 row (or 2 rows if needed) directly under Target Sets × Reps */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
           {/* Quick-Launch Rest Timer */}
-          <button
-            type="button"
-            data-testid={`quick-start-rest-${exercise.id}`}
-            onClick={() => onQuickStartRest(exercise.restSeconds)}
-            className="flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium transition-colors cursor-pointer active:scale-95"
-            title={`Start ${exercise.restSeconds}s rest timer`}
-          >
-            <Clock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Rest: <strong className="text-white">{exercise.restSeconds}s ({formatMMSS(exercise.restSeconds)})</strong></span>
-          </button>
+          {!isDailyAbsFinisher && (
+            <button
+              type="button"
+              data-testid={`quick-start-rest-${exercise.id}`}
+              onClick={() => onQuickStartRest(exercise.restSeconds)}
+              className="flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium transition-colors cursor-pointer active:scale-95"
+              title={`Start ${exercise.restSeconds}s rest timer`}
+            >
+              <Clock className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Rest: <strong className="text-white">{exercise.restSeconds}s ({formatMMSS(exercise.restSeconds)})</strong></span>
+            </button>
+          )}
 
           {/* Quick-Launch Inline Tempo / Hold Timer & Fullscreen Metronome (timed exercises only) */}
           {needsTimer && (
@@ -1965,15 +1987,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                       onUpdateSetLog(exercise.id, idx, { weightLbs: weight });
                     }
                   }}
-                  title={`Set all sets to ${weight} lbs (Bowflex SelectTech 840 setting)`}
-                  aria-label={`Select ${weight} lbs Bowflex kettlebell setting`}
+                  title={`Set all sets to ${weight}lb (Bowflex SelectTech 840 setting)`}
+                  aria-label={`Select ${weight}lb Bowflex kettlebell setting`}
                   className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
                     isSelected
                       ? 'bg-red-500/25 text-red-200 border border-red-500/60 shadow-md shadow-red-950/40 ring-1 ring-red-500/40'
                       : 'bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 hover:border-slate-600'
                   }`}
                 >
-                  {weight} lbs
+                  {weight}lb
                 </button>
               );
             })}

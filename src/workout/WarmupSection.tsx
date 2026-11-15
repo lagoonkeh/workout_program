@@ -185,23 +185,24 @@ export function WarmupSection({ activeFocusWarmupId, activeSession, collapsedWar
                       </div>
                     </div>
 
-                    {/* Row 3: Target Tasks & Reps, Purpose */}
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
-                      <span>
-                        Target:{' '}
-                        <strong className="text-slate-200">
-                          {warmupInstructions.length > 0 ? `${completedPhaseCount}/${warmupInstructions.length} Tasks · ` : ''}{drill.targetDurationOrReps}
-                        </strong>
-                      </span>
-                      <span>·</span>
-                      <span>
-                        Purpose: <span className="text-slate-300">{drill.biomechanicalPurpose}</span>
-                      </span>
-                    </div>
-
-                    {/* Row 4: Uniform Action Buttons in 1 row (or 2 rows if needed) directly under Tasks & Reps */}
                     {!isDrillCollapsed && (
-                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      <>
+                        {/* Row 3: Target Tasks & Reps, Purpose */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
+                          <span>
+                            Target:{' '}
+                            <strong className="text-slate-200">
+                              {warmupInstructions.length > 0 ? `${completedPhaseCount}/${warmupInstructions.length} Tasks · ` : ''}{drill.targetDurationOrReps}
+                            </strong>
+                          </span>
+                          <span>·</span>
+                          <span>
+                            Purpose: <span className="text-slate-300">{drill.biomechanicalPurpose}</span>
+                          </span>
+                        </div>
+
+                        {/* Row 4: Uniform Action Buttons in 1 row (or 2 rows if needed) directly under Tasks & Reps */}
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
                         {/* 1-Tap Dedicated Warmup Drill Timer / Cadence Launcher */}
                         {(() => {
                           const drillTempo = drill.tempo || matchingWarmupCueCard?.tempo;
@@ -312,11 +313,8 @@ export function WarmupSection({ activeFocusWarmupId, activeSession, collapsedWar
                           </button>
                         )}
                       </div>
-                    )}
 
-                    {!isDrillCollapsed && (
-                      <>
-                        <div className="text-slate-400 italic pt-0.5">💡 {drill.coachingNotes}</div>
+                      <div className="text-slate-400 italic pt-0.5">💡 {drill.coachingNotes}</div>
                         {(() => {
                           const matchingWarmupCueCard =
                             CUE_CARD_MAP.get(drill.id) ||

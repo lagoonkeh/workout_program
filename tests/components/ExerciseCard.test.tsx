@@ -1479,7 +1479,7 @@ describe('ExerciseCard Component', () => {
       expectedWeights.forEach((w) => {
         const btn = screen.getByTestId(`bowflex-dial-btn-${kbExercise.id}-${w}`);
         expect(btn).toBeInTheDocument();
-        expect(btn).toHaveTextContent(`${w} lbs`);
+        expect(btn).toHaveTextContent(`${w}lb`);
       });
     });
 

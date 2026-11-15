@@ -32,51 +32,59 @@ export function useSetLogging({ activeRestContext, activeSession, defaultLogsByE
       const targetExercise = sessionExercises.find((e) => e.id === exerciseId) ||
                              activeSession.dailyCoreFinisher?.find((e) => e.id === exerciseId);
 
+      const isCoreDrill =
+        exerciseId.startsWith('t3_sp_') ||
+        Boolean(activeSession.dailyCoreFinisher?.some((e) => e.id === exerciseId));
+
       if (updated.isCompleted === true && targetExercise) {
-        const currentLogs = getExerciseLogs(targetExercise);
-        const completedSetNumber = setIndex + 1;
-        const totalSets = currentLogs.length;
-        const isLastSet = completedSetNumber >= totalSets;
-
-        let nextSetNumber: number | undefined;
-        let nextExerciseName: string | undefined;
-        let nextExerciseId: string | undefined;
-
-        if (!isLastSet) {
-          nextSetNumber = completedSetNumber + 1;
-          nextExerciseName = undefined;
-          nextExerciseId = undefined;
+        if (isCoreDrill) {
+          pendingRestContextRef.current = null;
         } else {
-          const currentIdx = sessionExercises.findIndex((e) => e.id === exerciseId);
-          if (currentIdx >= 0 && currentIdx < sessionExercises.length - 1) {
-            nextExerciseName = sessionExercises[currentIdx + 1].name;
-            nextExerciseId = sessionExercises[currentIdx + 1].id;
-            nextSetNumber = 1;
-          } else if (activeSession.dailyCoreFinisher && activeSession.dailyCoreFinisher.length > 0) {
-            const finisherIdx = activeSession.dailyCoreFinisher.findIndex((e) => e.id === exerciseId);
-            if (finisherIdx >= 0 && finisherIdx < activeSession.dailyCoreFinisher.length - 1) {
-              nextExerciseName = activeSession.dailyCoreFinisher[finisherIdx + 1].name;
-              nextExerciseId = activeSession.dailyCoreFinisher[finisherIdx + 1].id;
+          const currentLogs = getExerciseLogs(targetExercise);
+          const completedSetNumber = setIndex + 1;
+          const totalSets = currentLogs.length;
+          const isLastSet = completedSetNumber >= totalSets;
+
+          let nextSetNumber: number | undefined;
+          let nextExerciseName: string | undefined;
+          let nextExerciseId: string | undefined;
+
+          if (!isLastSet) {
+            nextSetNumber = completedSetNumber + 1;
+            nextExerciseName = undefined;
+            nextExerciseId = undefined;
+          } else {
+            const currentIdx = sessionExercises.findIndex((e) => e.id === exerciseId);
+            if (currentIdx >= 0 && currentIdx < sessionExercises.length - 1) {
+              nextExerciseName = sessionExercises[currentIdx + 1].name;
+              nextExerciseId = sessionExercises[currentIdx + 1].id;
               nextSetNumber = 1;
-            } else if (finisherIdx === -1) {
-              nextExerciseName = activeSession.dailyCoreFinisher[0].name;
-              nextExerciseId = activeSession.dailyCoreFinisher[0].id;
-              nextSetNumber = 1;
+            } else if (activeSession.dailyCoreFinisher && activeSession.dailyCoreFinisher.length > 0) {
+              const finisherIdx = activeSession.dailyCoreFinisher.findIndex((e) => e.id === exerciseId);
+              if (finisherIdx >= 0 && finisherIdx < activeSession.dailyCoreFinisher.length - 1) {
+                nextExerciseName = activeSession.dailyCoreFinisher[finisherIdx + 1].name;
+                nextExerciseId = activeSession.dailyCoreFinisher[finisherIdx + 1].id;
+                nextSetNumber = 1;
+              } else if (finisherIdx === -1) {
+                nextExerciseName = activeSession.dailyCoreFinisher[0].name;
+                nextExerciseId = activeSession.dailyCoreFinisher[0].id;
+                nextSetNumber = 1;
+              }
             }
           }
-        }
 
-        pendingRestContextRef.current = {
-          exerciseId,
-          exerciseName: targetExercise.name,
-          completedSetNumber,
-          totalSets,
-          nextSetNumber,
-          nextExerciseName,
-          nextExerciseId,
-          isLastSet,
-          nextSet: nextSetInfo(nextExerciseId || exerciseId, nextSetNumber),
-        };
+          pendingRestContextRef.current = {
+            exerciseId,
+            exerciseName: targetExercise.name,
+            completedSetNumber,
+            totalSets,
+            nextSetNumber,
+            nextExerciseName,
+            nextExerciseId,
+            isLastSet,
+            nextSet: nextSetInfo(nextExerciseId || exerciseId, nextSetNumber),
+          };
+        }
       }
 
       setWorkoutLogs((prev) => {
@@ -148,6 +156,11 @@ export function useSetLogging({ activeRestContext, activeSession, defaultLogsByE
 
   const handleQuickStartRestForExercise = useCallback(
     (sec: number, exercise: WorkoutExercise) => {
+      const isCore =
+        exercise.id.startsWith('t3_sp_') ||
+        Boolean(activeSession.dailyCoreFinisher?.some((e) => e.id === exercise.id));
+      if (isCore) return;
+
       if (pendingRestContextRef.current && pendingRestContextRef.current.exerciseId === exercise.id) {
         handleQuickStartRest(sec, pendingRestContextRef.current);
         return;
