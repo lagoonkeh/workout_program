@@ -1300,104 +1300,106 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         /* Expanded Exercise Card */
         <>
       {/* Exercise Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-            {/* GZCL Tier Badge */}
+      <div className="mb-3 space-y-2">
+        {/* Row 1: Badges */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* GZCL Tier Badge */}
+          <span
+            className={`text-xs font-bold px-2 py-0.5 rounded-md border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
+          >
+            {exercise.tier} · {currentTier.label}
+          </span>
+
+          {/* Equipment Tag */}
+          <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700/60 uppercase font-mono tracking-wider">
+            {exercise.equipment.replaceAll('_', ' ')}
+          </span>
+
+          {/* Daily Core Finisher Badge */}
+          {isDailyAbsFinisher && (
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-md border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
+              data-testid="daily-core-badge"
+              className="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold tracking-wide flex items-center gap-1"
             >
-              {exercise.tier} · {currentTier.label}
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <span>Daily Core Finisher</span>
             </span>
+          )}
 
-            {/* Equipment Tag */}
-            <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700/60 uppercase font-mono tracking-wider">
-              {exercise.equipment.replaceAll('_', ' ')}
+          {/* AMRAP Badge */}
+          {exercise.isAmrapLastSet && (
+            <span className="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+              AMRAP Last Set
             </span>
+          )}
 
-            {/* Daily Core Finisher Badge */}
-            {isDailyAbsFinisher && (
-              <span
-                data-testid="daily-core-badge"
-                className="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold tracking-wide flex items-center gap-1"
-              >
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>Daily Core Finisher</span>
-              </span>
-            )}
+          {/* Live e1RM Badge (Hevy / Strong Inspiration) */}
+          {bestE1RM > 0 && (
+            <span
+              className="text-xs px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30"
+              title="Estimated 1-Rep Max (Epley Formula)"
+            >
+              e1RM: {bestE1RM} lbs
+            </span>
+          )}
 
-            {/* AMRAP Badge */}
-            {exercise.isAmrapLastSet && (
-              <span className="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
-                AMRAP Last Set
-              </span>
-            )}
+          {/* Live Tonnage / Volume Badge */}
+          {totalVolumeLbs > 0 && (
+            <span
+              className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono border border-slate-700"
+              title="Total Completed Volume (Weight × Reps)"
+            >
+              Vol: {totalVolumeLbs.toLocaleString()} lbs
+            </span>
+          )}
 
-            {/* Live e1RM Badge (Hevy / Strong Inspiration) */}
-            {bestE1RM > 0 && (
-              <span
-                className="text-xs px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30"
-                title="Estimated 1-Rep Max (Epley Formula)"
-              >
-                e1RM: {bestE1RM} lbs
-              </span>
-            )}
+          {/* Live Personal Record (PR) Badge */}
+          {isNewPR && (
+            <span
+              data-testid="pr-badge"
+              className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
+            >
+              <Trophy className="w-3 h-3 text-amber-400" />
+              <span>New PR!</span>
+            </span>
+          )}
 
-            {/* Live Tonnage / Volume Badge */}
-            {totalVolumeLbs > 0 && (
-              <span
-                className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono border border-slate-700"
-                title="Total Completed Volume (Weight × Reps)"
-              >
-                Vol: {totalVolumeLbs.toLocaleString()} lbs
-              </span>
-            )}
+          {/* High Priority Focus Badge */}
+          {(exercise.priorityBadge || exercise.missedLastSession) && (
+            <span
+              data-testid="priority-catchup-badge"
+              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
+            >
+              <span>⚡ High Priority</span>
+            </span>
+          )}
 
-            {/* Live Personal Record (PR) Badge */}
-            {isNewPR && (
-              <span
-                data-testid="pr-badge"
-                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
-              >
-                <Trophy className="w-3 h-3 text-amber-400" />
-                <span>New PR!</span>
-              </span>
-            )}
+          {/* Jeff Nippard LLP Protocol Badge */}
+          {isLLP && (
+            <span
+              data-testid="expanded-llp-badge"
+              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
+            >
+              <Flame className="w-3.5 h-3.5 text-purple-400" />
+              <span>LLP Protocol</span>
+            </span>
+          )}
 
-            {/* High Priority Focus Badge */}
-            {(exercise.priorityBadge || exercise.missedLastSession) && (
-              <span
-                data-testid="priority-catchup-badge"
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
-              >
-                <span>⚡ High Priority</span>
-              </span>
-            )}
+          {/* Skipped Badge */}
+          {isExerciseSkipped && (
+            <span
+              data-testid="expanded-skipped-badge"
+              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
+            >
+              <FastForward className="w-3.5 h-3.5 text-amber-400" />
+              <span>Skipped{skippedReason ? `: ${skippedReason}` : ''}</span>
+            </span>
+          )}
+        </div>
 
-            {/* Jeff Nippard LLP Protocol Badge */}
-            {isLLP && (
-              <span
-                data-testid="expanded-llp-badge"
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
-              >
-                <Flame className="w-3.5 h-3.5 text-purple-400" />
-                <span>LLP Protocol</span>
-              </span>
-            )}
-
-            {/* Skipped Badge */}
-            {isExerciseSkipped && (
-              <span
-                data-testid="expanded-skipped-badge"
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
-              >
-                <FastForward className="w-3.5 h-3.5 text-amber-400" />
-                <span>Skipped{skippedReason ? `: ${skippedReason}` : ''}</span>
-              </span>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        {/* Row 2: Visual Thumbnail, Title & Primary Completion (Mark Complete + Skip) */}
+        <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             {/* 44x44px Exercise Visual Motion Thumbnail */}
             {visualData && (
               <ExerciseDiagram
@@ -1408,12 +1410,12 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               />
             )}
 
-            <div className="flex flex-col min-w-0 basis-[9rem] flex-1">
+            <div className="flex flex-col min-w-0 flex-1">
               <h2 className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words">
                 {activeExerciseName}
               </h2>
 
-              <div className="flex items-center gap-1.5 flex-wrap mt-1">
+              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                 {demoVideo && (
                   <a
                     href={youtubeUrl(demoVideo)}
@@ -1421,7 +1423,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     rel="noopener noreferrer"
                     data-testid={`demo-video-link-${exercise.id}`}
                     title={`${demoVideo.title} (${demoVideo.channel}, YouTube)`}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-red-500/15 text-red-300 border border-red-500/40 hover:bg-red-500/25 min-h-[28px]"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-red-500/15 text-red-300 border border-red-500/40 hover:bg-red-500/25 min-h-[26px]"
                   >
                     <Video className="w-3.5 h-3.5" />
                     <span>Demo · {demoVideo.channel}</span>
@@ -1430,9 +1432,9 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 {isSwappedToRegression && exercise.regression && (
                   <span
                     data-testid="active-regression-badge"
-                    className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40"
                   >
-                    <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
+                    <ArrowLeftRight className="w-3 h-3 text-amber-400" />
                     <span>Swapped: {exercise.regression.name}</span>
                   </span>
                 )}
@@ -1441,7 +1443,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span
                       data-testid={`side-badge-${exercise.side}`}
-                      className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl border ${
+                      className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border ${
                         exercise.side === 'left'
                           ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
                           : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
@@ -1460,7 +1462,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                           const el = document.getElementById(`exercise-card-${pairedSideId}`);
                           if (el) el.scrollIntoView({ behavior: 'smooth' });
                         }}
-                        className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition-colors cursor-pointer"
                         title={`Switch to ${exercise.side === 'left' ? 'Right Side' : 'Left Side'} Workout`}
                         aria-label={`Switch to ${exercise.side === 'left' ? 'Right Side' : 'Left Side'} Workout`}
                       >
@@ -1488,7 +1490,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     type="button"
                     data-testid="split-sides-btn"
                     onClick={() => onToggleSplitSides(exercise.id)}
-                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 min-h-[28px] rounded-lg border transition-all cursor-pointer ${
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 min-h-[26px] rounded-lg border transition-all cursor-pointer ${
                       isSideSplitActive
                         ? 'bg-blue-500/25 text-blue-200 border-blue-400 shadow-sm ring-1 ring-blue-400/40'
                         : isUnilateral
@@ -1509,9 +1511,10 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 </span>
               )}
             </div>
+          </div>
 
-            {/* Mark Complete + Skip stay together on one line (right-aligned) instead of taking a row each */}
-            <div className="flex items-center gap-1.5 ml-auto">
+          {/* Mark Complete + Skip stay together on one line (right-aligned) */}
+          <div className="flex items-center gap-1.5 shrink-0 ml-auto">
             {/* Prominent Exercise-Level Completion Checkbox */}
             <button
               type="button"
@@ -1558,160 +1561,26 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   : 'Skip'}
               </span>
             </button>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1.5 text-xs text-slate-400">
-            <span>
-              Target:{' '}
-              <strong className="text-slate-200">
-                {exercise.targetSets} {exercise.targetSets === 1 ? 'set' : 'sets'} × {exercise.targetReps}
-                {/reps?|s$|sec|min|rounds?|ladders?|feet|ft|pulses?|hold|hang|cycles?|casts?|circles?|\//i.test(exercise.targetReps.trim()) ? '' : ' reps'}
-              </strong>
-            </span>
-            <span>·</span>
-            <span>
-              Muscles: <span className="text-slate-300">{exercise.muscleGroups.join(', ')}</span>
-            </span>
           </div>
         </div>
 
-        {/* Quick Launch Action Pills & Card Collapse / Reset */}
-        <div className="flex flex-wrap sm:flex-col items-center sm:items-end justify-end gap-1.5">
-          <div className="flex items-center gap-1.5 flex-wrap justify-end">
-            {exercise.equipment === 'barbell' && (
-              <button
-                type="button"
-                onClick={() => setShowWarmupRamp((prev) => !prev)}
-                aria-expanded={showWarmupRamp}
-                aria-label={`Toggle warm-up ramp for ${exercise.name}`}
-                className={`flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg border text-xs font-medium cursor-pointer transition-colors ${
-                  showWarmupRamp
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
-                    : 'bg-slate-800/80 hover:bg-slate-700 text-amber-300/90 border-slate-700/80'
-                }`}
-                title="Generate progressive barbell warm-up sets"
-              >
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>Warm-Up Ramp</span>
-              </button>
-            )}
+        {/* Row 3: Target Sets & Reps, Muscles */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
+          <span>
+            Target:{' '}
+            <strong className="text-slate-200">
+              {exercise.targetSets} {exercise.targetSets === 1 ? 'set' : 'sets'} × {exercise.targetReps}
+              {/reps?|s$|sec|min|rounds?|ladders?|feet|ft|pulses?|hold|hang|cycles?|casts?|circles?|\//i.test(exercise.targetReps.trim()) ? '' : ' reps'}
+            </strong>
+          </span>
+          <span>·</span>
+          <span>
+            Muscles: <span className="text-slate-300">{exercise.muscleGroups.join(', ')}</span>
+          </span>
+        </div>
 
-
-            {availableVariations.length > 1 && (
-              <button
-                type="button"
-                data-testid={`exercise-variations-btn-${exercise.id}`}
-                onClick={() => setIsVariationModalOpen(true)}
-                aria-label={`View variations for ${activeExerciseName}`}
-                className="flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-blue-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-                title={`Browse ${availableVariations.length} science-verified variations`}
-              >
-                <Layers className="w-3.5 h-3.5 text-blue-400" />
-                <span>Variations ({availableVariations.length})</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleReset}
-              aria-label={`Reset ${exercise.name} sets`}
-              className="flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-              title={`Reset ${exercise.name} sets`}
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-              <span>Reset</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleToggleCardCollapse}
-              aria-label={`Collapse ${exercise.name}`}
-              className="flex items-center gap-1 px-2 py-0.5 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
-              title={`Collapse ${exercise.name} card`}
-            >
-              <span>Collapse</span>
-              <ChevronUp className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          {/* Quick-Launch Inline Tempo / Hold Timer & Fullscreen Metronome (timed exercises only) */}
-          {needsTimer && (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              data-testid="inline-tempo-header-btn"
-              onClick={() => {
-                if (isInlineTempoActive) {
-                  if (inlineTempoSnapshot?.state === 'PAUSED') {
-                    handleResumeInlineTempo();
-                  } else {
-                    handlePauseInlineTempo();
-                  }
-                } else {
-                  handleStartInlineTempo();
-                }
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 ${
-                isInlineTempoActive
-                  ? inlineTempoSnapshot?.state === 'PAUSED'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                    : 'bg-emerald-500 text-slate-950 border border-emerald-400 shadow-md shadow-emerald-950/40 animate-pulse'
-                  : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40'
-              }`}
-              title={
-                isInlineTempoActive
-                  ? inlineTempoSnapshot?.state === 'PAUSED'
-                    ? 'Resume inline tempo'
-                    : 'Pause inline tempo'
-                  : `Start tempo ${effectiveTempo} on card`
-              }
-              aria-label={
-                isInlineTempoActive
-                  ? inlineTempoSnapshot?.state === 'PAUSED'
-                    ? 'Resume inline tempo'
-                    : 'Pause inline tempo'
-                  : `Start tempo ${effectiveTempo} on card`
-              }
-            >
-              {isInlineTempoActive ? (
-                inlineTempoSnapshot?.state === 'PAUSED' ? (
-                  <Play className="w-3.5 h-3.5 fill-amber-300" />
-                ) : (
-                  <Pause className="w-3.5 h-3.5 fill-slate-950" />
-                )
-              ) : (
-                <Play className="w-3.5 h-3.5 fill-emerald-300" />
-              )}
-              <span>
-                {isInlineTempoActive
-                  ? inlineTempoSnapshot?.state === 'PAUSED'
-                    ? inlineTempoSnapshot?.parsedTempo.isIsometricHold ? 'Resume Hold' : 'Resume'
-                    : inlineTempoSnapshot?.parsedTempo.isIsometricHold
-                    ? `Holding: ${inlineTempoSnapshot?.phaseRemainingSeconds || 0}s`
-                    : `Rep ${inlineTempoSnapshot?.currentRep || 1}/${inlineTempoSnapshot?.targetReps || 10}`
-                  : effectiveTempo.startsWith('HOLD-')
-                  ? `Start ${effectiveTempo.replace('HOLD-', '')}s Hold`
-                  : activeTempo.startsWith('HOLD-')
-                  ? `Start ${activeTempo.replace('HOLD-', '')}s Hold`
-                  : activeTempo.toLowerCase().includes('hold')
-                  ? 'Start Hold Clock'
-                  : `Start Tempo: ${activeTempo}`}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onQuickStartTempo(effectiveTempo, exercise.id)}
-              className="flex items-center justify-center gap-1.5 px-2 py-0.5 min-h-[36px] min-w-[36px] rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-mono font-medium transition-colors cursor-pointer"
-              title={`Launch tempo metronome for ${effectiveTempo}`}
-              aria-label={`Launch tempo metronome for ${effectiveTempo}`}
-            >
-              <Activity className="w-3.5 h-3.5 text-sky-400" />
-              <span className="hidden sm:inline">Visualizer</span>
-            </button>
-          </div>
-          )}
-
+        {/* Row 4: Uniform Action Buttons in 1 row (or 2 rows if needed) directly under Target Sets × Reps */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
           {/* Quick-Launch Rest Timer */}
           <button
             type="button"
@@ -1722,6 +1591,142 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           >
             <Clock className="w-3.5 h-3.5 text-emerald-400" />
             <span>Rest: <strong className="text-white">{exercise.restSeconds}s ({formatMMSS(exercise.restSeconds)})</strong></span>
+          </button>
+
+          {/* Quick-Launch Inline Tempo / Hold Timer & Fullscreen Metronome (timed exercises only) */}
+          {needsTimer && (
+            <>
+              <button
+                type="button"
+                data-testid="inline-tempo-header-btn"
+                onClick={() => {
+                  if (isInlineTempoActive) {
+                    if (inlineTempoSnapshot?.state === 'PAUSED') {
+                      handleResumeInlineTempo();
+                    } else {
+                      handlePauseInlineTempo();
+                    }
+                  } else {
+                    handleStartInlineTempo();
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 ${
+                  isInlineTempoActive
+                    ? inlineTempoSnapshot?.state === 'PAUSED'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-emerald-500 text-slate-950 border border-emerald-400 shadow-md shadow-emerald-950/40 animate-pulse'
+                    : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40'
+                }`}
+                title={
+                  isInlineTempoActive
+                    ? inlineTempoSnapshot?.state === 'PAUSED'
+                      ? 'Resume inline tempo'
+                      : 'Pause inline tempo'
+                    : `Start tempo ${effectiveTempo} on card`
+                }
+                aria-label={
+                  isInlineTempoActive
+                    ? inlineTempoSnapshot?.state === 'PAUSED'
+                      ? 'Resume inline tempo'
+                      : 'Pause inline tempo'
+                    : `Start tempo ${effectiveTempo} on card`
+                }
+              >
+                {isInlineTempoActive ? (
+                  inlineTempoSnapshot?.state === 'PAUSED' ? (
+                    <Play className="w-3.5 h-3.5 fill-amber-300" />
+                  ) : (
+                    <Pause className="w-3.5 h-3.5 fill-slate-950" />
+                  )
+                ) : (
+                  <Play className="w-3.5 h-3.5 fill-emerald-300" />
+                )}
+                <span>
+                  {isInlineTempoActive
+                    ? inlineTempoSnapshot?.state === 'PAUSED'
+                      ? inlineTempoSnapshot?.parsedTempo.isIsometricHold ? 'Resume Hold' : 'Resume'
+                      : inlineTempoSnapshot?.parsedTempo.isIsometricHold
+                      ? `Holding: ${inlineTempoSnapshot?.phaseRemainingSeconds || 0}s`
+                      : `Rep ${inlineTempoSnapshot?.currentRep || 1}/${inlineTempoSnapshot?.targetReps || 10}`
+                    : effectiveTempo.startsWith('HOLD-')
+                    ? `Start ${effectiveTempo.replace('HOLD-', '')}s Hold`
+                    : activeTempo.startsWith('HOLD-')
+                    ? `Start ${activeTempo.replace('HOLD-', '')}s Hold`
+                    : activeTempo.toLowerCase().includes('hold')
+                    ? 'Start Hold Clock'
+                    : `Start Tempo: ${activeTempo}`}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onQuickStartTempo(effectiveTempo, exercise.id)}
+                className="flex items-center justify-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-mono font-medium transition-colors cursor-pointer"
+                title={`Launch tempo metronome for ${effectiveTempo}`}
+                aria-label={`Launch tempo metronome for ${effectiveTempo}`}
+              >
+                <Activity className="w-3.5 h-3.5 text-sky-400" />
+                <span>Visualizer</span>
+              </button>
+            </>
+          )}
+
+          {/* Progressive Barbell Warm-Up Ramp Toggle */}
+          {exercise.equipment === 'barbell' && (
+            <button
+              type="button"
+              onClick={() => setShowWarmupRamp((prev) => !prev)}
+              aria-expanded={showWarmupRamp}
+              aria-label={`Toggle warm-up ramp for ${exercise.name}`}
+              className={`flex items-center gap-1 px-2.5 py-1 min-h-[36px] rounded-lg border text-xs font-medium cursor-pointer transition-colors ${
+                showWarmupRamp
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                  : 'bg-slate-800/80 hover:bg-slate-700 text-amber-300/90 border-slate-700/80'
+              }`}
+              title="Generate progressive barbell warm-up sets"
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <span>Warm-Up Ramp</span>
+            </button>
+          )}
+
+          {/* Exercise Variations Selector */}
+          {availableVariations.length > 1 && (
+            <button
+              type="button"
+              data-testid={`exercise-variations-btn-${exercise.id}`}
+              onClick={() => setIsVariationModalOpen(true)}
+              aria-label={`View variations for ${activeExerciseName}`}
+              className="flex items-center gap-1 px-2.5 py-1 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-blue-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+              title={`Browse ${availableVariations.length} science-verified variations`}
+            >
+              <Layers className="w-3.5 h-3.5 text-blue-400" />
+              <span>Variations ({availableVariations.length})</span>
+            </button>
+          )}
+
+          {/* Reset Sets */}
+          <button
+            type="button"
+            onClick={handleReset}
+            aria-label={`Reset ${exercise.name} sets`}
+            className="flex items-center gap-1 px-2.5 py-1 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+            title={`Reset ${exercise.name} sets`}
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+            <span>Reset</span>
+          </button>
+
+          {/* Card Collapse */}
+          <button
+            type="button"
+            onClick={handleToggleCardCollapse}
+            aria-label={`Collapse ${exercise.name}`}
+            className="flex items-center gap-1 px-2.5 py-1 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+            title={`Collapse ${exercise.name} card`}
+          >
+            <span>Collapse</span>
+            <ChevronUp className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -3163,44 +3168,70 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </table>
       </div>
 
-      {/* 1-Tap RPE & Knee Pain Quick-Chips (RP Hypertrophy & Prehab Guys Inspiration) */}
-      <div className="mb-3.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-        <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 shrink-0">
-          <Tag className="w-3 h-3 text-emerald-400" />
-          <span>Set {(logs[activeChipSetIndex]?.setNumber) || 1} Tags:</span>
-          <button
-            type="button"
-            data-testid="info-quick-chips-btn"
-            onClick={() => {
-              setInitialRatingTab('rpe');
-              setIsRatingModalOpen(true);
-            }}
-            title="Define RPE and Pain Rating Terms"
-            aria-label="Define RPE and Pain Rating Terms"
-            className="p-1 -m-1 min-h-[36px] min-w-[36px] shrink-0 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
-          >
-            <Info className="w-3 h-3 text-slate-400 hover:text-cyan-400" />
-          </button>
-        </span>
-        {QUICK_LOG_CHIPS.map((chip) => {
-          const isSelected = (logs[activeChipSetIndex]?.notes || '').includes(chip);
-          return (
+      {/* 1-Tap RPE & Knee Pain Quick-Chips (2 Uniform Rows) */}
+      <div className="mb-3.5 space-y-1.5" data-testid="set-tags-container">
+        {/* Row 1: Set Number Tags Label + Target RPE Chips */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 shrink-0">
+            <Tag className="w-3 h-3 text-emerald-400" />
+            <span>Set {(logs[activeChipSetIndex]?.setNumber) || 1} Tags:</span>
             <button
-              key={chip}
               type="button"
-              onClick={() => handleToggleQuickChip(chip)}
-              aria-pressed={isSelected}
-              aria-label={`Quick tag ${chip} for ${exercise.name}`}
-              className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-medium border whitespace-nowrap transition-all cursor-pointer active:scale-95 ${
-                isSelected
-                  ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 font-bold'
-                  : 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
-              }`}
+              data-testid="info-quick-chips-btn"
+              onClick={() => {
+                setInitialRatingTab('rpe');
+                setIsRatingModalOpen(true);
+              }}
+              title="Define RPE and Pain Rating Terms"
+              aria-label="Define RPE and Pain Rating Terms"
+              className="p-1 -m-1 min-h-[36px] min-w-[36px] shrink-0 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
             >
-              {chip}
+              <Info className="w-3 h-3 text-slate-400 hover:text-cyan-400" />
             </button>
-          );
-        })}
+          </span>
+          {QUICK_LOG_CHIPS.slice(0, 3).map((chip) => {
+            const isSelected = (logs[activeChipSetIndex]?.notes || '').includes(chip);
+            return (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => handleToggleQuickChip(chip)}
+                aria-pressed={isSelected}
+                aria-label={`Quick tag ${chip} for ${exercise.name}`}
+                className={`px-2 py-0.5 min-h-[28px] rounded-full text-[10px] font-mono font-medium border whitespace-nowrap transition-all cursor-pointer active:scale-95 inline-flex items-center justify-center ${
+                  isSelected
+                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 font-bold'
+                    : 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
+                }`}
+              >
+                {chip}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Row 2: Joint Pain, Discomfort & Readiness Chips */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {QUICK_LOG_CHIPS.slice(3).map((chip) => {
+            const isSelected = (logs[activeChipSetIndex]?.notes || '').includes(chip);
+            return (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => handleToggleQuickChip(chip)}
+                aria-pressed={isSelected}
+                aria-label={`Quick tag ${chip} for ${exercise.name}`}
+                className={`px-2 py-0.5 min-h-[28px] rounded-full text-[10px] font-mono font-medium border whitespace-nowrap transition-all cursor-pointer active:scale-95 inline-flex items-center justify-center ${
+                  isSelected
+                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 font-bold'
+                    : 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800'
+                }`}
+              >
+                {chip}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Regression Callout & 1-Tap Exercise Swap (ATG Steadfast & Prehab Guys Inspiration) */}
