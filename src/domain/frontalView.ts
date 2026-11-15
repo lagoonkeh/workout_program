@@ -341,6 +341,13 @@ export const FRONTAL: Record<DiagramType, FrontalConfig> = {
     track: { joint: 'neck', side: 'mid', label: 'Shoulders lift evenly' },
     cue: 'Head and shoulders lift as one block; neck stays long',
   },
+  side_bridge: {
+    view: 'front', label: 'Feet-end',
+    lat: { hand: 10, elbow: 14, shoulder: 14, hip: 8, knee: { N: 6, F: 6 }, ankle: { N: 6, F: 6 }, toe: 6 },
+    props: [], scenery: [], guide: 'midline',
+    track: { joint: 'hip', side: 'mid', label: 'Hips stacked & elevated' },
+    cue: 'Shoulders, pelvis, and ankles remain stacked in a single plane',
+  },
   plank_knee: {
     view: 'front', label: 'Head-end',
     lat: { hand: 9, elbow: 13, scap: [9, 12], knee: { N: [9, 12], F: 9 }, ankle: { N: [9, 11], F: 9 }, toe: 9 },

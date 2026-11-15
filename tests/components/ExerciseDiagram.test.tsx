@@ -232,6 +232,7 @@ describe('ExerciseDiagram Component', () => {
       'hanging_knee_raise',
       'hanging_corkscrew',
       'curl_up',
+      'side_bridge',
       'plank_knee',
       'mountain_climber',
       'cossack_squat',

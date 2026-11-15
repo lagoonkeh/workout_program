@@ -19,6 +19,7 @@ export const DEMO_VIDEOS: Partial<Record<DiagramType, DemoVideo>> = {
   tibialis: { youtubeId: 'VzIcGAgBiaM', title: 'Tibialis Wall Raises (Exercise Demo)', channel: 'The Barefoot Sprinter' },
   step_down: { youtubeId: 'DAOYK2kb-Tg', title: 'Patrick Step', channel: 'The Barefoot Sprinter' },
   core_mcgill: { youtubeId: 'S1QbyYZaXIg', title: 'McGill Big 3: The Bird Dog', channel: 'Northern Nevada Chiropractic' },
+  side_bridge: { youtubeId: '2_e4I-brf0Y', title: 'McGill Big 3: The Side Bridge', channel: 'Northern Nevada Chiropractic' },
   bench_press: { youtubeId: 'vcBig73ojpE', title: 'Bench Press with Perfect Technique', channel: 'Jeff Nippard' },
   kb_row: { youtubeId: 'gfUg6qWohTk', title: 'One-Arm Row: Proper Form', channel: 'ATHLEAN-X' },
   floor_press: { youtubeId: 'B340QckIfJM', title: '1-Arm Kettlebell Floor Press Tutorial', channel: 'Luka Hocevar' },

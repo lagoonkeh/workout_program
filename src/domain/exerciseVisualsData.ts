@@ -35,6 +35,7 @@ export type DiagramType =
   | 'hanging_knee_raise'
   | 'hanging_corkscrew'
   | 'curl_up'
+  | 'side_bridge'
   | 'plank_knee'
   | 'mountain_climber'
   | 'cossack_squat'
@@ -205,6 +206,27 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     },
     trajectoryNote: 'Pure isometric stabilization resisting gravity and rotational moments.',
     safetyNote: 'Spare the spine: Builds abdominal wall endurance over maximum spinal flexion.'
+  },
+
+  side_bridge: {
+    id: 'side_bridge',
+    exerciseName: 'McGill Side Bridge / Plank',
+    diagramType: 'side_bridge',
+    startPositionLabel: '1. Side-Lying Forearm Alignment',
+    bottomPositionLabel: '2. Rigid Lateral Bridge Hold',
+    caption: 'Forearm stacked under shoulder, lift hips into straight line from ankles to neck. Spares the lumbar spine while building quadratus lumborum endurance.',
+    keyCues: [
+      'Elbow directly under shoulder, ribs and pelvis stacked',
+      'Bridge hips up until torso and legs form a rigid diagonal line',
+      'Avoid sagging or rotating hips forward or backward',
+      'Breathe into the lateral core cylinder while holding 10 seconds'
+    ],
+    jointAngleCues: {
+      start: 'Hips resting on floor, 0° lift',
+      bottom: '180° straight alignment through hips, torso, and shoulders'
+    },
+    trajectoryNote: 'Pure isometric elevation resisting lateral spinal shear.',
+    safetyNote: 'Spares lumbar discs: Quad lumborum endurance without spinal twisting or flexion.'
   },
 
   // --- SESSION 2: UPPER A ---

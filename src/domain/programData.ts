@@ -26,6 +26,9 @@ export interface ExerciseRegression {
   name: string;
   instructions: string;
   tempo: string;
+  targetReps?: string;
+  defaultWeightLbs?: number;
+  targetSets?: number;
 }
 
 export interface WarmupExercise {
@@ -417,7 +420,9 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
       exerciseId: 't3_athlean_reverse_pelvic_curl',
       name: 'Athlean-X Lying Reverse Pelvic Curls on Floor',
       instructions: 'Lie supine on floor, hands flat or gripping rack base. Curl knees toward chest and actively elevate pelvis 2–3 inches off floor. Do NOT swing legs.',
-      tempo: '2112'
+      tempo: '2112',
+      targetReps: '12–15',
+      defaultWeightLbs: 0
     }
   },
   {
@@ -438,7 +443,9 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
       exerciseId: 't3_athlean_lying_corkscrew',
       name: 'Athlean-X Supine Twisting Reverse Crunches',
       instructions: 'Lie supine with arms braced out. Curl pelvis up and rotate hips diagonally to one side, alternating left and right with strict control.',
-      tempo: '2111'
+      tempo: '2111',
+      targetReps: '10–12 / side',
+      defaultWeightLbs: 0
     }
   },
   {
@@ -487,7 +494,9 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
       exerciseId: 't3_athlean_supported_curlup',
       name: 'Dr. Stuart McGill Supported Curl-Up with Head Neutral',
       instructions: 'Place hands under lumbar curve to preserve lordosis. Raise head and upper chest only 1 inch off floor without bending neck. Hold 3s per rep.',
-      tempo: '2112'
+      tempo: '2112',
+      targetReps: '10–12',
+      defaultWeightLbs: 0
     }
   },
   {
@@ -550,7 +559,9 @@ export const SESSION_LOWER_A: WorkoutSession = {
         exerciseId: 't1_bb_box_squat',
         name: 'Barbell Box Squat to Parallel',
         instructions: 'Position bench/box inside rack. Squat back onto the box keeping shins perpendicular to floor. Pause 1s on box without relaxing core, then explode up. Eliminates forward patellar shear.',
-        tempo: '31X1'
+        tempo: '31X1',
+        targetReps: '3',
+        defaultWeightLbs: 180
       }
     },
     {
@@ -574,7 +585,9 @@ export const SESSION_LOWER_A: WorkoutSession = {
         exerciseId: 't2_atg_split_squat_elevated',
         name: 'Front-Foot Elevated ATG Split Squat (6–12")',
         instructions: 'Elevate front foot on 2–3 weight plates (6") or workout bench (12–18"). Hold rack upright with hands to regulate load. Maintain vertical torso and pain-free 0/10 knee depth.',
-        tempo: '4010'
+        tempo: '4010',
+        targetReps: '8–10',
+        defaultWeightLbs: 0
       }
     },
     {
@@ -720,7 +733,9 @@ export const SESSION_UPPER_A: WorkoutSession = {
         exerciseId: 't1_bb_floor_press',
         name: 'Barbell Floor Press',
         instructions: 'Lie supine on floor inside rack. Lower bar until upper arms rest gently on the floor (90° elbow bend). Pauses movement at floor level, eliminating extreme shoulder hyperextension.',
-        tempo: '31X1'
+        tempo: '31X1',
+        targetReps: '3',
+        defaultWeightLbs: 135
       }
     },
     {
@@ -745,7 +760,9 @@ export const SESSION_UPPER_A: WorkoutSession = {
         exerciseId: 't2_inverted_row',
         name: 'Inverted Row (Rack Bar)',
         instructions: 'Set a barbell in the rack at hip height and hang underneath with straight legs or bent knees. Row your chest to the bar with elbows at about 45 degrees; the body is fully supported, so the lower back carries no load.',
-        tempo: '3011'
+        tempo: '3011',
+        targetReps: '8–10',
+        defaultWeightLbs: 0
       }
     },
     {
@@ -895,7 +912,9 @@ export const SESSION_LOWER_B: WorkoutSession = {
         exerciseId: 't1_kb_rdl',
         name: 'Kettlebell Romanian Deadlift',
         instructions: 'Hold one heavy kettlebell by the horns, soft knees, and push the hips straight back with the bell close to the legs. The lighter load and shorter lever take the shear off the lower back while still loading the hamstrings through a full stretch.',
-        tempo: '31X1'
+        tempo: '31X1',
+        targetReps: '5–6',
+        defaultWeightLbs: 40
       }
     },
     {
@@ -919,7 +938,9 @@ export const SESSION_LOWER_B: WorkoutSession = {
         exerciseId: 't2_goblet_cossack_squat',
         name: 'Goblet Cossack Squat',
         instructions: 'Hold 18–25 lb KB at chest. Shift laterally onto one leg in deep squat while contralateral leg remains straight. Opens adductors and builds unilateral knee resilience.',
-        tempo: '31X1'
+        tempo: '31X1',
+        targetReps: '8–10 / side',
+        defaultWeightLbs: 25
       }
     },
     {
@@ -987,6 +1008,8 @@ export const SESSION_LOWER_B: WorkoutSession = {
         name: 'Dr. Stuart McGill Big 3 Spinal Stabilization',
         instructions: 'Perform 3 rounds of 10s Bird-Dog, 10s Side Plank per side, and 10s Modified Curl-Up. Eliminates loaded spinal flexion and establishes a 360-degree rigid torso cylinder.',
         tempo: '10s hold',
+        targetReps: '3 rounds x 10s',
+        defaultWeightLbs: 0
       },
     }
   ],
@@ -1074,7 +1097,9 @@ export const SESSION_UPPER_B: WorkoutSession = {
         exerciseId: 't1_kb_half_kneeling_press',
         name: 'Half-Kneeling Single-Arm Kettlebell Press',
         instructions: 'Kneel with the pressing-side knee down and the bell in the rack. Press up and slightly forward in the scapular plane; the half-kneeling stance locks the ribs down and a single arm lets the shoulder find a pain-free path.',
-        tempo: '30X1'
+        tempo: '30X1',
+        targetReps: '5 / arm',
+        defaultWeightLbs: 25
       }
     },
     {
@@ -1095,7 +1120,9 @@ export const SESSION_UPPER_B: WorkoutSession = {
         exerciseId: 't2_inverted_bb_row',
         name: 'Inverted Barbell Rows in Rack',
         instructions: 'Set barbell at waist height in rack. Hang underneath with heels on floor and body rigid in plank. Pull chest to bar with 3s eccentric lowering.',
-        tempo: '3011'
+        tempo: '3011',
+        targetReps: '8–10',
+        defaultWeightLbs: 0
       }
     },
     {
@@ -1420,7 +1447,9 @@ export const SESSION_POST_BJJ: WorkoutSession = {
         exerciseId: 't3_bjj_reverse_pelvic_curl',
         name: 'Athlean-X Lying Reverse Pelvic Curls on Floor',
         instructions: 'Lie supine on floor, hands flat or gripping rack base. Curl knees toward chest and actively elevate pelvis 2–3 inches off floor. Do NOT swing legs.',
-        tempo: '2112'
+        tempo: '2112',
+        targetReps: '12–15',
+        defaultWeightLbs: 0
       }
     },
     {
@@ -1486,7 +1515,9 @@ export const SESSION_POST_BJJ: WorkoutSession = {
         exerciseId: 't3_bjj_tabletop_bridge',
         name: 'Range of Strength Reverse Tabletop Glute Bridge',
         instructions: 'Hands behind hips on floor, fingers pointing backward. Press through heels and hands to drive hips toward ceiling, creating a flat tabletop torso with neutral neck.',
-        tempo: 'Isometric Arc'
+        tempo: 'Isometric Arc',
+        targetReps: '20–30s hold',
+        defaultWeightLbs: 0
       }
     },
     {

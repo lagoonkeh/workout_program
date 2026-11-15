@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } fr
 import { createPortal } from 'react-dom';
 import { WorkoutExercise, isUnilateralExercise, isTimedPrescription, formatMMSS, extractTargetReps, getEffectiveExerciseTempo, BOWFLEX_840_KETTLEBELL_SETTINGS, isLLPEligible } from '../domain/programData';
 import { LazyExerciseDiagram as ExerciseDiagram } from './LazyExerciseDiagram';
-import { EXERCISE_VISUALS, ExerciseVisual } from '../domain/exerciseVisualsData';
+import { EXERCISE_VISUALS, ExerciseVisual, DiagramType } from '../domain/exerciseVisualsData';
 import { useCueCardLookup } from '../domain/cueCardStore';
 import {
   ShieldAlert,
@@ -113,6 +113,18 @@ export const DEAD_HANG_CLUB_DRILLS: DeadHangClubDrill[] = [
   },
 ];
 
+export const MCGILL_DRILL_DIAGRAM_MAP: Record<McGillDrill['id'], DiagramType> = {
+  curl_up: 'curl_up',
+  side_bridge: 'side_bridge',
+  bird_dog: 'core_mcgill',
+};
+
+export const DEAD_HANG_DRILL_DIAGRAM_MAP: Record<DeadHangClubDrill['id'], DiagramType> = {
+  dead_hang: 'dead_hang',
+  club_casts_left: 'warmup_club',
+  club_casts_right: 'warmup_club',
+};
+
 // Pre-computed O(1) lookup map for Cue Cards by ID, exerciseId, exerciseName, and title
 
 // Pre-computed O(1) lookup map for Exercise Visuals by ID and lowercase name
@@ -161,6 +173,10 @@ export interface SetLogRecord {
   loggedAt?: string;
   /** Whether lengthened partials (LLPs) were performed on this set */
   llpPerformed?: boolean;
+  /** Whether the left side was completed on a unilateral exercise */
+  leftCompleted?: boolean;
+  /** Whether the right side was completed on a unilateral exercise */
+  rightCompleted?: boolean;
 }
 
 export interface ExerciseCardProps {
@@ -218,6 +234,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   const [showWarmupRamp, setShowWarmupRamp] = useState(false);
   const [completedWarmupStages, setCompletedWarmupStages] = useState<Record<number, boolean>>({});
   const [isSwappedToRegression, setIsSwappedToRegression] = useState(false);
+  const preRegressionLogsRef = useRef<Record<number, { weightLbs: number; targetReps: string }> | null>(null);
   const [isManuallyCollapsed, setIsManuallyCollapsed] = useState<boolean | null>(null);
   const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
 
@@ -268,12 +285,66 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     onOpenPlateCalculator?.(w);
   };
 
+  const handleToggleRegression = useCallback((forceSwap?: boolean) => {
+    const nextSwap = forceSwap !== undefined ? forceSwap : !isSwappedToRegression;
+    if (!exercise.regression) return;
+
+    if (nextSwap) {
+      // Snapshot current set logs before regression swap
+      const snapshot: Record<number, { weightLbs: number; targetReps: string }> = {};
+      logs.forEach((s, idx) => {
+        snapshot[idx] = { weightLbs: s.weightLbs, targetReps: s.targetReps };
+      });
+      preRegressionLogsRef.current = snapshot;
+
+      // Determine target regression weight and reps
+      const regWeight = exercise.regression.defaultWeightLbs ?? 0;
+      const regReps = exercise.regression.targetReps ?? exercise.targetReps;
+
+      logs.forEach((_, idx) => {
+        onUpdateSetLog(exercise.id, idx, {
+          weightLbs: regWeight,
+          targetReps: regReps,
+        });
+      });
+
+      if (isBarbell && regWeight > 0) {
+        setPlateCalcWeight(regWeight);
+      }
+      setIsSwappedToRegression(true);
+      setShowRegression(true);
+    } else {
+      // Restore primary lift sets
+      const saved = preRegressionLogsRef.current;
+      logs.forEach((_, idx) => {
+        const restoredWeight = saved?.[idx]?.weightLbs ?? (exercise.defaultWeightLbs ?? exercise.defaultWeight ?? 0);
+        const restoredReps = saved?.[idx]?.targetReps ?? exercise.targetReps;
+        onUpdateSetLog(exercise.id, idx, {
+          weightLbs: restoredWeight,
+          targetReps: restoredReps,
+        });
+      });
+
+      if (isBarbell) {
+        const primaryWeight = saved?.[0]?.weightLbs ?? (exercise.defaultWeightLbs ?? exercise.defaultWeight ?? 135);
+        setPlateCalcWeight(primaryWeight);
+      }
+      preRegressionLogsRef.current = null;
+      setIsSwappedToRegression(false);
+    }
+  }, [exercise, isSwappedToRegression, logs, onUpdateSetLog, isBarbell]);
+
   // Dr. Stuart McGill Big 3 state & 10s isometric hold countdown
   const isMcGillBig3 = exercise.id === 't3_mcgill_big_3' || exercise.name.toLowerCase().includes('mcgill');
   const [mcgillCompletedDrills, setMcgillCompletedDrills] = useState<Record<number, Record<string, boolean>>>({
     0: { curl_up: false, side_bridge: false, bird_dog: false },
     1: { curl_up: false, side_bridge: false, bird_dog: false },
     2: { curl_up: false, side_bridge: false, bird_dog: false },
+  });
+  const [mcgillDrillSides, setMcgillDrillSides] = useState<Record<number, Record<string, boolean>>>({
+    0: { side_bridge_left: false, side_bridge_right: false, bird_dog_left: false, bird_dog_right: false },
+    1: { side_bridge_left: false, side_bridge_right: false, bird_dog_left: false, bird_dog_right: false },
+    2: { side_bridge_left: false, side_bridge_right: false, bird_dog_left: false, bird_dog_right: false },
   });
   const [activeMcGillRound, setActiveMcGillRound] = useState<number>(0);
   const [mcgillHoldSeconds, setMcgillHoldSeconds] = useState<number>(10);
@@ -293,6 +364,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
       });
       return next;
     });
+    setMcgillDrillSides((prev) => {
+      const next = { ...prev };
+      logs.forEach((set, idx) => {
+        if (set.isCompleted) {
+          next[idx] = { side_bridge_left: true, side_bridge_right: true, bird_dog_left: true, bird_dog_right: true };
+        }
+      });
+      return next;
+    });
   }, [isMcGillBig3, logs]);
 
   // Clean up McGill timer on unmount
@@ -305,6 +385,49 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     };
   }, []);
 
+  const handleToggleMcGillDrillSide = useCallback(
+    (roundIdx: number, drillId: 'side_bridge' | 'bird_dog' | string, side: 'left' | 'right') => {
+      setMcgillDrillSides((prevSides) => {
+        const roundSides = { ...(prevSides[roundIdx] || {}) };
+        const sideKey = `${drillId}_${side}`;
+        const isCurrentlyDone = mcgillCompletedDrills[roundIdx]?.[drillId] || false;
+        const currentSideVal = roundSides[sideKey] ?? isCurrentlyDone;
+        const nextSideVal = !currentSideVal;
+        roundSides[sideKey] = nextSideVal;
+
+        const otherSide = side === 'left' ? 'right' : 'left';
+        const otherSideKey = `${drillId}_${otherSide}`;
+        const otherSideVal = roundSides[otherSideKey] ?? isCurrentlyDone;
+        const allSidesDone = nextSideVal && otherSideVal;
+
+        setMcgillCompletedDrills((prevDrills) => {
+          const roundDrills = { ...(prevDrills[roundIdx] || { curl_up: false, side_bridge: false, bird_dog: false }) };
+          roundDrills[drillId] = allSidesDone;
+          const nextState = { ...prevDrills, [roundIdx]: roundDrills };
+
+          const completedDrillsCount = Object.values(roundDrills).filter(Boolean).length;
+          const allCompleted = completedDrillsCount === 3;
+
+          onUpdateSetLog(exercise.id, roundIdx, {
+            isCompleted: allCompleted,
+            repsAchieved: completedDrillsCount,
+            weightLbs: 0,
+            notes: allCompleted ? '3/3 Drills Complete · McGill Tri-Set' : `${completedDrillsCount}/3 Drills Done`,
+          });
+
+          if (allCompleted && exercise.restSeconds > 0) {
+            onQuickStartRest(exercise.restSeconds);
+          }
+
+          return nextState;
+        });
+
+        return { ...prevSides, [roundIdx]: roundSides };
+      });
+    },
+    [exercise, mcgillCompletedDrills, onUpdateSetLog, onQuickStartRest]
+  );
+
   const handleToggleMcGillDrill = useCallback(
     (roundIdx: number, drillId: string) => {
       setMcgillCompletedDrills((prev) => {
@@ -312,6 +435,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         const nextVal = !roundDrills[drillId];
         roundDrills[drillId] = nextVal;
         const nextState = { ...prev, [roundIdx]: roundDrills };
+
+        setMcgillDrillSides((prevSides) => {
+          const roundSides = { ...(prevSides[roundIdx] || {}) };
+          if (drillId === 'side_bridge' || drillId === 'bird_dog') {
+            roundSides[`${drillId}_left`] = nextVal;
+            roundSides[`${drillId}_right`] = nextVal;
+          }
+          return { ...prevSides, [roundIdx]: roundSides };
+        });
 
         const completedDrillsCount = Object.values(roundDrills).filter(Boolean).length;
         const allCompleted = completedDrillsCount === 3;
@@ -345,6 +477,16 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           curl_up: targetDone,
           side_bridge: targetDone,
           bird_dog: targetDone,
+        },
+      }));
+
+      setMcgillDrillSides((prevSides) => ({
+        ...prevSides,
+        [roundIdx]: {
+          side_bridge_left: targetDone,
+          side_bridge_right: targetDone,
+          bird_dog_left: targetDone,
+          bird_dog_right: targetDone,
         },
       }));
 
@@ -850,9 +992,14 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     const nextCompleted = !isExerciseCompleted;
     setIsManuallyCollapsed(nextCompleted);
     logs.forEach((_, idx) => {
-      onUpdateSetLog(exercise.id, idx, { isCompleted: nextCompleted });
+      onUpdateSetLog(exercise.id, idx, {
+        isCompleted: nextCompleted,
+        ...(isUnilateral && !exercise.side
+          ? { leftCompleted: nextCompleted, rightCompleted: nextCompleted }
+          : {}),
+      });
     });
-  }, [isExerciseCompleted, logs, onUpdateSetLog, exercise.id]);
+  }, [isExerciseCompleted, logs, onUpdateSetLog, exercise.id, isUnilateral, exercise.side]);
 
   const handleReset = useCallback(() => {
     setIsManuallyCollapsed(false);
@@ -1652,7 +1799,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => setIsSwappedToRegression(false)}
+              onClick={() => handleToggleRegression(false)}
               className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-semibold shrink-0 cursor-pointer transition-colors"
               title={`Restore primary exercise ${exercise.name}`}
               aria-label={`Restore primary exercise ${exercise.name}`}
@@ -2111,6 +2258,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                       {isDrillDone && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </button>
 
+                    {/* Drill Diagram Animation */}
+                    <ExerciseDiagram
+                      diagramType={MCGILL_DRILL_DIAGRAM_MAP[drill.id]}
+                      exerciseName={drill.name}
+                      compact={true}
+                      onOpenZoom={handleOpenDiagramZoom}
+                      className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl"
+                    />
+
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h5 className="font-bold text-white text-xs sm:text-sm">
@@ -2126,8 +2282,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     </div>
                   </div>
 
-                  {/* Drill Actions: 10s Hold Timer & Mark Done */}
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                  {/* Drill Actions: 10s Hold Timer & Mark Done (with L & R for unilateral drills) */}
+                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0 flex-wrap sm:flex-nowrap">
                     <button
                       type="button"
                       data-testid={`mcgill-hold-timer-btn-${drill.id}`}
@@ -2147,17 +2303,56 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                       </span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleToggleMcGillDrill(activeMcGillRound, drill.id)}
-                      className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
-                        isDrillDone
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
-                      }`}
-                    >
-                      {isDrillDone ? 'Completed ✓' : 'Mark Done'}
-                    </button>
+                    {drill.id === 'curl_up' ? (
+                      <button
+                        type="button"
+                        data-testid={`mcgill-drill-done-${drill.id}`}
+                        onClick={() => handleToggleMcGillDrill(activeMcGillRound, drill.id)}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+                          isDrillDone
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                        }`}
+                      >
+                        {isDrillDone ? 'Completed ✓' : 'Mark Done'}
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          data-testid={`mcgill-${drill.id}-left-btn`}
+                          onClick={() => handleToggleMcGillDrillSide(activeMcGillRound, drill.id, 'left')}
+                          aria-label={`Mark ${drill.name} Left side as ${mcgillDrillSides[activeMcGillRound]?.[`${drill.id}_left`] ?? isDrillDone ? 'incomplete' : 'complete'}`}
+                          className={`px-2 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer transition-all border ${
+                            (mcgillDrillSides[activeMcGillRound]?.[`${drill.id}_left`] ?? isDrillDone)
+                              ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
+                              : 'bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700'
+                          }`}
+                        >
+                          <span>Left</span>
+                          {(mcgillDrillSides[activeMcGillRound]?.[`${drill.id}_left`] ?? isDrillDone) && (
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          data-testid={`mcgill-${drill.id}-right-btn`}
+                          onClick={() => handleToggleMcGillDrillSide(activeMcGillRound, drill.id, 'right')}
+                          aria-label={`Mark ${drill.name} Right side as ${mcgillDrillSides[activeMcGillRound]?.[`${drill.id}_right`] ?? isDrillDone ? 'incomplete' : 'complete'}`}
+                          className={`px-2 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer transition-all border ${
+                            (mcgillDrillSides[activeMcGillRound]?.[`${drill.id}_right`] ?? isDrillDone)
+                              ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
+                              : 'bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700'
+                          }`}
+                        >
+                          <span>Right</span>
+                          {(mcgillDrillSides[activeMcGillRound]?.[`${drill.id}_right`] ?? isDrillDone) && (
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -2302,6 +2497,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     >
                       {isDrillDone && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </button>
+
+                    {/* Drill Diagram Animation */}
+                    <ExerciseDiagram
+                      diagramType={DEAD_HANG_DRILL_DIAGRAM_MAP[drill.id]}
+                      exerciseName={drill.name}
+                      compact={true}
+                      onOpenZoom={handleOpenDiagramZoom}
+                      className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl"
+                    />
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -2558,7 +2762,9 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   </button>
                 )}
               </th>
-              <th className="py-1 px-0.5 text-center w-11 sm:w-12 whitespace-nowrap">Done</th>
+              <th className="py-1 px-0.5 text-center min-w-[50px] whitespace-nowrap">
+                {isUnilateral && !exercise.side && !isMcGillBig3 && !isDeadHangClubMills ? 'Done (L / R)' : 'Done'}
+              </th>
               <th className="py-1 px-1 text-center w-auto whitespace-nowrap">
                 <div className="flex items-center justify-center gap-1">
                   <span>Notes / RPE</span>
@@ -2731,6 +2937,9 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                           const autoReps = set.repsAchieved > 0 ? set.repsAchieved : extractTargetReps(set.targetReps, 10);
                           onUpdateSetLog(exercise.id, idx, {
                             isCompleted: true,
+                            ...(isUnilateral && !exercise.side
+                              ? { leftCompleted: true, rightCompleted: true }
+                              : {}),
                             ...(set.repsAchieved === 0 && autoReps > 0 ? { repsAchieved: autoReps } : {}),
                           });
                           onQuickStartRest(exercise.restSeconds);
@@ -2765,32 +2974,121 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   )}
                 </td>
 
-                {/* Checkbox Done */}
+                {/* Checkbox Done (Master Checkbox + Separate L & R for Unilateral Workouts) */}
                 <td className="py-1 px-0.5 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (isMcGillBig3) {
-                        handleToggleMcGillRoundComplete(idx);
-                      } else if (isDeadHangClubMills) {
-                        handleToggleDeadHangRoundComplete(idx);
-                      } else {
-                        const nextState = !set.isCompleted;
-                        onUpdateSetLog(exercise.id, idx, { isCompleted: nextState });
-                        if (nextState) {
-                          onQuickStartRest(exercise.restSeconds);
+                  {isUnilateral && !exercise.side && !isMcGillBig3 && !isDeadHangClubMills ? (
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap sm:flex-nowrap">
+                      {/* Master complete button for accessibility & 1-tap set completion */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextState = !set.isCompleted;
+                          onUpdateSetLog(exercise.id, idx, {
+                            isCompleted: nextState,
+                            leftCompleted: nextState,
+                            rightCompleted: nextState,
+                          });
+                          if (nextState) {
+                            onQuickStartRest(exercise.restSeconds);
+                          }
+                        }}
+                        aria-label={`Mark set ${set.setNumber} as ${set.isCompleted ? 'incomplete' : 'completed'}`}
+                        className={`w-7 h-7 sm:w-8 sm:h-8 min-h-[36px] min-w-[36px] rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
+                          set.isCompleted
+                            ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
+                            : 'bg-slate-950 border-slate-700 text-transparent hover:border-slate-500'
+                        }`}
+                      >
+                        {set.isCompleted && <Check className="w-4 h-4 stroke-[3]" />}
+                      </button>
+
+                      {/* Separate Left and Right checkboxes */}
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          data-testid={`set-${set.setNumber}-left-done-btn`}
+                          onClick={() => {
+                            const currentLeft = set.leftCompleted ?? !!set.isCompleted;
+                            const currentRight = set.rightCompleted ?? !!set.isCompleted;
+                            const nextLeft = !currentLeft;
+                            const allDone = nextLeft && currentRight;
+                            onUpdateSetLog(exercise.id, idx, {
+                              leftCompleted: nextLeft,
+                              rightCompleted: currentRight,
+                              isCompleted: allDone,
+                            });
+                            if (allDone && !set.isCompleted) {
+                              onQuickStartRest(exercise.restSeconds);
+                            }
+                          }}
+                          aria-label={`Mark set ${set.setNumber} Left side as ${set.leftCompleted ?? set.isCompleted ? 'incomplete' : 'completed'}`}
+                          className={`px-1.5 py-1 min-h-[32px] min-w-[28px] rounded-lg border text-[11px] font-bold flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                            (set.leftCompleted ?? set.isCompleted)
+                              ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
+                              : 'bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                          }`}
+                        >
+                          <span>L</span>
+                          {(set.leftCompleted ?? set.isCompleted) && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                        </button>
+
+                        <button
+                          type="button"
+                          data-testid={`set-${set.setNumber}-right-done-btn`}
+                          onClick={() => {
+                            const currentLeft = set.leftCompleted ?? !!set.isCompleted;
+                            const currentRight = set.rightCompleted ?? !!set.isCompleted;
+                            const nextRight = !currentRight;
+                            const allDone = currentLeft && nextRight;
+                            onUpdateSetLog(exercise.id, idx, {
+                              leftCompleted: currentLeft,
+                              rightCompleted: nextRight,
+                              isCompleted: allDone,
+                            });
+                            if (allDone && !set.isCompleted) {
+                              onQuickStartRest(exercise.restSeconds);
+                            }
+                          }}
+                          aria-label={`Mark set ${set.setNumber} Right side as ${set.rightCompleted ?? set.isCompleted ? 'incomplete' : 'completed'}`}
+                          className={`px-1.5 py-1 min-h-[32px] min-w-[28px] rounded-lg border text-[11px] font-bold flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                            (set.rightCompleted ?? set.isCompleted)
+                              ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
+                              : 'bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                          }`}
+                        >
+                          <span>R</span>
+                          {(set.rightCompleted ?? set.isCompleted) && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isMcGillBig3) {
+                          handleToggleMcGillRoundComplete(idx);
+                        } else if (isDeadHangClubMills) {
+                          handleToggleDeadHangRoundComplete(idx);
+                        } else {
+                          const nextState = !set.isCompleted;
+                          onUpdateSetLog(exercise.id, idx, {
+                            isCompleted: nextState,
+                          });
+                          if (nextState) {
+                            onQuickStartRest(exercise.restSeconds);
+                          }
                         }
-                      }
-                    }}
-                    aria-label={`Mark set ${set.setNumber} as ${set.isCompleted ? 'incomplete' : 'completed'}`}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 min-h-[44px] min-w-[44px] mx-auto rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
-                      set.isCompleted
-                        ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
-                        : 'bg-slate-950 border-slate-700 text-transparent hover:border-slate-500'
-                    }`}
-                  >
-                    <Check className="w-4 h-4 stroke-[3]" />
-                  </button>
+                      }}
+                      aria-label={`Mark set ${set.setNumber} as ${set.isCompleted ? 'incomplete' : 'completed'}`}
+                      className={`w-7 h-7 sm:w-8 sm:h-8 min-h-[44px] min-w-[44px] mx-auto rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
+                        set.isCompleted
+                          ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
+                          : 'bg-slate-950 border-slate-700 text-transparent hover:border-slate-500'
+                      }`}
+                    >
+                      <Check className="w-4 h-4 stroke-[3]" />
+                    </button>
+                  )}
                 </td>
 
                 {/* Notes Input & Optional LLP Quick-Log */}
@@ -2902,11 +3200,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
 
             <button
               type="button"
-              onClick={() => {
-                const nextSwap = !isSwappedToRegression;
-                setIsSwappedToRegression(nextSwap);
-                if (nextSwap) setShowRegression(true);
-              }}
+              onClick={() => handleToggleRegression()}
               aria-pressed={isSwappedToRegression}
               aria-label={
                 isSwappedToRegression

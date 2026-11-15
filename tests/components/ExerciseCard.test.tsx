@@ -1498,6 +1498,152 @@ describe('ExerciseCard Component', () => {
       expect(screen.queryByTestId(`bowflex-840-dial-${mockExercise.id}`)).not.toBeInTheDocument();
     });
   });
+
+  describe('Regressions, McGill Big 3 Animations & Unilateral Checkboxes', () => {
+    it('auto-switches target reps & weight on regression swap, and restores primary values on revert', () => {
+      const updateLogMock = vi.fn();
+      const exWithReg: WorkoutExercise = {
+        ...mockExercise,
+        regression: {
+          condition: 'Patellar tendon discomfort',
+          exerciseId: 'reg_squat',
+          name: 'Box Squat Regression',
+          instructions: 'Sit to 90 degree box.',
+          tempo: '31X1',
+          targetReps: '10',
+          defaultWeightLbs: 95,
+        },
+      };
+
+      render(
+        <ExerciseCard
+          exercise={exWithReg}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      // Find regression swap button
+      const swapBtn = screen.getByRole('button', { name: /Swap Barbell Back Squat to regression Box Squat Regression/i });
+      fireEvent.click(swapBtn);
+
+      // Updates all 3 sets with regression weights and reps
+      expect(updateLogMock).toHaveBeenCalledWith('t1_bb_squat', 0, expect.objectContaining({
+        weightLbs: 95,
+        targetReps: '10',
+      }));
+      expect(updateLogMock).toHaveBeenCalledWith('t1_bb_squat', 1, expect.objectContaining({
+        weightLbs: 95,
+        targetReps: '10',
+      }));
+      expect(updateLogMock).toHaveBeenCalledWith('t1_bb_squat', 2, expect.objectContaining({
+        weightLbs: 95,
+        targetReps: '10',
+      }));
+
+      // Now restore
+      const restoreBtn = screen.getAllByRole('button', { name: /Restore primary exercise Barbell Back Squat/i })[0];
+      fireEvent.click(restoreBtn);
+
+      // Restores original logs
+      expect(updateLogMock).toHaveBeenCalledWith('t1_bb_squat', 0, expect.objectContaining({
+        weightLbs: 185,
+        targetReps: '3',
+      }));
+    });
+
+    it('renders McGill Big 3 animations and separate Left and Right drill checkboxes for side bridge and bird-dog', () => {
+      const mcgillExercise: WorkoutExercise = {
+        id: 't3_mcgill_big_3',
+        name: 'Dr. Stuart McGill Big 3 Endurance Tri-Set',
+        tier: 'T3',
+        targetSets: 3,
+        targetReps: '3 rounds',
+        isAmrapLastSet: false,
+        tempo: 'Isometric Holds',
+        restSeconds: 60,
+        equipment: 'bodyweight',
+        muscleGroups: ['Rectus Abdominis', 'Quadratus Lumborum', 'Obliques', 'Multifidus', 'Glutes'],
+        biomechanicalRationale: 'Spares lumbar discs while building isometric core endurance ratios.',
+        progressionRule: 'Maintain 3x10s perfect form holds.',
+      };
+
+      const mcgillLogs: SetLogRecord[] = [
+        { setNumber: 1, targetReps: '3 rounds', weightLbs: 0, repsAchieved: 0, isCompleted: false, notes: '' },
+        { setNumber: 2, targetReps: '3 rounds', weightLbs: 0, repsAchieved: 0, isCompleted: false, notes: '' },
+        { setNumber: 3, targetReps: '3 rounds', weightLbs: 0, repsAchieved: 0, isCompleted: false, notes: '' },
+      ];
+
+      render(
+        <ExerciseCard
+          exercise={mcgillExercise}
+          logs={mcgillLogs}
+          onUpdateSetLog={vi.fn()}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={vi.fn()}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      // Verify drill diagram animations are present
+      expect(screen.getByRole('button', { name: /View form demonstration for .*Curl-Up/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /View form demonstration for .*Side Bridge/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /View form demonstration for .*Bird-Dog/i })).toBeInTheDocument();
+
+      // Check separate Left and Right side buttons for side bridge and bird-dog
+      expect(screen.getByTestId('mcgill-side_bridge-left-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('mcgill-side_bridge-right-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('mcgill-bird_dog-left-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('mcgill-bird_dog-right-btn')).toBeInTheDocument();
+
+      // Toggling left side then right side completes the drill
+      fireEvent.click(screen.getByTestId('mcgill-side_bridge-left-btn'));
+      fireEvent.click(screen.getByTestId('mcgill-side_bridge-right-btn'));
+    });
+
+    it('renders separate Left and Right checkboxes for unilateral exercises and handles completion', () => {
+      const updateLogMock = vi.fn();
+      const restMock = vi.fn();
+      const unilateralExercise: WorkoutExercise = {
+        ...mockExercise,
+        id: 't2_kb_single_arm_row',
+        name: 'Single-Arm Kettlebell Row',
+        isUnilateral: true,
+        side: undefined,
+      };
+
+      render(
+        <ExerciseCard
+          exercise={unilateralExercise}
+          logs={mockLogs}
+          onUpdateSetLog={updateLogMock}
+          onOpenCueCard={vi.fn()}
+          onQuickStartRest={restMock}
+          onQuickStartTempo={vi.fn()}
+        />
+      );
+
+      // Header shows Done (L / R)
+      expect(screen.getByText('Done (L / R)')).toBeInTheDocument();
+
+      // Set 1 has Left and Right buttons
+      const leftBtn = screen.getByTestId('set-1-left-done-btn');
+      const rightBtn = screen.getByTestId('set-1-right-done-btn');
+      expect(leftBtn).toBeInTheDocument();
+      expect(rightBtn).toBeInTheDocument();
+
+      // Click Left side
+      fireEvent.click(leftBtn);
+      expect(updateLogMock).toHaveBeenCalledWith('t2_kb_single_arm_row', 0, {
+        leftCompleted: true,
+        rightCompleted: false,
+        isCompleted: false,
+      });
+    });
+  });
 });
 
 

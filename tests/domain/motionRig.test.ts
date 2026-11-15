@@ -64,8 +64,8 @@ describe('domain/motionRig', () => {
   describe('motion library', () => {
     const entries = Object.entries(MOTIONS);
 
-    it('covers all 40 diagram types', () => {
-      expect(entries.length).toBe(40);
+    it('covers all 41 diagram types', () => {
+      expect(entries.length).toBe(41);
       expect(getMotion('not-a-type')).toBe(MOTIONS.squat);
     });
 

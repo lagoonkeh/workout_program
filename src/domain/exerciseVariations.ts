@@ -60,6 +60,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Barbell Box Squat to Parallel',
         instructions: 'Position bench/box inside rack. Squat back onto the box keeping shins perpendicular to floor. Pause 1s on box without relaxing core, then explode up. Eliminates forward patellar shear.',
         tempo: '31X1',
+        targetReps: '3',
+        defaultWeightLbs: 180,
       },
     },
     {
@@ -85,6 +87,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Barbell Box Squat to Parallel',
         instructions: 'Position bench/box inside rack. Squat back onto the box keeping shins perpendicular to floor.',
         tempo: '31X1',
+        targetReps: '3',
+        defaultWeightLbs: 180,
       },
     },
     {
@@ -132,6 +136,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Front-Foot Elevated ATG Split Squat (6–12")',
         instructions: 'Elevate front foot on 2–3 weight plates (6") or workout bench (12–18"). Hold rack upright with hands to regulate load. Maintain vertical torso and pain-free 0/10 knee depth.',
         tempo: '4010',
+        targetReps: '8–10',
+        defaultWeightLbs: 0,
       },
     },
     {
@@ -319,6 +325,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Barbell Floor Press',
         instructions: 'Lie supine on floor inside rack. Lower bar until upper arms rest gently on the floor (90° elbow bend). Pauses movement at floor level, eliminating extreme shoulder hyperextension.',
         tempo: '31X1',
+        targetReps: '3',
+        defaultWeightLbs: 135,
       },
     },
     {
@@ -384,6 +392,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Inverted Row (Rack Bar)',
         instructions: 'Set a barbell in the rack at hip height and hang underneath with straight legs or bent knees.',
         tempo: '3011',
+        targetReps: '8–10',
+        defaultWeightLbs: 0,
       },
     },
     {
@@ -566,6 +576,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Kettlebell Romanian Deadlift',
         instructions: 'Hold one heavy kettlebell by the horns, soft knees, and push the hips straight back with the bell close to the legs.',
         tempo: '31X1',
+        targetReps: '5–6',
+        defaultWeightLbs: 40,
       },
     },
     {
@@ -591,6 +603,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Kettlebell Romanian Deadlift',
         instructions: 'Hold one heavy kettlebell by the horns with soft knees and strict hip hinge.',
         tempo: '31X1',
+        targetReps: '5–6',
+        defaultWeightLbs: 40,
       },
     },
     {
@@ -637,6 +651,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Goblet Cossack Squat',
         instructions: 'Hold 18–25 lb KB at chest. Shift laterally onto one leg in deep squat while contralateral leg remains straight.',
         tempo: '31X1',
+        targetReps: '8–10 / side',
+        defaultWeightLbs: 25,
       },
     },
     {
@@ -821,6 +837,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Dr. Stuart McGill Big 3 Spinal Stabilization',
         instructions: 'Perform 3 rounds of 10s Bird-Dog, 10s Side Plank per side, and 10s Modified Curl-Up. Eliminates loaded spinal flexion.',
         tempo: '10s hold',
+        targetReps: '3 rounds x 10s',
+        defaultWeightLbs: 0,
       },
     },
     {
@@ -870,6 +888,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Half-Kneeling Single-Arm Kettlebell Press',
         instructions: 'Kneel with the pressing-side knee down and the bell in the rack. Press up and slightly forward in the scapular plane.',
         tempo: '30X1',
+        targetReps: '5 / arm',
+        defaultWeightLbs: 25,
       },
     },
     {
@@ -895,6 +915,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Half-Kneeling Single-Arm Kettlebell Press',
         instructions: 'Press from half-kneeling to keep ribs locked down and pelvis neutral.',
         tempo: '30X1',
+        targetReps: '5 / arm',
+        defaultWeightLbs: 25,
       },
     },
     {
@@ -941,6 +963,8 @@ export const EXERCISE_VARIATIONS: Record<string, ExerciseVariation[]> = {
         name: 'Inverted Barbell Rows in Rack',
         instructions: 'Set barbell at waist height in rack. Hang underneath with heels on floor and body rigid in plank.',
         tempo: '3011',
+        targetReps: '8–10',
+        defaultWeightLbs: 0,
       },
     },
     {

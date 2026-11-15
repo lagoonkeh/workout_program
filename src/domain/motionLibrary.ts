@@ -1,4 +1,4 @@
-﻿// src/domain/motionLibrary.ts
+// src/domain/motionLibrary.ts
 /**
  * Keyframed side-view demonstrations for every DiagramType. Lifter faces right, floor at y = 180.
  * Feet and hands use IK targets, so planted contacts stay put and bars follow a real path.
@@ -704,6 +704,42 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     trackLabel: 'Head & shoulders lift',
     startCue: 'Flat back, one knee up, hands under the low back',
     endCue: 'Lift head and shoulders as one, squeeze 2 s',
+  },
+
+  side_bridge: {
+    title: 'Side bridge / plank (McGill)',
+    order: 'hold',
+    frames: two(
+      {
+        hip: [84, 152],
+        torso: -10,
+        head: -6,
+        armN: to(148, 172, -1),
+        armF: ang(-15, -15),
+        legN: to(12, 168, 1),
+        legF: to(12, 168, 1),
+        footN: 180,
+        footF: 180,
+      },
+      {
+        hip: [84, 144],
+        torso: -16,
+        head: -12,
+        armN: to(148, 172, -1),
+        armF: ang(-15, -15),
+        legN: to(12, 168, 1),
+        legF: to(12, 168, 1),
+        footN: 180,
+        footF: 180,
+      }
+    ),
+    props: [],
+    scenery: [],
+    worked: ['torso', 'thN'],
+    track: { joint: 'hip' },
+    trackLabel: 'Hips elevate into rigid diagonal line',
+    startCue: 'Side-lying on forearm, feet stacked and legs extended',
+    endCue: 'Hips locked in neutral diagonal, brace lateral core wall',
   },
 
   plank_knee: {
