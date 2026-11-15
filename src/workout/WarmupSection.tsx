@@ -1,5 +1,5 @@
 // Extracted from src/App.tsx (WorkoutAppMain). Presentation only: state and handlers come in as props.
-import { BookOpen, Check, ChevronDown, ChevronUp, Flame, ListOrdered, Minus, Play, Square, Timer } from 'lucide-react';
+import { BookOpen, Check, ChevronDown, ChevronUp, Flame, ListOrdered, Play, Timer } from 'lucide-react';
 import { type Dispatch, type SetStateAction } from 'react';
 import { LazyExerciseDiagram as ExerciseDiagram } from '../components/LazyExerciseDiagram';
 import { type RestTargetContext } from '../components/RestTimerWidget';
@@ -84,46 +84,28 @@ export function WarmupSection({ activeFocusWarmupId, activeSession, collapsedWar
                                 : 'bg-slate-900 border-slate-800'
                             }`}
                   >
-                    {/* Row 1: Badges & Windows-style Minimize/Maximize Square Button */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-0">
-                        <span className="h-8 inline-flex items-center px-2.5 rounded-lg border font-mono tracking-wide text-xs font-bold bg-amber-500/20 text-amber-300 border-amber-500/40 gap-1">
-                          <Flame className="w-3 h-3 text-amber-400" />
-                          <span>WARM-UP</span>
+                    {/* Row 1: Badges */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="h-8 inline-flex items-center px-2.5 rounded-lg border font-mono tracking-wide text-xs font-bold bg-amber-500/20 text-amber-300 border-amber-500/40 gap-1">
+                        <Flame className="w-3 h-3 text-amber-400" />
+                        <span>WARM-UP</span>
+                      </span>
+
+                      {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
+                      <span className="sr-only">
+                        {drill.equipment.replaceAll('_', ' ')}
+                      </span>
+
+                      <span className="h-8 inline-flex items-center px-2.5 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold">
+                        {drill.targetDurationOrReps}
+                      </span>
+
+                      {isDrillDone && (
+                        <span className="h-8 inline-flex items-center px-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-semibold gap-1">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          <span>Done</span>
                         </span>
-
-                        {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
-                        <span className="sr-only">
-                          {drill.equipment.replaceAll('_', ' ')}
-                        </span>
-
-                        <span className="h-8 inline-flex items-center px-2.5 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold">
-                          {drill.targetDurationOrReps}
-                        </span>
-
-                        {isDrillDone && (
-                          <span className="h-8 inline-flex items-center px-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-semibold gap-1">
-                            <Check className="w-3 h-3 stroke-[3]" />
-                            <span>Done</span>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Windows-style Minimize/Maximize Toggle Button matching row height */}
-                      <button
-                        type="button"
-                        onClick={() => handleToggleWarmupDrillCollapse(drill.id, isDrillCollapsed)}
-                        aria-expanded={!isDrillCollapsed}
-                        aria-label={`${isDrillCollapsed ? 'Expand' : 'Collapse'} warmup drill ${drill.name}`}
-                        className="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 flex items-center justify-center cursor-pointer transition-colors shrink-0 ml-auto select-none active:scale-95"
-                        title={`${isDrillCollapsed ? 'Maximize' : 'Minimize'} warmup drill ${drill.name}`}
-                      >
-                        {isDrillCollapsed ? (
-                          <Square className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
-                        ) : (
-                          <Minus className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
-                        )}
-                      </button>
+                      )}
                     </div>
 
                     {/* Row 2: Visual Thumbnail, Title & Primary Completion */}
@@ -140,6 +122,7 @@ export function WarmupSection({ activeFocusWarmupId, activeSession, collapsedWar
                         <button
                           type="button"
                           onClick={() => handleToggleWarmupDrillCollapse(drill.id, isDrillCollapsed)}
+                          aria-label={`${isDrillCollapsed ? 'Expand' : 'Collapse'} warmup drill ${drill.name}`}
                           className={`text-sm sm:text-base font-bold text-white hover:text-emerald-300 transition-colors cursor-pointer text-left line-clamp-2 break-words leading-tight ${
                                     isDrillDone ? 'text-emerald-400 line-through' : ''
                                   }`}

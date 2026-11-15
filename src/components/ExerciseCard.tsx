@@ -30,7 +30,6 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  Square,
   Video,
   Undo2,
 } from 'lucide-react';
@@ -1163,9 +1162,14 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 <span className="sr-only">
                   {exercise.equipment.replaceAll('_', ' ')}
                 </span>
-                <h3 className="text-sm sm:text-base font-bold text-white truncate">
+                <button
+                  type="button"
+                  onClick={handleToggleCardCollapse}
+                  aria-label={`Expand ${exercise.name}`}
+                  className="text-sm sm:text-base font-bold text-white hover:text-emerald-300 transition-colors cursor-pointer text-left line-clamp-2 break-words leading-tight"
+                >
                   {activeExerciseName}
-                </h3>
+                </button>
                 {isSwappedToRegression && (
                   <span className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
                     Regression
@@ -1286,16 +1290,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               </div>
               <span>{isExerciseCompleted ? 'Done' : 'Check Off'}</span>
             </button>
-
-            <button
-              type="button"
-              onClick={handleToggleCardCollapse}
-              aria-label={`Expand ${exercise.name}`}
-              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 flex items-center justify-center cursor-pointer transition-colors shrink-0 select-none active:scale-95"
-              title={`Maximize ${exercise.name} card`}
-            >
-              <Square className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
-            </button>
           </div>
         </div>
       ) : (
@@ -1303,99 +1297,86 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         <>
       {/* Exercise Header */}
       <div className="mb-3 space-y-2">
-        {/* Row 1: Badges & Top-Right Collapse Button (matching row height) */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-0">
-            {/* GZCL Tier Badge */}
-            <span
-              className={`h-8 inline-flex items-center text-xs font-bold px-2.5 rounded-lg border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
-            >
-              {exercise.tier} · {currentTier.label}
-            </span>
-
-            {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
-            <span className="sr-only">
-              {exercise.equipment.replaceAll('_', ' ')}
-            </span>
-
-            {/* Daily Core Finisher Badge (sr-only to keep screen uncluttered while accessible) */}
-            {isDailyAbsFinisher && (
-              <span data-testid="daily-core-badge" className="sr-only">
-                Daily Core Finisher
-              </span>
-            )}
-
-            {/* AMRAP Badge */}
-            {exercise.isAmrapLastSet && (
-              <span className="h-8 inline-flex items-center text-xs px-2.5 rounded-lg bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
-                AMRAP Last Set
-              </span>
-            )}
-
-            {/* Live Tonnage / Volume Badge */}
-            {totalVolumeLbs > 0 && (
-              <span
-                className="h-8 inline-flex items-center text-xs px-2.5 rounded-lg bg-slate-800 text-slate-300 font-mono border border-slate-700"
-                title="Total Completed Volume (Weight × Reps)"
-              >
-                Vol: {totalVolumeLbs.toLocaleString()} lbs
-              </span>
-            )}
-
-            {/* Live Personal Record (PR) Badge */}
-            {isNewPR && (
-              <span
-                data-testid="pr-badge"
-                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
-              >
-                <Trophy className="w-3 h-3 text-amber-400" />
-                <span>New PR!</span>
-              </span>
-            )}
-
-            {/* High Priority Focus Badge */}
-            {(exercise.priorityBadge || exercise.missedLastSession) && (
-              <span
-                data-testid="priority-catchup-badge"
-                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
-              >
-                <span>⚡ High Priority</span>
-              </span>
-            )}
-
-            {/* Jeff Nippard LLP Protocol Badge */}
-            {isLLP && (
-              <span
-                data-testid="expanded-llp-badge"
-                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
-              >
-                <Flame className="w-3.5 h-3.5 text-purple-400" />
-                <span>LLP Protocol</span>
-              </span>
-            )}
-
-            {/* Skipped Badge */}
-            {isExerciseSkipped && (
-              <span
-                data-testid="expanded-skipped-badge"
-                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
-              >
-                <FastForward className="w-3.5 h-3.5 text-amber-400" />
-                <span>Skipped{skippedReason ? `: ${skippedReason}` : ''}</span>
-              </span>
-            )}
-          </div>
-
-          {/* Windows-style Minimize/Maximize Square Toggle Button */}
-          <button
-            type="button"
-            onClick={handleToggleCardCollapse}
-            aria-label={`Collapse ${exercise.name}`}
-            className="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 flex items-center justify-center cursor-pointer transition-colors shrink-0 ml-auto select-none active:scale-95"
-            title={`Minimize ${exercise.name} card`}
+        {/* Row 1: Badges */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* GZCL Tier Badge */}
+          <span
+            className={`h-8 inline-flex items-center text-xs font-bold px-2.5 rounded-lg border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
           >
-            <Minus className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
-          </button>
+            {exercise.tier} · {currentTier.label}
+          </span>
+
+          {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
+          <span className="sr-only">
+            {exercise.equipment.replaceAll('_', ' ')}
+          </span>
+
+          {/* Daily Core Finisher Badge (sr-only to keep screen uncluttered while accessible) */}
+          {isDailyAbsFinisher && (
+            <span data-testid="daily-core-badge" className="sr-only">
+              Daily Core Finisher
+            </span>
+          )}
+
+          {/* AMRAP Badge */}
+          {exercise.isAmrapLastSet && (
+            <span className="h-8 inline-flex items-center text-xs px-2.5 rounded-lg bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+              AMRAP Last Set
+            </span>
+          )}
+
+          {/* Live Tonnage / Volume Badge */}
+          {totalVolumeLbs > 0 && (
+            <span
+              className="h-8 inline-flex items-center text-xs px-2.5 rounded-lg bg-slate-800 text-slate-300 font-mono border border-slate-700"
+              title="Total Completed Volume (Weight × Reps)"
+            >
+              Vol: {totalVolumeLbs.toLocaleString()} lbs
+            </span>
+          )}
+
+          {/* Live Personal Record (PR) Badge */}
+          {isNewPR && (
+            <span
+              data-testid="pr-badge"
+              className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
+            >
+              <Trophy className="w-3 h-3 text-amber-400" />
+              <span>New PR!</span>
+            </span>
+          )}
+
+          {/* High Priority Focus Badge */}
+          {(exercise.priorityBadge || exercise.missedLastSession) && (
+            <span
+              data-testid="priority-catchup-badge"
+              className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
+            >
+              <span>⚡ High Priority</span>
+            </span>
+          )}
+
+          {/* Jeff Nippard LLP Protocol Badge */}
+          {isLLP && (
+            <span
+              data-testid="expanded-llp-badge"
+              className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
+            >
+              <Flame className="w-3.5 h-3.5 text-purple-400" />
+              <span>LLP Protocol</span>
+            </span>
+          )}
+
+          {/* Skipped Badge */}
+          {isExerciseSkipped && (
+            <span
+              data-testid="expanded-skipped-badge"
+              className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
+            >
+              <FastForward className="w-3.5 h-3.5 text-amber-400" />
+              <span>Skipped{skippedReason ? `: ${skippedReason}` : ''}</span>
+            </span>
+          )}
         </div>
 
         {/* Row 2: Visual Thumbnail & Title */}
@@ -1411,9 +1392,20 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           )}
 
           <div className="flex flex-col min-w-0 flex-1">
-            <h2 className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words line-clamp-2">
-              {activeExerciseName}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2
+                className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words line-clamp-2 cursor-pointer hover:text-slate-300 transition-colors"
+                onClick={handleToggleCardCollapse}
+              >
+                {activeExerciseName}
+              </h2>
+              <button
+                type="button"
+                onClick={handleToggleCardCollapse}
+                aria-label={`Collapse ${exercise.name}`}
+                className="sr-only"
+              />
+            </div>
 
             {isSwappedToRegression && exercise.regression && (
               <span
