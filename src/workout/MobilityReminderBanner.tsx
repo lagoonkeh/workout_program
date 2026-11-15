@@ -69,7 +69,7 @@ export function MobilityReminderBanner({ currentView, handleDismissMobilityPromp
                 data-testid="biweekly-mobility-dismiss-btn"
                 onClick={handleDismissMobilityPrompt}
                 aria-label="Dismiss mobility reminder"
-                className="text-slate-400 hover:text-white p-1 rounded cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
+                className="text-slate-400 hover:text-white p-1 rounded cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
               >
                 ✕
               </button>

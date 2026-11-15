@@ -7,7 +7,8 @@ GitHub: lagoonkeh/workout_program. Run `git log --oneline -15` for recent work.
 ## Working rules
 - Deploy to Vercel when a piece of work is done.
 - Single user only (email allowlist). No need for women's strength standards.
-- Exercise motion demos default to showing BOTH views (side + front/back) on all screen sizes.
+- Exercise motion demos open in the camera angle that shows the exercise best (front 3/4 by default, rear 3/4 for
+  pulls and hinges, top-down for rotation / foot placement). Side / Front / Both stay available as buttons.
 - App data must stay backed up to the user's Google Drive (via the Google Sheet below).
 - Before finishing: `npx tsc --noEmit` and `npm test` (this is what CI runs).
 
@@ -35,13 +36,16 @@ GitHub: lagoonkeh/workout_program. Run `git log --oneline -15` for recent work.
   - `sync.js` - Sheets sync; verifies Firebase ID token + email allowlist.
   - `health.js` + `_healthWorkouts.js` - Health Connect bridge. Tasker / Life Dashboard Companion POST with header
     `X-Health-Token`; stored in the "Health Metrics" and "Health Workouts" sheet tabs; app GETs last 30 days.
+  - `bjj.js` + `_bjj.js` - "BJJ Trained" calendar events -> Google Health calories + readiness ("BJJ Sessions" tab).
+    POST from the app (Firebase token) and a nightly Vercel cron (GET with `CRON_SECRET`, see `vercel.json`).
 - `tests/` - mirrors src areas (components, domain, services, timer, e2e, sim).
 - Kettlebell loads match Bowflex SelectTech 840 notches (8, 12, 20, 25, 35, 40 lb).
 
 ## Environment variables (names only - never print values)
 - Client (`.env`, see `.env.example`): `VITE_FIREBASE_*`, `VITE_ALLOWED_EMAILS`
 - Server (Vercel): `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_SPREADSHEET_ID`,
-  `HEALTH_INGEST_TOKEN`, `ALLOWED_EMAILS`, `FIREBASE_API_KEY`
+  `HEALTH_INGEST_TOKEN`, `ALLOWED_EMAILS`, `FIREBASE_API_KEY`, `CRON_SECRET` (nightly BJJ job),
+  `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `GOOGLE_HEALTH_REFRESH_TOKEN` (scripts/google-health-token.mjs)
 
 ## Skip when exploring (noise, large)
 `node_modules/`, `dist/`, `coverage/`, `_sim/` (~3,800 simulation screenshots), `_archive/`, `.agents/` (old multi-agent build logs).

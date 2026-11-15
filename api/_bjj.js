@@ -6,6 +6,9 @@ export const BJJ_EVENT_TITLE = 'BJJ Trained';
 export const BJJ_SHEET = 'BJJ Sessions';
 export const BJJ_HEADER = ['Event ID', 'Date', 'Start', 'End', 'Minutes', 'Weight (lb)', 'Active kcal', 'Google Health ID', 'Status', 'Updated'];
 export const MAX_BJJ_KEPT = 600;
+/** Status of a session a run is about to send to Google Health; other runs leave it alone for CLAIM_MS. */
+export const WRITING = 'writing';
+export const CLAIM_MS = 10 * 60 * 1000;
 
 /** Mixed class (drilling + rolling). Compendium of Physical Activities puts martial arts at 5.3-10.3 MET. */
 export const BJJ_MET = 7.5;
@@ -111,8 +114,13 @@ export function recordedElsewhere(session, workouts) {
 }
 
 /** Sessions that still need a Google Health write (new, or an earlier attempt that failed). */
-export function needsHealthWrite(session, stored) {
+export function needsHealthWrite(session, stored, nowMs = Date.now()) {
   if (!stored) return true;
+  if (stored.status === WRITING) {
+    // another run claimed it; take over only if that run died without finishing
+    const at = Date.parse(stored.updated);
+    return !Number.isFinite(at) || nowMs - at > CLAIM_MS;
+  }
   return stored.status !== 'synced' && stored.status !== 'recorded by watch';
 }
 

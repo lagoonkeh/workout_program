@@ -26,7 +26,10 @@ export interface CalendarSyncResult {
 export const getLoggedCalendarEventsMap = (): Record<string, string> => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CALENDAR_LOGGED_EVENTS);
-    return raw ? JSON.parse(raw) : {};
+    const map: Record<string, string> = raw ? JSON.parse(raw) : {};
+    // Older versions stored "pending_<time>" when logging failed; those never reached the calendar
+    for (const id of Object.keys(map)) if (String(map[id]).startsWith('pending_')) delete map[id];
+    return map;
   } catch {
     return {};
   }
@@ -224,8 +227,8 @@ export const autoLogWorkoutToGoogleCalendar = async (
     console.warn('Sync endpoint calendar dispatch failed:', err);
   }
 
-  // 3. Fallback: return fallbackUrl so UI can offer 1-tap add if background permissions required
-  markSessionLoggedToCalendar(recordId, `pending_${Date.now()}`);
+  // 3. Fallback: return fallbackUrl so UI can offer 1-tap add if background permissions required.
+  // Nothing is recorded as logged, so the next attempt tries again and history shows "Add to Cal".
   return {
     success: false,
     source: 'fallback_url',

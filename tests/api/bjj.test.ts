@@ -69,6 +69,11 @@ describe('BJJ calendar events', () => {
     expect(needsHealthWrite({}, { status: 'synced' })).toBe(false);
     expect(needsHealthWrite({}, { status: 'recorded by watch' })).toBe(false);
     expect(needsHealthWrite({}, { status: 'Google Health not connected' })).toBe(true);
+    // a session another run is sending right now is left alone; an abandoned claim is taken over
+    const t = Date.parse('2026-11-10T17:00:00Z');
+    expect(needsHealthWrite({}, { status: 'writing', updated: '2026-11-10T16:58:00Z' }, t)).toBe(false);
+    expect(needsHealthWrite({}, { status: 'writing', updated: '2026-11-10T16:30:00Z' }, t)).toBe(true);
+    expect(needsHealthWrite({}, { status: 'writing', updated: '' }, t)).toBe(true);
     expect(latestWeight([{ date: '2026-11-01', weightLbs: 182 }, { date: '2026-11-05', weightLbs: 180.4 }, { date: '2026-11-06', weightLbs: null }])).toBe(180.4);
   });
 });

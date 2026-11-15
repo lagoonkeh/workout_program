@@ -2772,11 +2772,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   </button>
                 )}
               </th>
-              <th className="py-1 px-0.5 text-center min-w-[50px] whitespace-nowrap">
+              <th
+                className={`py-1 px-0.5 text-center whitespace-nowrap ${
+                  isUnilateral && !exercise.side && !isMcGillBig3 && !isDeadHangClubMills ? 'w-[92px]' : 'w-14'
+                }`}
+              >
                 {isUnilateral && !exercise.side && !isMcGillBig3 && !isDeadHangClubMills ? 'Done (L / R)' : 'Done'}
               </th>
-              <th className="py-1 px-1 text-center w-auto whitespace-nowrap">
-                <div className="flex items-center justify-center gap-1">
+              <th className="py-1 px-1 text-center w-auto leading-tight">
+                <div className="flex items-center justify-center">
                   <span>Notes / RPE</span>
                   <button
                     type="button"
@@ -2787,7 +2791,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     }}
                     title="Define RPE and Rating Terms"
                     aria-label="Define RPE and Rating Terms"
-                    className="p-1 min-h-[32px] min-w-[32px] -m-1 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
+                    className="p-1 min-h-[32px] min-w-[28px] -my-1 -mr-1 shrink-0 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
                   >
                     <Info className="w-3 h-3 text-slate-400 hover:text-cyan-400" />
                   </button>
@@ -2847,10 +2851,12 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   ) : isDeadHangClubMills ? (
                     <span className="font-semibold text-sky-300">3 Drills</span>
                   ) : isAmrapRow ? (
-                    <span className="font-bold text-rose-400 inline-flex items-center gap-1" title="As Many Reps As Possible (AMRAP)">
-                      <span>{set.targetReps}+</span>
-                      <span className="text-[9px] uppercase px-1 py-0.2 rounded bg-rose-500/20 text-rose-300">MAX</span>
-                      <span className="text-[9px] uppercase px-1 py-0.2 rounded bg-rose-500/30 text-rose-200 font-bold">AMRAP</span>
+                    <span className="font-bold text-rose-400 inline-flex flex-col items-center gap-0.5 leading-none py-0.5" title="As Many Reps As Possible (AMRAP)">
+                      <span className="inline-flex items-center gap-1">
+                        <span>{set.targetReps}+</span>
+                        <span className="text-[9px] uppercase px-0.5 rounded bg-rose-500/20 text-rose-300">MAX</span>
+                      </span>
+                      <span className="text-[9px] uppercase px-0.5 py-0.5 rounded bg-rose-500/30 text-rose-200 font-bold">AMRAP</span>
                     </span>
                   ) : (
                     set.targetReps
@@ -3033,7 +3039,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                             }
                           }}
                           aria-label={`Mark set ${set.setNumber} Left side as ${set.leftCompleted ?? set.isCompleted ? 'incomplete' : 'completed'}`}
-                          className={`px-1.5 py-1 min-h-[32px] min-w-[28px] rounded-lg border text-[11px] font-bold flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                          className={`px-1.5 py-1 min-h-[40px] min-w-[40px] rounded-lg border text-[11px] font-bold flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
                             (set.leftCompleted ?? set.isCompleted)
                               ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
                               : 'bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
@@ -3061,7 +3067,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                             }
                           }}
                           aria-label={`Mark set ${set.setNumber} Right side as ${set.rightCompleted ?? set.isCompleted ? 'incomplete' : 'completed'}`}
-                          className={`px-1.5 py-1 min-h-[32px] min-w-[28px] rounded-lg border text-[11px] font-bold flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                          className={`px-1.5 py-1 min-h-[40px] min-w-[40px] rounded-lg border text-[11px] font-bold flex items-center justify-center gap-0.5 transition-all cursor-pointer ${
                             (set.rightCompleted ?? set.isCompleted)
                               ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
                               : 'bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
@@ -3167,7 +3173,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             }}
             title="Define RPE and Pain Rating Terms"
             aria-label="Define RPE and Pain Rating Terms"
-            className="p-1 -m-1 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
+            className="p-1 -m-1 min-h-[36px] min-w-[36px] shrink-0 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
           >
             <Info className="w-3 h-3 text-slate-400 hover:text-cyan-400" />
           </button>

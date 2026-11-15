@@ -76,4 +76,12 @@ describe('Google Calendar Sync Service', () => {
     expect(result.eventId).toBe('existing_gcal_evt_999');
     expect(result.source).toBe('stored_cache');
   });
+
+  it('does not treat a failed ("pending_") log as logged, so it can be retried', () => {
+    markSessionLoggedToCalendar('failed_session', 'pending_1794000000000');
+    markSessionLoggedToCalendar('ok_session', 'gcal_evt_1');
+    const map = getLoggedCalendarEventsMap();
+    expect(map.failed_session).toBeUndefined();
+    expect(map.ok_session).toBe('gcal_evt_1');
+  });
 });

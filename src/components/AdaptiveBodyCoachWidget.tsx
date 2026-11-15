@@ -274,7 +274,7 @@ export const AdaptiveBodyCoachWidget: React.FC<AdaptiveBodyCoachWidgetProps> = (
               data-testid="toggle-body-coach-btn"
               onClick={toggleCollapse}
               aria-label="Collapse Adaptive Body Coach"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              className="p-1.5 min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
             >
               <ChevronUp className="w-4 h-4" />
             </button>

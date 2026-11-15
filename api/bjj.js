@@ -16,7 +16,7 @@ import { readDays, readWorkouts, writeTab, tokenMatches } from './health.js';
 import { WORKOUT_SHEET, WORKOUT_HEADER, mergeWorkouts, workoutToRow } from './_healthWorkouts.js';
 import {
   BJJ_EVENT_TITLE, BJJ_SHEET, BJJ_HEADER, MAX_BJJ_KEPT, sessionsFromEvents, activeCalories, healthExerciseBody,
-  dataPointName, recordedElsewhere, needsHealthWrite, workoutFromSession, bjjToRow, rowToBjj, latestWeight,
+  dataPointName, recordedElsewhere, needsHealthWrite, workoutFromSession, bjjToRow, rowToBjj, latestWeight, WRITING,
 } from './_bjj.js';
 
 const HEALTH_URL = 'https://health.googleapis.com/v4/users/me/dataTypes/exercise/dataPoints';
@@ -120,15 +120,31 @@ export default async function handler(req, res) {
     const envWeight = Number(process.env.BJJ_WEIGHT_LBS);
     const weightLbs = given >= 70 && given <= 500 ? given : latestWeight(healthDays) ?? (envWeight >= 70 ? envWeight : null);
 
-    const byId = new Map(stored.map((s) => [s.eventId, s]));
-    const pending = sessions.filter((s) => needsHealthWrite(s, byId.get(s.eventId)));
+    let byId = new Map(stored.map((s) => [s.eventId, s]));
     const stamp = now.toISOString();
+    const nowMs = now.getTime();
     let written = 0;
+    const sortedRows = (map) => [...map.values()].sort((a, b) => a.start.localeCompare(b.start)).slice(-MAX_BJJ_KEPT);
+
+    // Claim the sessions this run will send to Google Health before sending any, so a second run
+    // at the same moment (nightly job + the app, or two devices) does not post the same calories twice
+    const willPost = (s, map) =>
+      needsHealthWrite(s, map.get(s.eventId), nowMs) && !recordedElsewhere(s, workouts) && !!weightLbs && !!health.token;
+    if (sessions.some((s) => willPost(s, byId))) {
+      byId = new Map((await readBjj(accessToken, spreadsheetId)).map((s) => [s.eventId, s]));
+      const claims = sessions.filter((s) => willPost(s, byId));
+      if (claims.length) {
+        for (const s of claims) byId.set(s.eventId, { ...byId.get(s.eventId), ...s, status: WRITING, updated: stamp });
+        await writeTab(accessToken, spreadsheetId, BJJ_SHEET, 'J', [BJJ_HEADER, ...sortedRows(byId).map(bjjToRow)]);
+      }
+    }
+    const mine = new Set(); // sessions whose row this run decided
 
     for (const s of sessions) {
       const prev = byId.get(s.eventId);
       const kcal = weightLbs ? activeCalories(s.minutes, weightLbs) : null;
-      if (!needsHealthWrite(s, prev)) {
+      const claimedHere = prev?.status === WRITING && prev.updated === stamp;
+      if (!claimedHere && !needsHealthWrite(s, prev, nowMs)) {
         byId.set(s.eventId, { ...prev, ...s, updated: prev.updated }); // already done; keep its calories and id
         continue;
       }
@@ -152,6 +168,13 @@ export default async function handler(req, res) {
         }
       }
       byId.set(s.eventId, { ...s, weightLbs, kcal, healthId, status, updated: stamp });
+      mine.add(s.eventId);
+    }
+
+    // Rows this run did not decide come from the sheet as it is now, so a run that finished
+    // meanwhile keeps its result instead of being overwritten with what was read at the start
+    for (const row of await readBjj(accessToken, spreadsheetId)) {
+      if (!mine.has(row.eventId) && row.status !== byId.get(row.eventId)?.status) byId.set(row.eventId, row);
     }
 
     // Health Workouts tab: calendar sessions in the window replace earlier copies (an edited or deleted
@@ -161,7 +184,7 @@ export default async function handler(req, res) {
     const staleIds = workouts.filter((w) => w.source === 'calendar' && w.start >= windowStart).map((w) => w.uuid);
     const mergedW = mergeWorkouts(workouts, fromCalendar, staleIds.filter((id) => !fromCalendar.some((w) => w.uuid === id)), stamp);
 
-    const rows = [...byId.values()].sort((a, b) => a.start.localeCompare(b.start)).slice(-MAX_BJJ_KEPT);
+    const rows = sortedRows(byId);
     await writeTab(accessToken, spreadsheetId, BJJ_SHEET, 'J', [BJJ_HEADER, ...rows.map(bjjToRow)]);
     await writeTab(accessToken, spreadsheetId, WORKOUT_SHEET, 'L', [WORKOUT_HEADER, ...mergedW.map(workoutToRow)]);
 

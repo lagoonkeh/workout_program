@@ -833,7 +833,7 @@ const StretchingRoutineWidgetComponent: React.FC<StretchingRoutineWidgetProps> =
                     onClick={() => resetTimerForStretch(stretch)}
                     title="Reset countdown timer"
                     aria-label={`Reset timer for ${stretch.name}`}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700"
+                    className="p-1.5 min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                   </button>
