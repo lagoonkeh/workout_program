@@ -169,14 +169,18 @@ async function replaceWorkoutRows(accessToken, spreadsheetId, targets, logs, res
     while (a.length < 12) a.push('');
     return a.slice(0, 12);
   });
-  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
-    method: 'POST',
-    body: JSON.stringify({ ranges: [range] }),
-  });
+  // Write the new rows over the old ones first, then clear whatever is left below them. If the write
+  // fails nothing has been removed; clearing first would leave the log empty on a failed write.
   if (next.length > 0) {
     await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
       method: 'POST',
       body: JSON.stringify({ valueInputOption: 'USER_ENTERED', data: [{ range: "'Workout Logs'!A5", values: next }] }),
+    });
+  }
+  if (rows.length > next.length || next.length === 0) {
+    await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
+      method: 'POST',
+      body: JSON.stringify({ ranges: [`'Workout Logs'!A${5 + next.length}:L`] }),
     });
   }
   if (resetNow) {
@@ -384,7 +388,7 @@ export default async function handler(req, res) {
 
         const existingLogsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
           'Workout Logs'
-        )}!A5:L500`;
+        )}!A5:L`; // open-ended: a fixed last row silently hid every workout past it
 
         const existingRes = await fetch(existingLogsUrl, {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -674,7 +678,7 @@ export default async function handler(req, res) {
       // Fetch existing rows in Workout Logs to find update coordinates
       const existingLogsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
         'Workout Logs'
-      )}!A5:E500`;
+      )}!A5:E`; // open-ended, so rows past 500 are still matched instead of appended twice
 
       const existingRes = await fetch(existingLogsUrl, {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -731,40 +735,21 @@ export default async function handler(req, res) {
       }
 
       // Perform batch updates for matching rows
+      // sheetsFetch throws on a failed write, so a failure is reported instead of counted as synced
       if (updates.length > 0) {
-        await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              valueInputOption: 'USER_ENTERED',
-              data: updates,
-            }),
-          }
-        );
+        await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
+          method: 'POST',
+          body: JSON.stringify({ valueInputOption: 'USER_ENTERED', data: updates }),
+        });
         syncedWorkouts += updates.length;
       }
 
       // Perform append for new rows
       if (rowsToAppend.length > 0) {
-        await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
-            'Workout Logs'
-          )}!A5:L:append?valueInputOption=USER_ENTERED`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              values: rowsToAppend,
-            }),
-          }
+        await sheetsFetch(
+          accessToken,
+          sheetsUrl(spreadsheetId, `/values/${encodeURIComponent('Workout Logs')}!A5:L:append?valueInputOption=USER_ENTERED`),
+          { method: 'POST', body: JSON.stringify({ values: rowsToAppend }) }
         );
         syncedWorkouts += rowsToAppend.length;
       }
@@ -868,7 +853,7 @@ export default async function handler(req, res) {
       // B. Update / Append to Chronological Mobility History Log (Rows 15+)
       const historyReadUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
         'Mobility Tracker'
-      )}!A15:C500`;
+      )}!A15:C`;
       const historyRes = await fetch(historyReadUrl, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -925,38 +910,18 @@ export default async function handler(req, res) {
 
       // Execute all updates in batch
       if (benchmarkUpdates.length > 0) {
-        await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              valueInputOption: 'USER_ENTERED',
-              data: benchmarkUpdates,
-            }),
-          }
-        );
+        await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
+          method: 'POST',
+          body: JSON.stringify({ valueInputOption: 'USER_ENTERED', data: benchmarkUpdates }),
+        });
       }
 
       // Append new history rows if any
       if (historyRowsToAppend.length > 0) {
-        await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
-            'Mobility Tracker'
-          )}!A15:G:append?valueInputOption=USER_ENTERED`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              values: historyRowsToAppend,
-            }),
-          }
+        await sheetsFetch(
+          accessToken,
+          sheetsUrl(spreadsheetId, `/values/${encodeURIComponent('Mobility Tracker')}!A15:G:append?valueInputOption=USER_ENTERED`),
+          { method: 'POST', body: JSON.stringify({ values: historyRowsToAppend }) }
         );
       }
     }

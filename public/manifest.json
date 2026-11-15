@@ -4,7 +4,7 @@
   "description": "Personalized 4-Day Upper/Lower Workout & Mobility Routine with Timers, Tempo Metronome, and Tracking",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#020617",
   "theme_color": "#020617",
   "categories": ["fitness", "health", "sports"],

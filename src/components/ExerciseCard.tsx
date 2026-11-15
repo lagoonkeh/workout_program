@@ -1300,18 +1300,18 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         /* Expanded Exercise Card */
         <>
       {/* Exercise Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
             {/* GZCL Tier Badge */}
             <span
-              className={`text-xs font-bold px-2.5 py-1 rounded-lg border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
+              className={`text-xs font-bold px-2 py-0.5 rounded-md border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
             >
               {exercise.tier} · {currentTier.label}
             </span>
 
             {/* Equipment Tag */}
-            <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/60 uppercase font-mono tracking-wider">
+            <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700/60 uppercase font-mono tracking-wider">
               {exercise.equipment.replaceAll('_', ' ')}
             </span>
 
@@ -1397,7 +1397,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
             {/* 44x44px Exercise Visual Motion Thumbnail */}
             {visualData && (
               <ExerciseDiagram
@@ -1408,8 +1408,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               />
             )}
 
-            <div className="flex flex-col min-w-[11rem] flex-1">
-              <h2 className="text-lg sm:text-2xl font-bold text-white tracking-tight break-words">
+            <div className="flex flex-col min-w-0 basis-[9rem] flex-1">
+              <h2 className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words">
                 {activeExerciseName}
               </h2>
 
@@ -1421,7 +1421,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     rel="noopener noreferrer"
                     data-testid={`demo-video-link-${exercise.id}`}
                     title={`${demoVideo.title} (${demoVideo.channel}, YouTube)`}
-                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-red-500/15 text-red-300 border border-red-500/40 hover:bg-red-500/25 min-h-[32px]"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-red-500/15 text-red-300 border border-red-500/40 hover:bg-red-500/25 min-h-[28px]"
                   >
                     <Video className="w-3.5 h-3.5" />
                     <span>Demo · {demoVideo.channel}</span>
@@ -1488,7 +1488,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     type="button"
                     data-testid="split-sides-btn"
                     onClick={() => onToggleSplitSides(exercise.id)}
-                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl border transition-all cursor-pointer ${
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 min-h-[28px] rounded-lg border transition-all cursor-pointer ${
                       isSideSplitActive
                         ? 'bg-blue-500/25 text-blue-200 border-blue-400 shadow-sm ring-1 ring-blue-400/40'
                         : isUnilateral
@@ -1510,12 +1510,14 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               )}
             </div>
 
+            {/* Mark Complete + Skip stay together on one line (right-aligned) instead of taking a row each */}
+            <div className="flex items-center gap-1.5 ml-auto">
             {/* Prominent Exercise-Level Completion Checkbox */}
             <button
               type="button"
               onClick={handleToggleEntireExercise}
               aria-label={`Mark entire exercise ${exercise.name} as ${isExerciseCompleted ? 'incomplete' : 'complete'}`}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
                 isExerciseCompleted
                   ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-sm shadow-emerald-950/60'
                   : 'bg-slate-800/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
@@ -1543,7 +1545,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               data-testid={`skip-exercise-btn-${exercise.id}`}
               onClick={() => setIsSkipModalOpen(true)}
               aria-label={isExerciseSkipped ? `Edit skip reason for ${activeExerciseName}` : `Mark ${activeExerciseName} as skipped`}
-              className={`flex items-center gap-2 px-3 py-1.5 min-h-[44px] rounded-xl border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[36px] rounded-lg border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
                 isExerciseSkipped
                   ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-950/40'
                   : 'bg-slate-800/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
@@ -1556,9 +1558,10 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   : 'Skip'}
               </span>
             </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1.5 text-xs text-slate-400">
             <span>
               Target:{' '}
               <strong className="text-slate-200">
@@ -1574,7 +1577,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </div>
 
         {/* Quick Launch Action Pills & Card Collapse / Reset */}
-        <div className="flex flex-wrap sm:flex-col items-end gap-2">
+        <div className="flex flex-wrap sm:flex-col items-center sm:items-end justify-end gap-1.5">
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {exercise.equipment === 'barbell' && (
               <button

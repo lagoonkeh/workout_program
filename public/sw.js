@@ -1,5 +1,5 @@
-// Service Worker for 4-Day Workout & Mobility System PWA (v6: notification buttons)
-const CACHE_NAME = 'workout-app-v6';
+// Service Worker for 4-Day Workout & Mobility System PWA (v7: API requests are never cached)
+const CACHE_NAME = 'workout-app-v7';
 
 const STATIC_PRECACHE = [
   '/',
@@ -44,6 +44,11 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  // API calls (sync, health, BJJ) and other origins always go to the network: a cached
+  // /api/ response would show old history and health data until the cache name changes
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
   const isNavigation = event.request.mode === 'navigate' || 
                        event.request.destination === 'document' ||
                        url.pathname === '/' ||

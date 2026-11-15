@@ -91,7 +91,16 @@
                 newWorker.addEventListener('statechange', function() {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                     newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    window.location.reload();
+                    // Don't reload in the middle of a set: pick up the new version the next time
+                    // the app goes to the background (or right away if it already is)
+                    var reloadWhenHidden = function() {
+                      if (document.visibilityState === 'hidden') {
+                        document.removeEventListener('visibilitychange', reloadWhenHidden);
+                        window.location.reload();
+                      }
+                    };
+                    document.addEventListener('visibilitychange', reloadWhenHidden);
+                    reloadWhenHidden();
                   }
                 });
               }
