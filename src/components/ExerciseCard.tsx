@@ -30,6 +30,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Square,
   Video,
   Undo2,
 } from 'lucide-react';
@@ -1290,10 +1291,10 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
               type="button"
               onClick={handleToggleCardCollapse}
               aria-label={`Expand ${exercise.name}`}
-              className="flex items-center justify-center gap-1 px-3 py-1.5 min-h-[44px] rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors"
+              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 flex items-center justify-center cursor-pointer transition-colors shrink-0 select-none active:scale-95"
+              title={`Maximize ${exercise.name} card`}
             >
-              <span>Expand</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <Square className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
             </button>
           </div>
         </div>
@@ -1302,12 +1303,12 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         <>
       {/* Exercise Header */}
       <div className="mb-3 space-y-2">
-        {/* Row 1: Badges & Top-Right Collapse Button */}
+        {/* Row 1: Badges & Top-Right Collapse Button (matching row height) */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-0">
             {/* GZCL Tier Badge */}
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-md border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
+              className={`h-8 inline-flex items-center text-xs font-bold px-2.5 rounded-lg border font-mono tracking-wide ${currentTier.bg} ${currentTier.text} ${currentTier.border}`}
             >
               {exercise.tier} · {currentTier.label}
             </span>
@@ -1326,7 +1327,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
 
             {/* AMRAP Badge */}
             {exercise.isAmrapLastSet && (
-              <span className="text-xs px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+              <span className="h-8 inline-flex items-center text-xs px-2.5 rounded-lg bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
                 AMRAP Last Set
               </span>
             )}
@@ -1334,7 +1335,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             {/* Live Tonnage / Volume Badge */}
             {totalVolumeLbs > 0 && (
               <span
-                className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono border border-slate-700"
+                className="h-8 inline-flex items-center text-xs px-2.5 rounded-lg bg-slate-800 text-slate-300 font-mono border border-slate-700"
                 title="Total Completed Volume (Weight × Reps)"
               >
                 Vol: {totalVolumeLbs.toLocaleString()} lbs
@@ -1345,7 +1346,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             {isNewPR && (
               <span
                 data-testid="pr-badge"
-                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
+                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/25 text-amber-300 font-bold border border-amber-400/50 shadow-sm animate-pulse"
               >
                 <Trophy className="w-3 h-3 text-amber-400" />
                 <span>New PR!</span>
@@ -1356,7 +1357,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             {(exercise.priorityBadge || exercise.missedLastSession) && (
               <span
                 data-testid="priority-catchup-badge"
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
+                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 font-bold tracking-wide shadow-sm"
               >
                 <span>⚡ High Priority</span>
               </span>
@@ -1366,7 +1367,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             {isLLP && (
               <span
                 data-testid="expanded-llp-badge"
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
+                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/40 font-bold tracking-wide shadow-sm"
               >
                 <Flame className="w-3.5 h-3.5 text-purple-400" />
                 <span>LLP Protocol</span>
@@ -1377,7 +1378,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             {isExerciseSkipped && (
               <span
                 data-testid="expanded-skipped-badge"
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
+                className="h-8 inline-flex items-center gap-1 text-xs px-2.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold tracking-wide shadow-sm"
               >
                 <FastForward className="w-3.5 h-3.5 text-amber-400" />
                 <span>Skipped{skippedReason ? `: ${skippedReason}` : ''}</span>
@@ -1385,16 +1386,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             )}
           </div>
 
-          {/* Card Collapse Button on top right hand corner */}
+          {/* Windows-style Minimize/Maximize Square Toggle Button */}
           <button
             type="button"
             onClick={handleToggleCardCollapse}
             aria-label={`Collapse ${exercise.name}`}
-            className="flex items-center gap-1 px-2.5 py-1 min-h-[36px] rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-medium cursor-pointer transition-colors shrink-0 ml-auto select-none active:scale-95"
-            title={`Collapse ${exercise.name} card`}
+            className="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 flex items-center justify-center cursor-pointer transition-colors shrink-0 ml-auto select-none active:scale-95"
+            title={`Minimize ${exercise.name} card`}
           >
-            <span>Collapse</span>
-            <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+            <Minus className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
           </button>
         </div>
 
@@ -1411,7 +1411,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           )}
 
           <div className="flex flex-col min-w-0 flex-1">
-            <h2 className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words">
+            <h2 className="text-base sm:text-xl font-bold text-white tracking-tight leading-tight break-words line-clamp-2">
               {activeExerciseName}
             </h2>
 
@@ -1514,8 +1514,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           </button>
         </div>
 
-        {/* Row B: Split L/R Workouts & Skip in same row, equal button size */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Row B: Split L/R Workouts, Live e1RM, & Skip in same row */}
+        <div className={`grid gap-2 items-center ${bestE1RM > 0 ? 'grid-cols-[1fr_auto_1fr]' : 'grid-cols-2'}`}>
           {exercise.side && pairedSideId ? (
             <button
               type="button"
@@ -1567,6 +1567,18 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             </button>
           )}
 
+          {/* Live e1RM Badge in between Split L/R and Skip */}
+          {bestE1RM > 0 && (
+            <div className="flex items-center justify-center shrink-0">
+              <span
+                className="text-xs px-2.5 py-1.5 min-h-[36px] flex items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30 whitespace-nowrap shadow-sm"
+                title="Estimated 1-Rep Max (Epley Formula)"
+              >
+                e1RM: {bestE1RM} lbs
+              </span>
+            </div>
+          )}
+
           {/* Skip Exercise Button */}
           <button
             type="button"
@@ -1587,18 +1599,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             </span>
           </button>
         </div>
-
-        {/* Live e1RM Badge (Hevy / Strong Inspiration) directly above set / goal reps */}
-        {bestE1RM > 0 && (
-          <div className="flex items-center gap-1.5 pt-0.5">
-            <span
-              className="text-xs px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30"
-              title="Estimated 1-Rep Max (Epley Formula)"
-            >
-              e1RM: {bestE1RM} lbs
-            </span>
-          </div>
-        )}
 
         {/* Row 3: Target Sets & Reps, Muscles */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
@@ -2946,7 +2946,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                           ) : (
                             <>
                               <Copy className="w-2.5 h-2.5" />
-                              <span>copy ↓</span>
+                              <span aria-hidden="true">↓</span>
                             </>
                           )}
                         </button>

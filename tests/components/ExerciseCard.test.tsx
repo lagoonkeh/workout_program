@@ -1303,7 +1303,7 @@ describe('ExerciseCard Component', () => {
 
       const copyBtn = screen.getByTestId(`copy-set1-weight-btn-${exercise.id}`);
       expect(copyBtn).toBeInTheDocument();
-      expect(copyBtn).toHaveTextContent(/copy ↓/i);
+      expect(copyBtn).toHaveTextContent(/↓/i);
 
       fireEvent.click(copyBtn);
 
