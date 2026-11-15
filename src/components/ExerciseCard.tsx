@@ -858,6 +858,15 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   const isExerciseCompleted = logs.length > 0 && logs.every((l) => l.isCompleted);
   const completedSetsCount = useMemo(() => logs.filter((l) => l.isCompleted).length, [logs]);
 
+  // AMRAP reminder banner: show only when the user is on the final set
+  const isLastSetActive = useMemo(() => {
+    if (!exercise.isAmrapLastSet || logs.length === 0) return false;
+    const lastSet = logs[logs.length - 1];
+    if (lastSet.isCompleted) return false;
+    const priorSetsCompleted = logs.slice(0, -1).every((l) => l.isCompleted);
+    return priorSetsCompleted || inlineTempoTargetSet === logs.length - 1;
+  }, [exercise.isAmrapLastSet, logs, inlineTempoTargetSet]);
+
   // Live e1RM (Epley formula), Total Volume (tonnage), and PR Detection (inspired by Hevy & Strong)
   const { bestE1RM, totalVolumeLbs, isNewPR } = useMemo(() => {
     const baseWeight = exercise.defaultWeightLbs || exercise.defaultWeight || 0;
@@ -2004,8 +2013,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
         </div>
       )}
 
-      {/* AMRAP Final Set Reminder Banner */}
-      {exercise.isAmrapLastSet && (
+      {/* AMRAP Final Set Reminder Banner - shown on the final set */}
+      {isLastSetActive && (
         <div
           data-testid="amrap-reminder-banner"
           className="mb-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-rose-950/50 via-slate-900 to-rose-950/40 border border-rose-500/40 text-rose-100 shadow-lg"
@@ -2837,9 +2846,10 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   ) : isDeadHangClubMills ? (
                     <span className="font-semibold text-sky-300">3 Drills</span>
                   ) : isAmrapRow ? (
-                    <span className="font-bold text-rose-400 inline-flex items-center gap-0.5" title="As Many Reps As Possible (AMRAP)">
+                    <span className="font-bold text-rose-400 inline-flex items-center gap-1" title="As Many Reps As Possible (AMRAP)">
                       <span>{set.targetReps}+</span>
                       <span className="text-[9px] uppercase px-1 py-0.2 rounded bg-rose-500/20 text-rose-300">MAX</span>
+                      <span className="text-[9px] uppercase px-1 py-0.2 rounded bg-rose-500/30 text-rose-200 font-bold">AMRAP</span>
                     </span>
                   ) : (
                     set.targetReps

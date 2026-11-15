@@ -638,11 +638,11 @@ describe('ExerciseCard Component', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Barbell Back Squat' })).toBeInTheDocument();
   });
 
-  it('renders the AMRAP reminder banner without a stopwatch', () => {
+  it('does not display AMRAP reminder banner on earlier sets, but displays it on the final set', () => {
     const updateLogMock = vi.fn();
     const restMock = vi.fn();
 
-    render(
+    const { rerender } = render(
       <ExerciseCard
         exercise={mockExercise}
         logs={mockLogs}
@@ -653,16 +653,37 @@ describe('ExerciseCard Component', () => {
       />
     );
 
-    // AMRAP Banner is displayed
+    // Prior to final set (Sets 1 & 2 uncompleted): AMRAP reminder banner is NOT displayed on the card
+    expect(screen.queryByTestId('amrap-reminder-banner')).not.toBeInTheDocument();
+
+    // Goal column on the last set row still shows AMRAP target
+    expect(screen.getByText('3+')).toBeInTheDocument();
+    expect(screen.getByText('MAX')).toBeInTheDocument();
+    expect(screen.getByText('AMRAP')).toBeInTheDocument();
+
+    // Rerender with sets 1 and 2 completed (now on the final set)
+    const logsAtFinalSet: SetLogRecord[] = [
+      { setNumber: 1, targetReps: '3', weightLbs: 185, repsAchieved: 3, isCompleted: true, notes: '' },
+      { setNumber: 2, targetReps: '3', weightLbs: 185, repsAchieved: 3, isCompleted: true, notes: '' },
+      { setNumber: 3, targetReps: '3', weightLbs: 185, repsAchieved: 0, isCompleted: false, notes: '' },
+    ];
+
+    rerender(
+      <ExerciseCard
+        exercise={mockExercise}
+        logs={logsAtFinalSet}
+        onUpdateSetLog={updateLogMock}
+        onOpenCueCard={vi.fn()}
+        onQuickStartRest={restMock}
+        onQuickStartTempo={vi.fn()}
+      />
+    );
+
+    // On the final set: AMRAP banner is displayed with reminder & voice cue
     expect(screen.getByTestId('amrap-reminder-banner')).toBeInTheDocument();
     expect(screen.getByText(/Final Set: As Many Reps As Possible \(AMRAP\)!/i)).toBeInTheDocument();
     expect(screen.getByText(/Leave 1 rep in reserve/i)).toBeInTheDocument();
 
-    // Goal column shows AMRAP target
-    expect(screen.getByText('3+')).toBeInTheDocument();
-    expect(screen.getByText('MAX')).toBeInTheDocument();
-
-    // Voice Cue button is present
     const voiceCueBtn = screen.getByRole('button', { name: /Play AMRAP voice prompt/i });
     expect(voiceCueBtn).toBeInTheDocument();
     fireEvent.click(voiceCueBtn);
