@@ -463,20 +463,6 @@ export const ATHLEAN_DAILY_ABS_CORE_EXERCISES: WorkoutExercise[] = [
     progressionRule: 'Build from bent-knee tuck hollow hold (20s) to full straight-arm, straight-leg hollow hold (45s).'
   },
   {
-    id: 't3_athlean_cross_mountain_climber',
-    name: 'Athlean-X Cross-Body Mountain Climbers',
-    tier: 'T3',
-    targetSets: 3,
-    targetReps: '15–20 / side',
-    isAmrapLastSet: false,
-    tempo: '2011',
-    restSeconds: 45,
-    equipment: 'bodyweight',
-    muscleGroups: ['External Obliques', 'Internal Obliques', 'Serratus Anterior', 'Core Stabilizers'],
-    biomechanicalRationale: 'Jeff Cavaliere Kinetic Sequence Step 4: Top-Down Rotational. From a push-up plank, driving the opposite knee across the torso toward the opposite elbow rotates the ribcage on a stable pelvis.',
-    progressionRule: 'Ensure a deliberate 1-second squeeze at the cross-over peak rather than rushing reps. Progress from 15 to 20 reps/side.'
-  },
-  {
     id: 't3_athlean_iso_crunch',
     name: 'Athlean-X 2-Second Peak Squeeze Floor Curl-Up',
     tier: 'T3',
@@ -523,7 +509,7 @@ export function createDailyAbsExercises(sessionId: string): WorkoutExercise[] {
     targetSets: 1,
     restSeconds: 30,
     regression: undefined,
-    tempo: baseEx.id.includes('mountain') ? '2010' : baseEx.tempo,
+    tempo: baseEx.tempo,
     biomechanicalRationale: `Athlean-X Daily Core Finisher: ${baseEx.biomechanicalRationale}`,
   }));
 }
@@ -1466,21 +1452,6 @@ export const SESSION_POST_BJJ: WorkoutSession = {
       muscleGroups: ['Rectus Abdominis', 'Transversus Abdominis', 'Hip Flexors', 'Quadriceps'],
       biomechanicalRationale: 'Jeff Cavaliere & Yellow Dude Core Compression: Mid-Range Anti-Extension. Clamps the lumbar spine flush against the floor with zero air gap, re-centering pelvic alignment and rebuilding 360-degree cylindrical intra-abdominal pressure after ground fighting.',
       progressionRule: 'Build from bent-knee tuck hollow hold (20s) to full straight-arm, straight-leg hollow hold (45s).'
-    },
-    {
-      id: 't3_bjj_cross_mountain_climber',
-      baseExerciseId: 't3_athlean_cross_mountain_climber',
-      name: 'Athlean-X Cross-Body Oblique Climbers & Serratus Punch',
-      tier: 'T3',
-      targetSets: 3,
-      targetReps: '15–20 / side',
-      isAmrapLastSet: false,
-      tempo: '2011',
-      restSeconds: 45,
-      equipment: 'bodyweight',
-      muscleGroups: ['External Obliques', 'Internal Obliques', 'Serratus Anterior', 'Core Stabilizers'],
-      biomechanicalRationale: 'Jeff Cavaliere Kinetic Sequence Step 4: Top-Down Rotational. From a push-up plank, driving the opposite knee across the torso toward the opposite elbow rotates the ribcage on a stable pelvis. Unwinds asymmetric rotational torque incurred during guard passing, kimura grips, and hip escapes.',
-      progressionRule: 'Ensure a deliberate 1-second squeeze at the cross-over peak rather than rushing reps. Progress from 15 to 20 reps/side.'
     },
     {
       id: 't3_bjj_mcgill_curl_up',

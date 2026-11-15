@@ -33,7 +33,7 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
       expect(SESSION_DAILY_ABS.creatorInfluences).toContain('Dr. Stuart McGill');
 
       const exercises = SESSION_DAILY_ABS.exercises;
-      expect(exercises).toHaveLength(6);
+      expect(exercises).toHaveLength(5);
 
       // 1. Bottom-Up (Pelvis to Ribcage)
       expect(exercises[0].id).toBe('t3_athlean_hanging_knee_raise');
@@ -51,20 +51,15 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
       expect(exercises[2].tempo).toBe('Isometric Hold');
       expect(exercises[2].equipment).toBe('bodyweight');
 
-      // 4. Top-Down Rotational
-      expect(exercises[3].id).toBe('t3_athlean_cross_mountain_climber');
-      expect(exercises[3].muscleGroups).toContain('Serratus Anterior');
-      expect(exercises[3].equipment).toBe('bodyweight');
+      // 4. Top-Down Flexion (Ribcage to Pelvis)
+      expect(exercises[3].id).toBe('t3_athlean_iso_crunch');
+      expect(exercises[3].muscleGroups).toContain('Upper Rectus Abdominis');
+      expect(exercises[3].tempo).toBe('2112');
 
-      // 5. Top-Down Flexion (Ribcage to Pelvis)
-      expect(exercises[4].id).toBe('t3_athlean_iso_crunch');
-      expect(exercises[4].muscleGroups).toContain('Upper Rectus Abdominis');
-      expect(exercises[4].tempo).toBe('2112');
-
-      // 6. Transverse Abdominis & Core Cylinder Finisher
-      expect(exercises[5].id).toBe('t3_athlean_serratus_plank');
-      expect(exercises[5].muscleGroups).toContain('Transversus Abdominis');
-      expect(exercises[5].tempo).toBe('Isometric Hold');
+      // 5. Transverse Abdominis & Core Cylinder Finisher
+      expect(exercises[4].id).toBe('t3_athlean_serratus_plank');
+      expect(exercises[4].muscleGroups).toContain('Transversus Abdominis');
+      expect(exercises[4].tempo).toBe('Isometric Hold');
     });
 
     it('contains Dr. Stuart McGill Cat-Camel and Athlean-X 90/90 vacuum breath warmups', () => {
@@ -211,7 +206,7 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
       // Verify integrated ab workout exercises in Post-BJJ Reset
       expect(screen.getByText(/Athlean-X Post-Grappling Hanging Knee Raise & Pelvic Decompression/i)).toBeInTheDocument();
       expect(screen.getByText(/Athlean-X Grappler Hollow Body Core Compression Hold/i)).toBeInTheDocument();
-      expect(screen.getByText(/Athlean-X Cross-Body Oblique Climbers & Serratus Punch/i)).toBeInTheDocument();
+      expect(screen.queryByText(/Athlean-X Cross-Body Oblique Climbers & Serratus Punch/i)).toBeNull();
       expect(screen.getByText(/Dr. Stuart McGill Post-Grappling Isometric Curl-Up & Vacuum Brace/i)).toBeInTheDocument();
     });
 
@@ -247,9 +242,9 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
         expect(session).toBeDefined();
 
         const coreCircuitExercises = session.dailyCoreFinisher || [];
-        expect(coreCircuitExercises).toHaveLength(6);
+        expect(coreCircuitExercises).toHaveLength(5);
 
-        // Verify the 6 kinetic stages in order
+        // Verify the kinetic stages in order
         expect(coreCircuitExercises[0].name).toContain('Hanging Knee Raise');
         expect(coreCircuitExercises[0].tier).toBe('T3');
         expect(coreCircuitExercises[0].targetSets).toBe(1);
@@ -258,9 +253,8 @@ describe('Athlean-X Daily Abs Protocol & Kinetic Chain Science', () => {
 
         expect(coreCircuitExercises[1].name).toContain('Hanging Corkscrews');
         expect(coreCircuitExercises[2].name).toContain('Hollow Body Core Compression');
-        expect(coreCircuitExercises[3].name).toContain('Cross-Body Mountain Climbers');
-        expect(coreCircuitExercises[4].name).toContain('Floor Curl-Up');
-        expect(coreCircuitExercises[5].name).toContain('Serratus Elbow-to-Knee Plank');
+        expect(coreCircuitExercises[3].name).toContain('Floor Curl-Up');
+        expect(coreCircuitExercises[4].name).toContain('Serratus Elbow-to-Knee Plank');
       });
     });
 
