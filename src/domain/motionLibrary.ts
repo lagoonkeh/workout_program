@@ -4,14 +4,20 @@
  * Feet and hands use IK targets, so planted contacts stay put and bars follow a real path.
  */
 import type { DiagramType } from './exerciseVisualsData';
+import { SIX_PACK_MOTIONS } from './sixPackMotions';
 import type { JointId, Keyframe, LimbSpec, MotionOrder, PoseSpec, SegmentId, Vec } from './motionRig';
 
 export const FLOOR_Y = 180;
 
+/** a small tennis-ball-coloured ball (kettlebell props with ball: true) */
+export const BALL_FILL = '#d9f99d';
+export const BALL_STROKE = '#65a30d';
+
 export type PropDef =
   | { kind: 'barbell'; at: JointId; d?: Vec }
   /** handoff: between progress `from` and `to` the bell rides on joint `at` instead (hand-to-hand passes) */
-  | { kind: 'kettlebell'; at: JointId; d?: Vec; handoff?: { at: JointId; from: number; to: number } }
+  /** ball: draw a small ball instead of a bell (the behind-the-back pass) */
+  | { kind: 'kettlebell'; at: JointId; d?: Vec; handoff?: { at: JointId; from: number; to: number }; ball?: boolean }
   | { kind: 'dumbbell'; at: JointId; d?: Vec }
   | { kind: 'club'; at: JointId; from: JointId; len: number }
   | { kind: 'cable'; anchor: Vec; at: JointId }
@@ -59,6 +65,7 @@ const benchScenery = (x: number, y: number, w: number): SceneryDef[] => [
 const ARMS_DOWN = ang(92, 88);
 
 export const MOTIONS: Record<DiagramType, MotionDef> = {
+  ...SIX_PACK_MOTIONS,
   squat: {
     title: 'Barbell back squat',
     order: 'eccentric-first',

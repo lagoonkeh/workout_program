@@ -64,6 +64,28 @@ const BODY_SHEET = 'Body Metrics';
 const ASSESSMENT_SHEET = 'Quarterly Assessments';
 const MAX_BACKUP_CHARS = 45000; // a Sheets cell holds 50,000 characters
 
+/**
+ * Access token from the second Google sign-in (scripts/google-health-token.mjs), narrowed to one scope:
+ * Google Health refuses tokens that also carry calendar scope, so each API asks for its own.
+ * The main sign-in (GOOGLE_REFRESH_TOKEN) only covers Sheets and Drive.
+ */
+export const HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly';
+export const CALENDAR_EVENTS_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+
+export async function healthAccessToken(scope = HEALTH_SCOPE) {
+  const refreshToken = process.env.GOOGLE_HEALTH_REFRESH_TOKEN;
+  const clientId = process.env.GOOGLE_HEALTH_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_HEALTH_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  if (!refreshToken || !clientId || !clientSecret) return { token: null, error: 'Google Health not connected' };
+  const r = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken, grant_type: 'refresh_token', scope }),
+  });
+  if (!r.ok) return { token: null, error: `Google sign-in failed (${r.status}) - run scripts/google-health-token.mjs again` };
+  return { token: (await r.json()).access_token, error: null };
+}
+
 export async function getAccessToken() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -591,13 +613,18 @@ export default async function handler(req, res) {
         if (!eventPayload) {
           return res.status(400).json({ error: 'Missing calendar event payload.' });
         }
+        // the main sign-in has no calendar access; the second sign-in carries calendar.events
+        const cal = await healthAccessToken(CALENDAR_EVENTS_SCOPE);
+        if (!cal.token) {
+          return res.status(200).json({ success: false, error: cal.error, message: 'Calendar sign-in missing - run scripts/google-health-token.mjs.' });
+        }
 
         const calRes = await fetch(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
           {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${cal.token}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(eventPayload),

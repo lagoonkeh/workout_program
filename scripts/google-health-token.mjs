@@ -1,10 +1,11 @@
 // scripts/google-health-token.mjs
-// One-time: let /api/bjj write BJJ sessions to Google Health.
+// One-time: let /api/bjj write BJJ sessions to Google Health, and the app log workouts to Google Calendar.
 //
 //   node scripts/google-health-token.mjs <path to the OAuth client JSON> [--vercel]
 //
 // The client JSON is the "Download JSON" file of a Desktop OAuth client in a Google Cloud project with
-// the Google Health API enabled and the googlehealth.activity_and_fitness.writeonly scope on its consent
+// the Google Health and Calendar APIs enabled and the googlehealth.activity_and_fitness.writeonly and
+// calendar.events scopes on its consent
 // screen. Sign in in the browser tab that opens. With --vercel the client ID, client secret and refresh
 // token go straight into the Vercel project's production env (GOOGLE_HEALTH_CLIENT_ID,
 // GOOGLE_HEALTH_CLIENT_SECRET, GOOGLE_HEALTH_REFRESH_TOKEN) without being printed; then redeploy.
@@ -30,8 +31,9 @@ if (!clientId || !clientSecret) {
 }
 const PORT = 5179;
 const redirectUri = `http://localhost:${PORT}/callback`;
-// Health write for the sessions, plus calendar read so /api/bjj can find the "BJJ Trained" events
-const scope = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly https://www.googleapis.com/auth/calendar.readonly';
+// Health write for the sessions, plus calendar events: /api/bjj reads the "BJJ Trained" events and
+// /api/sync?action=log-calendar adds finished workouts to the "Workouts" calendar
+const scope = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly https://www.googleapis.com/auth/calendar.events';
 const authUrl =
   'https://accounts.google.com/o/oauth2/v2/auth?' +
   new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', scope, access_type: 'offline', prompt: 'consent' });

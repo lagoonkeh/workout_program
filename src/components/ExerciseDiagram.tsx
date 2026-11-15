@@ -20,7 +20,7 @@ import {
   type TimelineSegment,
   type Vec,
 } from '../domain/motionRig';
-import { FLOOR_Y, getMotion, type MotionDef, type PropDef, type SceneryDef } from '../domain/motionLibrary';
+import { BALL_FILL, BALL_STROKE, FLOOR_Y, getMotion, type MotionDef, type PropDef, type SceneryDef } from '../domain/motionLibrary';
 import {
   CX,
   frontalTrackPoint,
@@ -201,6 +201,7 @@ function Prop({ p, sk, ids, progress = 0 }: { p: PropDef; sk: Skeleton; ids: str
         </g>
       );
     case 'kettlebell':
+      if (p.ball) return <circle data-prop="ball" cx={c[0]} cy={c[1]} r={4.2} fill={BALL_FILL} stroke={BALL_STROKE} strokeWidth={0.9} />;
       return (
         <g>
           <path
@@ -511,6 +512,7 @@ function FrontalPropShape({ p, fs, ids }: { p: FrontalProp; fs: FrontalSkeleton;
       );
     }
     case 'kettlebell':
+      if (p.ball) return <circle data-frontal-prop="ball" cx={pt[0]} cy={pt[1]} r={4.2} fill={BALL_FILL} stroke={BALL_STROKE} strokeWidth={0.9} />;
       return (
         <g>
           <path d={`M${pt[0] - 4.5},${pt[1] - 6} Q${pt[0]},${pt[1] - 14} ${pt[0] + 4.5},${pt[1] - 6}`} fill="none" stroke="#92400e" strokeWidth={2.4} strokeLinecap="round" />

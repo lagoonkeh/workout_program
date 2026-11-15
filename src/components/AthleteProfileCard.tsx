@@ -115,7 +115,7 @@ export const AthleteProfileCard: React.FC<AthleteProfileCardProps> = ({ classNam
             <span data-testid="profile-age-height" className="text-white font-bold text-base">
               {age} · {formatHeight(profile.heightInches)}
             </span>
-            <button type="button" onClick={() => setEditing((v) => !v)} className="block text-[10px] text-blue-300 hover:underline cursor-pointer">
+            <button type="button" onClick={() => setEditing((v) => !v)} className="block min-h-[36px] min-w-[44px] -mb-1.5 text-left text-xs text-blue-300 hover:underline cursor-pointer">
               {editing ? 'Cancel' : 'Edit'}
             </button>
           </div>

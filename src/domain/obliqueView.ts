@@ -281,7 +281,7 @@ export function cameraFor(m: MotionDef, type: DiagramType | string, cfg: Frontal
 export type Prop3 =
   /** straight bar along z, centred on c */
   | { kind: 'bar'; c: Vec3; half: number }
-  | { kind: 'kettlebell'; c: Vec3 }
+  | { kind: 'kettlebell'; c: Vec3; ball?: boolean }
   /** dumbbell handle along z */
   | { kind: 'dumbbell'; c: Vec3 }
   | { kind: 'club'; hand: Vec3; tip: Vec3 }
@@ -331,7 +331,8 @@ export function props3D(m: MotionDef, cfg: FrontalConfig, sk: Skeleton, s3: Skel
         const sd: Vec = sp && 'd' in sp && sp.d ? sp.d : [0, 0];
         const fd: Vec = fp.d ?? [0, 0];
         const hand = s3.j[`hand${side}`];
-        out.push({ kind: fp.kind, c: [hand[0] + sd[0], hand[1] + sd[1], hand[2] + latSign * fd[0]] });
+        const c: Vec3 = [hand[0] + sd[0], hand[1] + sd[1], hand[2] + latSign * fd[0]];
+        out.push(fp.kind === 'kettlebell' && fp.ball ? { kind: 'kettlebell', c, ball: true } : { kind: fp.kind, c });
         break;
       }
       case 'club': {
@@ -466,7 +467,15 @@ const REAR_FIRST: DiagramType[] = [
   'pelvic_drop',
 ];
 /** rotation and foot placement read best from above */
-const TOP_FIRST: DiagramType[] = ['single_leg_atw', 'carry', 'cossack_squat'];
+const TOP_FIRST: DiagramType[] = [
+  'single_leg_atw',
+  'carry',
+  'cossack_squat',
+  'sp_windshield_wipers',
+  'sp_scissors',
+  'sp_seated_ab_circles',
+  'sp_btb_pass',
+];
 /** a flexing and extending spine reads best straight from the side */
 const SIDE_FIRST: DiagramType[] = ['cat_camel'];
 
@@ -488,6 +497,10 @@ const TOP_CUE: Partial<Record<DiagramType, string>> = {
   cossack_squat: 'Feet stay planted wide; hips slide over one foot',
   pelvic_drop: 'Pelvis level, stance foot centred under the hip',
   mountain_climber: 'Knee crosses under the body; hips stay level',
+  sp_windshield_wipers: 'Knees sweep side to side; shoulders stay pinned',
+  sp_scissors: 'Legs open wide and cross, top leg switching',
+  sp_seated_ab_circles: 'Feet draw a wide circle; torso stays still',
+  sp_btb_pass: 'Ball circles the waist; seat stays planted',
 };
 
 export function cameraCue(cam: ObliqueCamera, type: DiagramType | string, frontal: FrontalConfig): string {

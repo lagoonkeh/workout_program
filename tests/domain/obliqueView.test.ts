@@ -79,6 +79,9 @@ describe('domain/obliqueView', () => {
     expect(defaultCamera('pelvic_drop')).toBe('rear45');
     // a flexing spine reads best straight from the side
     expect(defaultCamera('cat_camel')).toBe('side');
+    // ab drills whose motion is sideways (sweeps, crossings, circles) open from above
+    (['sp_windshield_wipers', 'sp_scissors', 'sp_seated_ab_circles', 'sp_btb_pass'] as Id[]).forEach((id) => expect(defaultCamera(id)).toBe('top'));
+    expect(defaultCamera('sp_vups')).toBe('front45');
     IDS.forEach((id) => expect([...OBLIQUE_CAMERAS, 'side']).toContain(defaultCamera(id)));
   });
 

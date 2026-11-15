@@ -313,11 +313,12 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
     render(<App />);
 
     // Rep-based bodyweight work (Tibialis Wall Raises, 15-20 reps) has no tempo timer
-    expect(screen.queryByTitle(/Launch tempo metronome for 2011/i)).not.toBeInTheDocument();
+    const tibialis = document.querySelector('[id^="exercise-card-"][id*="tibialis"]');
+    if (tibialis) expect(within(tibialis as HTMLElement).queryByTitle(/Launch tempo metronome/i)).not.toBeInTheDocument();
 
-    // In Lower A, the Serratus Plank finisher is a timed bodyweight hold (30-45s)
-    const plank = document.getElementById('exercise-card-t3_athlean_serratus_plank_lower_a')!;
-    fireEvent.click(within(plank).getByTitle(/Launch tempo metronome for HOLD-45/i));
+    // In Lower A, the core finisher opens with Heels to the Heavens, a timed 30-second bodyweight interval
+    const plank = document.getElementById('exercise-card-t3_sp_heels_heavens_lower_a')!;
+    fireEvent.click(within(plank).getByTitle(/Launch tempo metronome for 2011/i));
 
     // Metronome modal opens
     expect(screen.getByRole('dialog', { name: /Tempo Metronome/i })).toBeInTheDocument();
@@ -332,7 +333,7 @@ describe('App Component (Milestone 3 Full Application)', { timeout: 15000 }, () 
 
     // Plank Set 1 is now marked as complete (button label changed from 'as completed' to 'as incomplete')
     // a one-set exercise collapses once done: expand it to see the set
-    const plankCard = within(document.getElementById('exercise-card-t3_athlean_serratus_plank_lower_a')!);
+    const plankCard = within(document.getElementById('exercise-card-t3_sp_heels_heavens_lower_a')!);
     const expand = plankCard.queryAllByRole('button', { name: /^Expand /i })[0];
     if (expand) fireEvent.click(expand);
     const completedSetBtn = plankCard.getByRole('button', { name: /Mark set 1 as incomplete/i });

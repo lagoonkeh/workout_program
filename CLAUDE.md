@@ -28,6 +28,8 @@ GitHub: lagoonkeh/workout_program. Run `git log --oneline -15` for recent work.
 - `src/domain/` - program data (`programData.ts`), progression, deloads, readiness, mobility, strength standards,
   plate calculator, cue cards (`cueCardsData.ts`, ~160 KB), exercise variations.
   Motion demos: `motionLibrary.ts`, `motionRig.ts`, `frontalView.ts`, `exerciseVisualsData.ts`.
+  Core finishers: `sixPackData.ts` (21 ab drills: exercise, demo caption and cue card each; 5–6 per session, 30 s intervals,
+  no mountain climbers) and `sixPackMotions.ts` (their demos). Movements follow the Six Pack Promise app's videos; cues are our own words.
 - `src/components/` - widgets and modals. `ExerciseCard.tsx` (~140 KB), `ExerciseDiagram.tsx` (renders motion demos).
 - `src/services/` - `firebaseAuth`, `firestoreSyncService`, `sheetSyncService` + `appBackupService` (Google Sheet in Drive),
   `calendarSyncService` (logs workouts to a Google Calendar), `healthService`.
@@ -45,7 +47,8 @@ GitHub: lagoonkeh/workout_program. Run `git log --oneline -15` for recent work.
 - Client (`.env`, see `.env.example`): `VITE_FIREBASE_*`, `VITE_ALLOWED_EMAILS`
 - Server (Vercel): `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_SPREADSHEET_ID`,
   `HEALTH_INGEST_TOKEN`, `ALLOWED_EMAILS`, `FIREBASE_API_KEY`, `CRON_SECRET` (nightly BJJ job),
-  `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `GOOGLE_HEALTH_REFRESH_TOKEN` (scripts/google-health-token.mjs)
+  `GOOGLE_HEALTH_CLIENT_ID`, `GOOGLE_HEALTH_CLIENT_SECRET`, `GOOGLE_HEALTH_REFRESH_TOKEN` (scripts/google-health-token.mjs:
+  Google Health write + calendar.events; used by /api/bjj and /api/sync?action=log-calendar)
 
 ## Skip when exploring (noise, large)
 `node_modules/`, `dist/`, `coverage/`, `_sim/` (~3,800 simulation screenshots), `_archive/`, `.agents/` (old multi-agent build logs).

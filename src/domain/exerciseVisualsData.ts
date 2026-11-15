@@ -1,5 +1,7 @@
 // src/domain/exerciseVisualsData.ts
 
+import { SIX_PACK_VISUALS } from './sixPackData';
+
 export type DiagramType =
   | 'squat'
   | 'split_squat'
@@ -41,7 +43,32 @@ export type DiagramType =
   | 'cossack_squat'
   | 'hollow_body'
   | 'cat_camel'
-  | 'pelvic_drop';
+  | 'pelvic_drop'
+  | SixPackDiagramType;
+
+/** floor and standing ab drills of the core finishers (demos in sixPackMotions.ts) */
+export type SixPackDiagramType =
+  | 'sp_heels_heavens'
+  | 'sp_iso_reverse_crunch'
+  | 'sp_flutter_kicks'
+  | 'sp_scissors'
+  | 'sp_hands_back_tucks'
+  | 'sp_hands_free_tucks'
+  | 'sp_vups'
+  | 'sp_x_man_crunch'
+  | 'sp_marching_plank'
+  | 'sp_tuck_plank_opposite'
+  | 'sp_russian_v_tuck_twist'
+  | 'sp_seated_ab_circles'
+  | 'sp_btb_pass'
+  | 'sp_windshield_wipers'
+  | 'sp_standing_ab_twist'
+  | 'sp_9090_crunch'
+  | 'sp_crunch_and_twist'
+  | 'sp_upper_circle_crunch'
+  | 'sp_jackknife'
+  | 'sp_side_crunch'
+  | 'sp_side_plank_lifts';
 
 export interface ExerciseVisual {
   id: string;
@@ -60,6 +87,7 @@ export interface ExerciseVisual {
 }
 
 export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
+  ...SIX_PACK_VISUALS,
 
   t2_goblet_cossack_squat: {
     id: 't2_goblet_cossack_squat',
@@ -973,321 +1001,6 @@ export const EXERCISE_VISUALS: Record<string, ExerciseVisual> = {
     },
     trajectoryNote: 'Static isometric anti-extension core hold.',
     safetyNote: 'If lower back arches away from floor, immediately bend knees to protect spine.'
-  },
-
-  t3_core_lying_pelvic_curl: {
-    id: 't3_core_lying_pelvic_curl',
-    exerciseName: 'Lying Reverse Pelvic Curls on Floor',
-    diagramType: 'hanging_knee_raise',
-    startPositionLabel: '1. Supine 90° Knee Bend Base',
-    bottomPositionLabel: '2. Top Pelvic Elevation & Tailbone Lift',
-    caption: 'Bottom-up lower rectus isolation: curl pelvis upward towards ribcage without using swinging momentum.',
-    keyCues: [
-      'Press lower back flush to floor',
-      'Curl pelvis upward 2–3 inches off floor',
-      'Hold peak squeeze for 2 seconds',
-      'Lower slowly over 2 seconds'
-    ],
-    jointAngleCues: {
-      start: '90° hip flexion, 90° knee angle',
-      bottom: '120° posterior pelvic tilt'
-    },
-    trajectoryNote: 'Curved bottom-up pelvic arc toward ribcage.',
-    safetyNote: 'Keep knees bent at 90° throughout to avoid lumbar arching.'
-  },
-
-  t3_core_side_plank_lifts: {
-    id: 't3_core_side_plank_lifts',
-    exerciseName: 'Side Plank Hip Lifts',
-    diagramType: 'side_bridge',
-    startPositionLabel: '1. Side Plank Neutral Alignment',
-    bottomPositionLabel: '2. High Pelvic Arc Contraction',
-    caption: 'Dynamic lateral core & oblique drive: elevate pelvis against gravity into high lateral arc.',
-    keyCues: [
-      'Elbow under shoulder, rigid head-to-heel line',
-      'Lower hip toward floor with control',
-      'Drive hip high into upward arc',
-      'Squeeze lower oblique for 2 seconds at apex'
-    ],
-    jointAngleCues: {
-      start: '180° coronal straight line',
-      bottom: '160° controlled lateral dip'
-    },
-    trajectoryNote: 'Vertical oscillating lateral hip path.',
-    safetyNote: 'Maintain perpendicular chest alignment; do not rotate forward.'
-  },
-
-  t3_core_marching_plank: {
-    id: 't3_core_marching_plank',
-    exerciseName: 'Marching Forearm Plank',
-    diagramType: 'plank_knee',
-    startPositionLabel: '1. Forearm Plank Alignment',
-    bottomPositionLabel: '2. Single-Foot Elevated March',
-    caption: 'Anti-rotation core challenge: lift alternating feet with zero pelvic swaying or piking.',
-    keyCues: [
-      'Elbows directly under shoulders',
-      'Lift single foot 2–3 inches',
-      'Hold 1 second with level hips',
-      'Switch feet with zero lateral wobble'
-    ],
-    jointAngleCues: {
-      start: '180° neutral horizontal line',
-      bottom: '10° hip hyperextension hold'
-    },
-    trajectoryNote: 'Alternating vertical foot march with rigid core cylinder.',
-    safetyNote: 'If hips tilt or sway, widen foot base.'
-  },
-
-  t3_core_9090_crunch: {
-    id: 't3_core_9090_crunch',
-    exerciseName: '90/90 Deadbug Torso Curl-Up',
-    diagramType: 'curl_up',
-    startPositionLabel: '1. Fixed 90/90 Thigh Setup',
-    bottomPositionLabel: '2. 30° Thoracic Flexion Apex',
-    caption: 'Upper rectus isolation: lock hips at 90° to eliminate psoas and curl only shoulder blades.',
-    keyCues: [
-      'Hips and knees locked at 90 degrees',
-      'Press lumbar spine into floor',
-      'Curl shoulder blades 30 degrees off floor',
-      'Empty lungs completely on peak 2s hold'
-    ],
-    jointAngleCues: {
-      start: '90° hip flexion, 90° knee angle',
-      bottom: '30° thoracic flexion'
-    },
-    trajectoryNote: 'Pure thoracic spinal curl without hip flexor assistance.',
-    safetyNote: 'Stopping at 30° completely protects lumbar discs.'
-  },
-
-  t3_core_twisted_t_plank: {
-    id: 't3_core_twisted_t_plank',
-    exerciseName: 'Twisted T-Plank Rotational Holds',
-    diagramType: 'side_bridge',
-    startPositionLabel: '1. High Push-Up Plank Base',
-    bottomPositionLabel: '2. Vertical Arm T-Plank Reach',
-    caption: 'Rotational core power: rotate from push-up plank into side T-position with 3s hold.',
-    keyCues: [
-      'Hands under shoulders, spread feet slightly',
-      'Rotate chest and hips smoothly to side',
-      'Extend top arm toward ceiling',
-      'Hold 3 seconds with elevated hips'
-    ],
-    jointAngleCues: {
-      start: '180° push-up plank plane',
-      bottom: '90° vertical thoracic rotation'
-    },
-    trajectoryNote: 'Rotational transverse arc pivoting on supporting arm.',
-    safetyNote: 'Push through supporting palm to keep shoulder stable.'
-  },
-
-  t3_core_hanging_bat_tuck: {
-    id: 't3_core_hanging_bat_tuck',
-    exerciseName: 'Hanging Bent-Leg L-Sit Compression',
-    diagramType: 'lsit',
-    startPositionLabel: '1. Active Dead Hang',
-    bottomPositionLabel: '2. 90° Thigh Horizontal Tuck',
-    caption: 'Hanging anti-extension compression: hold thighs strictly horizontal under active traction.',
-    keyCues: [
-      'Depress scapulae away from ears',
-      'Pull knees up to horizontal plane',
-      'Tuck pelvis into posterior tilt',
-      'Hold steady with zero torso swing'
-    ],
-    jointAngleCues: {
-      start: '180° vertical hang',
-      bottom: '90° hip flexion hold'
-    },
-    trajectoryNote: 'Static horizontal compression hold under bar traction.',
-    safetyNote: 'Do not allow shoulders to elevate into passive hang.'
-  },
-
-  t3_core_russian_twists: {
-    id: 't3_core_russian_twists',
-    exerciseName: 'Controlled Russian Twists',
-    diagramType: 'curl_up',
-    startPositionLabel: '1. 45° Torso Neutral Base',
-    bottomPositionLabel: '2. 45° Thoracic Rotational Apex',
-    caption: 'Oblique rotational endurance: rotate chest 45° with proud posture and 1s isometric stop.',
-    keyCues: [
-      'Torso reclined 45°, chest proud',
-      'Rotate sternum and shoulders 45 degrees',
-      'Pause 1 second without touching floor',
-      'Return through center with control'
-    ],
-    jointAngleCues: {
-      start: '45° hip angle, 90° knee flexion',
-      bottom: '45° transverse thoracic rotation'
-    },
-    trajectoryNote: 'Transverse horizontal rotation across torso centerline.',
-    safetyNote: 'Maintain neutral lumbar spine; avoid rounding lower back.'
-  },
-
-  t3_core_cliffhanger_plank: {
-    id: 't3_core_cliffhanger_plank',
-    exerciseName: 'Cliffhanger Long-Lever Plank',
-    diagramType: 'plank_knee',
-    startPositionLabel: '1. Extended Elbow Base',
-    bottomPositionLabel: '2. Long-Lever Anti-Extension Lock',
-    caption: 'Extended-lever anterior core challenge: elbows placed 4–6 inches forward for double extension torque.',
-    keyCues: [
-      'Elbows walked 4–6 inches in front of shoulders',
-      'Squeeze glutes and tuck pelvis under',
-      'Pull ribs firmly downward',
-      'Breathe rhythmically through nose'
-    ],
-    jointAngleCues: {
-      start: '110° shoulder flexion angle',
-      bottom: '180° rigid core cylinder line'
-    },
-    trajectoryNote: 'Static long-lever anti-extension hold.',
-    safetyNote: 'If lower back sags or pinches, immediately walk elbows back.'
-  },
-
-  t3_core_frog_crunch: {
-    id: 't3_core_frog_crunch',
-    exerciseName: 'Frog Crunches',
-    diagramType: 'curl_up',
-    startPositionLabel: '1. Diamond Knee Flared Base',
-    bottomPositionLabel: '2. 30° Thoracic Curl Squeeze',
-    caption: 'Psoas-bypass upper abdominal isolation: soles together and knees flared wide shut off hip flexors.',
-    keyCues: [
-      'Soles of feet pressed together, knees wide',
-      'Lower back pressed flat to floor',
-      'Curl shoulder blades 30 degrees off floor',
-      '2-second exhalation squeeze at peak'
-    ],
-    jointAngleCues: {
-      start: '60° hip abduction and external rotation',
-      bottom: '30° thoracic flexion'
-    },
-    trajectoryNote: 'Thoracic curl with relaxed, abducting hips.',
-    safetyNote: 'Do not pull on neck; keep elbows flared wide.'
-  },
-
-  t3_core_twisting_pistons: {
-    id: 't3_core_twisting_pistons',
-    exerciseName: 'Twisting Plank Pistons',
-    diagramType: 'plank_knee',
-    startPositionLabel: '1. Center Push-Up Plank Base',
-    bottomPositionLabel: '2. Diagonal Spring Piston Hop',
-    caption: 'Dynamic rotational core burnout: spring feet together diagonally side to side with level shoulders.',
-    keyCues: [
-      'Push-up plank base, feet together',
-      'Hop feet together to outside of right elbow',
-      'Spring back to center immediately',
-      'Hop to left elbow and repeat continuously'
-    ],
-    jointAngleCues: {
-      start: '180° straight push-up plank',
-      bottom: '60° diagonal tuck landing'
-    },
-    trajectoryNote: 'Fast horizontal spring piston oscillating across centerline.',
-    safetyNote: 'Land softly on balls of feet; keep hips level.'
-  },
-
-  t3_core_hanging_scissors: {
-    id: 't3_core_hanging_scissors',
-    exerciseName: 'Hanging Alternating Scissor Raises',
-    diagramType: 'hanging_knee_raise',
-    startPositionLabel: '1. 45° Elevated Leg Hang',
-    bottomPositionLabel: '2. Alternating Scissor Cross',
-    caption: 'Unilateral lower core stabilization: alternate scissor kicks from hanging position with level pelvis.',
-    keyCues: [
-      'Active hang with depressed scapulae',
-      'Legs elevated 45 degrees in front',
-      'Alternate crossing feet over and under',
-      'Keep knees locked and toes pointed'
-    ],
-    jointAngleCues: {
-      start: '45° hip flexion elevation',
-      bottom: '20° alternating hip adduction/abduction'
-    },
-    trajectoryNote: 'Alternating scissor flutter path across sagittal plane.',
-    safetyNote: 'Maintain core brace to prevent torso swinging.'
-  },
-
-  t3_core_statue_liberty: {
-    id: 't3_core_statue_liberty',
-    exerciseName: 'Side Plank Statue of Liberty',
-    diagramType: 'side_bridge',
-    startPositionLabel: '1. Forearm Side Plank Base',
-    bottomPositionLabel: '2. Vertical Arm Torch Reach',
-    caption: 'Lateral chain anti-lateral flexion: reach top arm straight up to amplify lateral fascial tension.',
-    keyCues: [
-      'Forearm side plank with stacked feet',
-      'Reach top arm vertically toward ceiling',
-      'Drive bottom hip high off floor',
-      'Hold rigid for 30s per side'
-    ],
-    jointAngleCues: {
-      start: '180° coronal plane alignment',
-      bottom: '180° shoulder abduction reach'
-    },
-    trajectoryNote: 'Static lateral anti-flexion hold.',
-    safetyNote: 'Keep top shoulder pulled back; do not roll chest toward floor.'
-  },
-
-  t3_core_alligator_plank: {
-    id: 't3_core_alligator_plank',
-    exerciseName: 'Dynamic Push-Up Plank Transfer (Walk the Plank)',
-    diagramType: 'plank_knee',
-    startPositionLabel: '1. Forearm Plank Position',
-    bottomPositionLabel: '2. High Push-Up Plank Lockout',
-    caption: 'Dynamic anti-rotational core transfer: transition from elbows to palms and back with zero hip rocking.',
-    keyCues: [
-      'Forearm plank base, feet hip-width',
-      'Press up one hand at a time to high plank',
-      'Lower down one elbow at a time to forearm plank',
-      'Alternate lead hand on each rep'
-    ],
-    jointAngleCues: {
-      start: '90° elbow flexion forearm plank',
-      bottom: '180° elbow extension push-up plank'
-    },
-    trajectoryNote: 'Vertical hand-to-elbow transition plane.',
-    safetyNote: 'Lock pelvis level; widen feet if hips sway.'
-  },
-
-  t3_core_janda_crunch: {
-    id: 't3_core_janda_crunch',
-    exerciseName: 'Janda Tension Crunch',
-    diagramType: 'curl_up',
-    startPositionLabel: '1. Active Hamstring Heel Dig Base',
-    bottomPositionLabel: '2. 30° Pure Upper Abdominal Flexion',
-    caption: 'Reciprocal inhibition psoas shutdown: actively pulling heels backward shuts off hip flexors.',
-    keyCues: [
-      'Lie supine, knees bent at 90 degrees',
-      'Isometrically pull heels backward toward glutes',
-      'Curl shoulder blades 30 degrees off floor',
-      'Hold 2 seconds with maximum exhalation'
-    ],
-    jointAngleCues: {
-      start: '90° knee angle, active hamstring tension',
-      bottom: '30° thoracic flexion'
-    },
-    trajectoryNote: 'Thoracic curl under continuous hamstring reciprocal inhibition.',
-    safetyNote: 'Do not let heels slide; maintain continuous backward pulling pressure.'
-  },
-
-  t3_core_sprinter_tuck_plank: {
-    id: 't3_core_sprinter_tuck_plank',
-    exerciseName: 'Sprinter Tuck Planks',
-    diagramType: 'plank_knee',
-    startPositionLabel: '1. Forearm Plank Alignment',
-    bottomPositionLabel: '2. Outside Knee Sprinter Tuck',
-    caption: 'Deliberate rotational core control: drive knee slowly along outside of elbow with 1s hold. Zero mountain climbers.',
-    keyCues: [
-      'Forearm plank, push floor away through elbows',
-      'Drive right knee forward outside right elbow',
-      'Hold 1 second at apex to squeeze obliques',
-      'Step back with control and alternate sides'
-    ],
-    jointAngleCues: {
-      start: '180° straight forearm plank',
-      bottom: '90° lateral hip flexion tuck'
-    },
-    trajectoryNote: 'Slow, controlled lateral knee tuck along coronal plane.',
-    safetyNote: 'Maintain slow, deliberate cadence; this is a strict core exercise, not a cardio drill.'
   },
 
   t3_athlean_iso_crunch: {

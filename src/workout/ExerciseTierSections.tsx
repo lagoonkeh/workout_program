@@ -167,8 +167,8 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
             <div className="p-2 sm:p-4 space-y-4">
               <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200">
                 <div>
-                  <span className="font-bold text-amber-300">Core Kinetic Sequence:</span>{' '}
-                  <span>Bottom-Up ➔ Rotational ➔ Mid-Range Hold ➔ Top-Down ➔ Flexion ➔ Core Cylinder</span>
+                  <span className="font-bold text-amber-300">30-second intervals:</span>{' '}
+                  <span>Lower abs ➔ Middle &amp; rotation ➔ Upper abs ➔ Plank &amp; side work</span>
                 </div>
                 {(() => {
                   const isAllCoreDone = !!activeSession.dailyCoreFinisher?.every((ex) => {
@@ -191,7 +191,11 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
                                 }`}
                     >
                       {isAllCoreDone && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                      <span>{isAllCoreDone ? 'All 6 Core Sets Done ✓' : 'Mark All 6 Core Sets Done'}</span>
+                      <span>
+                        {isAllCoreDone
+                          ? `All ${activeSession.dailyCoreFinisher?.length ?? 0} Core Sets Done ✓`
+                          : `Mark All ${activeSession.dailyCoreFinisher?.length ?? 0} Core Sets Done`}
+                      </span>
                     </button>
                   );
                 })()}

@@ -150,21 +150,27 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
       't3_athlean_hollow_body_hold',
       't3_athlean_iso_crunch',
       't3_athlean_serratus_plank',
-      't3_core_lying_pelvic_curl',
-      't3_core_side_plank_lifts',
-      't3_core_marching_plank',
-      't3_core_9090_crunch',
-      't3_core_twisted_t_plank',
-      't3_core_hanging_bat_tuck',
-      't3_core_russian_twists',
-      't3_core_cliffhanger_plank',
-      't3_core_frog_crunch',
-      't3_core_twisting_pistons',
-      't3_core_hanging_scissors',
-      't3_core_statue_liberty',
-      't3_core_alligator_plank',
-      't3_core_janda_crunch',
-      't3_core_sprinter_tuck_plank',
+      't3_sp_heels_heavens',
+      't3_sp_iso_reverse_crunch',
+      't3_sp_flutter_kicks',
+      't3_sp_scissors',
+      't3_sp_hands_back_tucks',
+      't3_sp_hands_free_tucks',
+      't3_sp_vups',
+      't3_sp_x_man_crunch',
+      't3_sp_marching_plank',
+      't3_sp_tuck_plank_opposite',
+      't3_sp_russian_v_tuck_twists',
+      't3_sp_seated_ab_circles',
+      't3_sp_btb_ball_pass',
+      't3_sp_windshield_wipers',
+      't3_sp_standing_ab_twists',
+      't3_sp_9090_crunch',
+      't3_sp_crunch_and_twist',
+      't3_sp_upper_circle_crunch',
+      't3_sp_jackknifes',
+      't3_sp_side_crunches',
+      't3_sp_side_plank_lifts',
       'w_abs_1',
       'w_abs_2',
     ];
@@ -238,13 +244,14 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
   describe('5. Regular Session Incorporation (Lower A, Upper A, Lower B, Upper B)', () => {
     const regularSessionKeys = ['lower_a', 'upper_a', 'lower_b', 'upper_b'] as const;
 
-    it('incorporates distinct 5-stage core finisher routines into all 4 regular sessions without mountain climbers', () => {
+    it('incorporates distinct 5–6 drill core finisher routines into all 4 regular sessions without mountain climbers', () => {
       regularSessionKeys.forEach((key) => {
         const session = WORKOUT_PROGRAM[key];
         expect(session).toBeDefined();
 
         const coreCircuitExercises = session.dailyCoreFinisher || [];
-        expect(coreCircuitExercises).toHaveLength(5);
+        expect(coreCircuitExercises.length).toBeGreaterThanOrEqual(5);
+        expect(coreCircuitExercises.length).toBeLessThanOrEqual(6);
 
         // Every core finisher exercise is T3, 1 target set, 30s rest
         coreCircuitExercises.forEach((ex) => {
@@ -256,10 +263,11 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
       });
 
       // Verify session-specific rotating core themes
-      expect(WORKOUT_PROGRAM.lower_a.dailyCoreFinisher?.[0].name).toContain('Hanging Knee Raise');
-      expect(WORKOUT_PROGRAM.upper_a.dailyCoreFinisher?.[0].name).toContain('Lying Reverse Pelvic Curls');
-      expect(WORKOUT_PROGRAM.lower_b.dailyCoreFinisher?.[0].name).toContain('Hanging Bent-Leg L-Sit');
-      expect(WORKOUT_PROGRAM.upper_b.dailyCoreFinisher?.[0].name).toContain('Hanging Alternating Scissor Raises');
+      // each finisher opens with a lower-ab drill
+      expect(WORKOUT_PROGRAM.lower_a.dailyCoreFinisher?.[0].name).toContain('Heels to the Heavens');
+      expect(WORKOUT_PROGRAM.upper_a.dailyCoreFinisher?.[0].name).toContain('Flutter Kicks');
+      expect(WORKOUT_PROGRAM.lower_b.dailyCoreFinisher?.[0].name).toContain('Hands-Back Tucks');
+      expect(WORKOUT_PROGRAM.upper_b.dailyCoreFinisher?.[0].name).toContain('Hands-Free Tucks');
     });
 
     it('guarantees pull-up bar is in equipmentRequired for lower sessions for hanging core movements', () => {
@@ -279,39 +287,39 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
       render(<App />);
 
       // Lower A is active by default; expand Tier 3 or check presence of ab exercises
-      expect(screen.getByText(/Hanging Knee Raise with Posterior Pelvic Tilt/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Heels to the Heavens/i).length).toBeGreaterThan(0);
       expect(screen.getAllByText(/Daily Core Finisher/i).length).toBeGreaterThan(0);
     });
 
-    it('allows 1-tap completion and toggling of all 6 core sets in Lower A', () => {
+    it('allows 1-tap completion and toggling of all 5 core sets in Lower A', () => {
       render(<App />);
 
-      const markAllBtn = screen.getByRole('button', { name: /Mark All 6 Core Sets Done/i });
+      const markAllBtn = screen.getByRole('button', { name: /Mark All 5 Core Sets Done/i });
       expect(markAllBtn).toBeInTheDocument();
 
-      // 1-tap completes all 6 core finisher sets
+      // 1-tap completes all 5 core finisher sets
       fireEvent.click(markAllBtn);
-      expect(screen.getByRole('button', { name: /All 6 Core Sets Done ✓/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /All 5 Core Sets Done ✓/i })).toBeInTheDocument();
 
       // 1-tap toggle uncompletes them
-      fireEvent.click(screen.getByRole('button', { name: /All 6 Core Sets Done ✓/i }));
-      expect(screen.getByRole('button', { name: /Mark All 6 Core Sets Done/i })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: /All 5 Core Sets Done ✓/i }));
+      expect(screen.getByRole('button', { name: /Mark All 5 Core Sets Done/i })).toBeInTheDocument();
     });
 
     it('clears core finisher logs when resetting the entire workout session', () => {
       render(<App />);
 
-      // Mark all 6 core sets done
-      const markAllBtn = screen.getByRole('button', { name: /Mark All 6 Core Sets Done/i });
+      // Mark all 5 core sets done
+      const markAllBtn = screen.getByRole('button', { name: /Mark All 5 Core Sets Done/i });
       fireEvent.click(markAllBtn);
-      expect(screen.getByRole('button', { name: /All 6 Core Sets Done ✓/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /All 5 Core Sets Done ✓/i })).toBeInTheDocument();
 
       // Reset the session
       const resetBtn = screen.getAllByRole('button', { name: /Reset session logs/i })[0];
       fireEvent.click(resetBtn);
 
       // Core finisher button returns to uncompleted state
-      expect(screen.getByRole('button', { name: /Mark All 6 Core Sets Done/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Mark All 5 Core Sets Done/i })).toBeInTheDocument();
     });
   });
 });

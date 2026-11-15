@@ -9,9 +9,10 @@
 //   GET  /api/bjj   Authorization: Bearer <CRON_SECRET>          (Vercel cron, nightly)
 //
 // Calendar and Sheets use GOOGLE_REFRESH_TOKEN. Google Health needs its own consent
-// (googlehealth.activity_and_fitness.writeonly): GOOGLE_HEALTH_REFRESH_TOKEN, made with scripts/google-health-token.mjs.
+// (googlehealth.activity_and_fitness.writeonly + calendar.events): GOOGLE_HEALTH_REFRESH_TOKEN, made with
+// scripts/google-health-token.mjs.
 // Without it, sessions are still logged here and sent to Google Health once it is connected.
-import { verifyRequest, getAccessToken, ensureSheets, spreadsheetIdFromEnv, sheetsUrl } from './sync.js';
+import { verifyRequest, getAccessToken, ensureSheets, spreadsheetIdFromEnv, sheetsUrl, healthAccessToken, HEALTH_SCOPE, CALENDAR_EVENTS_SCOPE } from './sync.js';
 import { readDays, readWorkouts, writeTab, tokenMatches } from './health.js';
 import { WORKOUT_SHEET, WORKOUT_HEADER, mergeWorkouts, workoutToRow } from './_healthWorkouts.js';
 import {
@@ -19,28 +20,8 @@ import {
   dataPointName, recordedElsewhere, needsHealthWrite, workoutFromSession, bjjToRow, rowToBjj, latestWeight, WRITING,
 } from './_bjj.js';
 
+const CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 const HEALTH_URL = 'https://health.googleapis.com/v4/users/me/dataTypes/exercise/dataPoints';
-
-const HEALTH_SCOPE = 'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.writeonly';
-const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
-
-/**
- * Access token from the Google Health sign-in, narrowed to one scope: Google Health refuses tokens
- * that also carry other scopes (calendar), so each API gets its own.
- */
-async function healthAccessToken(scope = HEALTH_SCOPE) {
-  const refreshToken = process.env.GOOGLE_HEALTH_REFRESH_TOKEN;
-  const clientId = process.env.GOOGLE_HEALTH_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_HEALTH_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
-  if (!refreshToken || !clientId || !clientSecret) return { token: null, error: 'Google Health not connected' };
-  const r = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken, grant_type: 'refresh_token', scope }),
-  });
-  if (!r.ok) return { token: null, error: `Google Health sign-in failed (${r.status}) - run scripts/google-health-token.mjs again` };
-  return { token: (await r.json()).access_token, error: null };
-}
 
 /** Calendars scanned for "BJJ Trained": the main one and the app's "Workouts" calendar. */
 export const BJJ_CALENDARS = (process.env.BJJ_CALENDAR_IDS || 'primary,f9b8d2847324743fc078081d1d421e4660bc06f309ee836ea06f17b20afc86eb@group.calendar.google.com')
@@ -105,8 +86,10 @@ export default async function handler(req, res) {
     if (!accessToken) return res.status(500).json({ error: 'Missing Google OAuth credentials.' });
 
     const timeMin = new Date(now.getTime() - days * 86400000).toISOString();
-    // The Google Health sign-in also carries calendar.readonly (the main token has no calendar access)
-    const [health, calendar] = await Promise.all([healthAccessToken(HEALTH_SCOPE), healthAccessToken(CALENDAR_SCOPE)]);
+    // The Google Health sign-in also carries calendar.events (the main token has no calendar access)
+    let [health, calendar] = await Promise.all([healthAccessToken(HEALTH_SCOPE), healthAccessToken(CALENDAR_EVENTS_SCOPE)]);
+    // a sign-in made before calendar.events was added only carries calendar.readonly, which is enough to read
+    if (!calendar.token) calendar = await healthAccessToken(CALENDAR_READONLY_SCOPE);
     const sessions = sessionsFromEvents(await listBjjEvents(calendar.token || accessToken, timeMin, now.toISOString()), now);
 
     await ensureSheets(accessToken, spreadsheetId, [BJJ_SHEET, WORKOUT_SHEET]);

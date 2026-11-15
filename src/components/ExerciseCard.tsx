@@ -960,9 +960,10 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   const isDailyAbsFinisher = useMemo(() => {
     const checkId = exercise.baseExerciseId || exercise.id;
     return (
-      checkId.startsWith('t3_athlean_') &&
-      checkId !== 't3_athlean_face_pull' &&
-      checkId !== 't3_athlean_face_pull_alternative'
+      checkId.startsWith('t3_sp_') ||
+      (checkId.startsWith('t3_athlean_') &&
+        checkId !== 't3_athlean_face_pull' &&
+        checkId !== 't3_athlean_face_pull_alternative')
     );
   }, [exercise.id, exercise.baseExerciseId]);
 
@@ -2780,7 +2781,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 {isUnilateral && !exercise.side && !isMcGillBig3 && !isDeadHangClubMills ? 'Done (L / R)' : 'Done'}
               </th>
               <th className="py-1 px-1 text-center w-auto leading-tight">
-                <div className="flex items-center justify-center">
+                <div className="flex flex-col min-[400px]:flex-row items-center justify-center">
                   <span>Notes / RPE</span>
                   <button
                     type="button"
@@ -2791,7 +2792,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                     }}
                     title="Define RPE and Rating Terms"
                     aria-label="Define RPE and Rating Terms"
-                    className="p-1 min-h-[32px] min-w-[28px] -my-1 -mr-1 shrink-0 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
+                    className="p-1 min-h-[28px] min-[400px]:min-h-[32px] min-w-[28px] -my-1 min-[400px]:-mr-1 shrink-0 text-slate-400 hover:text-cyan-400 transition-colors inline-flex items-center justify-center cursor-pointer"
                   >
                     <Info className="w-3 h-3 text-slate-400 hover:text-cyan-400" />
                   </button>

@@ -5,7 +5,7 @@
  */
 import React, { useMemo } from 'react';
 import { BONES, buildSkeleton, poseAt, type SegmentId, type Vec } from '../domain/motionRig';
-import { FLOOR_Y, type MotionDef } from '../domain/motionLibrary';
+import { BALL_FILL, BALL_STROKE, FLOOR_Y, type MotionDef } from '../domain/motionLibrary';
 import type { FrontalConfig } from '../domain/frontalView';
 import {
   LIMBS3,
@@ -250,6 +250,13 @@ function propItems(props: Prop3[], pr: Projector, ids: string): Item[] {
       }
       case 'kettlebell': {
         const c = P(p.c);
+        if (p.ball) {
+          items.push({
+            d: c.d + 0.4,
+            node: <circle key={`ball${i}`} data-oblique-prop="ball" cx={c.p[0]} cy={c.p[1]} r={4.2} fill={BALL_FILL} stroke={BALL_STROKE} strokeWidth={0.9} />,
+          });
+          break;
+        }
         const top = pr.cam === 'top';
         items.push({
           d: c.d + 0.4,

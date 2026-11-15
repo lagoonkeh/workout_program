@@ -12,6 +12,7 @@
 import type { DiagramType } from './exerciseVisualsData';
 import type { Skeleton, Vec } from './motionRig';
 import { FLOOR_Y } from './motionLibrary';
+import { SIX_PACK_FRONTAL } from './sixPackMotions';
 
 export const CX = 100;
 
@@ -23,7 +24,7 @@ export type LatJoint = 'shoulder' | 'elbow' | 'hand' | 'hip' | 'knee' | 'ankle' 
 export type FrontalProp =
   /** straight bar held in both hands (or racked: y taken from the neck) */
   | { kind: 'bar'; at: 'hands' | 'neck'; half: number; dy?: number }
-  | { kind: 'kettlebell' | 'dumbbell'; side: 'N' | 'F'; d?: Vec; handoff?: { side: 'N' | 'F'; from: number; to: number } }
+  | { kind: 'kettlebell' | 'dumbbell'; side: 'N' | 'F'; d?: Vec; handoff?: { side: 'N' | 'F'; from: number; to: number }; ball?: boolean }
   | { kind: 'cable'; anchor: Vec; sides: ('N' | 'F')[] }
   | { kind: 'club'; side: 'N' | 'F'; len: number };
 
@@ -71,6 +72,7 @@ const pullBar: FrontalScenery[] = [{ kind: 'bar', y: 0, half: 52 }];
 const plumbFeetWide = { ankle: 13, toe: 17 } as const;
 
 export const FRONTAL: Record<DiagramType, FrontalConfig> = {
+  ...SIX_PACK_FRONTAL,
   squat: {
     view: 'front', label: 'Front',
     lat: { hand: 25, elbow: 28, knee: [10, 16], ...plumbFeetWide },
