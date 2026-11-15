@@ -91,7 +91,8 @@ export function WarmupSection({ activeFocusWarmupId, activeSession, collapsedWar
                         <span>WARM-UP</span>
                       </span>
 
-                      <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700/60 uppercase font-mono tracking-wider">
+                      {/* Equipment Tag (sr-only to keep screen uncluttered while accessible) */}
+                      <span className="sr-only">
                         {drill.equipment.replaceAll('_', ' ')}
                       </span>
 
