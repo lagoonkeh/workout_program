@@ -39,6 +39,7 @@ import { getExerciseVariations, ExerciseVariation, saveCustomVariation, WorkoutC
 import { ExerciseVariationModal } from './ExerciseVariationModal';
 import { voiceAnnouncer } from '../audio/voiceAnnouncer';
 import { TempoMetronome, MetronomeSnapshot } from '../timer/tempoMetronome';
+import { useRestTimer } from '../hooks/useRestTimer';
 import { audioSynthesizer } from '../audio/audioSynthesizer';
 import { PlateLoadStrip, platesPerSideText } from './PlateLoadStrip';
 import type { RatingCategoryTab } from './RatingDefinitionsModal';
@@ -701,6 +702,11 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   );
   // Tempo / hold timers only on exercises prescribed by time; rep-based lifts keep just the rest timer
   const needsTimer = useMemo(() => isTimedPrescription(exercise.targetReps, effectiveTempo), [exercise.targetReps, effectiveTempo]);
+
+  // Synchronized rest timer state connected to global restTimerSingleton
+  const { snapshot: restSnapshot, pause: pauseRest, resume: resumeRest } = useRestTimer();
+  const isRestRunning = restSnapshot.state === 'RUNNING';
+  const isRestPaused = restSnapshot.state === 'PAUSED';
 
   const handleStartInlineTempo = useCallback(
     (targetSetIdx?: number) => {
@@ -1708,15 +1714,44 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
           </div>
           )}
 
-          {/* Quick-Launch Rest Timer */}
+          {/* Quick-Launch Rest Timer (Synced with App Rest Timer) */}
           <button
             type="button"
-            onClick={() => onQuickStartRest(exercise.restSeconds)}
-            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-[38px] rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium transition-colors cursor-pointer"
-            title={`Start ${exercise.restSeconds}s rest timer`}
+            data-testid={`quick-start-rest-${exercise.id}`}
+            onClick={() => {
+              if (isRestRunning) {
+                pauseRest();
+              } else if (isRestPaused) {
+                resumeRest();
+              } else {
+                onQuickStartRest(exercise.restSeconds);
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-[38px] rounded-xl border text-xs font-mono font-medium transition-all cursor-pointer active:scale-95 ${
+              isRestRunning
+                ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-md shadow-emerald-950/40 animate-pulse'
+                : isRestPaused
+                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                : 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+            }`}
+            title={
+              isRestRunning
+                ? `Resting: ${formatMMSS(restSnapshot.remainingSeconds)} remaining (click to pause)`
+                : isRestPaused
+                ? `Rest paused at ${formatMMSS(restSnapshot.remainingSeconds)} (click to resume)`
+                : `Start ${exercise.restSeconds}s rest timer`
+            }
           >
-            <Clock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Rest: <strong className="text-white">{exercise.restSeconds}s ({formatMMSS(exercise.restSeconds)})</strong></span>
+            <Clock className={`w-3.5 h-3.5 ${isRestRunning ? 'text-emerald-300 animate-spin' : 'text-emerald-400'}`} />
+            <span>
+              {isRestRunning ? (
+                <>Rest: <strong className="text-white font-bold">{formatMMSS(restSnapshot.remainingSeconds)}</strong></>
+              ) : isRestPaused ? (
+                <>Paused: <strong className="text-amber-200 font-bold">{formatMMSS(restSnapshot.remainingSeconds)}</strong></>
+              ) : (
+                <>Rest: <strong className="text-white">{exercise.restSeconds}s ({formatMMSS(exercise.restSeconds)})</strong></>
+              )}
+            </span>
           </button>
         </div>
       </div>

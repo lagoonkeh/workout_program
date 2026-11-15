@@ -968,6 +968,40 @@ export function WorkoutAppMain() {
     return firstUncompleted?.id ?? null;
   }, [sessionExercises, getExerciseLogs]);
 
+  // Exercise card currently being worked on (synced with the app rest timer)
+  const activeWorkingExercise = useMemo(() => {
+    if (activeFocusExerciseId) {
+      const found = sessionExercises.find((e) => e.id === activeFocusExerciseId);
+      if (found) return found;
+    }
+    if (activeSession.dailyCoreFinisher && activeSession.dailyCoreFinisher.length > 0) {
+      const firstUncompletedCore = activeSession.dailyCoreFinisher.find((ex) => {
+        const logs = getExerciseLogs(ex);
+        return logs.some((l) => !l.isCompleted);
+      });
+      if (firstUncompletedCore) return firstUncompletedCore;
+    }
+    return sessionExercises[0] || null;
+  }, [sessionExercises, activeFocusExerciseId, activeSession.dailyCoreFinisher, getExerciseLogs]);
+
+  const currentWorkingRestContext: RestTargetContext | null = useMemo(() => {
+    if (!activeWorkingExercise) return null;
+    const logs = getExerciseLogs(activeWorkingExercise);
+    const completedCount = logs.filter((l) => l.isCompleted).length;
+    const firstUnfinishedIdx = logs.findIndex((l) => !l.isCompleted);
+    const nextSetNumber = firstUnfinishedIdx >= 0 ? firstUnfinishedIdx + 1 : 1;
+    return {
+      exerciseId: activeWorkingExercise.id,
+      exerciseName: activeWorkingExercise.name,
+      completedSetNumber: completedCount > 0 ? completedCount : undefined,
+      totalSets: logs.length || activeWorkingExercise.targetSets,
+      nextSetNumber,
+      isLastSet: firstUnfinishedIdx === logs.length - 1,
+    };
+  }, [activeWorkingExercise, getExerciseLogs]);
+
+  const currentExerciseRestSeconds = activeWorkingExercise?.restSeconds || 60;
+
   const activeFocusWarmupId = useMemo(() => {
     const firstUncompleted = activeSession.warmupSequence?.find((w) => !completedWarmups[w.id]);
     return firstUncompleted?.id ?? null;
@@ -1166,11 +1200,12 @@ export function WorkoutAppMain() {
         setCurrentView={setCurrentView}
       />
 
-      {/* Docked Rest Timer Widget (Always Available) */}
+      {/* Docked Rest Timer Widget (Synced to Active Exercise Card) */}
       <RestTimerWidget
         variant="docked"
+        initialDuration={currentExerciseRestSeconds}
         activePresetSeconds={activeRestSeconds}
-        activeRestContext={activeRestContext}
+        activeRestContext={activeRestContext || currentWorkingRestContext}
         onClearActivePreset={handleClearActivePreset}
         onStartNextSet={handleStartNextSet}
       />

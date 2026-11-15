@@ -104,6 +104,16 @@ export const RestTimerWidget: React.FC<RestTimerWidgetProps> = ({
     }
   }, [activeRestContext]);
 
+  // Sync idle timer duration and context with the active exercise card's workout timer
+  useEffect(() => {
+    if (countSnapshot.state === 'IDLE' && initialDuration > 0) {
+      resetCount(initialDuration);
+      if (activeRestContext) {
+        setCurrentRestContext(activeRestContext);
+      }
+    }
+  }, [initialDuration, countSnapshot.state, resetCount, activeRestContext]);
+
   // Cleanup wake lock and document title on unmount
   useEffect(() => {
     return () => {
@@ -960,6 +970,41 @@ export const RestTimerWidget: React.FC<RestTimerWidgetProps> = ({
 
             {/* Presets Grid & Preset Creator */}
             <div className="flex flex-col gap-2.5">
+              {/* Synced Current Exercise Card Timer */}
+              {currentRestContext?.exerciseName && !currentRestContext.exerciseName.includes('TNT') && (
+                <button
+                  type="button"
+                  data-testid="sync-current-exercise-timer-btn"
+                  onClick={() => {
+                    spokenRestPointsRef.current.clear();
+                    startCount(initialDuration);
+                    if (voiceEnabled) {
+                      voiceAnnouncer.announceRestStart(initialDuration, currentRestContext || undefined);
+                    }
+                  }}
+                  className="p-3 rounded-xl bg-gradient-to-r from-cyan-950/70 via-slate-900 to-cyan-950/50 border border-cyan-500/40 hover:border-cyan-400 text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer group shadow-md"
+                >
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        ⚡ Active Exercise Rest
+                      </span>
+                      <span className="text-xs font-bold text-white truncate">
+                        {currentRestContext.exerciseName}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 truncate">
+                      {currentRestContext.nextSetNumber
+                        ? `Rest interval before Set ${currentRestContext.nextSetNumber}`
+                        : `Prescribed recovery timer for ${currentRestContext.exerciseName}`}
+                    </p>
+                  </div>
+                  <span className="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-mono text-xs font-black shadow-sm group-hover:scale-105 transition-transform shrink-0">
+                    {initialDuration}s ({formatCountdown(initialDuration)})
+                  </span>
+                </button>
+              )}
+
               {/* 1-Tap TNT Isometric Analgesia Protocol Banner */}
               <div
                 data-testid="tnt-analgesia-protocol-banner"

@@ -298,4 +298,37 @@ describe('RestTimerWidget Component', () => {
 
     vi.useRealTimers();
   });
+
+  it('syncs idle timer duration and displays Active Exercise Rest button for the working card', () => {
+    render(
+      <RestTimerWidget
+        variant="docked"
+        initialDuration={180}
+        activeRestContext={{
+          exerciseId: 't1_bb_squat',
+          exerciseName: 'Barbell Back Squat',
+          completedSetNumber: 1,
+          totalSets: 3,
+          nextSetNumber: 2,
+        }}
+      />
+    );
+
+    // Idle pill displays synced 180s duration (03:00)
+    expect(screen.getByText('03:00')).toBeInTheDocument();
+
+    // Expand docked widget
+    const expandBtn = screen.getByRole('button', { name: /Expand Rest Timer/i });
+    fireEvent.click(expandBtn);
+
+    // Active Exercise Rest button is rendered with exercise name and duration
+    const syncBtn = screen.getByTestId('sync-current-exercise-timer-btn');
+    expect(syncBtn).toBeInTheDocument();
+    expect(screen.getByText('Barbell Back Squat')).toBeInTheDocument();
+    expect(screen.getByText('180s (03:00)')).toBeInTheDocument();
+
+    // Clicking Active Exercise Rest starts the synced 180s timer
+    fireEvent.click(syncBtn);
+    expect(screen.getByText(/Resting/i)).toBeInTheDocument();
+  });
 });
