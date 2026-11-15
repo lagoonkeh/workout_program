@@ -1347,11 +1347,8 @@ describe('ExerciseCard Component', () => {
       expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { weightLbs: 315 });
       expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 315 });
 
-      // Also header button
-      const thBtn = screen.getByTestId(`copy-set1-weight-th-${exercise.id}`);
-      expect(thBtn).toBeInTheDocument();
-      fireEvent.click(thBtn);
-      expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 315 });
+      // Header button is removed from Set, goal reps, lbs header
+      expect(screen.queryByTestId(`copy-set1-weight-th-${exercise.id}`)).not.toBeInTheDocument();
     });
 
     it('populates Set 1 through 5 using defaultWeightLbs when Set 1 is 0/empty', () => {
@@ -1387,7 +1384,7 @@ describe('ExerciseCard Component', () => {
       expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 4, { weightLbs: 185 });
     });
 
-    it('copies Set 1 reps down to the sets not done yet, from the Set 1 button and the header', () => {
+    it('copies Set 1 reps down to the sets not done yet, from the Set 1 button and the action bar', () => {
       const exercise = { ...mockExercise, targetSets: 4 };
       const updateLogMock = vi.fn();
       const mockLogs: SetLogRecord[] = [
@@ -1416,8 +1413,14 @@ describe('ExerciseCard Component', () => {
       expect(updateLogMock).not.toHaveBeenCalledWith(exercise.id, 0, expect.objectContaining({ repsAchieved: expect.any(Number) }));
 
       updateLogMock.mockClear();
-      fireEvent.click(screen.getByTestId(`copy-set1-reps-th-${exercise.id}`));
+      const repsActionBtn = screen.getByTestId(`copy-set1-reps-action-${exercise.id}`);
+      expect(repsActionBtn).toBeInTheDocument();
+      expect(repsActionBtn).toHaveTextContent(/Copied Reps!|Copy Set 1 Reps Down/i);
+      fireEvent.click(repsActionBtn);
       expect(updateLogMock).toHaveBeenCalledWith(exercise.id, 3, { repsAchieved: 7 });
+
+      // Header button is removed from table header
+      expect(screen.queryByTestId(`copy-set1-reps-th-${exercise.id}`)).not.toBeInTheDocument();
     });
 
     it('uses Set 1 goal reps when Set 1 has no reps logged yet', () => {

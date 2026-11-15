@@ -2697,42 +2697,78 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
 
       {/* Interactive Set Logger Header / Action Toolbar */}
       {logs.length > 1 && !isMcGillBig3 && !isDeadHangClubMills && (
-        <div className="flex items-center justify-between pb-1.5 px-0.5">
-          <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 px-0.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400">
               Sets ({logs.filter((s) => s.isCompleted).length}/{logs.length})
             </span>
             {copyWeightFlash && (
               <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full animate-fadeIn">
                 <Check className="w-2.5 h-2.5 stroke-[3]" />
-                <span>Copied to Sets 2–{logs.length}!</span>
+                <span>Copied weight to Sets 2–{logs.length}!</span>
+              </span>
+            )}
+            {copyRepsFlash && (
+              <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full animate-fadeIn">
+                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                <span>Copied reps down!</span>
               </span>
             )}
           </div>
-          <button
-            type="button"
-            data-testid={`copy-set1-weight-action-${exercise.id}`}
-            onClick={handleCopySet1WeightToAll}
-            title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets`}
-            aria-label="Replicate set 1 load down to all sets"
-            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all cursor-pointer active:scale-95 ${
-              copyWeightFlash
-                ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'
-                : 'bg-slate-900 hover:bg-emerald-950/70 text-slate-300 hover:text-emerald-300 border-slate-700 hover:border-emerald-500/40'
-            }`}
-          >
-            {copyWeightFlash ? (
-              <>
-                <Check className="w-3 h-3 stroke-[3]" />
-                <span>Copied to Sets 2–{logs.length}!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3 h-3 text-emerald-400" />
-                <span>Copy Set 1 Weight to Sets 2–{logs.length}</span>
-              </>
-            )}
-          </button>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Copy Set 1 Weight to Sets 2-X */}
+            <button
+              type="button"
+              data-testid={`copy-set1-weight-action-${exercise.id}`}
+              onClick={handleCopySet1WeightToAll}
+              title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets`}
+              aria-label="Replicate set 1 load down to all sets"
+              className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 min-h-[32px] rounded-lg border transition-all cursor-pointer active:scale-95 ${
+                copyWeightFlash
+                  ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'
+                  : 'bg-slate-900 hover:bg-emerald-950/70 text-slate-300 hover:text-emerald-300 border-slate-700 hover:border-emerald-500/40'
+              }`}
+            >
+              {copyWeightFlash ? (
+                <>
+                  <Check className="w-3 h-3 stroke-[3]" />
+                  <span>Copied Weight!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3 text-emerald-400" />
+                  <span>Copy Set 1 Weight to Sets 2–{logs.length}</span>
+                </>
+              )}
+            </button>
+
+            {/* Copy Set 1 Reps Down */}
+            <button
+              type="button"
+              data-testid={`copy-set1-reps-action-${exercise.id}`}
+              onClick={handleCopySet1RepsToAll}
+              title={`Copy Set 1 reps down to the sets not done yet (Sets 2–${logs.length})`}
+              aria-label="Copy set 1 reps down to all sets"
+              className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 min-h-[32px] rounded-lg border transition-all cursor-pointer active:scale-95 ${
+                copyRepsFlash
+                  ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-sm'
+                  : 'bg-slate-900 hover:bg-emerald-950/70 text-slate-300 hover:text-emerald-300 border-slate-700 hover:border-emerald-500/40'
+              }`}
+            >
+              {copyRepsFlash ? (
+                <>
+                  <Check className="w-3 h-3 stroke-[3]" />
+                  <span>Copied Reps!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3 text-emerald-400" />
+                  <span>Copy Set 1 Reps Down</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
@@ -2754,34 +2790,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                 </div>
               </th>
               <th className="py-1 px-0.5 text-center w-14 sm:w-16 whitespace-nowrap">
-                {isMcGillBig3 || isDeadHangClubMills ? (
-                  'Type'
-                ) : (
-                  <div className="flex items-center justify-center gap-1">
-                    <span>LBS</span>
-                    {logs.length > 1 && (
-                      <button
-                        type="button"
-                        data-testid={`copy-set1-weight-th-${exercise.id}`}
-                        onClick={handleCopySet1WeightToAll}
-                        title={`Copy Set 1 weight (${logs[0]?.weightLbs || exercise.defaultWeightLbs || 0} lbs) down to all sets`}
-                        aria-label="Replicate set 1 load down to all sets"
-                        className={`text-[9px] px-1 py-0.5 rounded border transition-colors flex items-center gap-0.5 cursor-pointer font-sans normal-case tracking-normal active:scale-95 ${
-                          copyWeightFlash
-                            ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
-                            : 'bg-slate-800 hover:bg-emerald-950/70 border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-300'
-                        }`}
-                      >
-                        {copyWeightFlash ? (
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
-                        ) : (
-                          <Copy className="w-2.5 h-2.5" />
-                        )}
-                        <span>↓ all</span>
-                      </button>
-                    )}
-                  </div>
-                )}
+                {isMcGillBig3 || isDeadHangClubMills ? 'Type' : 'LBS'}
               </th>
               <th className="py-1 px-0.5 text-center w-11 sm:w-12">
                 <span className="sr-only">Reps Done</span>
@@ -2789,23 +2798,6 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                   <span className="tracking-wide">{isMcGillBig3 || isDeadHangClubMills ? 'Drills' : 'Reps'}</span>
                   <span className="text-[8px] sm:text-[9px] text-slate-400 font-medium -mt-0.5">Done</span>
                 </div>
-                {!isMcGillBig3 && !isDeadHangClubMills && logs.length > 1 && (
-                  <button
-                    type="button"
-                    data-testid={`copy-set1-reps-th-${exercise.id}`}
-                    onClick={handleCopySet1RepsToAll}
-                    title="Copy Set 1 reps down to the sets not done yet"
-                    aria-label="Copy set 1 reps down to all sets"
-                    className={`mx-auto mt-0.5 text-[9px] px-1 py-0.5 rounded border transition-colors flex items-center gap-0.5 cursor-pointer font-sans normal-case tracking-normal active:scale-95 ${
-                      copyRepsFlash
-                        ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
-                        : 'bg-slate-800 hover:bg-emerald-950/70 border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-300'
-                    }`}
-                  >
-                    {copyRepsFlash ? <Check className="w-2.5 h-2.5 stroke-[3]" /> : <Copy className="w-2.5 h-2.5" />}
-                    <span aria-hidden="true">↓</span>
-                  </button>
-                )}
               </th>
               <th
                 className={`py-1 px-0.5 text-center whitespace-nowrap ${
