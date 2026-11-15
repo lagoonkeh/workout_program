@@ -29,7 +29,7 @@ export const STORAGE_KEY_LOCAL_MOBILITY_TIMESTAMP = 'workout_app_local_mobility_
 type FirestoreModule = typeof import('firebase/firestore');
 
 let firestoreModulePromise: Promise<FirestoreModule> | null = null;
-let db: Firestore | null = null;
+let dbSetup: Promise<Firestore> | null = null;
 let persistenceEnabled = false;
 
 export const loadFirestoreModule = (): Promise<FirestoreModule> => {
@@ -47,24 +47,28 @@ export const getFirebaseDb = async (): Promise<Firestore | null> => {
     if (!auth || !auth.app) return null;
     await auth.authStateReady().catch(() => {});
     if (!auth.currentUser) return null;
-    if (!db) {
-      const { getFirestore, enableIndexedDbPersistence } = await loadFirestoreModule();
-      db = getFirestore(auth.app);
-      if (typeof window !== 'undefined' && !persistenceEnabled) {
-        enableIndexedDbPersistence(db)
-          .then(() => {
-            persistenceEnabled = true;
-          })
-          .catch((err) => {
-            if (err.code === 'failed-precondition') {
-              // Multiple tabs open, persistence can only be enabled in one tab at a time.
-            } else if (err.code === 'unimplemented') {
-              // Browser does not support IndexedDb persistence.
-            }
-          });
-      }
+    // Callers often ask at the same moment on startup: share one setup, so offline persistence is
+    // enabled exactly once, before anything uses the database (enabling it later throws)
+    if (!dbSetup) {
+      const app = auth.app;
+      dbSetup = loadFirestoreModule().then(({ getFirestore, enableIndexedDbPersistence }) => {
+        const instance = getFirestore(app);
+        if (typeof window !== 'undefined' && !persistenceEnabled) {
+          enableIndexedDbPersistence(instance)
+            .then(() => {
+              persistenceEnabled = true;
+            })
+            .catch(() => {
+              // failed-precondition: another tab has persistence; unimplemented: no IndexedDB. Sync still works online.
+            });
+        }
+        return instance;
+      });
+      dbSetup.catch(() => {
+        dbSetup = null; // let the next call try again
+      });
     }
-    return db;
+    return await dbSetup;
   } catch (err) {
     console.error('[FirestoreSync] Failed to initialize Firestore:', err);
     return null;
