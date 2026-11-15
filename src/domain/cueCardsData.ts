@@ -1527,37 +1527,498 @@ export const CUE_CARDS: CueCard[] = [
     ]
   },
   {
-    id: 'cue_athlean_cross_mountain_climber',
-    exerciseId: 't3_athlean_cross_mountain_climber',
-    exerciseName: 'Cross-Body Mountain Climbers',
-    title: 'Cross-Body Mountain Climbers',
+    id: 'cue_core_lying_pelvic_curl',
+    exerciseId: 't3_core_lying_pelvic_curl',
+    exerciseName: 'Lying Reverse Pelvic Curls on Floor',
+    title: 'Lying Reverse Pelvic Curls on Floor',
     tier: 'T3',
-    tempo: '2011',
-    prescribedTempo: '2011 (Controlled Cross-Body Drive)',
-    primaryMuscles: ['External Obliques', 'Internal Obliques', 'Serratus Anterior', 'Core Stabilizers'],
+    tempo: '2112',
+    prescribedTempo: '2112 (2s Lower / 1s Bottom / 1s Curl / 2s Peak Elevation)',
+    primaryMuscles: ['Lower Rectus Abdominis', 'Transversus Abdominis', 'Iliopsoas'],
     equipment: 'Flat Floor & Bodyweight',
-    setup: 'Push-up plank position with hands under shoulders, body in a straight line from head to heels.',
+    setup: 'Lie flat on floor with hands braced at your sides or holding rack uprights, knees bent at 90 degrees.',
     setupInstructions: [
-      'Phase 1 — Push-Up Plank Base: Start in a high push-up plank. Hands directly beneath shoulders, fingers spread, core braced rigidly.',
-      'Phase 2 — Protracted Scapulae: Push the floor away through your palms to protract your shoulder blades and recruit the serratus anterior.',
-      'Phase 3 — Cross-Body Knee Drive: Drive your right knee diagonally across your chest toward your left elbow.',
-      'Phase 4 — 1-Second Rotational Squeeze: When the knee nears the opposite elbow, pause for a deliberate 1-second contraction to squeeze the obliques.',
-      'Phase 5 — Controlled Return: Step the right foot back smoothly to the plank position over 2 seconds.',
-      'Phase 6 — Alternate Sides: Drive the left knee across to the right elbow. Continue alternating with deliberate cadence, not frantic cardio running.'
+      'Phase 1 — Supine Setup: Lie flat on back with lumbar spine pressed to floor, hands gripping floor or rack base for stability.',
+      'Phase 2 — 90-Degree Knee Bend: Bring knees up over hips with 90-degree bend at knees and hips.',
+      'Phase 3 — Pelvic Elevation: Initiate movement by curling pelvis upward toward your ribcage, lifting tailbone 2–3 inches off floor.',
+      'Phase 4 — 2-Second Isometric Squeeze: Hold peak contraction at top, focusing entirely on lower abdominal fibers.',
+      'Phase 5 — Controlled Lowering: Lower pelvis slowly over 2 seconds until lower back contacts floor; do not swing legs.'
     ],
     creatorCues: [
       {
         creator: 'Form Cue',
-        quote: 'Do not bounce through these like high-school cardio drills. Slow it down! Drive the knee across, squeeze your obliques hard against the opposite elbow for a full second, then reset.',
-        biomechanicalRationale: 'Top-down rotational vector that trains the oblique force-couple against rotational torque on a stable pelvic platform.'
+        quote: 'Do not swing your legs or kick with your calves. Move the pelvis, not just the knees. Show your tailbone to the ceiling.',
+        biomechanicalRationale: 'Curling the pelvis upward isolates lower rectus fibers without psoas hyperextension shear.'
       }
     ],
     commonFaults: [
-      'Rushing reps like a sprint without pausing at peak oblique contraction.',
-      'Allowing hips to pike high into the air or sag toward the floor.'
+      'Using leg swinging momentum instead of curling the pelvis.',
+      'Allowing lower back to hyperextend into an anterior pelvic tilt on the descent.'
     ],
     rehabRegressions: [
-      'Place hands elevated on a bench or sturdy chair to reduce shoulder and core load.'
+      'Reduce range of motion to a small pelvic tilt flatten against the floor.'
+    ]
+  },
+  {
+    id: 'cue_core_side_plank_lifts',
+    exerciseId: 't3_core_side_plank_lifts',
+    exerciseName: 'Side Plank Hip Lifts (Lateral Core & Obliques)',
+    title: 'Side Plank Hip Lifts',
+    tier: 'T3',
+    tempo: '2012',
+    prescribedTempo: '2012 (2s Lower / Explode Lift / 2s Peak Contraction)',
+    primaryMuscles: ['Internal Obliques', 'External Obliques', 'Quadratus Lumborum'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Side elbow plank position with feet stacked or staggered, body in a rigid straight line.',
+    setupInstructions: [
+      'Phase 1 — Lateral Alignment: Elbow directly beneath shoulder, forearm flat, feet stacked or top foot slightly forward.',
+      'Phase 2 — Controlled Dip: Lower bottom hip toward the floor over 2 seconds, lightly grazing mat.',
+      'Phase 3 — High Arc Drive: Drive bottom hip upward above neutral in a high lateral arc.',
+      'Phase 4 — 2-Second Peak Squeeze: Hold top apex for 2 full seconds to lock in oblique contraction.',
+      'Phase 5 — Repeat: Complete all reps with rigid cervical and thoracic alignment before switching sides.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Lift from the bottom waistline, not by twisting your chest. Keep your shoulders and hips perpendicular to the ground.',
+        biomechanicalRationale: 'Dynamic coronal plane loading conditions the quadratus lumborum and oblique lateral sling.'
+      }
+    ],
+    commonFaults: [
+      'Torso twisting toward the floor during the lift.',
+      'Dropping head forward and breaking cervical alignment.'
+    ],
+    rehabRegressions: [
+      'Bend knees to 90 degrees and perform side plank hip lifts pivoting from the knees.'
+    ]
+  },
+  {
+    id: 'cue_core_marching_plank',
+    exerciseId: 't3_core_marching_plank',
+    exerciseName: 'Marching Forearm Plank',
+    title: 'Marching Forearm Plank',
+    tier: 'T3',
+    tempo: '2011',
+    prescribedTempo: 'Controlled Cadence (Alternating Foot March)',
+    primaryMuscles: ['Transversus Abdominis', 'Rectus Abdominis', 'Gluteus Maximus'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Standard forearm plank position, elbows under shoulders, body rigid.',
+    setupInstructions: [
+      'Phase 1 — Base Setup: Start in forearm plank, elbows directly below shoulders, feet hip-width apart.',
+      'Phase 2 — Intra-Abdominal Brace: Exhale sharply through mouth, clamp ribs downward, engage glutes.',
+      'Phase 3 — Single-Leg March: Lift one foot 2–3 inches off floor without any rotation or shift in pelvis.',
+      'Phase 4 — 1-Second Glute & Core Lock: Hold elevated foot for 1 second, maintaining level hips.',
+      'Phase 5 — Alternating Step: Lower foot softly and immediately march the opposite foot with zero hip sway.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Imagine a hot cup of coffee balanced on your lower back. If your hips wobble even half an inch, you spill it. Keep the pelvis locked.',
+        biomechanicalRationale: 'Removing a single point of support creates rotational torque that forces the transverse abdominis to fire isometrically.'
+      }
+    ],
+    commonFaults: [
+      'Hips swaying side-to-side with each step.',
+      'Piking hips upward into a pike position.'
+    ],
+    rehabRegressions: [
+      'Perform marching plank from hands elevated on a bench or sturdy platform.'
+    ]
+  },
+  {
+    id: 'cue_core_9090_crunch',
+    exerciseId: 't3_core_9090_crunch',
+    exerciseName: '90/90 Deadbug Torso Curl-Up',
+    title: '90/90 Deadbug Torso Curl-Up',
+    tier: 'T3',
+    tempo: '2112',
+    prescribedTempo: '2112 (2s Lower / 1s Bottom / 1s Curl / 2s Peak Squeeze)',
+    primaryMuscles: ['Upper Rectus Abdominis', 'Transversus Abdominis'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Lie supine on back, thighs vertical at 90 degrees, knees bent at 90 degrees, hands lightly touching temples.',
+    setupInstructions: [
+      'Phase 1 — 90/90 Leg Setup: Position hips and knees locked strictly at 90-degree angles.',
+      'Phase 2 — Lumbar Rooting: Push lower back firmly into the floor so there is zero gap under lumbar spine.',
+      'Phase 3 — Thoracic Curl: Curl head and shoulder blades 30 degrees off floor toward thighs.',
+      'Phase 4 — 2-Second Exhalation Squeeze: Exhale all air forcefully at top peak, squeezing upper abs intensely.',
+      'Phase 5 — Controlled Descent: Lower shoulder blades over 2 seconds while keeping thighs stationary at 90 degrees.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Lock your knees and hips at 90 degrees and do not let them drift. The legs stay frozen; only the upper spine curls.',
+        biomechanicalRationale: '90-degree hip flexion slackens the psoas, forcing the upper rectus abdominis to generate 100% of the curling force.'
+      }
+    ],
+    commonFaults: [
+      'Pulling on the head or neck with hands.',
+      'Kicking feet up or allowing knees to tuck into chest.'
+    ],
+    rehabRegressions: [
+      'Keep feet flat on floor with knees bent instead of suspended at 90 degrees.'
+    ]
+  },
+  {
+    id: 'cue_core_twisted_t_plank',
+    exerciseId: 't3_core_twisted_t_plank',
+    exerciseName: 'Twisted T-Plank Rotational Holds',
+    title: 'Twisted T-Plank Rotational Holds',
+    tier: 'T3',
+    tempo: '0010',
+    prescribedTempo: 'Isometric Hold (3s Hold / Side)',
+    primaryMuscles: ['Transversus Abdominis', 'Internal Obliques', 'Serratus Anterior'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'High push-up plank position with feet shoulder-width apart for rotational stability.',
+    setupInstructions: [
+      'Phase 1 — High Plank Setup: Hands beneath shoulders, body in a rigid straight line, feet slightly wider than normal.',
+      'Phase 2 — Rotational Transition: Rotate torso and hips to the right, transferring weight onto left arm.',
+      'Phase 3 — T-Position Reach: Reach right arm straight toward the ceiling, creating a continuous vertical line through both arms.',
+      'Phase 4 — 3-Second Oblique Lock: Hold T-plank for 3 seconds, driving bottom hip up away from floor.',
+      'Phase 5 — Smooth Center Reset: Return right hand to floor with strict control, pause 1 second, then rotate to left.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Do not let your bottom hip drop toward the floor. Drive through the supporting palm and push your hips high.',
+        biomechanicalRationale: 'Dynamic transition across rotational axes recruits the spiral fascial line and stabilizes the scapular platform.'
+      }
+    ],
+    commonFaults: [
+      'Allowing supporting shoulder to collapse or shrug toward ear.',
+      'Rotating hips without rotating chest, causing spinal twisting.'
+    ],
+    rehabRegressions: [
+      'Perform rotational reach from knees in a modified push-up base.'
+    ]
+  },
+  {
+    id: 'cue_core_hanging_bat_tuck',
+    exerciseId: 't3_core_hanging_bat_tuck',
+    exerciseName: 'Hanging Bent-Leg L-Sit Compression',
+    title: 'Hanging Bent-Leg L-Sit Compression',
+    tier: 'T3',
+    tempo: '0010',
+    prescribedTempo: 'Isometric Hold (20–30s Continuous)',
+    primaryMuscles: ['Lower Rectus Abdominis', 'Iliopsoas', 'Forearms'],
+    equipment: 'Pull-Up Bar',
+    setup: 'Active hang from pull-up bar, shoulder-width overhand grip, depressed shoulder blades.',
+    setupInstructions: [
+      'Phase 1 — Active Hang: Grip bar firmly, pull shoulder blades down away from ears to protect rotator cuff.',
+      'Phase 2 — Tuck Compression: Pull knees up until thighs are strictly horizontal (parallel to floor) or higher.',
+      'Phase 3 — Posterior Pelvic Tuck: Curl tailbone forward to ensure abdominal wall is bearing the load, not just psoas.',
+      'Phase 4 — Anti-Swing Hold: Lock position completely still, breathing steadily through nose for 20–30 seconds.',
+      'Phase 5 — Controlled Lowering: Lower knees slowly under control without dropping or swinging.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Do not let your legs hang loosely. Clamp your knees and ankles together and pull your belt buckle toward your chest.',
+        biomechanicalRationale: 'Hanging isometric compression decompresses lumbar vertebrae under traction while strengthening the anterior core wall.'
+      }
+    ],
+    commonFaults: [
+      'Passive hanging with relaxed shoulders.',
+      'Swinging torso back and forth.'
+    ],
+    rehabRegressions: [
+      'Perform tuck L-sit on parallel dip bars or floor push-up handles.'
+    ]
+  },
+  {
+    id: 'cue_core_russian_twists',
+    exerciseId: 't3_core_russian_twists',
+    exerciseName: 'Controlled Russian Twists',
+    title: 'Controlled Russian Twists',
+    tier: 'T3',
+    tempo: '2011',
+    prescribedTempo: '2011 (Controlled 2s Rotation / 1s Peak Hold)',
+    primaryMuscles: ['Internal Obliques', 'External Obliques', 'Rectus Abdominis'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Seated on floor, knees bent, torso reclined 45 degrees, chest proud, heels lightly hovering or grounded.',
+    setupInstructions: [
+      'Phase 1 — 45-Degree Torso Setup: Sit on floor, lean torso back 45 degrees with proud chest and neutral spine.',
+      'Phase 2 — Core Engagement: Pull belly button toward spine and elevate feet 2–3 inches off floor.',
+      'Phase 3 — Thoracic Rotation: Rotate shoulders and ribcage 45 degrees to the right over 2 seconds.',
+      'Phase 4 — 1-Second Isometric Stop: Pause at end-range rotation without touching floor; squeeze right oblique.',
+      'Phase 5 — Controlled Reverse: Rotate smoothly through center to the left side with rhythmic cadence.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Do not just wave your arms back and forth. Turn your ribcage! Your sternum should point where your hands point.',
+        biomechanicalRationale: 'True rotational oblique strength requires active thoracic rotation while the lumbar spine remains stabilized in neutral.'
+      }
+    ],
+    commonFaults: [
+      'Moving only the arms while the torso stays stationary.',
+      'Rounding the lower back into lumbar kyphosis.'
+    ],
+    rehabRegressions: [
+      'Keep heels resting on the floor for extra stability.'
+    ]
+  },
+  {
+    id: 'cue_core_cliffhanger_plank',
+    exerciseId: 't3_core_cliffhanger_plank',
+    exerciseName: 'Cliffhanger Long-Lever Plank',
+    title: 'Cliffhanger Long-Lever Plank',
+    tier: 'T3',
+    tempo: '0010',
+    prescribedTempo: 'Isometric Hold (25–35s)',
+    primaryMuscles: ['Rectus Abdominis', 'Transversus Abdominis', 'Serratus Anterior'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Forearm plank position with elbows positioned 4–6 inches in front of shoulders.',
+    setupInstructions: [
+      'Phase 1 — Standard Plank Base: Begin in a standard forearm plank with elbows under shoulders.',
+      'Phase 2 — Elbow Walkout: Walk elbows forward 4–6 inches so they are positioned well in front of shoulders.',
+      'Phase 3 — Extended Lever Lock: Squeeze glutes aggressively and tuck pelvis into posterior pelvic tilt.',
+      'Phase 4 — 360-Degree Compression: Pull ribs down toward pelvis, eliminate any spinal dip or sag.',
+      'Phase 5 — Timed Hold: Maintain maximum full-body isometric tension for 25–35 seconds.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Extending your elbows forward doubles the lever arm on your abs. If you feel any strain in your lower back, immediately walk elbows back.',
+        biomechanicalRationale: 'Long-lever placement dramatically amplifies extension torque, challenging anterior core anti-extension endurance.'
+      }
+    ],
+    commonFaults: [
+      'Allowing lower back to hyperextend or sag toward the floor.',
+      'Holding breath instead of diaphragmatic nasal breathing.'
+    ],
+    rehabRegressions: [
+      'Return elbows to standard position directly beneath shoulders.'
+    ]
+  },
+  {
+    id: 'cue_core_frog_crunch',
+    exerciseId: 't3_core_frog_crunch',
+    exerciseName: 'Frog Crunches (Psoas-Bypass Flexion)',
+    title: 'Frog Crunches',
+    tier: 'T3',
+    tempo: '2112',
+    prescribedTempo: '2112 (2s Lower / 1s Bottom / 1s Curl / 2s Peak Squeeze)',
+    primaryMuscles: ['Upper Rectus Abdominis'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Lie supine on back, press soles of feet together with knees flared wide in a diamond/frog position.',
+    setupInstructions: [
+      'Phase 1 — Frog Leg Setup: Press soles of shoes/feet together, allowing knees to fall open wide to the sides.',
+      'Phase 2 — Lumbar Flush: Press lower back firmly against the floor, hands behind ears with elbows wide.',
+      'Phase 3 — Thoracic Curl: Curl shoulder blades off floor, driving sternum toward the pelvis.',
+      'Phase 4 — 2-Second Peak Contraction: Exhale all air completely and squeeze upper rectus abdominis intensely for 2 seconds.',
+      'Phase 5 — Controlled Descent: Lower shoulder blades smoothly over 2 seconds; keep knees flared wide throughout.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Flaring your knees wide takes your hip flexors completely out of the movement. You cannot cheat with your psoas here.',
+        biomechanicalRationale: 'External rotation and abduction of the hips mechanically slackens the iliopsoas, isolating thoracic flexion.'
+      }
+    ],
+    commonFaults: [
+      'Letting knees pull inward during the crunch.',
+      'Pulling on the back of the neck with hands.'
+    ],
+    rehabRegressions: [
+      'Place arms across chest instead of behind ears to reduce neck tension.'
+    ]
+  },
+  {
+    id: 'cue_core_twisting_pistons',
+    exerciseId: 't3_core_twisting_pistons',
+    exerciseName: 'Twisting Plank Pistons (Rotational Burnout)',
+    title: 'Twisting Plank Pistons',
+    tier: 'T3',
+    tempo: '2011',
+    prescribedTempo: 'Dynamic Continuous Cadence (30–45s)',
+    primaryMuscles: ['Transversus Abdominis', 'Obliques', 'Serratus Anterior'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'High push-up plank base, feet together, hands under shoulders.',
+    setupInstructions: [
+      'Phase 1 — Push-Up Plank Base: Start in push-up plank, feet together, arms straight, shoulder blades protracted.',
+      'Phase 2 — Piston Hop Right: Hop both feet together diagonally forward and to the outside of your right elbow.',
+      'Phase 3 — Immediate Reset Hop: Spring both feet together back to the center plank position.',
+      'Phase 4 — Piston Hop Left: Hop both feet together diagonally forward to the outside of your left elbow.',
+      'Phase 5 — Continuous Rhythm: Maintain a smooth, spring-like rhythm for 30–45 seconds with level hips. Zero mountain climbers.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Land softly on the balls of your feet like a spring. Keep your shoulders stable over your wrists while your lower body twists.',
+        biomechanicalRationale: 'Rapid dynamic rotational hops challenge core power, elastic fascia, and metabolic conditioning simultaneously.'
+      }
+    ],
+    commonFaults: [
+      'Landing heavily on heels.',
+      'Piking hips excessively into the air instead of keeping a tight horizontal line.'
+    ],
+    rehabRegressions: [
+      'Step feet diagonally one at a time instead of hopping.'
+    ]
+  },
+  {
+    id: 'cue_core_hanging_scissors',
+    exerciseId: 't3_core_hanging_scissors',
+    exerciseName: 'Hanging Alternating Scissor Raises',
+    title: 'Hanging Alternating Scissor Raises',
+    tier: 'T3',
+    tempo: '2011',
+    prescribedTempo: 'Controlled Cadence (12–16 Alternating Kicks)',
+    primaryMuscles: ['Lower Rectus Abdominis', 'Internal Obliques', 'Forearms'],
+    equipment: 'Pull-Up Bar',
+    setup: 'Overhand active dead hang from pull-up bar, lats packed, core pre-braced.',
+    setupInstructions: [
+      'Phase 1 — Active Hang: Hang from bar with overhand grip, shoulders actively engaged and depressed away from ears.',
+      'Phase 2 — Leg Lift: Raise both legs together 45 degrees in front of body.',
+      'Phase 3 — Scissor Cross: Alternate crossing right foot over left, then left foot over right in a rhythmic scissor kick.',
+      'Phase 4 — Pelvic Stabilization: Prevent hips from rocking backward or swinging; maintain tight anterior pelvic control.',
+      'Phase 5 — Smooth Exit: After 12–16 scissor crosses, lower legs under strict control back to vertical.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Point your toes and keep your knees locked. The movement comes from the hips and pelvis, not floppy ankles.',
+        biomechanicalRationale: 'Unilateral leg scissor motion creates alternating torque that challenges the pelvic sling and adductor-core kinetic bridge.'
+      }
+    ],
+    commonFaults: [
+      'Allowing torso to swing forward and backward like a pendulum.',
+      'Bending knees and kicking only from the lower legs.'
+    ],
+    rehabRegressions: [
+      'Perform scissor flutter kicks supine on the floor with hands supporting lower back.'
+    ]
+  },
+  {
+    id: 'cue_core_statue_liberty',
+    exerciseId: 't3_core_statue_liberty',
+    exerciseName: 'Side Plank Statue of Liberty',
+    title: 'Side Plank Statue of Liberty',
+    tier: 'T3',
+    tempo: '0010',
+    prescribedTempo: 'Isometric Hold (30s / Side)',
+    primaryMuscles: ['Internal Obliques', 'External Obliques', 'Quadratus Lumborum'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Forearm side plank with top arm extended vertically toward ceiling with open palm.',
+    setupInstructions: [
+      'Phase 1 — Side Plank Base: Form a straight line from ankles to ears on your bottom forearm.',
+      'Phase 2 — Vertical Arm Extension: Reach your top arm vertically toward the ceiling like the Statue of Liberty torch.',
+      'Phase 3 — Lateral Arch: Drive bottom hip upward away from floor, creating a subtle upward arch in your lower waist.',
+      'Phase 4 — Isometric Fixation: Fix gaze straight ahead, squeeze glutes, breathe rhythmically through nose for 30s.',
+      'Phase 5 — Repeat: Lower softly, switch sides, and repeat with symmetrical duration.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Reach your top hand toward the ceiling as if trying to touch the rafters. That reach locks your upper oblique and serratus.',
+        biomechanicalRationale: 'Elevating the contralateral arm increases the lateral lever arm and maximizes quadratus lumborum anti-lateral flexion recruitment.'
+      }
+    ],
+    commonFaults: [
+      'Sagging the bottom hip toward the floor.',
+      'Allowing the top shoulder to collapse forward.'
+    ],
+    rehabRegressions: [
+      'Perform with bottom knee bent at 90 degrees resting on the floor.'
+    ]
+  },
+  {
+    id: 'cue_core_alligator_plank',
+    exerciseId: 't3_core_alligator_plank',
+    exerciseName: 'Dynamic Push-Up Plank Transfer (Walk the Plank)',
+    title: 'Dynamic Push-Up Plank Transfer',
+    tier: 'T3',
+    tempo: '2011',
+    prescribedTempo: 'Controlled Cadence (10–12 Alternating Transfers)',
+    primaryMuscles: ['Transversus Abdominis', 'Serratus Anterior', 'Triceps Brachii'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Forearm plank base, feet hip-width apart.',
+    setupInstructions: [
+      'Phase 1 — Base Setup: Start in a standard forearm plank with feet shoulder-width apart for rotational stability.',
+      'Phase 2 — Palm Plant: Place right palm on floor directly where right elbow was, pressing upward.',
+      'Phase 3 — High Plank Lock: Follow with left palm to reach a high push-up plank with level hips.',
+      'Phase 4 — Forearm Return: Lower right elbow back to floor, followed by left elbow.',
+      'Phase 5 — Alternate Lead Arm: Repeat leading with left arm first. Complete 10–12 total alternating transfers.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Keep your hips completely level as you press up. If your hips rock side to side, widen your feet.',
+        biomechanicalRationale: 'Transitioning between elbow and palm planes challenges the shoulder girdle while demanding anti-rotational core stability.'
+      }
+    ],
+    commonFaults: [
+      'Excessive hip sway during hand placement.',
+      'Allowing lower back to dip when pushing upward.'
+    ],
+    rehabRegressions: [
+      'Perform transfers with knees resting on the floor.'
+    ]
+  },
+  {
+    id: 'cue_core_janda_crunch',
+    exerciseId: 't3_core_janda_crunch',
+    exerciseName: 'Janda Tension Crunch',
+    title: 'Janda Tension Crunch',
+    tier: 'T3',
+    tempo: '3112',
+    prescribedTempo: '3112 (3s Lower / 1s Bottom / 1s Curl / 2s Peak Squeeze)',
+    primaryMuscles: ['Upper Rectus Abdominis', 'Hamstrings'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Lie supine, knees bent at 90 degrees, dig heels aggressively into floor as if pulling them toward glutes.',
+    setupInstructions: [
+      'Phase 1 — Supine Setup: Lie on back with knees bent at 90 degrees, heels planted firmly on floor.',
+      'Phase 2 — Active Hamstring Dig: Isometrically pull your heels backward into the floor toward your buttocks.',
+      'Phase 3 — Reciprocal Inhibition: Maintain backward heel pressure to shut down hip flexors (psoas).',
+      'Phase 4 — Slow Thoracic Curl: Curl shoulder blades 30 degrees off floor over 1 second, exhaling forcefully.',
+      'Phase 5 — 2-Second Apex Lock: Squeeze abdominal wall for 2 full seconds, then lower slowly over 3 seconds.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'Do not let your heels relax backward pressure. The harder your hamstrings pull, the harder your abs must work alone.',
+        biomechanicalRationale: 'Janda reciprocal inhibition reflex deactivates the hip flexors when the antagonist hamstrings are actively firing.'
+      }
+    ],
+    commonFaults: [
+      'Relaxing heel pressure and letting hip flexors take over.',
+      'Lifting lower back off the floor.'
+    ],
+    rehabRegressions: [
+      'Perform with feet hooked under a low strap or band for tactile feedback.'
+    ]
+  },
+  {
+    id: 'cue_core_sprinter_tuck_plank',
+    exerciseId: 't3_core_sprinter_tuck_plank',
+    exerciseName: 'Sprinter Tuck Planks (Rotational Anti-Flexion)',
+    title: 'Sprinter Tuck Planks',
+    tier: 'T3',
+    tempo: '2011',
+    prescribedTempo: 'Dynamic Continuous Cadence (30–40s)',
+    primaryMuscles: ['Transversus Abdominis', 'Internal Obliques', 'Serratus Anterior'],
+    equipment: 'Flat Floor & Bodyweight',
+    setup: 'Forearm plank base, spine in a neutral line, feet hip-width.',
+    setupInstructions: [
+      'Phase 1 — Forearm Base: Form a solid forearm plank, pushing ground away through elbows.',
+      'Phase 2 — Sprinter Tuck: Bring right knee forward along the outside of the right elbow like a sprinter starting block.',
+      'Phase 3 — 1-Second Isometric Hold: Pause for 1 second at full tuck, squeezing the ipsilateral oblique.',
+      'Phase 4 — Controlled Return: Step right foot back to plank position.',
+      'Phase 5 — Alternate Sides: Tuck left knee to outside of left elbow. Maintain slow, deliberate cadence. Zero mountain climbers.'
+    ],
+    creatorCues: [
+      {
+        creator: 'Form Cue',
+        quote: 'This is not a cardio mountain climber. Move slowly and deliberately. Bring the knee forward, pause for a second, then reset.',
+        biomechanicalRationale: 'Lateral knee drive in horizontal plank recruits the transverse abdominis and lateral oblique force-couple with zero spinal shear.'
+      }
+    ],
+    commonFaults: [
+      'Rushing reps like a fast cardio drill.',
+      'Sagging the pelvis when the knee drives forward.'
+    ],
+    rehabRegressions: [
+      'Perform tucks with hands elevated on a bench or couch.'
     ]
   },
   {
@@ -1592,7 +2053,7 @@ export const CUE_CARDS: CueCard[] = [
       'Holding breath instead of exhaling on the squeeze.'
     ],
     rehabRegressions: [
-      'Dr. Stuart McGill Supported Curl-Up: Keep one knee straight, slide hands under the lower back to preserve neutral lordosis, and lift head and upper shoulders only 1 inch.'
+      'Supported Curl-Up: Keep one knee straight, slide hands under the lower back to preserve neutral lordosis, and lift head and upper shoulders only 1 inch.'
     ]
   },
   {

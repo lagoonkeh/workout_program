@@ -144,18 +144,32 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
   });
 
   describe('3. Cue Cards & Biomechanical Form Rationale Coverage', () => {
-    it('provides comprehensive creator cue cards for all daily abs exercises and warmups', () => {
-      const requiredIds = [
-        't3_athlean_hanging_knee_raise',
-        't3_athlean_hanging_corkscrew',
-        't3_athlean_hollow_body_hold',
-        't3_athlean_cross_mountain_climber',
-        't3_athlean_iso_crunch',
-        't3_athlean_serratus_plank',
-        'w_abs_1',
-        'w_abs_2',
-      ];
+    const requiredIds = [
+      't3_athlean_hanging_knee_raise',
+      't3_athlean_hanging_corkscrew',
+      't3_athlean_hollow_body_hold',
+      't3_athlean_iso_crunch',
+      't3_athlean_serratus_plank',
+      't3_core_lying_pelvic_curl',
+      't3_core_side_plank_lifts',
+      't3_core_marching_plank',
+      't3_core_9090_crunch',
+      't3_core_twisted_t_plank',
+      't3_core_hanging_bat_tuck',
+      't3_core_russian_twists',
+      't3_core_cliffhanger_plank',
+      't3_core_frog_crunch',
+      't3_core_twisting_pistons',
+      't3_core_hanging_scissors',
+      't3_core_statue_liberty',
+      't3_core_alligator_plank',
+      't3_core_janda_crunch',
+      't3_core_sprinter_tuck_plank',
+      'w_abs_1',
+      'w_abs_2',
+    ];
 
+    it('provides comprehensive creator cue cards for all daily abs exercises and warmups', () => {
       for (const id of requiredIds) {
         const card = CUE_CARDS.find((c) => c.exerciseId === id);
         expect(card, `Cue card missing for exerciseId ${id}`).toBeDefined();
@@ -166,17 +180,6 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
     });
 
     it('provides interactive visual diagrams for all daily abs exercises and warmups', () => {
-      const requiredIds = [
-        't3_athlean_hanging_knee_raise',
-        't3_athlean_hanging_corkscrew',
-        't3_athlean_hollow_body_hold',
-        't3_athlean_cross_mountain_climber',
-        't3_athlean_iso_crunch',
-        't3_athlean_serratus_plank',
-        'w_abs_1',
-        'w_abs_2',
-      ];
-
       for (const id of requiredIds) {
         const visual = EXERCISE_VISUALS[id];
         expect(visual, `Visual missing for ${id}`).toBeDefined();
@@ -235,7 +238,7 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
   describe('5. Regular Session Incorporation (Lower A, Upper A, Lower B, Upper B)', () => {
     const regularSessionKeys = ['lower_a', 'upper_a', 'lower_b', 'upper_b'] as const;
 
-    it('incorporates the 6 Athlean-X core finisher exercises into all 4 regular GZCL sessions', () => {
+    it('incorporates distinct 5-stage core finisher routines into all 4 regular sessions without mountain climbers', () => {
       regularSessionKeys.forEach((key) => {
         const session = WORKOUT_PROGRAM[key];
         expect(session).toBeDefined();
@@ -243,18 +246,20 @@ describe('Daily Core Routine Protocol & Kinetic Chain Science', () => {
         const coreCircuitExercises = session.dailyCoreFinisher || [];
         expect(coreCircuitExercises).toHaveLength(5);
 
-        // Verify the kinetic stages in order
-        expect(coreCircuitExercises[0].name).toContain('Hanging Knee Raise');
-        expect(coreCircuitExercises[0].tier).toBe('T3');
-        expect(coreCircuitExercises[0].targetSets).toBe(1);
-        expect(coreCircuitExercises[0].restSeconds).toBe(30);
-        expect(coreCircuitExercises[0].id).toBe(`t3_athlean_hanging_knee_raise_${key}`);
-
-        expect(coreCircuitExercises[1].name).toContain('Hanging Corkscrews');
-        expect(coreCircuitExercises[2].name).toContain('Hollow Body Core Compression');
-        expect(coreCircuitExercises[3].name).toContain('Floor Curl-Up');
-        expect(coreCircuitExercises[4].name).toContain('Serratus Elbow-to-Knee Plank');
+        // Every core finisher exercise is T3, 1 target set, 30s rest
+        coreCircuitExercises.forEach((ex) => {
+          expect(ex.tier).toBe('T3');
+          expect(ex.targetSets).toBe(1);
+          expect(ex.restSeconds).toBe(30);
+          expect(ex.name.toLowerCase()).not.toContain('mountain climber');
+        });
       });
+
+      // Verify session-specific rotating core themes
+      expect(WORKOUT_PROGRAM.lower_a.dailyCoreFinisher?.[0].name).toContain('Hanging Knee Raise');
+      expect(WORKOUT_PROGRAM.upper_a.dailyCoreFinisher?.[0].name).toContain('Lying Reverse Pelvic Curls');
+      expect(WORKOUT_PROGRAM.lower_b.dailyCoreFinisher?.[0].name).toContain('Hanging Bent-Leg L-Sit');
+      expect(WORKOUT_PROGRAM.upper_b.dailyCoreFinisher?.[0].name).toContain('Hanging Alternating Scissor Raises');
     });
 
     it('guarantees pull-up bar is in equipmentRequired for lower sessions for hanging core movements', () => {
