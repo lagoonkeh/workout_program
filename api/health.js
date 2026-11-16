@@ -117,7 +117,7 @@ export function daysFromLifeDashboard(payload, timeZone = 'America/Los_Angeles')
     const date = dayOf(r?.time);
     if (!date || !Number.isFinite(Number(r.bpm))) continue;
     const d = get(date);
-    if (!d.rhrAt || r.time > d.rhrAt) Object.assign(d, { rhr: Number(r.bpm), rhrAt: r.time });
+    if (!d.rhrAt || Date.parse(r.time) > Date.parse(d.rhrAt)) Object.assign(d, { rhr: Number(r.bpm), rhrAt: r.time });
   }
   for (const r of Array.isArray(payload.heart_rate_variability) ? payload.heart_rate_variability : []) {
     const date = dayOf(r?.time);
@@ -128,7 +128,7 @@ export function daysFromLifeDashboard(payload, timeZone = 'America/Los_Angeles')
     const date = dayOf(r?.time);
     if (!date || !Number.isFinite(Number(r.kilograms))) continue;
     const d = get(date);
-    if (!d.kgAt || r.time > d.kgAt) Object.assign(d, { kg: Number(r.kilograms), kgAt: r.time });
+    if (!d.kgAt || Date.parse(r.time) > Date.parse(d.kgAt)) Object.assign(d, { kg: Number(r.kilograms), kgAt: r.time });
   }
   for (const t of Array.isArray(payload.daily_totals) ? payload.daily_totals : []) {
     if (/^\d{4}-\d{2}-\d{2}$/.test(t?.date || '') && Number.isFinite(Number(t.steps))) get(t.date).steps = Number(t.steps);

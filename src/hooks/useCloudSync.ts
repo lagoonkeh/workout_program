@@ -56,15 +56,19 @@ export function useCloudSync({
         setActiveSessionId(remoteState.activeSessionId);
       }
       if (remoteState.workoutLogs) {
-        setWorkoutLogs((prev) => ({ ...prev, ...remoteState.workoutLogs }));
-        try {
-          localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(remoteState.workoutLogs));
-        } catch {
-          // safe fallback
-        }
+        setWorkoutLogs((prev) => {
+          const merged = { ...prev, ...remoteState.workoutLogs };
+          // keep storage identical to state: saving only the remote part dropped local-only exercises on reload
+          try {
+            localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(merged));
+          } catch {
+            // safe fallback
+          }
+          return merged;
+        });
       }
       if (remoteState.completedWarmupDrills) {
-        setCompletedWarmups((prev) => ({ ...prev, ...remoteState.completedWarmupDrills }));
+        setCompletedWarmups({ ...remoteState.completedWarmupDrills });
         try {
           localStorage.setItem(STORAGE_KEY_WARMUPS, JSON.stringify(remoteState.completedWarmupDrills));
         } catch {
@@ -72,7 +76,7 @@ export function useCloudSync({
         }
       }
       if (remoteState.splitSidesExercises) {
-        setSplitSidesExercises((prev) => ({ ...prev, ...remoteState.splitSidesExercises }));
+        setSplitSidesExercises({ ...remoteState.splitSidesExercises });
         try {
           localStorage.setItem(STORAGE_KEY_SPLIT_SIDES, JSON.stringify(remoteState.splitSidesExercises));
         } catch {

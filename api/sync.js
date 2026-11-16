@@ -247,7 +247,9 @@ export function backupTables(b) {
   b.assessments.forEach((a) => {
     if (a && a.date && a.bodyweightLbs) byDate.set(String(a.date).slice(0, 10), [String(a.date).slice(0, 10), a.bodyweightLbs, 'Quarterly test']);
   });
-  weighIns.forEach((w) => byDate.set(w.date, [w.date, w.lbs, 'Weigh-in']));
+  weighIns.forEach((w) => {
+    if (w && w.date) byDate.set(w.date, [w.date, w.lbs, 'Weigh-in']);
+  });
   const body = [['Date', 'Bodyweight (lb)', 'Source'], ...[...byDate.values()].sort((x, y) => String(x[0]).localeCompare(String(y[0])))];
 
   const cols = [
@@ -428,7 +430,7 @@ export default async function handler(req, res) {
         const sessionsByDate = new Map();
         for (const r of existingRows) {
           if (!r || r.length < 3 || !r[0]) continue;
-          const date = r[0].trim();
+          const date = normSheetDate(r[0]);
           const sessionTitle = (r[1] || '').trim();
           const exercise = (r[2] || '').trim();
           const tier = (r[3] || '').trim();
@@ -488,7 +490,7 @@ export default async function handler(req, res) {
           if (t.includes('daily abs') || t.includes('abs')) return 'daily_abs';
           if (t.includes('run')) return 'run_conditioning';
           if (t.includes('bjj')) return 'post_bjj_recovery';
-          return 'lower_a';
+          return 'other';
         };
 
         const allWorkouts = sortedSessions.map((s, idx) => {
@@ -603,7 +605,7 @@ export default async function handler(req, res) {
     if (actionParam === 'clear-history' || actionParam === 'reset-history') {
       await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
         method: 'POST',
-        body: JSON.stringify({ ranges: ["'Workout Logs'!A5:L2000"] }),
+        body: JSON.stringify({ ranges: ["'Workout Logs'!A5:L"] }),
       });
       return res.status(200).json({
         status: 'ok',
@@ -696,7 +698,9 @@ export default async function handler(req, res) {
       const existingKeyToRow = new Map();
       existingRows.forEach((r, idx) => {
         if (r && r.length >= 5) {
-          const key = `${r[0]}__${r[2]}__${r[4]}`.trim().toLowerCase();
+          // the sheet may hand a typed date back as 10/28/2026: compare normalised dates, and include the
+          // session so the same exercise and set number in two sessions on one day stay separate rows
+          const key = `${normSheetDate(r[0])}__${String(r[1] || '').trim()}__${r[2]}__${r[4]}`.trim().toLowerCase();
           existingKeyToRow.set(key, idx + 5);
         }
       });
@@ -723,7 +727,7 @@ export default async function handler(req, res) {
           sanitizeCell(log.notes || ''),
         ];
 
-        const lookupKey = `${dateStr}__${exerciseName}__${setNum}`.trim().toLowerCase();
+        const lookupKey = `${normSheetDate(dateStr)}__${String(log.session || log.sessionTitle || '').trim()}__${exerciseName}__${setNum}`.trim().toLowerCase();
         if (existingKeyToRow.has(lookupKey)) {
           // Update in-place
           const rowNumber = existingKeyToRow.get(lookupKey);
