@@ -205,6 +205,20 @@ export async function sheetsFetch(accessToken, url, init = {}) {
   return res.json();
 }
 
+/**
+ * Reads a values range. Returns [] only when the tab does not exist yet.
+ * Any other failure throws: a failed read must never look like an empty tab.
+ */
+export async function readRange(accessToken, spreadsheetId, range) {
+  const res = await fetch(sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(range)}`), {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (res.ok) return (await res.json()).values || [];
+  const text = await res.text();
+  if (res.status === 400 && /Unable to parse range/i.test(text)) return [];
+  throw new Error(`Google Sheets read ${res.status}: ${text.slice(0, 300)}`);
+}
+
 export async function ensureSheets(accessToken, spreadsheetId, titles) {
   const meta = await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '?fields=sheets.properties.title'));
   const have = new Set((meta.sheets || []).map((s) => s.properties.title));
@@ -676,19 +690,7 @@ export default async function handler(req, res) {
     // 2. Synchronize Workout Logs (Deduplicated by Date + Exercise + Set #)
     if (workoutLogs.length > 0) {
       // Fetch existing rows in Workout Logs to find update coordinates
-      const existingLogsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
-        'Workout Logs'
-      )}!A5:E`; // open-ended, so rows past 500 are still matched instead of appended twice
-
-      const existingRes = await fetch(existingLogsUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      let existingRows = [];
-      if (existingRes.ok) {
-        const existingData = await existingRes.json();
-        existingRows = existingData.values || [];
-      }
+      const existingRows = await readRange(accessToken, spreadsheetId, "'Workout Logs'!A5:E");
 
       // Map existing: `${date}__${exercise}__${setNumber}` -> rowNumber (5-indexed)
       const existingKeyToRow = new Map();
@@ -829,19 +831,9 @@ export default async function handler(req, res) {
         const noteText = sanitizeCell(latest.notes || 'Logged via Web PWA One-Tap Sync');
 
         // Read current row to preserve Col H/I if not updated in this entry
-        const readRowUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
-          'Mobility Tracker'
-        )}!H${rowNumber}:I${rowNumber}`;
-        const rowRes = await fetch(readRowUrl, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-
-        if (rowRes.ok) {
-          const rowData = await rowRes.json();
-          const currentVals = (rowData.values && rowData.values[0]) || ['', ''];
-          if (!leftVal && currentVals[0]) leftVal = currentVals[0];
-          if (!rightVal && currentVals[1]) rightVal = currentVals[1];
-        }
+        const currentVals = (await readRange(accessToken, spreadsheetId, `'Mobility Tracker'!H${rowNumber}:I${rowNumber}`))[0] || ['', ''];
+        if (!leftVal && currentVals[0]) leftVal = currentVals[0];
+        if (!rightVal && currentVals[1]) rightVal = currentVals[1];
 
         benchmarkUpdates.push({
           range: `'Mobility Tracker'!H${rowNumber}:M${rowNumber}`,
@@ -851,18 +843,7 @@ export default async function handler(req, res) {
       }
 
       // B. Update / Append to Chronological Mobility History Log (Rows 15+)
-      const historyReadUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
-        'Mobility Tracker'
-      )}!A15:C`;
-      const historyRes = await fetch(historyReadUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      let existingHistoryRows = [];
-      if (historyRes.ok) {
-        const histData = await historyRes.json();
-        existingHistoryRows = histData.values || [];
-      }
+      const existingHistoryRows = await readRange(accessToken, spreadsheetId, "'Mobility Tracker'!A15:C");
 
       // Map `${date}__${protocolName}__${side}` -> row index (15-indexed)
       const existingHistoryMap = new Map();

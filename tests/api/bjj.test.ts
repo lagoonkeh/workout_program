@@ -137,7 +137,7 @@ describe('api/bjj handler', () => {
     });
     const sheets: Record<string, string[][]> = {};
     const healthPosts: any[] = [];
-    const json = (v: unknown) => ({ ok: true, json: async () => v, text: async () => '' });
+    const json = (v: unknown) => ({ ok: true, json: async () => v, text: async (): Promise<string> => '' });
     vi.stubGlobal('fetch', vi.fn(async (url: string, init: any = {}) => {
       if (url.includes('oauth2')) { const b = String(init.body); return json({ access_token: !b.includes('refresh_token=hr') ? 'at' : b.includes('calendar.readonly') ? 'cal-at' : 'health-at' }); }
       if (url.includes('calendar/v3')) {
@@ -160,7 +160,7 @@ describe('api/bjj handler', () => {
       const m = /values\/([^?]+)/.exec(url);
       if (m && !init.method) {
         const tab = /'(.+)'/.exec(decodeURIComponent(m[1]))![1];
-        return sheets[tab] ? json({ values: sheets[tab].slice(1) }) : { ok: false, json: async () => ({}), text: async () => '' };
+        return sheets[tab] ? json({ values: sheets[tab].slice(1) }) : { ok: false, status: 400, text: async (): Promise<string> => 'Unable to parse range', json: async () => ({}) };
       }
       return json({});
     }));
@@ -179,5 +179,36 @@ describe('api/bjj handler', () => {
     expect(r2.json.mock.calls[0][0]).toMatchObject({ written: 0, sessions: [{ eventId: 'e1', status: 'synced' }] });
     expect(healthPosts).toHaveLength(1);
     expect(sheets['Health Workouts'].length).toBe(2);
+  });
+
+  it('fails with 502 and does not POST to Google Health when BJJ Sessions read returns 500', async () => {
+    Object.assign(process.env, {
+      CRON_SECRET: 'cron', GOOGLE_CLIENT_ID: 'c', GOOGLE_CLIENT_SECRET: 's', GOOGLE_REFRESH_TOKEN: 'r', GOOGLE_SPREADSHEET_ID: 'sheet',
+      GOOGLE_HEALTH_REFRESH_TOKEN: 'hr', BJJ_WEIGHT_LBS: '180',
+    });
+    const healthPosts: any[] = [];
+    const json = (v: unknown) => ({ ok: true, json: async () => v, text: async (): Promise<string> => '' });
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init: any = {}) => {
+      if (url.includes('oauth2')) return json({ access_token: 'at' });
+      if (url.includes('calendar/v3')) {
+        return json({ items: [
+          { id: 'e1', summary: 'BJJ Trained', status: 'confirmed', start: { dateTime: '2026-11-09T18:00:00-08:00' }, end: { dateTime: '2026-11-09T19:30:00-08:00' } },
+        ] });
+      }
+      if (url.includes('health.googleapis.com')) {
+        healthPosts.push(JSON.parse(init.body));
+        return json({ done: true, response: { name: 'users/me/dataTypes/exercise/dataPoints/42' } });
+      }
+      if (url.includes('fields=sheets')) return json({ sheets: [] });
+      if (url.includes('BJJ%20Sessions') || url.includes('BJJ Sessions')) {
+        return { ok: false, status: 500, text: async (): Promise<string> => 'Internal Server Error', json: async () => ({}) };
+      }
+      return json({});
+    }));
+
+    const r = res();
+    await handler({ method: 'GET', headers: { authorization: 'Bearer cron' } }, r);
+    expect(r.status).toHaveBeenCalledWith(502);
+    expect(healthPosts).toHaveLength(0);
   });
 });

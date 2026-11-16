@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 // @ts-expect-error plain JS serverless function
-import handler, { normalizeHealthDay, mergeHealthDays, tokenMatches, localToday, daysFromLifeDashboard } from '../../api/health.js';
+import handler, { normalizeHealthDay, mergeHealthDays, tokenMatches, localToday, daysFromLifeDashboard, writeTab } from '../../api/health.js';
+// @ts-expect-error plain JS serverless function
+import { readRange } from '../../api/sync.js';
 import { sleepScoreFromHours, restingHrTrend, healthForDate } from '../../src/domain/healthMetrics';
 import { DEMO_VIDEOS, demoVideoFor, youtubeUrl } from '../../src/domain/demoVideos';
 import { MOTIONS } from '../../src/domain/motionLibrary';
@@ -137,10 +139,10 @@ describe('api/health handler auth', () => {
     const calls: { url: string; body?: string }[] = [];
     const fetchMock = vi.fn(async (url: string, init: any = {}) => {
       calls.push({ url, body: init.body === undefined ? undefined : String(init.body) });
-      const json = (v: unknown) => ({ ok: true, json: async () => v, text: async () => '' });
+      const json = (v: unknown) => ({ ok: true, json: async () => v, text: async (): Promise<string> => '' });
       if (url.includes('oauth2')) return json({ access_token: 'at' });
       if (url.includes('fields=sheets')) return json({ sheets: [{ properties: { title: 'Health Metrics' } }] });
-      if (url.includes('/values/')) return { ok: false, json: async () => ({}), text: async () => '' };
+      if (url.includes('/values/')) return { ok: false, status: 400, json: async () => ({}), text: async (): Promise<string> => 'Unable to parse range' };
       return json({});
     });
     vi.stubGlobal('fetch', fetchMock);
@@ -162,6 +164,75 @@ describe('api/health handler auth', () => {
     } finally {
       vi.unstubAllGlobals();
       for (const k of ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN', 'GOOGLE_SPREADSHEET_ID']) delete process.env[k];
+    }
+  });
+
+  it('fails with 502 and does not write or clear when Health Metrics read returns 500', async () => {
+    process.env.HEALTH_INGEST_TOKEN = 'secret-token';
+    Object.assign(process.env, { GOOGLE_CLIENT_ID: 'c', GOOGLE_CLIENT_SECRET: 's', GOOGLE_REFRESH_TOKEN: 'r', GOOGLE_SPREADSHEET_ID: 'sheet' });
+    const calls: { url: string; body?: string }[] = [];
+    const fetchMock = vi.fn(async (url: string, init: any = {}) => {
+      calls.push({ url, body: init.body === undefined ? undefined : String(init.body) });
+      const json = (v: unknown) => ({ ok: true, json: async () => v, text: async (): Promise<string> => '' });
+      if (url.includes('oauth2')) return json({ access_token: 'at' });
+      if (url.includes('fields=sheets')) return json({ sheets: [{ properties: { title: 'Health Metrics' } }] });
+      if (url.includes('/values/')) return { ok: false, status: 500, json: async () => ({}), text: async (): Promise<string> => 'Internal Server Error' };
+      return json({});
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const r = res();
+      const body = { sleepHours: 7.5, restingHr: 58 };
+      await handler({ method: 'POST', headers: { 'x-health-token': 'secret-token' }, body }, r);
+      expect(r.status).toHaveBeenCalledWith(502);
+      expect(calls.some((c) => c.url.includes('batchUpdate'))).toBe(false);
+      expect(calls.some((c) => c.url.includes('batchClear'))).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+      for (const k of ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN', 'GOOGLE_SPREADSHEET_ID']) delete process.env[k];
+    }
+  });
+
+  it('readRange treats 400 Unable to parse range as empty tab', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 400,
+      text: async (): Promise<string> => 'Unable to parse range: Sheet!A1:B',
+      json: async () => ({}),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const rows = await readRange('at', 'sheet', 'Sheet!A1:B');
+      expect(rows).toEqual([]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('writeTab calls batchUpdate before batchClear and clears A{rows+1}:{lastCol}', async () => {
+    const order: string[] = [];
+    const clearRanges: string[] = [];
+    const fetchMock = vi.fn(async (url: string, init: any = {}) => {
+      if (url.includes('values:batchUpdate')) {
+        order.push('update');
+        return { ok: true, json: async () => ({}), text: async (): Promise<string> => '' };
+      }
+      if (url.includes('values:batchClear')) {
+        order.push('clear');
+        const body = JSON.parse(init.body);
+        clearRanges.push(...body.ranges);
+        return { ok: true, json: async () => ({}), text: async (): Promise<string> => '' };
+      }
+      return { ok: true, json: async () => ({}), text: async (): Promise<string> => '' };
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const rows = [['header'], ['r1'], ['r2']];
+      await writeTab('at', 'sheet', 'Health Metrics', 'G', rows);
+      expect(order).toEqual(['update', 'clear']);
+      expect(clearRanges).toEqual(["'Health Metrics'!A4:G"]);
+    } finally {
+      vi.unstubAllGlobals();
     }
   });
 

@@ -12,7 +12,7 @@
 // (googlehealth.activity_and_fitness.writeonly + calendar.events): GOOGLE_HEALTH_REFRESH_TOKEN, made with
 // scripts/google-health-token.mjs.
 // Without it, sessions are still logged here and sent to Google Health once it is connected.
-import { verifyRequest, getAccessToken, ensureSheets, spreadsheetIdFromEnv, sheetsUrl, healthAccessToken, HEALTH_SCOPE, CALENDAR_EVENTS_SCOPE } from './sync.js';
+import { verifyRequest, getAccessToken, ensureSheets, spreadsheetIdFromEnv, sheetsUrl, readRange, healthAccessToken, HEALTH_SCOPE, CALENDAR_EVENTS_SCOPE } from './sync.js';
 import { readDays, readWorkouts, writeTab, tokenMatches } from './health.js';
 import { WORKOUT_SHEET, WORKOUT_HEADER, mergeWorkouts, workoutToRow } from './_healthWorkouts.js';
 import {
@@ -46,12 +46,8 @@ async function listBjjEvents(accessToken, timeMin, timeMax) {
 }
 
 async function readBjj(accessToken, spreadsheetId) {
-  const r = await fetch(sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(`'${BJJ_SHEET}'!A2:J${MAX_BJJ_KEPT + 50}`)}`), {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!r.ok) return [];
-  const data = await r.json();
-  return (data.values || []).map(rowToBjj).filter((s) => s.eventId);
+  const rows = await readRange(accessToken, spreadsheetId, `'${BJJ_SHEET}'!A2:J${MAX_BJJ_KEPT + 50}`);
+  return rows.map(rowToBjj).filter((s) => s.eventId);
 }
 
 async function authorize(req) {

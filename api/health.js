@@ -12,7 +12,7 @@
 // Stored in the "Health Metrics" tab of the workout spreadsheet, one row per date. Exercise sessions from
 // Life Dashboard (its "exercise" array) go to the "Health Workouts" tab, one row per session (see _healthWorkouts.js).
 import crypto from 'node:crypto';
-import { verifyRequest, getAccessToken, sheetsFetch, sheetsUrl, ensureSheets, spreadsheetIdFromEnv } from './sync.js';
+import { verifyRequest, getAccessToken, sheetsFetch, sheetsUrl, readRange, ensureSheets, spreadsheetIdFromEnv } from './sync.js';
 import {
   WORKOUT_SHEET, WORKOUT_HEADER, MAX_WORKOUTS_KEPT, workoutsFromLifeDashboard, deletedWorkoutIds, mergeWorkouts, workoutToRow, rowToWorkout,
 } from './_healthWorkouts.js';
@@ -179,31 +179,23 @@ export function tokenMatches(given, expected) {
 }
 
 export async function readDays(accessToken, spreadsheetId) {
-  const res = await fetch(sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(`'${SHEET}'!A2:G${MAX_DAYS_KEPT + 50}`)}`), {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!res.ok) return []; // tab not created yet
-  const data = await res.json();
-  return (data.values || []).map(rowToDay).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d.date));
+  const rows = await readRange(accessToken, spreadsheetId, `'${SHEET}'!A2:G${MAX_DAYS_KEPT + 50}`);
+  return rows.map(rowToDay).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d.date));
 }
 
 export async function readWorkouts(accessToken, spreadsheetId) {
-  const res = await fetch(sheetsUrl(spreadsheetId, `/values/${encodeURIComponent(`'${WORKOUT_SHEET}'!A2:L${MAX_WORKOUTS_KEPT + 50}`)}`), {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.values || []).map(rowToWorkout).filter((w) => w.uuid && /^\d{4}-\d{2}-\d{2}$/.test(w.date));
+  const rows = await readRange(accessToken, spreadsheetId, `'${WORKOUT_SHEET}'!A2:L${MAX_WORKOUTS_KEPT + 50}`);
+  return rows.map(rowToWorkout).filter((w) => w.uuid && /^\d{4}-\d{2}-\d{2}$/.test(w.date));
 }
 
 export async function writeTab(accessToken, spreadsheetId, sheet, lastCol, rows) {
-  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
-    method: 'POST',
-    body: JSON.stringify({ ranges: [`'${sheet}'!A1:${lastCol}${rows.length + 200}`] }),
-  });
   await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchUpdate'), {
     method: 'POST',
     body: JSON.stringify({ valueInputOption: 'RAW', data: [{ range: `'${sheet}'!A1`, values: rows }] }),
+  });
+  await sheetsFetch(accessToken, sheetsUrl(spreadsheetId, '/values:batchClear'), {
+    method: 'POST',
+    body: JSON.stringify({ ranges: [`'${sheet}'!A${rows.length + 1}:${lastCol}`] }),
   });
 }
 
