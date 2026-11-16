@@ -81,4 +81,30 @@ describe('MuscleHeatmapWidget', () => {
     expect(statusBadge).toHaveTextContent('Fatigued');
     expect(screen.getAllByText(/4h ago/).length).toBeGreaterThan(0);
   });
+
+  it('renders pattern balance block with Push 0 · Pull 0 with no history', () => {
+    render(<MuscleHeatmapWidget />);
+    const balanceBlock = screen.getByTestId('pattern-balance');
+    expect(balanceBlock).toBeInTheDocument();
+    expect(screen.getByTestId('pattern-balance-upper')).toHaveTextContent('Push 0 · Pull 0');
+    expect(screen.getByTestId('pattern-balance-lower')).toHaveTextContent('Squat 0 · Hinge 0');
+    expect(screen.queryByTestId('pattern-balance-flag')).not.toBeInTheDocument();
+  });
+
+  it('renders pattern balance flag for 10-vs-4 case', () => {
+    const session: CompletedWorkoutSession = {
+      sessionId: 'upper_b',
+      date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      logs: {
+        t1_bb_bench_press: Array(10).fill({ isCompleted: true, weight: 185, reps: 3 }) as any,
+        t2_barbell_row: Array(4).fill({ isCompleted: true, weight: 135, reps: 8 }) as any,
+      },
+    };
+
+    render(<MuscleHeatmapWidget history={[session]} />);
+    expect(screen.getByTestId('pattern-balance-upper')).toHaveTextContent('Push 10 · Pull 4');
+    const flag = screen.getByTestId('pattern-balance-flag');
+    expect(flag).toBeInTheDocument();
+    expect(flag).toHaveTextContent(/Pushing is ahead of pulling/);
+  });
 });

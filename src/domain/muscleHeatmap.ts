@@ -3,6 +3,15 @@ import { CompletedWorkoutSession } from '../storage/storageManager';
 import { WorkoutExercise, ALL_APP_SESSIONS } from './programData';
 import { SetLogRecord } from '../components/ExerciseCard';
 import { type HealthWorkout, interpretWorkout, withoutAppDuplicates } from './healthWorkouts';
+import {
+  EXERCISE_META,
+  ROLE_WEIGHT,
+  type MovementPattern,
+  getExerciseMeta,
+  muscleWeightsOf,
+  muscleIdForLabel,
+  sideFactor,
+} from './exerciseMeta';
 
 export type RecoveryStatus = 'fresh' | 'recovering' | 'fatigued';
 
@@ -45,96 +54,44 @@ export interface MuscleStatus {
   guidance: string;
 }
 
-// Exercise ID to target muscle groups map
-const EXERCISE_MUSCLE_MAP: Record<string, string[]> = {
-  // Lower A
-  t1_bb_squat: ['quads', 'glutes', 'core'],
-  t1_squat: ['quads', 'glutes', 'core'],
-  t2_atg_split_squat: ['quads', 'glutes'],
-  t3_bulgarian_split_squat: ['quads', 'glutes'],
-  t3_tibialis_wall_raise: ['calves'],
-  t3_patrick_step_down: ['quads', 'calves'],
-  t3_mcgill_big_3: ['core', 'lower_back'],
-  t3_loaded_horse_stance: ['quads', 'glutes', 'core'],
+/** A muscle below this share of a set gets volume credit but is not marked as "trained" (its recovery clock is left alone). */
+const TRAINED_MIN_WEIGHT = 0.5;
 
-  // Upper A
-  t1_bb_ohp: ['shoulders', 'triceps', 'traps'],
-  t1_ohp: ['shoulders', 'triceps', 'traps'],
-  t2_pullup_ladders: ['lats', 'biceps', 'traps'],
-  t2_pullup: ['lats', 'biceps', 'traps'],
-  t3_filly_kb_z_press: ['shoulders', 'core', 'triceps'],
-  t3_yellow_dude_lsit: ['core'],
-  t3_kb_arm_superset: ['biceps', 'triceps'],
-  t3_german_hang_prep: ['shoulders', 'lats', 'biceps'],
-
-  // Lower B
-  t1_bb_rdl: ['hamstrings', 'glutes', 'lower_back', 'lats'],
-  t1_deadlift: ['hamstrings', 'glutes', 'lower_back', 'lats'],
-  t1_rdl: ['hamstrings', 'glutes', 'lower_back', 'lats'],
-  t2_kb_good_morning: ['hamstrings', 'glutes', 'lower_back'],
-  t3_patrick_step_down_b: ['quads', 'calves'],
-  t3_biering_sorensen: ['lower_back', 'glutes', 'hamstrings'],
-  t3_kb_suitcase_carry: ['core', 'shoulders'],
-  t3_jefferson_curl: ['hamstrings', 'lower_back'],
-
-  // Upper B
-  t1_bb_bench_press: ['chest', 'shoulders', 'triceps'],
-  t1_bench_press: ['chest', 'shoulders', 'triceps'],
-  t2_barbell_row: ['lats', 'traps', 'biceps'],
-  t2_incline_dumbbell_press: ['chest', 'shoulders', 'triceps'],
-  t2_kb_single_arm_row: ['lats', 'traps', 'biceps'],
-  t3_kb_floor_press_er: ['chest', 'triceps', 'shoulders'],
-  t3_push_up: ['chest', 'triceps', 'shoulders'],
-  t3_athlean_face_pull: ['shoulders', 'traps'],
-  t3_dead_hang_club_mills: ['shoulders', 'lats', 'core'],
-
-  // Athlean Abs & Finishers
-  core_hanging_leg_raise: ['core'],
-  t3_athlean_hanging_knee_raise: ['core'],
-  t3_athlean_hanging_corkscrew: ['core'],
-  t3_athlean_hollow_body_hold: ['core'],
-  t3_athlean_cross_mountain_climber: ['core', 'shoulders'],
-  t3_athlean_iso_crunch: ['core'],
-  t3_athlean_serratus_plank: ['core', 'shoulders'],
-
-  // Conditioning & Recovery
-  t1_run_zone2: ['quads', 'hamstrings', 'calves'],
-  t1_run_norwegian_4x4: ['quads', 'hamstrings', 'calves'],
-  t2_backward_locomotion: ['quads', 'calves'],
-  t3_rowing_metabolic_flush: ['quads', 'hamstrings', 'lats'],
-};
+/** Completed sets in one stored log value: a set array counts its completed sets, a legacy `{ completed: true }` record counts as 3. */
+export function completedSetCount(logVal: unknown): number {
+  if (Array.isArray(logVal)) return logVal.filter((s) => s && (s as { isCompleted?: boolean }).isCompleted).length;
+  const v = logVal as { completed?: boolean; isCompleted?: boolean } | null | undefined;
+  return v?.completed === true || v?.isCompleted === true ? 3 : 0;
+}
 
 /**
- * Resolves muscle groups for an exercise, checking explicit muscleGroups array or fallback catalog.
+ * muscle id -> share of one set (1 primary, 0.5 secondary, 0.25 tertiary).
+ * Exercises in EXERCISE_META use their authored roles. Anything else (variations, custom exercises) falls back
+ * to its muscleGroups labels in listed order: the first recognised muscle is primary, the rest secondary.
+ */
+export function resolveExerciseMuscleWeights(exerciseId: string, exercise?: WorkoutExercise): Record<string, number> {
+  const baseId = exerciseId.replace(/__side_(left|right)$/i, '');
+  const known = EXERCISE_META[baseId];
+  if (known) return muscleWeightsOf(known);
+
+  const ex =
+    exercise ||
+    ALL_APP_SESSIONS.flatMap((s) => s.exercises).find((e) => e.id === baseId || e.baseExerciseId === baseId);
+
+  const weights: Record<string, number> = {};
+  (ex?.muscleGroups || []).forEach((label: string) => {
+    const id = muscleIdForLabel(label);
+    if (!id || weights[id] !== undefined) return;
+    weights[id] = Object.keys(weights).length === 0 ? ROLE_WEIGHT.primary : ROLE_WEIGHT.secondary;
+  });
+  return weights;
+}
+
+/**
+ * Muscle groups an exercise works, strongest role first.
  */
 export function resolveExerciseMuscleGroups(exerciseId: string, exercise?: WorkoutExercise): string[] {
-  const baseId = exerciseId.replace(/__side_(left|right)$/i, '');
-  if (EXERCISE_MUSCLE_MAP[baseId]) {
-    return EXERCISE_MUSCLE_MAP[baseId];
-  }
-
-  const ex = exercise || ALL_APP_SESSIONS.flatMap((s) => s.exercises).find(
-    (e) => e.id === baseId || e.baseExerciseId === baseId
-  );
-
-  if (ex?.muscleGroups && ex.muscleGroups.length > 0) {
-    const list: string[] = [];
-    const lower = ex.muscleGroups.map((m: string) => m.toLowerCase());
-    if (lower.some((m: string) => m.includes('chest') || m.includes('pectoral'))) list.push('chest');
-    if (lower.some((m: string) => m.includes('lat') || m.includes('back'))) list.push('lats');
-    if (lower.some((m: string) => m.includes('quad') || m.includes('vmo'))) list.push('quads');
-    if (lower.some((m: string) => m.includes('hamstring') || m.includes('posterior'))) list.push('hamstrings');
-    if (lower.some((m: string) => m.includes('glute'))) list.push('glutes');
-    if (lower.some((m: string) => m.includes('shoulder') || m.includes('deltoid'))) list.push('shoulders');
-    if (lower.some((m: string) => m.includes('tricep'))) list.push('triceps');
-    if (lower.some((m: string) => m.includes('bicep'))) list.push('biceps');
-    if (lower.some((m: string) => m.includes('core') || m.includes('ab') || m.includes('oblique'))) list.push('core');
-    if (lower.some((m: string) => m.includes('calf') || m.includes('tibialis'))) list.push('calves');
-    if (lower.some((m: string) => m.includes('trap'))) list.push('traps');
-    if (list.length > 0) return list;
-  }
-
-  return [];
+  return Object.keys(resolveExerciseMuscleWeights(exerciseId, exercise));
 }
 
 /**
@@ -171,75 +128,40 @@ export function calculateMuscleHeatmap(
     };
   });
 
-  // 1. Process active session logs (if athlete has completed sets right now)
-  Object.entries(activeLogs).forEach(([exerciseId, sets]) => {
-    const completedSets = sets.filter((s) => s.isCompleted).length;
-    if (completedSets > 0) {
-      const muscles = resolveExerciseMuscleGroups(exerciseId);
-      muscles.forEach((mId) => {
-        if (muscleData[mId]) {
-          muscleData[mId].latestTimestampMs = Math.max(
-            muscleData[mId].latestTimestampMs || 0,
-            nowMs
-          );
-          muscleData[mId].sets7Days += completedSets;
+  const allExercises = ALL_APP_SESSIONS.flatMap((s) => s.exercises);
+  const exerciseName = (exerciseId: string): string => {
+    const info = allExercises.find((e) => e.id === exerciseId || e.baseExerciseId === exerciseId);
+    return info ? info.name : exerciseId;
+  };
 
-          // Find exercise name from program data
-          const exInfo = ALL_APP_SESSIONS.flatMap((s) => s.exercises).find(
-            (e) => e.id === exerciseId || e.baseExerciseId === exerciseId
-          );
-          muscleData[mId].recentExercises.add(exInfo ? exInfo.name : exerciseId);
-        }
-      });
-    }
+  /** Credits `sets` of one exercise to each muscle by role; only primary/secondary muscles count as trained at `timeMs`. */
+  const credit = (exerciseId: string, sets: number, timeMs: number, countsToward7Days: boolean) => {
+    Object.entries(resolveExerciseMuscleWeights(exerciseId)).forEach(([mId, weight]) => {
+      const d = muscleData[mId];
+      if (!d) return;
+      if (countsToward7Days) d.sets7Days += sets * weight * sideFactor(exerciseId);
+      if (weight < TRAINED_MIN_WEIGHT) return;
+      if (d.latestTimestampMs === null || timeMs > d.latestTimestampMs) d.latestTimestampMs = timeMs;
+      d.recentExercises.add(exerciseName(exerciseId));
+    });
+  };
+
+  // 1. Active session logs (sets completed right now)
+  Object.entries(activeLogs).forEach(([exerciseId, sets]) => {
+    const completedSets = completedSetCount(sets);
+    if (completedSets > 0) credit(exerciseId, completedSets, nowMs, true);
   });
 
-  // 2. Process historical completed sessions
+  // 2. Completed sessions from history
   history.forEach((session) => {
     const sessionTimeMs = new Date(session.date).getTime();
     if (isNaN(sessionTimeMs)) return;
-
+    if (!session.logs || typeof session.logs !== 'object') return;
     const isWithin7Days = sessionTimeMs >= sevenDaysAgoMs;
-
-    // Inspect logs within the session
-    if (session.logs && typeof session.logs === 'object') {
-      Object.entries(session.logs).forEach(([exerciseId, logVal]) => {
-        const isCompleted =
-          (logVal as any)?.completed === true ||
-          (logVal as any)?.isCompleted === true ||
-          (Array.isArray(logVal) && logVal.some((s) => s.isCompleted));
-
-        const setCount = Array.isArray(logVal)
-          ? logVal.filter((s) => s.isCompleted).length
-          : isCompleted
-          ? 3
-          : 0;
-
-        if (isCompleted || setCount > 0) {
-          const muscles = resolveExerciseMuscleGroups(exerciseId);
-          muscles.forEach((mId) => {
-            if (muscleData[mId]) {
-              // Track most recent training timestamp
-              if (
-                muscleData[mId].latestTimestampMs === null ||
-                sessionTimeMs > muscleData[mId].latestTimestampMs!
-              ) {
-                muscleData[mId].latestTimestampMs = sessionTimeMs;
-              }
-
-              if (isWithin7Days) {
-                muscleData[mId].sets7Days += setCount || 3;
-              }
-
-              const exInfo = ALL_APP_SESSIONS.flatMap((s) => s.exercises).find(
-                (e) => e.id === exerciseId || e.baseExerciseId === exerciseId
-              );
-              muscleData[mId].recentExercises.add(exInfo ? exInfo.name : exerciseId);
-            }
-          });
-        }
-      });
-    }
+    Object.entries(session.logs).forEach(([exerciseId, logVal]) => {
+      const setCount = completedSetCount(logVal);
+      if (setCount > 0) credit(exerciseId, setCount, sessionTimeMs, isWithin7Days);
+    });
   });
 
   // 2b. Workouts from Health Connect (BJJ, runs, a watch-tracked lift...), minus copies of workouts logged here
@@ -263,6 +185,7 @@ export function calculateMuscleHeatmap(
 
   MUSCLE_GROUPS.forEach((m) => {
     const data = muscleData[m.id];
+    const sets7Days = Math.round(data.sets7Days * 10) / 10;
     let hoursElapsed: number | null = null;
     let daysElapsed: number | null = null;
     let status: RecoveryStatus = 'fresh';
@@ -278,13 +201,13 @@ export function calculateMuscleHeatmap(
       // 🔴 Fatigued: Trained in the last 24h (<24h) OR high accumulated volume (>=14 sets)
       // 🟡 Recovering: Trained 24–48h ago OR moderate weekly volume (8-13 sets)
       // 🟢 Fresh: >=48h elapsed AND manageable weekly volume
-      if (hoursElapsed < 24 || data.sets7Days >= 14) {
+      if (hoursElapsed < 24 || sets7Days >= 14) {
         status = 'fatigued';
         recoveryPercentage = Math.min(45, Math.max(10, Math.round((hoursElapsed / 24) * 45)));
         guidance = hoursElapsed < 24
           ? `Trained ${hoursElapsed}h ago. Muscle protein breakdown elevated. Recommended: Active recovery or alternate muscle group.`
-          : `High weekly volume (${data.sets7Days} sets). Recommend light recovery session or deload.`;
-      } else if (hoursElapsed < 48 || data.sets7Days >= 8) {
+          : `High weekly volume (${sets7Days} sets). Recommend light recovery session or deload.`;
+      } else if (hoursElapsed < 48 || sets7Days >= 8) {
         status = 'recovering';
         recoveryPercentage = Math.min(85, Math.max(50, 50 + Math.round(((hoursElapsed - 24) / 24) * 35)));
         guidance = `Trained ${hoursElapsed}h ago. Supercompensation underway. Moderate volume/accessories suitable; avoid maximal 1RM attempts.`;
@@ -309,7 +232,7 @@ export function calculateMuscleHeatmap(
       lastTrainedDate: data.latestTimestampMs ? new Date(data.latestTimestampMs).toLocaleDateString() : null,
       hoursElapsed,
       daysElapsed,
-      setsLast7Days: data.sets7Days,
+      setsLast7Days: sets7Days,
       recommendedTargetSets: m.recommendedTargetSets,
       recentExercises: Array.from(data.recentExercises).slice(0, 4),
       recoveryPercentage,
@@ -319,3 +242,62 @@ export function calculateMuscleHeatmap(
 
   return result;
 }
+
+export interface PatternBalance {
+  /** completed sets in the last 7 days per movement pattern (not muscle-weighted; per-side sets count at half) */
+  sets: Record<MovementPattern, number>;
+  /** plain-language warnings; empty when balanced or when there is too little volume to judge */
+  flags: string[];
+}
+
+const BALANCE_MIN_SETS = 6;
+const BALANCE_MAX_RATIO = 1.5;
+
+/**
+ * 7-day strength-set balance between opposing movement patterns (upper push vs pull, squat vs hinge).
+ * Counts only sets logged in this app; BJJ and other outside workouts are not included.
+ */
+export function calculatePatternBalance(
+  history: CompletedWorkoutSession[] = [],
+  activeLogs: Record<string, SetLogRecord[]> = {},
+  now: Date = new Date()
+): PatternBalance {
+  const nowMs = now.getTime();
+  const sevenDaysAgoMs = nowMs - 7 * 24 * 60 * 60 * 1000;
+  const sets: Record<MovementPattern, number> = {
+    upper_push: 0,
+    upper_pull: 0,
+    squat: 0,
+    hinge: 0,
+    core: 0,
+    carry: 0,
+    conditioning: 0,
+    other: 0,
+  };
+
+  const add = (exerciseId: string, count: number) => {
+    const m = getExerciseMeta(exerciseId);
+    if (m && count > 0) sets[m.pattern] += count * sideFactor(exerciseId);
+  };
+
+  Object.entries(activeLogs).forEach(([exerciseId, logs]) => add(exerciseId, completedSetCount(logs)));
+
+  history.forEach((session) => {
+    const t = new Date(session.date).getTime();
+    if (isNaN(t) || t < sevenDaysAgoMs || t > nowMs) return;
+    if (!session.logs || typeof session.logs !== 'object') return;
+    Object.entries(session.logs).forEach(([exerciseId, logVal]) => add(exerciseId, completedSetCount(logVal)));
+  });
+
+  const flags: string[] = [];
+  const compare = (a: number, b: number, aLabel: string, bLabel: string, addA: string, addB: string) => {
+    if (a + b < BALANCE_MIN_SETS) return;
+    if (a > b * BALANCE_MAX_RATIO) flags.push(`${aLabel} is ahead of ${bLabel} (${a} vs ${b} sets in 7 days). ${addB}`);
+    else if (b > a * BALANCE_MAX_RATIO) flags.push(`${bLabel} is ahead of ${aLabel} (${b} vs ${a} sets in 7 days). ${addA}`);
+  };
+  compare(sets.upper_push, sets.upper_pull, 'Pushing', 'pulling', 'Add a pressing set or two.', 'Add rows or pull-ups.');
+  compare(sets.squat, sets.hinge, 'Squatting', 'hinging', 'Add a squat-pattern accessory.', 'Add a hinge accessory.');
+
+  return { sets, flags };
+}
+

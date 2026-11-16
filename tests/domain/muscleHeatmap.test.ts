@@ -3,6 +3,8 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateMuscleHeatmap,
   resolveExerciseMuscleGroups,
+  resolveExerciseMuscleWeights,
+  calculatePatternBalance,
   MUSCLE_GROUPS,
 } from '../../src/domain/muscleHeatmap';
 import { CompletedWorkoutSession } from '../../src/storage/storageManager';
@@ -185,6 +187,138 @@ describe('domain/muscleHeatmap', () => {
       expect(quads.status).toBe('fatigued');
       expect(quads.hoursElapsed).toBe(0);
       expect(quads.setsLast7Days).toBe(2);
+    });
+
+    it('credits muscle volume by role weight: bench 5 sets gives chest 5, shoulders 2.5, triceps 2.5', () => {
+      const activeLogs = {
+        t1_bb_bench_press: [
+          { setIndex: 1, weight: 185, reps: 3, isCompleted: true },
+          { setIndex: 2, weight: 185, reps: 3, isCompleted: true },
+          { setIndex: 3, weight: 185, reps: 3, isCompleted: true },
+          { setIndex: 4, weight: 185, reps: 3, isCompleted: true },
+          { setIndex: 5, weight: 185, reps: 3, isCompleted: true },
+        ],
+      };
+
+      const result = calculateMuscleHeatmap([], activeLogs as any, fixedNow);
+      expect(result['chest'].setsLast7Days).toBe(5);
+      expect(result['shoulders'].setsLast7Days).toBe(2.5);
+      expect(result['triceps'].setsLast7Days).toBe(2.5);
+    });
+
+    it('tertiary muscle gets volume credit but recovery clock is left alone (core on squat)', () => {
+      const eightHoursAgo = new Date(fixedNow.getTime() - 8 * 60 * 60 * 1000).toISOString();
+      const session: CompletedWorkoutSession = {
+        sessionId: 'lower_a',
+        date: eightHoursAgo,
+        logs: {
+          t1_squat: [
+            { isCompleted: true, weight: 275, reps: 3 },
+            { isCompleted: true, weight: 275, reps: 3 },
+            { isCompleted: true, weight: 275, reps: 3 },
+            { isCompleted: true, weight: 275, reps: 3 },
+          ] as any,
+        },
+      };
+
+      const result = calculateMuscleHeatmap([session], {}, fixedNow);
+      const core = result['core'];
+      expect(core.setsLast7Days).toBe(1);
+      expect(core.hoursElapsed).toBeNull();
+      expect(core.status).toBe('fresh');
+      expect(core.recentExercises.some((name) => name.toLowerCase().includes('squat'))).toBe(false);
+
+      expect(result['quads'].status).toBe('fatigued');
+    });
+
+    it('fallback resolves muscle weights in listed order: first primary, others secondary', () => {
+      const weights = resolveExerciseMuscleWeights('custom_x', {
+        id: 'custom_x',
+        name: 'X',
+        muscleGroups: ['Lats', 'Biceps', 'Rear Deltoid'],
+      } as any);
+      expect(weights).toEqual({ lats: 1, biceps: 0.5, shoulders: 0.5 });
+    });
+
+    it('counts unilateral per-side sets at half for volume but maintains recovery status', () => {
+      const eightHoursAgo = new Date(fixedNow.getTime() - 8 * 60 * 60 * 1000).toISOString();
+      const bothSidesSession: CompletedWorkoutSession = {
+        sessionId: 'lower_a',
+        date: eightHoursAgo,
+        logs: {
+          t3_bulgarian_split_squat__side_left: [
+            { isCompleted: true, weight: 45, reps: 8 },
+            { isCompleted: true, weight: 45, reps: 8 },
+            { isCompleted: true, weight: 45, reps: 8 },
+          ] as any,
+          t3_bulgarian_split_squat__side_right: [
+            { isCompleted: true, weight: 45, reps: 8 },
+            { isCompleted: true, weight: 45, reps: 8 },
+            { isCompleted: true, weight: 45, reps: 8 },
+          ] as any,
+        },
+      };
+
+      const bothResult = calculateMuscleHeatmap([bothSidesSession], {}, fixedNow);
+      expect(bothResult['quads'].setsLast7Days).toBe(3);
+      expect(bothResult['glutes'].setsLast7Days).toBe(1.5);
+      expect(calculatePatternBalance([bothSidesSession], {}, fixedNow).sets.squat).toBe(3);
+
+      const oneSideSession: CompletedWorkoutSession = {
+        sessionId: 'lower_a',
+        date: eightHoursAgo,
+        logs: {
+          t3_bulgarian_split_squat__side_left: [
+            { isCompleted: true, weight: 45, reps: 8 },
+            { isCompleted: true, weight: 45, reps: 8 },
+            { isCompleted: true, weight: 45, reps: 8 },
+          ] as any,
+        },
+      };
+
+      const oneResult = calculateMuscleHeatmap([oneSideSession], {}, fixedNow);
+      expect(oneResult['quads'].setsLast7Days).toBe(1.5);
+      expect(oneResult['quads'].status).toBe('fatigued');
+    });
+
+    it('calculatePatternBalance calculates 7-day pattern balance and emits warning flags', () => {
+      const twoDaysAgo = new Date(fixedNow.getTime() - 48 * 60 * 60 * 1000).toISOString();
+      const eightDaysAgo = new Date(fixedNow.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString();
+
+      const session: CompletedWorkoutSession = {
+        sessionId: 'upper_b',
+        date: twoDaysAgo,
+        logs: {
+          t1_bb_bench_press: Array(10).fill({ isCompleted: true, weight: 185, reps: 3 }) as any,
+          t2_barbell_row: Array(4).fill({ isCompleted: true, weight: 135, reps: 8 }) as any,
+        },
+      };
+
+      const oldSession: CompletedWorkoutSession = {
+        sessionId: 'upper_b',
+        date: eightDaysAgo,
+        logs: {
+          t2_barbell_row: Array(10).fill({ isCompleted: true, weight: 135, reps: 8 }) as any,
+        },
+      };
+
+      const balance = calculatePatternBalance([session, oldSession], {}, fixedNow);
+      expect(balance.sets.upper_push).toBe(10);
+      expect(balance.sets.upper_pull).toBe(4);
+      expect(balance.flags.length).toBe(1);
+      expect(balance.flags[0].startsWith('Pushing is ahead of pulling')).toBe(true);
+
+      const smallSession: CompletedWorkoutSession = {
+        sessionId: 'upper_b',
+        date: twoDaysAgo,
+        logs: {
+          t1_bb_bench_press: Array(3).fill({ isCompleted: true, weight: 185, reps: 3 }) as any,
+          t2_barbell_row: Array(2).fill({ isCompleted: true, weight: 135, reps: 8 }) as any,
+        },
+      };
+
+      const smallBalance = calculatePatternBalance([smallSession], {}, fixedNow);
+      expect(smallBalance.flags.length).toBe(0);
     });
   });
 });

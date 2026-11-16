@@ -4,6 +4,7 @@ import { Activity, Info } from 'lucide-react';
 import {
   type RecoveryStatus,
   calculateMuscleHeatmap,
+  calculatePatternBalance,
 } from '../domain/muscleHeatmap';
 import { CompletedWorkoutSession } from '../storage/storageManager';
 import { HEALTH_UPDATED_EVENT, loadCachedWorkouts, type HealthWorkout } from '../domain/healthWorkouts';
@@ -34,6 +35,8 @@ export const MuscleHeatmapWidget: React.FC<MuscleHeatmapWidgetProps> = ({
   const heatmap = useMemo(() => {
     return calculateMuscleHeatmap(history, activeLogs, new Date(), outsideWorkouts);
   }, [history, activeLogs, outsideWorkouts]);
+
+  const balance = useMemo(() => calculatePatternBalance(history, activeLogs, new Date()), [history, activeLogs]);
 
   const selectedMuscle = heatmap[selectedMuscleId] || heatmap['chest'] || Object.values(heatmap)[0];
 
@@ -646,6 +649,23 @@ export const MuscleHeatmapWidget: React.FC<MuscleHeatmapWidgetProps> = ({
             )}
           </div>
         </div>
+      </div>
+
+      <div data-testid="pattern-balance" className="rounded-xl bg-slate-950/60 border border-slate-800 p-3 text-xs font-mono">
+        <span className="text-[11px] font-bold uppercase text-slate-400 block mb-1.5">7-Day Movement Balance</span>
+        <div className="grid grid-cols-2 gap-2 text-slate-300">
+          <span data-testid="pattern-balance-upper">
+            Push {balance.sets.upper_push} · Pull {balance.sets.upper_pull}
+          </span>
+          <span data-testid="pattern-balance-lower">
+            Squat {balance.sets.squat} · Hinge {balance.sets.hinge}
+          </span>
+        </div>
+        {balance.flags.map((flag) => (
+          <p key={flag} data-testid="pattern-balance-flag" className="mt-1.5 text-amber-400">
+            {flag}
+          </p>
+        ))}
       </div>
     </div>
   );
