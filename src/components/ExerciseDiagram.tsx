@@ -7,6 +7,7 @@ import {
   SEGMENTS,
   angleOf,
   buildSkeleton,
+  breathe,
   buildTimeline,
   dist,
   jointAngle,
@@ -35,6 +36,7 @@ import {
 } from '../domain/frontalView';
 import { CAMERA_LABEL, OBLIQUE_CAMERAS, cameraCue, defaultCamera, type ObliqueCamera } from '../domain/obliqueView';
 import { ObliqueFigure } from './ObliqueFigure';
+import { FIG, HeadShape, LimbShape, smoothClosed } from './figureParts';
 
 export interface ExerciseDiagramProps {
   diagramType: DiagramType;
@@ -74,21 +76,6 @@ const pathFrom = (pts: Vec[]) =>
 
 const isFar = (s: SegmentId) => s.endsWith('F');
 
-const SEGMENT_WIDTH: Record<SegmentId, number> = {
-  torso: 0,
-  neck: 6,
-  uaN: 8.5,
-  uaF: 8.5,
-  faN: 7,
-  faF: 7,
-  thN: 11.5,
-  thF: 11.5,
-  shN: 8.5,
-  shF: 8.5,
-  ftN: 4.5,
-  ftF: 4.5,
-};
-
 // ---------------------------------------------------------------------------
 // Pure figure renderer (also used by the thumbnail)
 // ---------------------------------------------------------------------------
@@ -101,6 +88,8 @@ interface FigureProps {
   detailed: boolean;
   showTrail: boolean;
   showGhosts: boolean;
+  /** 0..1 breath in, see motionRig.breathe */
+  breath?: number;
 }
 
 const COLORS = {
@@ -118,31 +107,29 @@ const COLORS = {
   trail: '#38bdf8',
 };
 
-function Limb({ a, b, w, color, outline = true }: { a: Vec; b: Vec; w: number; color: string; outline?: boolean }) {
-  return (
-    <>
-      {outline && (
-        <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={COLORS.outline} strokeWidth={w + 2.4} strokeLinecap="round" />
-      )}
-      <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={color} strokeWidth={w} strokeLinecap="round" />
-    </>
-  );
-}
-
-/** Tapered torso: wider at the chest than the hips */
-function torsoPath(hip: Vec, neck: Vec, spine = 0): string {
+/**
+ * Side-view torso outline: chest, back, waist and glutes around the (possibly curved) spine.
+ * `upTo` < 1 stops part-way up, which gives the pelvis block the shorts are drawn on.
+ */
+function torsoOutline(hip: Vec, neck: Vec, spine = 0, upTo = 1): Vec[] {
   const a = angleOf(hip, neck);
-  const n = a + 90;
-  const h1 = polar(hip, n, 6.5);
-  const h2 = polar(hip, n + 180, 6.5);
-  // + rounds the back (the chest section bows toward the back), - arches it
-  const chest = polar(polar(hip, a, BONES.torso * 0.55), n + 180, spine);
-  const c1 = polar(chest, n, 9);
-  const c2 = polar(chest, n + 180, 9);
-  const s1 = polar(neck, n, 6);
-  const s2 = polar(neck, n + 180, 6);
-  const f = (p: Vec) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
-  return `M${f(h1)} L${f(c1)} Q${f(polar(neck, n, 9))} ${f(s1)} L${f(s2)} Q${f(polar(neck, n + 180, 9))} ${f(c2)} L${f(h2)} Z`;
+  const T = dist(hip, neck);
+  const fr = a + 90; // the lifter's front
+  // [position up the spine, thickness toward the front, thickness toward the back]
+  const prof: [number, number, number][] = [
+    [0, 6.6, 8.6],
+    [0.14, 7.3, 8.8],
+    [0.4, 7.0, 6.6],
+    [0.72, 10.2, 8.0],
+    [0.93, 7.2, 7.8],
+    [1, 4.4, 5.0],
+  ];
+  // + rounds the back (the spine bows toward the back), - arches it
+  const centre = (t: number): Vec => polar(polar(hip, a, T * t), fr + 180, spine * Math.sin(Math.PI * t));
+  const rows = prof.filter(([t]) => t <= upTo + 1e-6);
+  const front = rows.map(([t, f]) => polar(centre(t), fr, f));
+  const back = rows.map(([t, , b]) => polar(centre(t), fr + 180, b));
+  return [polar(hip, a + 180, 6.5), ...front, ...back.reverse()];
 }
 
 function Scenery({ s }: { s: SceneryDef }) {
@@ -253,59 +240,31 @@ function Body({ sk, worked, load, ghost = false, ids, spine = 0 }: { sk: Skeleto
     const [a, b] = SEGMENTS[s];
     // far limbs hang off the (unshifted) shoulder/hip so they stay attached
     const pa = s === 'uaF' || s === 'thF' ? sk[a] : off(a);
-    const pb = off(b);
-    const far = isFar(s);
-    const base = ghost ? '#94a3b8' : far ? COLORS.far : COLORS.near;
-    const w = SEGMENT_WIDTH[s];
-    return (
-      <g key={s}>
-        <Limb a={pa} b={pb} w={w} color={base} outline={!ghost} />
-        {!ghost && worked.has(s) && (
-          <line
-            x1={pa[0]}
-            y1={pa[1]}
-            x2={pb[0]}
-            y2={pb[1]}
-            stroke={far ? COLORS.workedFar : COLORS.worked}
-            strokeWidth={w - 2}
-            strokeLinecap="round"
-            opacity={glowOpacity}
-            filter={`url(#${ids}-glow)`}
-            data-worked={s}
-          />
-        )}
-      </g>
-    );
+    return <LimbShape key={s} seg={s} a={pa} b={off(b)} far={isFar(s)} ghost={ghost} worked={worked.has(s)} glow={load} ids={ids} />;
   };
 
   const farSegs: SegmentId[] = ['thF', 'shF', 'ftF', 'uaF', 'faF'];
   const nearLegs: SegmentId[] = ['thN', 'shN', 'ftN'];
   const nearArm: SegmentId[] = ['uaN', 'faN'];
-  const torsoD = torsoPath(sk.hip, sk.neck, spine);
+  const torsoD = smoothClosed(torsoOutline(sk.hip, sk.neck, spine));
+  const shortsD = smoothClosed(torsoOutline(sk.hip, sk.neck, spine, 0.14));
+  // the face looks a quarter turn from neck->head
+  const up = angleOf(sk.neck, sk.head);
+  const R = BONES.headRadius;
+  const rel = (ang: number): Vec => [Math.cos((ang * Math.PI) / 180) * R, Math.sin((ang * Math.PI) / 180) * R];
 
   return (
     <g opacity={ghost ? 0.16 : 1}>
       {farSegs.map(seg)}
-      {nearLegs.map(seg)}
-      {/* torso */}
-      <path d={torsoD} fill={ghost ? '#94a3b8' : COLORS.near} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} strokeLinejoin="round" />
-      {!ghost && worked.has('torso') && (
-        <path d={torsoD} fill={COLORS.worked} opacity={glowOpacity * 0.85} filter={`url(#${ids}-glow)`} data-worked="torso" />
-      )}
       {seg('neck')}
-      <circle cx={sk.head[0]} cy={sk.head[1]} r={BONES.headRadius} fill={ghost ? '#94a3b8' : COLORS.head} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
-      {!ghost &&
-        (() => {
-          // nose: shows which way the lifter faces (the face looks a quarter turn from neck->head)
-          const a = angleOf(sk.neck, sk.head) + 90;
-          const n = polar(sk.head, a, BONES.headRadius * 0.8);
-          return <circle cx={n[0]} cy={n[1]} r={1.9} fill="#64748b" data-testid="diagram-face" />;
-        })()}
+      <path d={torsoD} fill={ghost ? FIG.ghost : FIG.skin} stroke={ghost ? 'none' : FIG.outline} strokeWidth={1.3} strokeLinejoin="round" />
+      {!ghost && worked.has('torso') && (
+        <path d={torsoD} fill={FIG.worked} opacity={glowOpacity * 0.85} filter={`url(#${ids}-glow)`} data-worked="torso" />
+      )}
+      {!ghost && <path d={shortsD} fill={FIG.shorts} stroke={FIG.outline} strokeWidth={1.1} strokeLinejoin="round" data-part="shorts" />}
+      {nearLegs.map(seg)}
+      <HeadShape c={sk.head} face={rel(up + 90)} crown={rel(up)} ghost={ghost} faceTestId="diagram-face" />
       {nearArm.map(seg)}
-      {!ghost &&
-        (['kneeN', 'elbowN', 'hip', 'ankleN'] as JointId[]).map((j) => (
-          <circle key={j} cx={sk[j][0]} cy={sk[j][1]} r={1.7} fill={COLORS.joint} opacity={0.7} />
-        ))}
     </g>
   );
 }
@@ -340,8 +299,8 @@ function AngleArc({ a, b, c, label }: { a: Vec; b: Vec; c: Vec; label: string })
   );
 }
 
-export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, ids, detailed, showTrail, showGhosts }) => {
-  const pose = useMemo(() => poseAt(motion.frames, progress), [motion, progress]);
+export const MotionFigure: React.FC<FigureProps> = ({ motion, progress, load, ids, detailed, showTrail, showGhosts, breath = 0 }) => {
+  const pose = useMemo(() => breathe(poseAt(motion.frames, progress), breath), [motion, progress, breath]);
   const sk = useMemo(() => buildSkeleton(pose), [pose]);
   const worked = useMemo(() => new Set(motion.worked), [motion]);
 
@@ -450,6 +409,7 @@ interface FrontalFigureProps {
   ids: string;
   showTrail: boolean;
   showGhosts: boolean;
+  breath?: number;
 }
 
 function FrontalScene({ s }: { s: FrontalScenery }) {
@@ -562,33 +522,25 @@ function FrontalBody({ fs, worked, load, ghost = false, ids }: { fs: FrontalSkel
   type Item = { depth: number; order: number; node: React.ReactNode };
   const items: Item[] = [];
 
-  const limb = (key: SegmentId, a: FrontalJoint, b: FrontalJoint, side: Side, w: number, order: number) => {
+  const limb = (key: SegmentId, a: FrontalJoint, b: FrontalJoint, side: Side, order: number) => {
     const pa = J[a][side];
     const pb = J[b][side];
-    const color = ghost ? '#94a3b8' : COLORS.near;
     items.push({
       depth: (pa.depth + pb.depth) / 2,
       order,
-      node: (
-        <g key={`${key}`}>
-          <Limb a={pa.p} b={pb.p} w={w} color={color} outline={!ghost} />
-          {isWorked(key) && (
-            <line x1={pa.p[0]} y1={pa.p[1]} x2={pb.p[0]} y2={pb.p[1]} stroke={COLORS.worked} strokeWidth={w - 2} strokeLinecap="round" opacity={glow} filter={`url(#${ids}-glow)`} data-worked={key} />
-          )}
-        </g>
-      ),
+      node: <LimbShape key={key} seg={key} a={pa.p} b={pb.p} ghost={ghost} worked={isWorked(key)} glow={load} ids={ids} />,
     });
   };
 
   (['N', 'F'] as Side[]).forEach((sd) => {
-    limb(`th${sd}` as SegmentId, 'hip', 'knee', sd, 12, 1);
-    limb(`sh${sd}` as SegmentId, 'knee', 'ankle', sd, 9, 1);
-    limb(`ft${sd}` as SegmentId, 'ankle', 'toe', sd, 5, 1);
-    limb(`ua${sd}` as SegmentId, 'shoulder', 'elbow', sd, 8.5, 3);
-    limb(`fa${sd}` as SegmentId, 'elbow', 'hand', sd, 7, 3);
+    limb(`th${sd}` as SegmentId, 'hip', 'knee', sd, 1);
+    limb(`sh${sd}` as SegmentId, 'knee', 'ankle', sd, 1);
+    limb(`ft${sd}` as SegmentId, 'ankle', 'toe', sd, 1);
+    limb(`ua${sd}` as SegmentId, 'shoulder', 'elbow', sd, 3);
+    limb(`fa${sd}` as SegmentId, 'elbow', 'hand', sd, 3);
   });
 
-  // torso: trapezoid shoulders → hips, or an end-on cross-section when lying / folded flat
+  // torso: shoulders, chest, waist and hips, or an end-on cross-section when lying / folded flat
   const sN = J.shoulder.N.p;
   const sF = J.shoulder.F.p;
   const hN = J.hip.N.p;
@@ -596,39 +548,62 @@ function FrontalBody({ fs, worked, load, ghost = false, ids }: { fs: FrontalSkel
   const torsoH = Math.abs(fs.pelvis.p[1] - fs.neck.p[1]);
   const endOn = torsoH < 16;
   const torsoDepth = (fs.neck.depth + fs.pelvis.depth) / 2;
-  const fill = ghost ? '#94a3b8' : COLORS.near;
+  const fill = ghost ? FIG.ghost : FIG.skin;
   let torsoNode: React.ReactNode;
   if (endOn) {
     const cy = (fs.neck.p[1] + fs.pelvis.p[1]) / 2;
     torsoNode = (
       <g key="torso">
-        <ellipse cx={fs.pelvis.p[0]} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2 + 3} ry={9} fill={fill} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
-        {isWorked('torso') && <ellipse cx={fs.pelvis.p[0]} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2} ry={7} fill={COLORS.worked} opacity={glow * 0.85} filter={`url(#${ids}-glow)`} data-worked="torso" />}
+        <ellipse cx={fs.pelvis.p[0]} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2 + 3} ry={9} fill={fill} stroke={ghost ? 'none' : FIG.outline} strokeWidth={1.3} />
+        {isWorked('torso') && <ellipse cx={fs.pelvis.p[0]} cy={cy} rx={Math.abs(sN[0] - sF[0]) / 2} ry={7} fill={FIG.worked} opacity={glow * 0.85} filter={`url(#${ids}-glow)`} data-worked="torso" />}
       </g>
     );
   } else {
-    const mx = fs.pelvis.p[0];
-    const hw = (p: Vec, k: number): Vec => [mx + (p[0] - mx) * k, p[1]];
-    const h1 = hw(hN, 1.45);
-    const h2 = hw(hF, 1.45);
-    const d = `M${sN[0]},${sN[1]} L${sF[0]},${sF[1]} L${h2[0]},${h2[1]} L${h1[0]},${h1[1]} Z`;
+    const lerpV = (a: Vec, b: Vec, t: number): Vec => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    const top = lerpV(sN, sF, 0.5);
+    const bot = lerpV(hN, hF, 0.5);
+    const shHalf = Math.abs(sN[0] - sF[0]) / 2;
+    const hipHalf = (Math.abs(hN[0] - hF[0]) / 2) * 1.45;
+    const signN = Math.sign(sN[0] - sF[0]) || -1;
+    // one edge of the torso: each side follows its own shoulder and hip height (a dropped hip tilts the pelvis)
+    const edge = (side: Side, t: number, half: number): Vec => {
+      const s = side === 'N' ? sN : sF;
+      const h = side === 'N' ? hN : hF;
+      return [top[0] + (bot[0] - top[0]) * t + (side === 'N' ? signN : -signN) * half, s[1] + (h[1] - s[1]) * t];
+    };
+    const rows: [number, number][] = [
+      [-0.04, shHalf * 0.9],
+      [0.1, shHalf + 1.6],
+      [0.36, shHalf * 0.94],
+      [0.7, hipHalf * 0.87],
+      [1, hipHalf],
+      [1.13, hipHalf * 0.86],
+    ];
+    const d = smoothClosed([...rows.map(([t, w]) => edge('N', t, w)), ...rows.map(([t, w]) => edge('F', t, w)).reverse()]);
+    const sRows: [number, number][] = [
+      [0.84, hipHalf * 0.93],
+      [1, hipHalf + 0.5],
+      [1.15, hipHalf * 0.9],
+    ];
+    const shortsD = smoothClosed([...sRows.map(([t, w]) => edge('N', t, w)), ...sRows.map(([t, w]) => edge('F', t, w)).reverse()]);
     const scapN = J.scap.N.p;
     const scapF = J.scap.F.p;
     const showBack = fs.view === 'back' && !ghost;
     torsoNode = (
       <g key="torso">
-        <path d={d} fill={fill} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} strokeLinejoin="round" />
-        {isWorked('torso') && <path d={d} fill={COLORS.worked} opacity={glow * 0.8} filter={`url(#${ids}-glow)`} data-worked="torso" />}
+        <path d={d} fill={fill} stroke={ghost ? 'none' : FIG.outline} strokeWidth={1.3} strokeLinejoin="round" />
+        {isWorked('torso') && <path d={d} fill={FIG.worked} opacity={glow * 0.8} filter={`url(#${ids}-glow)`} data-worked="torso" />}
+        {!ghost && <path d={shortsD} fill={FIG.shorts} stroke={FIG.outline} strokeWidth={1.1} strokeLinejoin="round" data-part="shorts" />}
         {showBack && (
           <g data-testid="frontal-scapulae">
-            <line x1={fs.neck.p[0]} y1={fs.neck.p[1] + 2} x2={fs.pelvis.p[0]} y2={fs.pelvis.p[1] - 2} stroke="#475569" strokeWidth={1.2} strokeDasharray="1.5 2" />
+            <line x1={fs.neck.p[0]} y1={fs.neck.p[1] + 2} x2={fs.pelvis.p[0]} y2={fs.pelvis.p[1] - 9} stroke="#475569" strokeWidth={1.2} strokeDasharray="1.5 2" />
             {[scapN, scapF].map((sc, i) => (
               <path key={i} d={`M${sc[0]},${sc[1] - 4} L${sc[0] + (sc[0] < fs.neck.p[0] ? -6 : 6)},${sc[1] - 2} L${sc[0]},${sc[1] + 9} Z`} fill="#94a3b8" stroke="#475569" strokeWidth={0.8} opacity={0.9} />
             ))}
           </g>
         )}
         {!showBack && !ghost && (
-          <line x1={fs.neck.p[0]} y1={fs.neck.p[1] + 4} x2={fs.pelvis.p[0]} y2={fs.pelvis.p[1] - 4} stroke="#94a3b8" strokeWidth={0.8} opacity={0.6} />
+          <line x1={fs.neck.p[0]} y1={fs.neck.p[1] + 6} x2={fs.pelvis.p[0]} y2={fs.pelvis.p[1] - 10} stroke="#94a3b8" strokeWidth={0.8} opacity={0.6} />
         )}
       </g>
     );
@@ -636,14 +611,16 @@ function FrontalBody({ fs, worked, load, ghost = false, ids }: { fs: FrontalSkel
   items.push({ depth: torsoDepth, order: 2, node: torsoNode });
 
   const head = fs.head;
+  const hv: Vec = [head.p[0] - fs.neck.p[0], head.p[1] - fs.neck.p[1]];
+  const hl = Math.hypot(hv[0], hv[1]);
+  const crown: Vec = hl > 1 ? [(hv[0] / hl) * BONES.headRadius, (hv[1] / hl) * BONES.headRadius] : [0, -BONES.headRadius];
   items.push({
     depth: head.depth,
     order: 4,
     node: (
       <g key="head">
-        <line x1={fs.neck.p[0]} y1={fs.neck.p[1]} x2={head.p[0]} y2={head.p[1]} stroke={ghost ? '#94a3b8' : COLORS.near} strokeWidth={6} strokeLinecap="round" />
-        <circle cx={head.p[0]} cy={head.p[1]} r={BONES.headRadius} fill={ghost ? '#94a3b8' : fs.view === 'back' ? '#cbd5e1' : COLORS.head} stroke={ghost ? 'none' : COLORS.outline} strokeWidth={1.4} />
-        {!ghost && fs.view === 'back' && <path d={`M${head.p[0] - 7},${head.p[1] - 4} Q${head.p[0]},${head.p[1] - 12} ${head.p[0] + 7},${head.p[1] - 4}`} fill="none" stroke="#64748b" strokeWidth={2} />}
+        <LimbShape seg="neck" a={fs.neck.p} b={head.p} ghost={ghost} ids={ids} />
+        <HeadShape c={head.p} face={fs.view === 'back' ? null : [0, 0]} crown={crown} ghost={ghost} />
       </g>
     ),
   });
@@ -653,9 +630,9 @@ function FrontalBody({ fs, worked, load, ghost = false, ids }: { fs: FrontalSkel
   return <g opacity={ghost ? 0.16 : 1}>{items.map((i) => i.node)}</g>;
 }
 
-export const FrontalFigure: React.FC<FrontalFigureProps> = ({ motion, cfg, progress, load, ids, showTrail, showGhosts }) => {
+export const FrontalFigure: React.FC<FrontalFigureProps> = ({ motion, cfg, progress, load, ids, showTrail, showGhosts, breath = 0 }) => {
   const worked = useMemo(() => new Set(motion.worked), [motion]);
-  const fs = useMemo(() => projectFrontal(buildSkeleton(poseAt(motion.frames, progress)), cfg, progress), [motion, cfg, progress]);
+  const fs = useMemo(() => projectFrontal(buildSkeleton(breathe(poseAt(motion.frames, progress), breath)), cfg, progress), [motion, cfg, progress, breath]);
   const statics = useMemo(() => {
     const at = (p: number) => projectFrontal(buildSkeleton(poseAt(motion.frames, p)), cfg, p);
     const trail: Vec[] = [];
@@ -853,6 +830,7 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
   const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
   const progress = state ? state.progress : ease(manual);
   const load = state ? state.load : 0.35 + 0.5 * manual;
+  const breath = state ? 0.5 - 0.5 * Math.cos((clock / total) * 2 * Math.PI * Math.max(1, Math.round(total / 3.5))) : 0;
 
   const badge = state
     ? phaseBadge(state.segment, motion.order)
@@ -1040,6 +1018,7 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
                 detailed
                 showTrail={showTrail}
                 showGhosts={showGhosts}
+              breath={breath}
               />
             </svg>
             <span className="absolute top-2.5 left-3 text-[10px] font-mono font-bold uppercase text-slate-400">Side</span>
@@ -1072,6 +1051,7 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
                 ids={`${ids}o`}
                 showTrail={showTrail}
                 showGhosts={showGhosts}
+              breath={breath}
               />
             </svg>
             <span className="absolute top-2.5 left-3 text-[10px] font-mono font-bold uppercase text-slate-400">{CAMERA_LABEL[viewMode]}</span>
@@ -1102,6 +1082,7 @@ const ExerciseDiagramComponent: React.FC<ExerciseDiagramProps> = ({
                 ids={`${ids}f`}
                 showTrail={showTrail}
                 showGhosts={showGhosts}
+              breath={breath}
               />
             </svg>
             <span className="absolute top-2.5 left-3 text-[10px] font-mono font-bold uppercase text-slate-400">{frontalCfg.label}</span>

@@ -4,7 +4,7 @@
  * are 3-D (see domain/obliqueView) and drawn back to front by their depth from the camera.
  */
 import React, { useMemo } from 'react';
-import { BONES, buildSkeleton, poseAt, type SegmentId, type Vec } from '../domain/motionRig';
+import { BONES, breathe, buildSkeleton, poseAt, type SegmentId, type Vec } from '../domain/motionRig';
 import { BALL_FILL, BALL_STROKE, FLOOR_Y, type MotionDef } from '../domain/motionLibrary';
 import type { FrontalConfig } from '../domain/frontalView';
 import {
@@ -13,6 +13,7 @@ import {
   add3,
   build3D,
   dot3,
+  norm3,
   cameraFor,
   props3D,
   scale3,
@@ -25,6 +26,7 @@ import {
   type Skeleton3,
   type Vec3,
 } from '../domain/obliqueView';
+import { FIG, HeadShape, LimbShape } from './figureParts';
 
 const TRAIL_SAMPLES = 48;
 
@@ -38,10 +40,6 @@ const C = {
   steel: '#475569',
   bar: '#94a3b8',
   cable: '#fbbf24',
-};
-
-const LIMB_W: Partial<Record<SegmentId, number>> = {
-  uaN: 8.5, uaF: 8.5, faN: 7, faF: 7, thN: 11.5, thF: 11.5, shN: 8.5, shF: 8.5, ftN: 4.5, ftF: 4.5,
 };
 
 type Item = { d: number; node: React.ReactNode };
@@ -96,50 +94,48 @@ function bodyItems(s3: Skeleton3, pr: Projector, worked: Set<SegmentId>, load: n
     const a = P(s3.j[l.a]);
     const b = P(s3.j[l.b]);
     const d = (a.d + b.d) / 2;
-    const w = LIMB_W[l.seg] ?? 7;
     const far = pr.cam !== 'top' && d < pelvisD - 3;
-    const color = ghost ? '#94a3b8' : far ? C.far : C.near;
     items.push({
       d,
-      node: (
-        <g key={l.seg}>
-          {!ghost && <line x1={a.p[0]} y1={a.p[1]} x2={b.p[0]} y2={b.p[1]} stroke={C.outline} strokeWidth={w + 2.4} strokeLinecap="round" />}
-          <line x1={a.p[0]} y1={a.p[1]} x2={b.p[0]} y2={b.p[1]} stroke={color} strokeWidth={w} strokeLinecap="round" />
-          {!ghost && worked.has(l.seg) && (
-            <line
-              x1={a.p[0]} y1={a.p[1]} x2={b.p[0]} y2={b.p[1]}
-              stroke={far ? C.workedFar : C.worked} strokeWidth={w - 2} strokeLinecap="round"
-              opacity={glow} filter={`url(#${ids}-glow)`} data-worked={l.seg}
-            />
-          )}
-        </g>
-      ),
+      node: <LimbShape key={l.seg} seg={l.seg} a={a.p} b={b.p} far={far} ghost={ghost} worked={worked.has(l.seg)} glow={load} ids={ids} />,
     });
   });
 
-  // torso: hull of three elliptical rings (hips, chest, shoulders) around the spine
+  // torso: elliptical rings around the spine (seat, hips, waist, chest, shoulders). The lower and upper
+  // halves are separate hulls so the waist stays narrower than the chest and hips.
   // N is on the -z side, F on the +z side (the body may be shifted sideways)
   const halfW = (n: Vec3, f: Vec3) => (f[2] - n[2]) / 2;
   const shoulderW = halfW(s3.j.shoulderN, s3.j.shoulderF);
   const hipW = halfW(s3.j.hipN, s3.j.hipF) * 1.45;
   const spine = sub3(s3.j.neck, s3.j.pelvis);
-  const ring = (c: Vec3, w: number, depth: number): Vec[] => disc(pr, c, 1, scale3(Z3, w), scale3(s3.forward, depth), 12);
-  const torsoPts = [
-    ...ring(s3.j.pelvis, hipW, 6.5),
-    ...ring(add3(s3.j.pelvis, scale3(spine, 0.72)), shoulderW * 0.95, 9),
-    ...ring(s3.j.neck, shoulderW, 6),
-  ];
-  const outline = hull(torsoPts);
+  const along = (t: number): Vec3 => add3(s3.j.pelvis, scale3(spine, t));
+  const ring = (c: Vec3, w: number, depth: number): Vec[] => disc(pr, c, 1, scale3(Z3, w), scale3(s3.forward, depth), 14);
+  const seat = ring(sub3(s3.j.pelvis, scale3(s3.up, 5.5)), hipW * 0.78, 6);
+  const hips = ring(s3.j.pelvis, hipW, 7.4);
+  const belt = ring(along(0.16), hipW * 0.97, 7.2);
+  const waist = ring(along(0.42), hipW * 0.9, 6.1);
+  const chest = ring(along(0.72), shoulderW * 0.96, 8.5);
+  const shoulders = ring(s3.j.neck, shoulderW, 5.4);
+  const lower = hull([...seat, ...hips, ...waist]);
+  const upper = hull([...waist, ...chest, ...shoulders]);
+  const shorts = hull([...seat, ...hips, ...belt]);
   const torsoD = (P(s3.j.pelvis).d + P(s3.j.neck).d) / 2;
-  const fill = ghost ? '#94a3b8' : C.near;
+  const fill = ghost ? FIG.ghost : FIG.skin;
+  const stroke = ghost ? 'none' : FIG.outline;
   items.push({
     d: torsoD,
     node: (
       <g key="torso">
-        <polygon points={pts(outline)} fill={fill} stroke={ghost ? 'none' : C.outline} strokeWidth={1.4} strokeLinejoin="round" />
+        <polygon points={pts(lower)} fill={fill} stroke={stroke} strokeWidth={1.3} strokeLinejoin="round" />
+        <polygon points={pts(upper)} fill={fill} stroke={stroke} strokeWidth={1.3} strokeLinejoin="round" />
+        <polygon points={pts(lower)} fill={fill} />
         {!ghost && worked.has('torso') && (
-          <polygon points={pts(outline)} fill={C.worked} opacity={glow * 0.8} filter={`url(#${ids}-glow)`} data-worked="torso" />
+          <g opacity={glow * 0.8} filter={`url(#${ids}-glow)`} data-worked="torso">
+            <polygon points={pts(lower)} fill={FIG.worked} />
+            <polygon points={pts(upper)} fill={FIG.worked} />
+          </g>
         )}
+        {!ghost && <polygon points={pts(shorts)} fill={FIG.shorts} stroke={FIG.outline} strokeWidth={1.1} strokeLinejoin="round" data-part="shorts" />}
       </g>
     ),
   });
@@ -154,7 +150,7 @@ function bodyItems(s3: Skeleton3, pr: Projector, worked: Set<SegmentId>, load: n
     });
     // the spine down the back (flat or rounding) and the hip line (square or dropping)
     const back = (v: Vec3) => P(sub3(v, scale3(s3.forward, 6.5))).p;
-    const sp0 = back(add3(s3.j.pelvis, scale3(s3.up, 3)));
+    const sp0 = back(add3(s3.j.pelvis, scale3(s3.up, 9)));
     const sp1 = back(sub3(s3.j.neck, scale3(s3.up, 3)));
     const hN = back(s3.j.hipN);
     const hF = back(s3.j.hipF);
@@ -190,14 +186,18 @@ function bodyItems(s3: Skeleton3, pr: Projector, worked: Set<SegmentId>, load: n
   const head = P(s3.j.head);
   const neck = P(s3.j.neck);
   const faceTo = dot3(s3.face, pr.toCamera);
-  const nose = P(add3(s3.j.head, scale3(s3.face, BONES.headRadius * 0.8)));
+  const R = BONES.headRadius;
+  const rel = (dir: Vec3): Vec => {
+    const q = P(add3(s3.j.head, scale3(dir, R))).p;
+    return [q[0] - head.p[0], q[1] - head.p[1]];
+  };
+  const crownDir = norm3(sub3(s3.j.head, s3.j.neck));
   items.push({
     d: head.d + 0.3,
     node: (
       <g key="head">
-        <line x1={neck.p[0]} y1={neck.p[1]} x2={head.p[0]} y2={head.p[1]} stroke={ghost ? '#94a3b8' : C.near} strokeWidth={6} strokeLinecap="round" />
-        <circle cx={head.p[0]} cy={head.p[1]} r={BONES.headRadius} fill={ghost ? '#94a3b8' : C.head} stroke={ghost ? 'none' : C.outline} strokeWidth={1.4} />
-        {!ghost && faceTo > -0.35 && <circle cx={nose.p[0]} cy={nose.p[1]} r={1.9} fill="#64748b" data-testid="oblique-face" />}
+        <LimbShape seg="neck" a={neck.p} b={head.p} ghost={ghost} ids={ids} />
+        <HeadShape c={head.p} face={faceTo > -0.35 ? rel(s3.face) : null} crown={rel(crownDir)} ghost={ghost} faceTestId="oblique-face" />
       </g>
     ),
   });
@@ -396,20 +396,21 @@ export interface ObliqueFigureProps {
   ids: string;
   showTrail: boolean;
   showGhosts: boolean;
+  breath?: number;
 }
 
-const frame = (motion: MotionDef, cfg: FrontalConfig, p: number) => {
-  const sk = buildSkeleton(poseAt(motion.frames, p));
+const frame = (motion: MotionDef, cfg: FrontalConfig, p: number, breath = 0) => {
+  const sk = buildSkeleton(breathe(poseAt(motion.frames, p), breath));
   const s3 = build3D(sk, cfg, p);
   const props = props3D(motion, cfg, sk, s3);
   return { sk, s3, props, track: track3D(motion, sk, s3, props) };
 };
 
-export const ObliqueFigure: React.FC<ObliqueFigureProps> = ({ motion, type, cfg, cam, progress, load, ids, showTrail, showGhosts }) => {
+export const ObliqueFigure: React.FC<ObliqueFigureProps> = ({ motion, type, cfg, cam, progress, load, ids, showTrail, showGhosts, breath = 0 }) => {
   const worked = useMemo(() => new Set(motion.worked), [motion]);
   const pr = useMemo(() => cameraFor(motion, type, cfg, cam), [cam, motion, type, cfg]);
   const scene = SCENE3D[type as keyof typeof SCENE3D] ?? [];
-  const cur = useMemo(() => frame(motion, cfg, progress), [motion, cfg, progress]);
+  const cur = useMemo(() => frame(motion, cfg, progress, breath), [motion, cfg, progress, breath]);
 
   const statics = useMemo(() => {
     const trail: Vec[] = [];

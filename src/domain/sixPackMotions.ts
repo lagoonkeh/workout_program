@@ -28,7 +28,7 @@ const ARMS_AT_SIDES = ang(3, 3);
 /** hands cupped behind the head, elbows out wide (the front views spread the elbows) */
 const HANDS_BEHIND_HEAD = rel('head', -3, 7, -1);
 /** forearm plank, head right: elbows under the shoulders */
-const PLANK: PoseSpec = { hip: [88, 148], torso: -5, head: -2, armN: to(162, 175, -1), legN: to(12, 165, 1), footN: 115 };
+const PLANK: PoseSpec = { hip: [88, 148], torso: -5, head: -2, armN: to(162, 175, -1), legN: to(13.5, 165, 1), footN: 115 };
 
 export const SIX_PACK_MOTIONS: Record<SixPackDiagramType, MotionDef> = {
   // ---------------------------------------------------------------- lower abs (pelvis toward ribs)
@@ -185,9 +185,9 @@ export const SIX_PACK_MOTIONS: Record<SixPackDiagramType, MotionDef> = {
     order: 'cycle',
     // forearm plank; one straight leg lifts high behind, then the other, hips stay square
     frames: [
-      kf(0, with_(PLANK, { legN: ang(198, 198), legF: to(12, 165, 1), footN: 120, footF: 115 })),
-      kf(0.5, with_(PLANK, { legN: to(12, 165, 1), legF: to(12, 165, 1) })),
-      kf(1, with_(PLANK, { legN: to(12, 165, 1), legF: ang(198, 198), footN: 115, footF: 120 })),
+      kf(0, with_(PLANK, { legN: ang(198, 198), legF: to(13.5, 165, 1), footN: 120, footF: 115 })),
+      kf(0.5, with_(PLANK, { legN: to(13.5, 165, 1), legF: to(13.5, 165, 1) })),
+      kf(1, with_(PLANK, { legN: to(13.5, 165, 1), legF: ang(198, 198), footN: 115, footF: 120 })),
     ],
     props: [],
     scenery: [],
@@ -207,7 +207,7 @@ export const SIX_PACK_MOTIONS: Record<SixPackDiagramType, MotionDef> = {
       kf(0, { hip: [90, 138], torso: 8, head: 10, armN: to(162, 175, -1), legN: to(94, 156, 1), legF: to(19, 164, 1), footN: 182, footF: 115 }),
       // hips stay a little high while the knee travels, so it skims just over the floor
       kf(0.25, { hip: [90, 134], torso: 12, head: 12, armN: to(162, 175, -1), legN: to(54, 154, 1), legF: to(21, 163, 1), footN: 150, footF: 115 }),
-      kf(0.5, with_(PLANK, { legN: to(12, 165, 1), legF: to(12, 165, 1) })),
+      kf(0.5, with_(PLANK, { legN: to(13.5, 165, 1), legF: to(13.5, 165, 1) })),
       kf(0.75, { hip: [90, 134], torso: 12, head: 12, armN: to(162, 175, -1), legN: to(21, 163, 1), legF: to(54, 154, 1), footN: 115, footF: 150 }),
       kf(1, { hip: [90, 138], torso: 8, head: 10, armN: to(162, 175, -1), legN: to(19, 164, 1), legF: to(94, 156, 1), footN: 115, footF: 182 }),
     ],

@@ -48,10 +48,6 @@ export interface MotionDef {
 
 // --- helpers ---------------------------------------------------------------
 const to = (x: number, y: number, bend: 1 | -1 = 1): LimbSpec => ({ to: [x, y], bend });
-const rel = (j: 'neck' | 'hip' | 'head', dx: number, dy: number, bend: 1 | -1 = 1): LimbSpec => ({
-  to: { rel: j, d: [dx, dy] },
-  bend,
-});
 const ang = (a: number, b: number): LimbSpec => ({ a: [a, b] });
 const kf = (at: number, pose: PoseSpec): Keyframe => ({ at, pose });
 const two = (start: PoseSpec, end: PoseSpec): Keyframe[] => [kf(0, start), kf(1, end)];
@@ -69,10 +65,11 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
   squat: {
     title: 'Barbell back squat',
     order: 'eccentric-first',
-    frames: two(
-      { hip: [96, 98.3], torso: -91, head: -88, armN: rel('neck', -3, -2, 1), legN: to(95, 176), legF: to(92, 176) },
-      { hip: [70, 140], torso: -50, head: -62, armN: rel('neck', -3, -2, 1), legN: to(95, 176), legF: to(92, 176) }
-    ),
+    frames: [
+      kf(0, { hip: [100, 98.3], torso: -90, head: -88, armN: ang(105, -82), legN: to(95, 176), legF: to(92, 176) }),
+      kf(0.5, { hip: [84, 120], torso: -66, head: -72, armN: ang(129, -58), legN: to(95, 176), legF: to(92, 176) }),
+      kf(1, { hip: [70, 140], torso: -50, head: -62, armN: ang(145, -42), legN: to(95, 176), legF: to(92, 176) }),
+    ],
     props: [{ kind: 'barbell', at: 'neck', d: [-3, 2] }],
     scenery: [],
     worked: ['thN', 'thF'],
@@ -681,8 +678,8 @@ export const MOTIONS: Record<DiagramType, MotionDef> = {
     // hang -> knees up and across to one side -> hang -> the other side (the front views show the side-to-side)
     frames: (() => {
       const hang: PoseSpec = { hip: [100, 104], torso: -90, head: -90, armN: to(100, 2, -1), legN: ang(92, 138), footN: 150 };
-      const mid: PoseSpec = { hip: [102.6, 103.85], torso: -93, head: -89, armN: to(100, 2, -1), legN: ang(50, 120), footN: 150 };
-      const up: PoseSpec = { hip: [105.2, 103.7], torso: -96, head: -88, armN: to(100, 2, -1), legN: ang(5, 92), footN: 70 };
+      const mid: PoseSpec = { hip: [102.6, 103.85], torso: -93, head: -89, armN: to(100, 2, -1), legN: ang(54, 119), footN: 130 };
+      const up: PoseSpec = { hip: [105.2, 103.7], torso: -96, head: -88, armN: to(100, 2, -1), legN: ang(16, 100), footN: 96 };
       return [hang, mid, up, mid, hang, mid, up, mid, hang].map((p, i) => kf(i / 8, p));
     })(),
     props: [],

@@ -229,20 +229,115 @@ export interface Keyframe {
 }
 
 export const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+/** even, controlled speed with soft ends: lowering under control, moving into a position */
+export const easeControlled = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
+/** the lift: leaves the bottom quickly, then settles into lockout */
+export const easeDrive = (t: number) => Math.pow(Math.sin((Math.PI / 2) * t), 1.35);
+const easeFor = (action: TimelineSegment['action']) => (action === 'concentric' ? easeDrive : action === 'eccentric' ? easeControlled : easeInOut);
 
-/** Pose at movement progress p (0 = start position, 1 = end position). */
+/** Cubic Hermite between p1 and p2; tangents come from the neighbours, scaled for uneven key spacing. */
+function hermite(p: [number, number, number, number], t: [number, number, number, number], u: number): number {
+  const dt = t[2] - t[1];
+  const m1 = t[2] - t[0] > 1e-9 ? ((p[2] - p[0]) / (t[2] - t[0])) * dt : p[2] - p[1];
+  const m2 = t[3] - t[1] > 1e-9 ? ((p[3] - p[1]) / (t[3] - t[1])) * dt : p[2] - p[1];
+  const u2 = u * u;
+  const u3 = u2 * u;
+  return (2 * u3 - 3 * u2 + 1) * p[1] + (u3 - 2 * u2 + u) * m1 + (-2 * u3 + 3 * u2) * p[2] + (u3 - u2) * m2;
+}
+
+const shortest = (from: number, to: number) => from + (((to - from) % 360) + 540) % 360 - 180;
+
+/** Hermite on angles: every key is unwrapped onto the shortest path from its neighbour first. */
+function hermiteAngle(a: [number, number, number, number], t: [number, number, number, number], u: number): number {
+  const p2 = shortest(a[1], a[2]);
+  return hermite([shortest(a[1], a[0]), a[1], p2, shortest(p2, a[3])], t, u);
+}
+
+const sameSpec = (a: PoseSpec, b: PoseSpec) => a === b || JSON.stringify(a) === JSON.stringify(b);
+const CLOSED = new WeakMap<Keyframe[], boolean>();
+
+const targetKey = (l: LimbSpec): string | null => ('to' in l ? (Array.isArray(l.to) ? 'abs' : l.to.rel) : null);
+const targetVec = (l: LimbSpec): Vec => {
+  const t = (l as { to: Target }).to;
+  return Array.isArray(t) ? t : t.d;
+};
+
+/**
+ * Pose at movement progress p (0 = start position, 1 = end position).
+ *
+ * With three or more keyframes the pose follows a smooth curve through them instead of straight
+ * lines between them, so bars, hands and hips sweep through the middle keys without a visible
+ * corner. A loop whose last key repeats its first is smooth across the join as well.
+ */
 export function poseAt(frames: Keyframe[], p: number): PoseSpec {
   const x = Math.min(1, Math.max(0, p));
-  for (let i = 1; i < frames.length; i++) {
-    if (x <= frames[i].at) {
-      const a = frames[i - 1];
-      const b = frames[i];
-      const local = b.at === a.at ? 1 : (x - a.at) / (b.at - a.at);
-      return lerpPose(a.pose, b.pose, local);
-    }
+  const n = frames.length;
+  let i = 1;
+  while (i < n - 1 && x > frames[i].at) i++;
+  const A = frames[i - 1];
+  const B = frames[i];
+  if (n <= 2 || x <= frames[0].at) return x <= frames[0].at ? frames[0].pose : lerpPose(A.pose, B.pose, B.at === A.at ? 1 : (x - A.at) / (B.at - A.at));
+  if (x >= frames[n - 1].at) return frames[n - 1].pose;
+  const u = B.at === A.at ? 1 : (x - A.at) / (B.at - A.at);
+  let closed = CLOSED.get(frames);
+  if (closed === undefined) {
+    closed = sameSpec(frames[0].pose, frames[n - 1].pose);
+    CLOSED.set(frames, closed);
   }
-  return frames[frames.length - 1].pose;
+  // neighbours on either side; at the ends of an open movement the end key stands in for the missing one
+  const before = i - 2 >= 0 ? frames[i - 2] : closed ? { at: frames[n - 2].at - 1, pose: frames[n - 2].pose } : A;
+  const after = i + 1 < n ? frames[i + 1] : closed ? { at: frames[1].at + 1, pose: frames[1].pose } : B;
+  const K = [before, A, B, after];
+  const t = K.map((k) => k.at) as [number, number, number, number];
+  const base = lerpPose(A.pose, B.pose, u);
+
+  const num = (get: (q: PoseSpec) => number) => hermite(K.map((k) => get(k.pose)) as [number, number, number, number], t, u);
+  const ang = (get: (q: PoseSpec) => number) => hermiteAngle(K.map((k) => get(k.pose)) as [number, number, number, number], t, u);
+  const limb = (get: (q: PoseSpec) => LimbSpec, fallback: LimbSpec): LimbSpec => {
+    const L = K.map((k) => get(k.pose));
+    const [a, b] = [L[1], L[2]];
+    const key = targetKey(a);
+    if (key && key === targetKey(b)) {
+      // a neighbour given another way (angles, or relative to another joint) cannot shape the curve
+      const v = [key === targetKey(L[0]) ? targetVec(L[0]) : targetVec(a), targetVec(a), targetVec(b), key === targetKey(L[3]) ? targetVec(L[3]) : targetVec(b)];
+      const tt: [number, number, number, number] = [key === targetKey(L[0]) ? t[0] : t[1], t[1], t[2], key === targetKey(L[3]) ? t[3] : t[2]];
+      const d: Vec = [hermite(v.map((q) => q[0]) as [number, number, number, number], tt, u), hermite(v.map((q) => q[1]) as [number, number, number, number], tt, u)];
+      const bend = u < 0.5 ? (a as { bend: 1 | -1 }).bend : (b as { bend: 1 | -1 }).bend;
+      return { to: key === 'abs' ? d : { rel: key as 'neck' | 'hip' | 'head', d }, bend };
+    }
+    if ('a' in a && 'a' in b) {
+      const g = (j: 0 | 1) => {
+        const v = [('a' in L[0] ? L[0] : a) as { a: [number, number] }, a, b, ('a' in L[3] ? L[3] : b) as { a: [number, number] }].map((q) => q.a[j]);
+        const tt: [number, number, number, number] = ['a' in L[0] ? t[0] : t[1], t[1], t[2], 'a' in L[3] ? t[3] : t[2]];
+        return hermiteAngle(v as [number, number, number, number], tt, u);
+      };
+      return { a: [g(0), g(1)] };
+    }
+    return fallback;
+  };
+
+  return {
+    hip: [num((q) => q.hip[0]), num((q) => q.hip[1])],
+    torso: ang((q) => q.torso),
+    head: ang((q) => q.head),
+    armN: limb((q) => q.armN, base.armN),
+    armF: limb((q) => q.armF ?? q.armN, base.armF as LimbSpec),
+    legN: limb((q) => q.legN, base.legN),
+    legF: limb((q) => q.legF ?? q.legN, base.legF as LimbSpec),
+    footN: ang((q) => q.footN ?? 0),
+    footF: ang((q) => q.footF ?? q.footN ?? 0),
+    shrug: num((q) => q.shrug ?? 0),
+    scaleN: num((q) => q.scaleN ?? 1),
+    scaleF: num((q) => q.scaleF ?? q.scaleN ?? 1),
+    spine: num((q) => q.spine ?? 0),
+  };
 }
+
+/**
+ * Breathing: the rib cage and shoulders rise a touch on each breath (b = 0..1), so the lifter is
+ * never frozen solid during a pause or a hold. Planted hands and feet stay where they are.
+ */
+export const breathe = (p: PoseSpec, b = 0): PoseSpec => (b ? { ...p, shrug: (p.shrug ?? 0) + 1.3 * b } : p);
 
 /** Interior angle at joint b (degrees, 0–180). */
 export function jointAngle(a: Vec, b: Vec, c: Vec): number {
@@ -360,9 +455,9 @@ export function timelineAt(tl: TimelineSegment[], seconds: number): TimelineStat
       const local = seg.seconds > 0 ? Math.min(1, s / seg.seconds) : 1;
       let progress = 0;
       if (seg.kind === 'loop') progress = local;
-      else if (seg.kind === 'toEnd') progress = easeInOut(local);
+      else if (seg.kind === 'toEnd') progress = easeFor(seg.action)(local);
       else if (seg.kind === 'holdEnd') progress = 1;
-      else if (seg.kind === 'toStart') progress = 1 - easeInOut(local);
+      else if (seg.kind === 'toStart') progress = 1 - easeFor(seg.action)(local);
       const load =
         seg.action === 'concentric'
           ? 1
