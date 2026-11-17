@@ -258,7 +258,7 @@ export function calculatePlates(
     const isExact = targetWeight === barWeight;
     const remainder = Number((targetWeight - barWeight).toFixed(2));
     const message = isExact
-      ? 'Empty bar (45 lbs).'
+      ? `Empty bar (${barWeight} lbs).`
       : `Target weight is below empty bar (${barWeight} lbs). Use empty bar.`;
 
     return {

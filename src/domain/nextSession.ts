@@ -31,7 +31,7 @@ export function lastFinishedRotationWorkout(workouts: FinishedWorkout[]): { sess
     if (!w || !IN_ROTATION.has(w.sessionId)) continue;
     const at = parseWorkoutDate(w.completedAt || w.date).getTime();
     if (isNaN(at)) continue;
-    // a later time wins; a date-only record (noon) never beats a timed one from the same day
+    // a later time wins; a date-only record counts as noon of its day
     if (!best || at > best.at) best = { sessionId: w.sessionId, at };
   }
   return best;

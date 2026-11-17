@@ -79,6 +79,7 @@ export const getFirebaseDb = async (): Promise<Firestore | null> => {
 
 class FirestoreSyncService {
   private workoutDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private pendingWorkout: { userId: string; state: Omit<WorkoutStateSyncPayload, 'updatedAt'> } | null = null;
   private mobilityDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private statusListeners: Set<(status: CloudSyncStatus, lastSyncedTime: number | null) => void> = new Set();
   private currentStatus: CloudSyncStatus = 'idle';
@@ -93,6 +94,21 @@ class FirestoreSyncService {
     } catch {
       // ignore storage access errors
     }
+    // a tap in the last 500 ms would otherwise be lost when the tab is closed or backgrounded
+    try {
+      window.addEventListener('pagehide', () => this.flushPendingWorkout());
+    } catch {
+      // non-browser
+    }
+  }
+
+  private flushPendingWorkout(): void {
+    if (!this.pendingWorkout) return;
+    if (this.workoutDebounceTimer) clearTimeout(this.workoutDebounceTimer);
+    this.workoutDebounceTimer = null;
+    const { userId, state } = this.pendingWorkout;
+    this.pendingWorkout = null;
+    void this.pushWorkoutStateImmediate(userId, state);
   }
 
   public getStatus(): CloudSyncStatus {
@@ -167,6 +183,8 @@ class FirestoreSyncService {
         stateDocRef,
         (snapshot) => {
           if (!snapshot.exists()) return;
+          // our own write echoed back before the server confirmed it: not a remote change
+          if (snapshot.metadata?.hasPendingWrites) return;
           const data = snapshot.data() as WorkoutStateSyncPayload;
           if (!data || !data.updatedAt) return;
 
@@ -198,7 +216,9 @@ class FirestoreSyncService {
 
     this.setStatus('syncing');
 
+    this.pendingWorkout = { userId, state };
     this.workoutDebounceTimer = setTimeout(async () => {
+      this.pendingWorkout = null;
       await this.pushWorkoutStateImmediate(userId, state);
     }, 500);
   }
@@ -227,7 +247,7 @@ class FirestoreSyncService {
       };
 
       const stateDocRef = doc(firestore, 'users', userId, 'state', 'current_workout');
-      await setDoc(stateDocRef, payload, { merge: true });
+      await setDoc(stateDocRef, payload);
       this.setLocalTimestamp(STORAGE_KEY_LOCAL_STATE_TIMESTAMP, now);
       this.setStatus('synced');
     } catch (err) {
@@ -250,6 +270,7 @@ class FirestoreSyncService {
         mobilityDocRef,
         (snapshot) => {
           if (!snapshot.exists()) return;
+          if (snapshot.metadata?.hasPendingWrites) return;
           const data = snapshot.data() as MobilityHistorySyncPayload;
           if (!data || !data.updatedAt || !Array.isArray(data.entries)) return;
 
