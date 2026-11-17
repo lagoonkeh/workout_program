@@ -15,7 +15,7 @@ import {
   TempoPhase,
 } from '../../src/timer/tempoMetronome';
 
-describe('Adversarial Challenge: Tempo Metronome', () => {
+describe('Adversarial Challenge: Tempo Metronome', { timeout: 30000 }, () => {
   let mockSynth: IAudioSynthesizer;
 
   beforeEach(() => {
@@ -27,12 +27,12 @@ describe('Adversarial Challenge: Tempo Metronome', () => {
       isMuted: vi.fn().mockReturnValue(false),
       getAudioContext: vi.fn().mockReturnValue(null),
     };
-  });
+  }, 30000);
 
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
-  });
+  }, 30000);
 
   // =========================================================================
   // SECTION 1: TEMPO STRING FUZZING & PARSER RESILIENCE

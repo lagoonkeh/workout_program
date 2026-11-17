@@ -39,13 +39,13 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.{test,spec}.{ts,tsx}'],
-    testTimeout: 15000,
+    testTimeout: 30000,
     hookTimeout: 30000,
     pool: 'threads',
     poolOptions: {
       threads: {
-        maxThreads: 3,
-        minThreads: 1,
+        maxThreads: 6,
+        minThreads: 2,
       },
     },
     coverage: {

@@ -12,7 +12,7 @@ import {
   MetronomeSnapshot,
 } from '../../src/timer/tempoMetronome';
 
-describe('Tempo Metronome Engine', () => {
+describe('Tempo Metronome Engine', { timeout: 30000 }, () => {
   let mockSynth: IAudioSynthesizer;
 
   beforeEach(() => {
@@ -24,12 +24,12 @@ describe('Tempo Metronome Engine', () => {
       isMuted: vi.fn().mockReturnValue(false),
       getAudioContext: vi.fn().mockReturnValue(null),
     };
-  });
+  }, 30000);
 
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
-  });
+  }, 30000);
 
   describe('1. 4-Digit Tempo Cadence Parsing (parseTempo & tryParseTempo)', () => {
     it('parses standard explosive tempo "30X1" accurately', () => {

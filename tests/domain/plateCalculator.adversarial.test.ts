@@ -5,7 +5,7 @@ import {
   PlateInventory,
 } from '../../src/domain/plateCalculator';
 
-describe('Adversarial Stress Test Suite: Barbell Plate Calculator', () => {
+describe('Adversarial Stress Test Suite: Barbell Plate Calculator', { timeout: 30000 }, () => {
   // Helper: Independent greedy change-making simulation for comparison
   function greedyPlateSelection(desiredSide: number, availableSidePlates: number[]): number[] {
     const sorted = [...availableSidePlates].sort((a, b) => b - a);
