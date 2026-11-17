@@ -142,8 +142,7 @@ describe('firestoreSyncService', () => {
           activeSessionId: 'upper_a',
           completedWarmupDrills: { curl_up: true },
           updatedAt: expect.any(Number),
-        }),
-        { merge: true }
+        })
       );
 
       const localTime = localStorage.getItem(STORAGE_KEY_LOCAL_STATE_TIMESTAMP);
