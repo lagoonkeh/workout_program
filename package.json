@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/run-build.mjs",
+    "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "node scripts/run-tests.mjs",
+    "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:sim": "node -e \"process.env.RUN_SIM='1';require('child_process').execSync('npx vitest run tests/sim --testTimeout=1800000',{stdio:'inherit',env:process.env})\""
