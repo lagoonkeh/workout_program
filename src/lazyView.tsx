@@ -54,6 +54,10 @@ export const AdaptationClocksWidget = lazyView(() =>
   import('./components/AdaptationClocksWidget').then((m) => m.AdaptationClocksWidget)
 );
 
+export const PostureAssessmentWidget = lazyView(() =>
+  import('./components/PostureAssessmentWidget').then((m) => m.PostureAssessmentWidget)
+);
+
 export const GuideWidget = lazyView(() => import('./components/GuideWidget').then((m) => m.GuideWidget));
 
 export const DailyReadinessWidget = lazyView(() =>
@@ -101,6 +105,7 @@ const LAZY_VIEWS = [
   StretchingRoutineWidget,
   ProgressChartWidget,
   QuarterlyAssessmentWidget,
+  PostureAssessmentWidget,
   StrengthHeatmapWidget,
   AthleteProfileCard,
   DailyReadinessWidget,

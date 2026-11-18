@@ -18,6 +18,7 @@ import {
   type QuarterlyAssessmentRecord,
 } from '../domain/fitnessAssessment';
 import { loadCnsChecks, replaceCnsChecks, MAX_STORED_CHECKS, type CnsCheck } from '../domain/cnsReadiness';
+import { loadPostureState, replacePostureState, type PostureState } from '../domain/postureAssessment';
 import { APP_DATA_MODIFIED_EVENT, getAppDataModifiedAt, setAppDataModifiedAt } from '../storage/appDataClock';
 import { getIdToken } from './firebaseAuth';
 
@@ -31,6 +32,8 @@ export interface AppBackup {
   assessments: QuarterlyAssessmentRecord[];
   /** CNS readiness checks (added later; older backups don't have it) */
   cnsChecks?: CnsCheck[];
+  /** Posture assessment + 22-day plan (added later; older backups don't have it) */
+  posture?: PostureState;
 }
 
 /** The backup lives in one Sheets cell (the server rejects over 45,000 characters), so stay well under */
@@ -43,6 +46,7 @@ export function collectAppBackup(now: Date = new Date()): AppBackup {
     profile: loadProfile(),
     assessments: loadQuarterlyAssessments(),
     cnsChecks: loadCnsChecks().slice(-MAX_STORED_CHECKS),
+    posture: loadPostureState(),
   };
   // oldest CNS checks go first if the cell would overflow
   while (backup.cnsChecks && backup.cnsChecks.length > 0 && JSON.stringify(backup).length > BACKUP_SOFT_LIMIT_CHARS) {
@@ -57,7 +61,7 @@ export function isLocalDataPristine(): boolean {
   const profile = loadProfile();
   const assessments = loadQuarterlyAssessments();
   const onlyBaseline = assessments.every((a) => a.id === DEFAULT_BASELINE_ASSESSMENT.id);
-  return profile.weighIns.length === 0 && onlyBaseline && loadCnsChecks().length === 0;
+  return profile.weighIns.length === 0 && onlyBaseline && loadCnsChecks().length === 0 && loadPostureState().records.length === 0;
 }
 
 function isBackup(x: unknown): x is AppBackup {
@@ -76,6 +80,7 @@ export function applyAppBackup(backup: AppBackup): void {
     return;
   }
   if (Array.isArray(backup.cnsChecks)) replaceCnsChecks(backup.cnsChecks);
+  if (backup.posture) replacePostureState(backup.posture);
   setAppDataModifiedAt(backup.savedAt);
   try {
     window.dispatchEvent(new Event(ATHLETE_PROFILE_EVENT));

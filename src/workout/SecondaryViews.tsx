@@ -6,7 +6,7 @@ import { type AppViewMode } from '../components/Header';
 import { type MobilityEntry } from '../domain/mobility';
 import { type WorkoutExercise, type WorkoutSession } from '../domain/programData';
 import { type WorkoutAdaptation } from '../domain/weeklyEvaluator';
-import { AdaptationClocksWidget, AdaptiveBodyCoachWidget, AthleteProfileCard, CnsReadinessWidget, DailyReadinessWidget, GuideWidget, MobilityTrackerWidget, MuscleHeatmapWidget, ProgressChartWidget, QuarterlyAssessmentWidget, StrengthHeatmapWidget, StretchingRoutineWidget } from '../lazyView';
+import { AdaptationClocksWidget, AdaptiveBodyCoachWidget, AthleteProfileCard, CnsReadinessWidget, DailyReadinessWidget, GuideWidget, MobilityTrackerWidget, MuscleHeatmapWidget, PostureAssessmentWidget, ProgressChartWidget, QuarterlyAssessmentWidget, StrengthHeatmapWidget, StretchingRoutineWidget } from '../lazyView';
 import { type CompletedWorkoutSession } from '../storage/storageManager';
 import { ViewLoadingFallback } from './shared';
 
@@ -113,6 +113,7 @@ export function SecondaryViews({ activeSession, activeSessionId, completedWorkou
             <AdaptationClocksWidget />
             <StrengthHeatmapWidget history={Object.values(completedWorkouts)} />
             <QuarterlyAssessmentWidget />
+            <PostureAssessmentWidget />
           </Suspense>
         </div>
       )}
