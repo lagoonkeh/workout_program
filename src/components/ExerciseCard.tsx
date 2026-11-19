@@ -3428,18 +3428,14 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
   );
 };
 
-export const ExerciseCard = React.memo(
-  ExerciseCardComponent,
-  (prev, next) =>
-    prev.exercise === next.exercise &&
-    prev.logs === next.logs &&
-    prev.defaultCollapsed === next.defaultCollapsed &&
-    prev.collapseRevision === next.collapseRevision &&
-    prev.onUpdateSetLog === next.onUpdateSetLog &&
-    prev.onResetExercise === next.onResetExercise &&
-    prev.currentCycle === next.currentCycle &&
-    prev.onSelectVariation === next.onSelectVariation &&
-    prev.lastTime === next.lastTime &&
-    prev.loadSuggestion === next.loadSuggestion &&
-    prev.onUndoSuggestion === next.onUndoSuggestion
-);
+// Every prop is compared, so the card never renders stale state or calls a stale handler. Callers pass
+// stable handlers (ExerciseTierSections caches one rest handler per exercise) so this still skips re-renders.
+export const areExerciseCardPropsEqual = (prev: ExerciseCardProps, next: ExerciseCardProps): boolean => {
+  const keys = new Set([...Object.keys(prev), ...Object.keys(next)] as (keyof ExerciseCardProps)[]);
+  for (const key of keys) {
+    if (!Object.is(prev[key], next[key])) return false;
+  }
+  return true;
+};
+
+export const ExerciseCard = React.memo(ExerciseCardComponent, areExerciseCardPropsEqual);

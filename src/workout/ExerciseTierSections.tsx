@@ -1,6 +1,6 @@
 // Extracted from src/App.tsx (WorkoutAppMain). Presentation only: state and handlers come in as props.
 import { Check, ChevronDown, ChevronUp, Flame } from 'lucide-react';
-import { type Dispatch, type SetStateAction } from 'react';
+import { type Dispatch, type SetStateAction, useMemo } from 'react';
 import { ExerciseCard, type SetLogRecord } from '../components/ExerciseCard';
 import { type ExerciseVariation, type WorkoutCycle } from '../domain/exerciseVariations';
 import { type WorkoutExercise, type WorkoutSession } from '../domain/programData';
@@ -35,6 +35,20 @@ export interface ExerciseTierSectionsProps {
 }
 
 export function ExerciseTierSections({ activeFocusExerciseId, activeSession, appliedSuggestions, bulkCollapseState, collapseRevision, currentSessionCycle, expandedTiers, getExerciseLogs, handleOpenCueCard, handleQuickStartRestForExercise, handleQuickStartTempo, handleResetExerciseLogs, handleSelectExerciseVariation, handleSwitchToPairedSide, handleToggleSplitSides, handleToggleTier, handleUndoSuggestion, handleUpdateSetLog, isDailyAbsFinisherExpanded, isFocusMode, progressionByExercise, sessionExercises, setIsDailyAbsFinisherExpanded, splitSidesExercises }: ExerciseTierSectionsProps) {
+  // One stable rest handler per exercise object, so the memoized ExerciseCard can compare onQuickStartRest
+  // like any other prop. The cache resets when the underlying handler changes.
+  const getRestHandler = useMemo(() => {
+    const cache = new WeakMap<WorkoutExercise, (sec: number) => void>();
+    return (exercise: WorkoutExercise) => {
+      let handler = cache.get(exercise);
+      if (!handler) {
+        handler = (sec: number) => handleQuickStartRestForExercise(sec, exercise);
+        cache.set(exercise, handler);
+      }
+      return handler;
+    };
+  }, [handleQuickStartRestForExercise]);
+
   return (
     <>
       {(['T1', 'T2', 'T3'] as const).map((tierKey) => {
@@ -107,7 +121,7 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
                         onUpdateSetLog={handleUpdateSetLog}
                         onResetExercise={handleResetExerciseLogs}
                         onOpenCueCard={handleOpenCueCard}
-                        onQuickStartRest={(sec) => handleQuickStartRestForExercise(sec, exercise)}
+                        onQuickStartRest={getRestHandler(exercise)}
                         onQuickStartTempo={handleQuickStartTempo}
                         onToggleSplitSides={handleToggleSplitSides}
                         onSwitchToPairedSide={handleSwitchToPairedSide}
@@ -219,7 +233,7 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
                     onUpdateSetLog={handleUpdateSetLog}
                     onResetExercise={handleResetExerciseLogs}
                     onOpenCueCard={handleOpenCueCard}
-                    onQuickStartRest={(sec) => handleQuickStartRestForExercise(sec, exercise)}
+                    onQuickStartRest={getRestHandler(exercise)}
                     onQuickStartTempo={handleQuickStartTempo}
                     onToggleSplitSides={handleToggleSplitSides}
                     onSwitchToPairedSide={handleSwitchToPairedSide}
@@ -264,7 +278,7 @@ export function ExerciseTierSections({ activeFocusExerciseId, activeSession, app
               onUpdateSetLog={handleUpdateSetLog}
               onResetExercise={handleResetExerciseLogs}
               onOpenCueCard={handleOpenCueCard}
-              onQuickStartRest={(sec) => handleQuickStartRestForExercise(sec, exercise)}
+              onQuickStartRest={getRestHandler(exercise)}
               onQuickStartTempo={handleQuickStartTempo}
               onToggleSplitSides={handleToggleSplitSides}
               onSwitchToPairedSide={handleSwitchToPairedSide}
